@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>iDash — AI Dashboard Intelligence Platform</title>
+  <link rel="stylesheet" href="css/style.css?v=20260722">
+  <link rel="stylesheet" href="css/ai_progress.css?v=20260722">
+  <link rel="stylesheet" href="css/ref_template_picker.css?v=20260722">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect x='2' y='18' width='6' height='12' rx='1' fill='%232563eb'/><rect x='10' y='12' width='6' height='18' rx='1' fill='%233b82f6'/><rect x='18' y='6' width='6' height='24' rx='1' fill='%2360a5fa'/><rect x='26' y='2' width='6' height='28' rx='1' fill='%2393c5fd'/></svg>">
+</head>
+<body>
+
+<!-- ─── SIDEBAR ─── -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect x="2" y="18" width="6" height="12" rx="1.5" fill="#2563eb"/>
+      <rect x="10" y="12" width="6" height="18" rx="1.5" fill="#3b82f6"/>
+      <rect x="18" y="6" width="6" height="24" rx="1.5" fill="#60a5fa"/>
+      <rect x="26" y="2" width="4" height="28" rx="1.5" fill="#93c5fd"/>
+    </svg>
+    <div>
+      <span class="logo-text">iDash</span>
+      <span class="logo-sub">AI Dashboard Intelligence Platform</span>
+    </div>
+  </div>
+
+  <nav class="sidebar-nav">
+    <a class="active">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      Home
+    </a>
+  </nav>
+
+  <div class="sidebar-footer">
+    <div class="sidebar-user" id="sidebarUserTrigger">
+      <div class="user-avatar">A</div>
+      <div class="user-info">
+        <div class="user-name">Bobo</div>
+        <div class="user-role">Admin</div>
+      </div>
+      <div class="sidebar-user-menu" id="sidebarUserMenu" hidden>
+        <button type="button" data-action="profile">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          โปรไฟล์
+        </button>
+        <button type="button" data-action="settings">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06A1.65 1.65 0 004.6 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06A1.65 1.65 0 009 4.6a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+          ตั้งค่า
+        </button>
+        <div class="sidebar-user-menu-divider"></div>
+        <button type="button" data-action="logout" class="danger">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          ออกจากระบบ
+        </button>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- ─── MAIN ─── -->
+<main class="main">
+  <!-- Content -->
+  <div class="content">
+
+    <!-- Hero -->
+    <section class="hero">
+      <img src="assets/img/hero.png" alt="Transform Your Data into Intelligent Dashboard">
+    </section>
+
+    <!-- 3-Column Grid -->
+    <div class="grid-3">
+
+      <!-- Column 1: Module Selector -->
+      <div class="card">
+        <div class="card-title">เลือกโมดูลอัจฉริยะ</div>
+        <div class="card-desc">AI จะใช้ความรู้เฉพาะทางของแต่ละโมดูล เพื่อวิเคราะห์และสร้าง Dashboard ที่เหมาะสมที่สุดสำหรับธุรกิจของคุณ</div>
+        <div class="modules-grid">
+          <div class="module-card" data-module="executive">
+            <div class="module-icon">
+              <img src="assets/icons/executive.png" alt="Executive">
+            </div>
+            <div class="module-name">1. Executive</div>
+            <div class="module-role">สมองของผู้บริหาร<br>ภาพรวมองค์กร</div>
+          </div>
+          <div class="module-card" data-module="manufacturing">
+            <div class="module-icon">
+              <img src="assets/icons/manufacturing.png" alt="Manufacturing">
+            </div>
+            <div class="module-name">2. Manufacturing</div>
+            <div class="module-role">ผู้จัดการฝ่ายโรงงาน<br>การผลิต และวิศวกรรม</div>
+          </div>
+          <div class="module-card" data-module="finance">
+            <div class="module-icon">
+              <img src="assets/icons/finance.png" alt="Finance">
+            </div>
+            <div class="module-name">3. Finance</div>
+            <div class="module-role">นักบัญชีการเงิน<br>และต้นทุน</div>
+          </div>
+          <div class="module-card" data-module="inventory">
+            <div class="module-icon">
+              <img src="assets/icons/inventory.png" alt="Inventory">
+            </div>
+            <div class="module-name">4. Inventory</div>
+            <div class="module-role">นักบริหารคลัง<br>ทรัพย์สิน สินค้า</div>
+          </div>
+          <div class="module-card" data-module="hr">
+            <div class="module-icon">
+              <img src="assets/icons/hr.png" alt="HR">
+            </div>
+            <div class="module-name">5. HR</div>
+            <div class="module-role">นักบริหารทรัพยากร<br>มนุษย์</div>
+          </div>
+          <div class="module-card" data-module="sales">
+            <div class="module-icon">
+              <img src="assets/icons/sales.png" alt="Sales">
+            </div>
+            <div class="module-name">6. Sales</div>
+            <div class="module-role">นักขายและ<br>การตลาด</div>
+          </div>
+          <div class="module-card" data-module="supply_chain">
+            <div class="module-icon">
+              <img src="assets/icons/supply_chain.png" alt="Supply Chain">
+            </div>
+            <div class="module-name">7. Supply Chain</div>
+            <div class="module-role">จัดซื้อ BOI ขนส่ง<br>และหน่วยงานสนับสนุน</div>
+          </div>
+          <div class="module-card" data-module="agriculture">
+            <div class="module-icon">
+              <img src="assets/icons/agriculture.png" alt="Agriculture">
+            </div>
+            <div class="module-name">8. Agriculture</div>
+            <div class="module-role">นักปลูกอ้อย บริหารไร่<br>ดูแลดิน ปุ๋ย ยา ชาวไร่</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Column 2: Upload -->
+      <div class="card">
+        <div class="card-title">อัปโหลดข้อมูลของคุณ</div>
+        <div class="card-desc">เริ่มต้นสร้าง Dashboard จากข้อมูลของคุณเอง</div>
+
+        <div class="mode-selector">
+          <div class="mode-card recommended" data-mode="autopilot">
+            <span class="rec-badge">แนะนำ</span>
+            <div class="mode-icon">
+              <img src="assets/icons/ai_autopilot.png" alt="AI Autopilot">
+            </div>
+            <div class="mode-name">AI Autopilot</div>
+            <div class="mode-desc">ให้ AI วิเคราะห์ข้อมูลที่คุณมี และสร้าง Dashboard ที่เหมาะสมที่สุดโดยอัตโนมัติ</div>
+          </div>
+          <div class="mode-divider"><span>or</span></div>
+          <div class="mode-card" data-mode="custom">
+            <div class="mode-icon">
+              <img src="assets/icons/custom_studio.png" alt="Custom Studio">
+            </div>
+            <div class="mode-name">Custom Studio</div>
+            <div class="mode-desc">ออกแบบ Dashboard เอง เลือก Template และปรับแต่งตามต้องการอย่างอิสระ</div>
+          </div>
+        </div>
+        <div class="upload-hint">คลิกเพื่ออัปโหลดไฟล์ · รองรับ Excel (.xlsx, .xls), CSV, JSON</div>
+      </div>
+
+      <!-- Column 3: Why iDash -->
+      <div class="card why-card">
+        <div class="card-title">ทำไมต้อง iDash?</div>
+        <div class="feature-list">
+          <div class="feature-item">
+            <div class="feature-icon" style="background:linear-gradient(135deg,#3b82f6,#2563eb)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/><line x1="9" y1="20" x2="9" y2="23"/><line x1="15" y1="20" x2="15" y2="23"/><line x1="20" y1="9" x2="23" y2="9"/><line x1="20" y1="14" x2="23" y2="14"/><line x1="1" y1="9" x2="4" y2="9"/><line x1="1" y1="14" x2="4" y2="14"/></svg>
+            </div>
+            <div>
+              <div class="feature-title">AI เข้าใจธุรกิจของคุณ</div>
+              <div class="feature-desc">AI ที่มีความรู้เฉพาะทางในแต่ละด้านของโรงงานน้ำตาลและอุตสาหกรรม</div>
+            </div>
+          </div>
+          <div class="feature-item">
+            <div class="feature-icon" style="background:linear-gradient(135deg,#60a5fa,#3b82f6)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+            </div>
+            <div>
+              <div class="feature-title">วิเคราะห์เชิงลึก</div>
+              <div class="feature-desc">ค้นหา Insight ปัญหา และโอกาสจากข้อมูลของคุณ</div>
+            </div>
+          </div>
+          <div class="feature-item">
+            <div class="feature-icon" style="background:linear-gradient(135deg,#2dd4bf,#14b8a6)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 15l-2 5L9 9l11 4-5 2z"/><path d="M14.5 14.5L18 18"/></svg>
+            </div>
+            <div>
+              <div class="feature-title">ใช้งานง่าย</div>
+              <div class="feature-desc">ไม่ต้องมีความรู้ด้าน Data ก็สร้าง Dashboard ได้</div>
+            </div>
+          </div>
+          <div class="feature-item">
+            <div class="feature-icon" style="background:linear-gradient(135deg,#818cf8,#6366f1)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg>
+            </div>
+            <div>
+              <div class="feature-title">ปรับแต่งได้อิสระ</div>
+              <div class="feature-desc">ออกแบบได้ตามต้องการด้วยเครื่องมือที่ทรงพลัง</div>
+            </div>
+          </div>
+          <div class="feature-item">
+            <div class="feature-icon" style="background:linear-gradient(135deg,#34d399,#10b981)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+            </div>
+            <div>
+              <div class="feature-title">แชร์และทำงานร่วมกัน</div>
+              <div class="feature-desc">แชร์ Dashboard และทำงานร่วมกันแบบ Real-time</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Template Gallery -->
+    <section class="card template-section">
+      <div class="template-header">
+        <div>
+          <div class="card-title">ตัวอย่าง Template</div>
+          <div class="card-desc" style="margin-bottom:0">เลือก Template ที่สามารถปรับแต่งให้เข้ากับข้อมูลของคุณได้</div>
+        </div>
+        <a class="view-all" href="templates.html">ดูทั้งหมด
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </a>
+      </div>
+      <div class="template-grid">
+        <div class="template-card">
+          <div class="template-thumb"><img src="assets/img/templates/001.png" alt="Executive Overview"></div>
+          <div class="template-info">
+            <div class="template-name">Executive Overview</div>
+            <div class="template-desc">ภาพรวมสำหรับผู้บริหาร</div>
+          </div>
+        </div>
+        <div class="template-card">
+          <div class="template-thumb"><img src="assets/img/templates/002.png" alt="Financial Performance"></div>
+          <div class="template-info">
+            <div class="template-name">Financial Performance</div>
+            <div class="template-desc">ผลการดำเนินงานทางการเงิน</div>
+          </div>
+        </div>
+        <div class="template-card">
+          <div class="template-thumb"><img src="assets/img/templates/003.png" alt="Manufacturing Dashboard"></div>
+          <div class="template-info">
+            <div class="template-name">Manufacturing Dashboard</div>
+            <div class="template-desc">การผลิตและประสิทธิภาพโรงงาน</div>
+          </div>
+        </div>
+        <div class="template-card">
+          <div class="template-thumb"><img src="assets/img/templates/004.png" alt="Inventory Management"></div>
+          <div class="template-info">
+            <div class="template-name">Inventory Management</div>
+            <div class="template-desc">บริหารคลังสินค้าและสต็อก</div>
+          </div>
+        </div>
+        <div class="template-card">
+          <div class="template-thumb"><img src="assets/img/templates/005.png" alt="HR Analytics"></div>
+          <div class="template-info">
+            <div class="template-name">HR Analytics</div>
+            <div class="template-desc">วิเคราะห์บุคลากรและประสิทธิภาพ</div>
+          </div>
+        </div>
+        <div class="template-card">
+          <div class="template-thumb"><img src="assets/img/templates/006.png" alt="Sales Performance"></div>
+          <div class="template-info">
+            <div class="template-name">Sales Performance</div>
+            <div class="template-desc">ยอดขายและการเติบโตทางธุรกิจ</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Quote -->
+    <div class="quote-banner">
+      <img src="assets/img/quote_banner.png" alt="เปลี่ยนข้อมูลดิบ ให้เป็นการตัดสินใจที่ชาญฉลาด ด้วย iDash">
+    </div>
+
+  </div>
+</main>
+
+<div class="lightbox" id="lightbox">
+  <button class="lightbox-close" aria-label="Close">&times;</button>
+  <img src="" alt="Preview">
+</div>
+
+<!-- Module Upload Modal -->
+<div class="modal-overlay" id="moduleUploadModal" hidden>
+  <div class="modal-card">
+    <div class="modal-bg-blob modal-bg-blob-1"></div>
+    <div class="modal-bg-blob modal-bg-blob-2"></div>
+    <button class="modal-close" id="moduleUploadClose" aria-label="Close">&times;</button>
+
+    <div class="modal-card-scroll">
+    <div class="modal-icon-wrap">
+      <div class="modal-icon" id="moduleUploadIcon"></div>
+    </div>
+    <div class="modal-ai-badge">
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M13 2L3 14h7l-1 8 10-12h-7l1-8z"/></svg>
+      AI Powered
+    </div>
+    <div class="modal-title">Upload <span id="moduleUploadName"></span> Dataset</div>
+    <div class="modal-desc" id="moduleUploadDesc"></div>
+
+    <div class="modal-dropzone" id="moduleUploadDropzone">
+      <div class="modal-dropzone-icon">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+      </div>
+      <div class="modal-dropzone-text">Drag &amp; Drop ไฟล์ของคุณที่นี่</div>
+      <div class="modal-dropzone-hint">หรือคลิกเพื่อเลือกไฟล์จากเครื่อง</div>
+      <div class="modal-filetype-badges">
+        <span class="modal-filetype-badge ft-xlsx">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M4 3h16v18H4z" opacity="0"/><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
+          XLSX
+        </span>
+        <span class="modal-filetype-badge ft-csv">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
+          CSV
+        </span>
+        <span class="modal-filetype-badge ft-json">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
+          JSON
+        </span>
+      </div>
+      <div class="modal-dropzone-maxsize">ขนาดไฟล์สูงสุด 100 MB <span class="modal-info-dot">i</span></div>
+    </div>
+
+    <div class="modal-file-picked" id="moduleUploadPicked" hidden>
+      <div class="modal-file-picked-icon" id="moduleUploadFileIcon">X</div>
+      <div class="modal-file-picked-info">
+        <div class="modal-file-picked-name" id="moduleUploadFilename"></div>
+        <div class="modal-file-picked-size" id="moduleUploadFilesize"></div>
+      </div>
+      <div class="modal-file-picked-status">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="8 12 11 15 16 9"/></svg>
+        พร้อมอัปโหลด
+      </div>
+      <button class="modal-file-picked-remove" id="moduleUploadRemove" aria-label="Remove file">&times;</button>
+    </div>
+
+    <div class="modal-ai-info">
+      <div class="modal-ai-info-icon">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><rect x="4" y="8" width="16" height="12" rx="2"/><circle cx="9" cy="14" r="1.2" fill="#fff"/><circle cx="15" cy="14" r="1.2" fill="#fff"/><path d="M12 8V4"/><circle cx="12" cy="3" r="1.2" fill="#fff"/></svg>
+      </div>
+      <div class="modal-ai-info-body">
+        <div class="modal-ai-info-title">AI จะทำอะไรหลังจากอัปโหลด</div>
+        <div class="modal-ai-info-grid">
+          <div class="modal-ai-info-item">✓ ตรวจสอบคุณภาพข้อมูล</div>
+          <div class="modal-ai-info-item">✓ ตรวจจับ Missing Value</div>
+          <div class="modal-ai-info-item">✓ วิเคราะห์โครงสร้างข้อมูล</div>
+          <div class="modal-ai-info-item">✓ แนะนำ Dashboard ที่เหมาะสม</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-error" id="moduleUploadError" hidden></div>
+
+    <div class="modal-actions">
+      <button class="modal-btn modal-btn-cancel" id="moduleUploadCancel">ยกเลิก</button>
+      <button class="modal-btn modal-btn-confirm" id="moduleUploadConfirm" disabled>
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        อัปโหลดข้อมูล
+      </button>
+    </div>
+    </div>
+  </div>
+</div>
+
+<!-- Multi-sheet Picker Modal (only shown when the uploaded file has >1 sheet) -->
+<div class="modal-overlay" id="sheetPickerModal" hidden>
+  <div class="modal-card" style="max-width:480px">
+    <button class="modal-close" id="sheetPickerClose" aria-label="Close">&times;</button>
+    <div class="modal-card-scroll">
+      <div class="modal-title">ไฟล์นี้มีหลาย Sheet</div>
+      <div class="modal-desc">เลือก Sheet ที่ต้องการใช้สร้าง Dashboard (เลือกได้มากกว่า 1 หรือเลือกทั้งหมด)</div>
+      <label style="display:flex;align-items:center;gap:8px;padding:10px 0;border-bottom:1px solid #e5e7eb;font-weight:600;cursor:pointer">
+        <input type="checkbox" id="sheetPickerAll"> ทั้งหมด (All)
+      </label>
+      <div id="sheetPickerList" style="max-height:280px;overflow-y:auto;margin-top:4px"></div>
+      <div class="modal-error" id="sheetPickerError" hidden></div>
+      <div class="modal-actions">
+        <button class="modal-btn modal-btn-cancel" id="sheetPickerCancel">ยกเลิก</button>
+        <button class="modal-btn modal-btn-confirm" id="sheetPickerConfirm" disabled>ใช้ Sheet ที่เลือก</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Theme Picker Modal (module flow only) -->
+<div class="modal-overlay" id="themePickerModal" hidden>
+  <div class="modal-card" style="max-width:620px">
+    <button class="modal-close" id="themePickerClose" aria-label="Close">&times;</button>
+    <div class="modal-card-scroll">
+      <div class="modal-title">เลือกธีม Dashboard</div>
+      <div class="modal-desc">เลือกโทนสีที่ต้องการ — สามารถเปลี่ยนได้ภายหลังด้วยปุ่ม เปลี่ยนธีม</div>
+
+      <!-- Tabs -->
+      <div id="themePickerTabs" style="display:flex;gap:6px;margin:12px 0 8px;flex-wrap:wrap">
+        <button class="tp-tab active" data-tab="all">ทั้งหมด <span class="tp-tab-count"></span></button>
+        <button class="tp-tab" data-tab="light">Light <span class="tp-tab-count"></span></button>
+        <button class="tp-tab" data-tab="dark">Dark <span class="tp-tab-count"></span></button>
+        <button class="tp-tab" data-tab="colorful">Colorful <span class="tp-tab-count"></span></button>
+        <button class="tp-tab" data-tab="pastel">Pastel <span class="tp-tab-count"></span></button>
+        <button class="tp-tab" data-tab="pro">Professional <span class="tp-tab-count"></span></button>
+      </div>
+
+      <!-- Theme grid -->
+      <div id="themePickerGrid" style="display:grid;grid-template-columns:repeat(6,1fr);gap:10px;padding:8px 0;max-height:400px;overflow-y:auto"></div>
+
+      <div class="modal-actions" style="margin-top:16px">
+        <button class="modal-btn modal-btn-cancel" id="themePickerCancel">ยกเลิก</button>
+        <button class="modal-btn modal-btn-confirm" id="themePickerConfirm" disabled>สร้าง Dashboard</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- AI Autopilot Reference Template Picker (45 user-authored styles) -->
+<div class="modal-overlay" id="refTplPickerModal" hidden>
+  <div class="modal-card" style="max-width:960px">
+    <button class="modal-close" id="refTplPickerClose" aria-label="Close">&times;</button>
+    <div class="modal-card-scroll">
+      <div class="modal-title">เลือกสไตล์ Dashboard</div>
+      <div class="modal-desc">เลือกแบบที่ใกล้เคียงกับที่ต้องการ — AI จะสร้าง Dashboard จากข้อมูลจริงของคุณตามสไตล์นี้ (ตัวอย่างด้านล่างเป็นภาพจำลองคร่าวๆ เพื่อช่วยตัดสินใจ)</div>
+      <div id="refTplPickerLoading" class="ref-tpl-loading">กำลังโหลดตัวอย่างสไตล์...</div>
+      <div id="refTplPickerGrid" class="ref-tpl-grid" hidden></div>
+      <div class="modal-actions" style="margin-top:16px">
+        <button class="modal-btn modal-btn-cancel" id="refTplPickerCancel">ยกเลิก</button>
+        <button class="modal-btn modal-btn-confirm" id="refTplPickerConfirm" disabled>ใช้สไตล์นี้ &amp; สร้าง Dashboard</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- AI Autopilot Progress Modal -->
+<div class="modal-overlay" id="aiProgressModal" hidden>
+  <div class="ai-progress-card">
+    <button class="modal-close" id="aiProgressClose" aria-label="Close">&times;</button>
+
+    <div class="ai-progress-header">
+      <div class="ai-progress-header-icon">
+        <img src="assets/icons/ai_autopilot.png" alt="AI Autopilot">
+      </div>
+      <div>
+        <div class="ai-progress-header-title">AI Autopilot</div>
+        <div class="ai-progress-header-sub" id="aiProgressHeaderSub">กำลังวิเคราะห์ข้อมูลของคุณ</div>
+      </div>
+    </div>
+
+    <div class="ai-progress-hero">
+      <div class="ai-progress-hero-glow"></div>
+      <span class="ai-progress-deco deco-1"></span>
+      <span class="ai-progress-deco deco-2"></span>
+      <span class="ai-progress-deco deco-3"></span>
+      <span class="ai-progress-deco deco-4"></span>
+      <span class="ai-progress-deco deco-5"></span>
+      <div class="ai-progress-doc">
+        <svg viewBox="0 0 64 64" width="60" height="60">
+          <path d="M14 6h26l10 10v42a2 2 0 01-2 2H14a2 2 0 01-2-2V8a2 2 0 012-2z" fill="#fff" stroke="#e5e7eb" stroke-width="1"/>
+          <path d="M40 6l10 10H42a2 2 0 01-2-2V6z" fill="#eef2ff"/>
+          <rect x="19" y="24" width="22" height="4" rx="2" fill="#c7d2fe"/>
+          <rect x="19" y="33" width="28" height="4" rx="2" fill="#c7d2fe"/>
+          <rect x="19" y="42" width="18" height="4" rx="2" fill="#c7d2fe"/>
+        </svg>
+        <div class="ai-progress-badge">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="#fff">
+            <path d="M11 2l1.6 5L18 8.6l-5 1.6L11 15l-1.6-5L4.4 8.6l5-1.6z"/>
+            <path d="M19 3l.7 2.3L22 6l-2.3.7L19 9l-.7-2.3L16 6l2.3-.7z"/>
+            <path d="M6 14l.6 1.9L8.5 16.5l-1.9.6L6 19l-.6-1.9L3.5 16.5l1.9-.6z"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <div class="ai-progress-title">AI กำลังสร้าง Dashboard ของคุณ</div>
+    <div class="ai-progress-desc" id="aiProgressDesc">กำลังวิเคราะห์ไฟล์และสร้างข้อมูลเชิงลึกที่เหมาะสมที่สุด...</div>
+
+    <div class="ai-progress-bar-card">
+      <div class="ai-progress-bar-row">
+        <span>ความคืบหน้า</span>
+        <span id="aiProgressPct">0%</span>
+      </div>
+      <div class="ai-progress-bar-track">
+        <div class="ai-progress-bar-fill" id="aiProgressBarFill" style="width:0%"></div>
+      </div>
+    </div>
+
+    <ul class="ai-progress-steps" id="aiProgressSteps">
+      <li class="ai-progress-step" data-step="upload">
+        <span class="ai-step-icon"></span>
+        <span class="ai-step-label">อัปโหลดไฟล์เรียบร้อย</span>
+        <span class="ai-step-status"></span>
+      </li>
+      <li class="ai-progress-step" data-step="understand">
+        <span class="ai-step-icon"></span>
+        <span class="ai-step-label">กำลังอ่านและทำความเข้าใจข้อมูล</span>
+        <span class="ai-step-status"></span>
+      </li>
+      <li class="ai-progress-step" data-step="analyze">
+        <span class="ai-step-icon"></span>
+        <span class="ai-step-label">กำลังวิเคราะห์และประมวลผลข้อมูล</span>
+        <span class="ai-step-status"></span>
+      </li>
+      <li class="ai-progress-step" data-step="build">
+        <span class="ai-step-icon"></span>
+        <span class="ai-step-label">กำลังสร้าง Dashboard และ Visualizations</span>
+        <span class="ai-step-status"></span>
+      </li>
+    </ul>
+
+    <div class="ai-progress-tip">
+      <div class="ai-progress-tip-icon">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 00-4 12.7V17h8v-2.3A7 7 0 0012 2z"/></svg>
+      </div>
+      <div>
+        <div class="ai-progress-tip-title">เคล็ดลับ</div>
+        <div class="ai-progress-tip-desc">AI จะเลือกแสดงข้อมูลที่สำคัญและสร้าง Dashboard ที่เหมาะสมกับวัตถุประสงค์ของคุณโดยอัตโนมัติ</div>
+      </div>
+    </div>
+
+    <div class="ai-progress-error" id="aiProgressError" hidden></div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="js/profiler.js?v=20260722"></script>
+<script src="js/classifier.js?v=20260722"></script>
+<script src="js/kpi_engine.js?v=20260722"></script>
+<script src="js/decision_engine.js?v=20260722"></script>
+<script src="js/theme_palette.js?v=20260722"></script>
+<script src="js/style_library.js?v=20260722"></script>
+<script src="js/dashboard_templates.js?v=20260722"></script>
+<script src="js/composer.js?v=20260722"></script>
+<script src="js/business_frame.js?v=20260722"></script>
+<script src="js/insight_engine.js?v=20260722"></script>
+<script src="js/blank_dashboard_library.js?v=20260722"></script>
+<script src="js/reference_template_library.js?v=20260722"></script>
+<script src="js/interactive_dashboard_generator.js?v=20260722"></script>
+<script src="js/app.js?v=20260722"></script>
+<script src="js/sidebar.js?v=20260722"></script>
+</body>
+</html>
