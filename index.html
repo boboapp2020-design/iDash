@@ -1,12 +1,12 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="th">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>iDash — AI Dashboard Intelligence Platform</title>
-  <link rel="stylesheet" href="css/style.css?v=20260722">
-  <link rel="stylesheet" href="css/ai_progress.css?v=20260722">
-  <link rel="stylesheet" href="css/ref_template_picker.css?v=20260722">
+  <link rel="stylesheet" href="css/style.css?v=20260728b">
+  <link rel="stylesheet" href="css/ai_progress.css?v=20260722c">
+  <link rel="stylesheet" href="css/home.css?v=20260728k">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect x='2' y='18' width='6' height='12' rx='1' fill='%232563eb'/><rect x='10' y='12' width='6' height='18' rx='1' fill='%233b82f6'/><rect x='18' y='6' width='6' height='24' rx='1' fill='%2360a5fa'/><rect x='26' y='2' width='6' height='28' rx='1' fill='%2393c5fd'/></svg>">
 </head>
 <body>
@@ -30,6 +30,36 @@
     <a class="active">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
       Home
+    </a>
+    <!-- Dashboard Center: expandable group; sub-items are placeholders (no pages yet) -->
+    <a id="dashCenterToggle" style="cursor:pointer">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+      Dashboard Center
+      <svg class="nav-chevron" id="dashCenterChevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+    </a>
+    <div class="nav-submenu" id="dashCenterMenu" hidden>
+      <!-- view=dashboard: open the report view directly instead of the source
+           site's landing page. Falls back to the landing page if that fails. -->
+      <a href="embedded_dashboard.html?name=Production%20Dashboard&amp;view=dashboard&amp;url=https%3A%2F%2Fboboapp2020-design.github.io%2FML_Dashboard2026_2027%2F">Production Dashboard</a>
+      <a href="embedded_dashboard.html?name=QM%20Dashboard&amp;url=dashboards%2Fqm_dashboard.html">QM Dashboard</a>
+      <a href="embedded_dashboard.html?name=Store%20Dashboard&amp;url=https%3A%2F%2Fshippingml.github.io%2FStockML%2F">Store Dashboard</a>
+      <a href="embedded_dashboard.html?name=BOI%20Dashboard&amp;url=https%3A%2F%2Fshippingml.github.io%2FBOI-ML%2F">BOI Dashboard</a>
+    </div>
+    <a href="request.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+      Request Dashboard
+    </a>
+    <a href="chat.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="8" width="16" height="12" rx="2"/><circle cx="9" cy="14" r="1.2" fill="currentColor"/><circle cx="15" cy="14" r="1.2" fill="currentColor"/><path d="M12 8V4"/><circle cx="12" cy="3" r="1.2" fill="currentColor"/></svg>
+      AI Assistant
+    </a>
+    <a class="disabled is-mock" title="ยังไม่เปิดใช้งาน">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      Profile
+    </a>
+    <a class="disabled is-mock" title="ยังไม่เปิดใช้งาน">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06A1.65 1.65 0 004.6 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06A1.65 1.65 0 009 4.6a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+      Settings
     </a>
   </nav>
 
@@ -64,218 +94,207 @@
   <!-- Content -->
   <div class="content">
 
-    <!-- Hero -->
-    <section class="hero">
-      <img src="assets/img/hero.png" alt="Transform Your Data into Intelligent Dashboard">
-    </section>
-
-    <!-- 3-Column Grid -->
-    <div class="grid-3">
-
-      <!-- Column 1: Module Selector -->
-      <div class="card">
-        <div class="card-title">เลือกโมดูลอัจฉริยะ</div>
-        <div class="card-desc">AI จะใช้ความรู้เฉพาะทางของแต่ละโมดูล เพื่อวิเคราะห์และสร้าง Dashboard ที่เหมาะสมที่สุดสำหรับธุรกิจของคุณ</div>
-        <div class="modules-grid">
-          <div class="module-card" data-module="executive">
-            <div class="module-icon">
-              <img src="assets/icons/executive.png" alt="Executive">
-            </div>
-            <div class="module-name">1. Executive</div>
-            <div class="module-role">สมองของผู้บริหาร<br>ภาพรวมองค์กร</div>
-          </div>
-          <div class="module-card" data-module="manufacturing">
-            <div class="module-icon">
-              <img src="assets/icons/manufacturing.png" alt="Manufacturing">
-            </div>
-            <div class="module-name">2. Manufacturing</div>
-            <div class="module-role">ผู้จัดการฝ่ายโรงงาน<br>การผลิต และวิศวกรรม</div>
-          </div>
-          <div class="module-card" data-module="finance">
-            <div class="module-icon">
-              <img src="assets/icons/finance.png" alt="Finance">
-            </div>
-            <div class="module-name">3. Finance</div>
-            <div class="module-role">นักบัญชีการเงิน<br>และต้นทุน</div>
-          </div>
-          <div class="module-card" data-module="inventory">
-            <div class="module-icon">
-              <img src="assets/icons/inventory.png" alt="Inventory">
-            </div>
-            <div class="module-name">4. Inventory</div>
-            <div class="module-role">นักบริหารคลัง<br>ทรัพย์สิน สินค้า</div>
-          </div>
-          <div class="module-card" data-module="hr">
-            <div class="module-icon">
-              <img src="assets/icons/hr.png" alt="HR">
-            </div>
-            <div class="module-name">5. HR</div>
-            <div class="module-role">นักบริหารทรัพยากร<br>มนุษย์</div>
-          </div>
-          <div class="module-card" data-module="sales">
-            <div class="module-icon">
-              <img src="assets/icons/sales.png" alt="Sales">
-            </div>
-            <div class="module-name">6. Sales</div>
-            <div class="module-role">นักขายและ<br>การตลาด</div>
-          </div>
-          <div class="module-card" data-module="supply_chain">
-            <div class="module-icon">
-              <img src="assets/icons/supply_chain.png" alt="Supply Chain">
-            </div>
-            <div class="module-name">7. Supply Chain</div>
-            <div class="module-role">จัดซื้อ BOI ขนส่ง<br>และหน่วยงานสนับสนุน</div>
-          </div>
-          <div class="module-card" data-module="agriculture">
-            <div class="module-icon">
-              <img src="assets/icons/agriculture.png" alt="Agriculture">
-            </div>
-            <div class="module-name">8. Agriculture</div>
-            <div class="module-role">นักปลูกอ้อย บริหารไร่<br>ดูแลดิน ปุ๋ย ยา ชาวไร่</div>
-          </div>
-        </div>
+    <!-- ─── TOPBAR ─── -->
+    <div class="home-topbar">
+      <div>
+        <div class="home-greet"><span id="homeGreetText">Good Morning</span>, Bobo <span class="wave">👋</span></div>
+        <div class="home-subgreet">ภาพรวมการทำงานของโรงงานวันนี้ <span class="home-demo-pill" id="homeKpiStamp" hidden></span></div>
       </div>
-
-      <!-- Column 2: Upload -->
-      <div class="card">
-        <div class="card-title">อัปโหลดข้อมูลของคุณ</div>
-        <div class="card-desc">เริ่มต้นสร้าง Dashboard จากข้อมูลของคุณเอง</div>
-
-        <div class="mode-selector">
-          <div class="mode-card recommended" data-mode="autopilot">
-            <span class="rec-badge">แนะนำ</span>
-            <div class="mode-icon">
-              <img src="assets/icons/ai_autopilot.png" alt="AI Autopilot">
-            </div>
-            <div class="mode-name">AI Autopilot</div>
-            <div class="mode-desc">ให้ AI วิเคราะห์ข้อมูลที่คุณมี และสร้าง Dashboard ที่เหมาะสมที่สุดโดยอัตโนมัติ</div>
-          </div>
-          <div class="mode-divider"><span>or</span></div>
-          <div class="mode-card" data-mode="custom">
-            <div class="mode-icon">
-              <img src="assets/icons/custom_studio.png" alt="Custom Studio">
-            </div>
-            <div class="mode-name">Custom Studio</div>
-            <div class="mode-desc">ออกแบบ Dashboard เอง เลือก Template และปรับแต่งตามต้องการอย่างอิสระ</div>
-          </div>
+      <div class="home-topbar-right">
+        <div class="home-search home-date">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          <span id="homeDateText"></span>
         </div>
-        <div class="upload-hint">คลิกเพื่ออัปโหลดไฟล์ · รองรับ Excel (.xlsx, .xls), CSV, JSON</div>
-      </div>
-
-      <!-- Column 3: Why iDash -->
-      <div class="card why-card">
-        <div class="card-title">ทำไมต้อง iDash?</div>
-        <div class="feature-list">
-          <div class="feature-item">
-            <div class="feature-icon" style="background:linear-gradient(135deg,#3b82f6,#2563eb)">
-              <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/><line x1="9" y1="20" x2="9" y2="23"/><line x1="15" y1="20" x2="15" y2="23"/><line x1="20" y1="9" x2="23" y2="9"/><line x1="20" y1="14" x2="23" y2="14"/><line x1="1" y1="9" x2="4" y2="9"/><line x1="1" y1="14" x2="4" y2="14"/></svg>
-            </div>
-            <div>
-              <div class="feature-title">AI เข้าใจธุรกิจของคุณ</div>
-              <div class="feature-desc">AI ที่มีความรู้เฉพาะทางในแต่ละด้านของโรงงานน้ำตาลและอุตสาหกรรม</div>
-            </div>
-          </div>
-          <div class="feature-item">
-            <div class="feature-icon" style="background:linear-gradient(135deg,#60a5fa,#3b82f6)">
-              <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
-            </div>
-            <div>
-              <div class="feature-title">วิเคราะห์เชิงลึก</div>
-              <div class="feature-desc">ค้นหา Insight ปัญหา และโอกาสจากข้อมูลของคุณ</div>
-            </div>
-          </div>
-          <div class="feature-item">
-            <div class="feature-icon" style="background:linear-gradient(135deg,#2dd4bf,#14b8a6)">
-              <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 15l-2 5L9 9l11 4-5 2z"/><path d="M14.5 14.5L18 18"/></svg>
-            </div>
-            <div>
-              <div class="feature-title">ใช้งานง่าย</div>
-              <div class="feature-desc">ไม่ต้องมีความรู้ด้าน Data ก็สร้าง Dashboard ได้</div>
-            </div>
-          </div>
-          <div class="feature-item">
-            <div class="feature-icon" style="background:linear-gradient(135deg,#818cf8,#6366f1)">
-              <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg>
-            </div>
-            <div>
-              <div class="feature-title">ปรับแต่งได้อิสระ</div>
-              <div class="feature-desc">ออกแบบได้ตามต้องการด้วยเครื่องมือที่ทรงพลัง</div>
-            </div>
-          </div>
-          <div class="feature-item">
-            <div class="feature-icon" style="background:linear-gradient(135deg,#34d399,#10b981)">
-              <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
-            </div>
-            <div>
-              <div class="feature-title">แชร์และทำงานร่วมกัน</div>
-              <div class="feature-desc">แชร์ Dashboard และทำงานร่วมกันแบบ Real-time</div>
-            </div>
-          </div>
+        <div class="home-bell is-mock" title="ยังไม่เปิดใช้งาน">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+          <span class="home-bell-badge">3</span>
         </div>
       </div>
     </div>
 
-    <!-- Template Gallery -->
-    <section class="card template-section">
-      <div class="template-header">
-        <div>
-          <div class="card-title">ตัวอย่าง Template</div>
-          <div class="card-desc" style="margin-bottom:0">เลือก Template ที่สามารถปรับแต่งให้เข้ากับข้อมูลของคุณได้</div>
+    <!-- ─── KPI ROW — live from Production Dashboard (Dashboard ML / DailyReport) ─── -->
+    <div class="home-kpi-row" id="homeKpiRow">
+      <div class="home-kpi" data-kpi="cane_crushed" data-accent="#2563eb" data-accent-2="#60a5fa">
+        <div class="home-kpi-top">
+          <img class="home-kpi-icon" src="assets/icons/kpi/cane_crushed.png" alt="">
+          <div>
+            <div class="home-kpi-label">จำนวนอ้อยเข้าหีบ</div>
+            <div class="home-kpi-value" data-kpi-value>—</div>
+            <div class="home-kpi-delta" data-kpi-delta>กำลังโหลด…</div>
+          </div>
         </div>
-        <a class="view-all" href="templates.html">ดูทั้งหมด
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-        </a>
+        <div class="home-kpi-spark" data-kpi-spark></div>
       </div>
-      <div class="template-grid">
-        <div class="template-card">
-          <div class="template-thumb"><img src="assets/img/templates/001.png" alt="Executive Overview"></div>
-          <div class="template-info">
-            <div class="template-name">Executive Overview</div>
-            <div class="template-desc">ภาพรวมสำหรับผู้บริหาร</div>
-          </div>
-        </div>
-        <div class="template-card">
-          <div class="template-thumb"><img src="assets/img/templates/002.png" alt="Financial Performance"></div>
-          <div class="template-info">
-            <div class="template-name">Financial Performance</div>
-            <div class="template-desc">ผลการดำเนินงานทางการเงิน</div>
-          </div>
-        </div>
-        <div class="template-card">
-          <div class="template-thumb"><img src="assets/img/templates/003.png" alt="Manufacturing Dashboard"></div>
-          <div class="template-info">
-            <div class="template-name">Manufacturing Dashboard</div>
-            <div class="template-desc">การผลิตและประสิทธิภาพโรงงาน</div>
-          </div>
-        </div>
-        <div class="template-card">
-          <div class="template-thumb"><img src="assets/img/templates/004.png" alt="Inventory Management"></div>
-          <div class="template-info">
-            <div class="template-name">Inventory Management</div>
-            <div class="template-desc">บริหารคลังสินค้าและสต็อก</div>
-          </div>
-        </div>
-        <div class="template-card">
-          <div class="template-thumb"><img src="assets/img/templates/005.png" alt="HR Analytics"></div>
-          <div class="template-info">
-            <div class="template-name">HR Analytics</div>
-            <div class="template-desc">วิเคราะห์บุคลากรและประสิทธิภาพ</div>
-          </div>
-        </div>
-        <div class="template-card">
-          <div class="template-thumb"><img src="assets/img/templates/006.png" alt="Sales Performance"></div>
-          <div class="template-info">
-            <div class="template-name">Sales Performance</div>
-            <div class="template-desc">ยอดขายและการเติบโตทางธุรกิจ</div>
-          </div>
-        </div>
-      </div>
-    </section>
 
-    <!-- Quote -->
-    <div class="quote-banner">
-      <img src="assets/img/quote_banner.png" alt="เปลี่ยนข้อมูลดิบ ให้เป็นการตัดสินใจที่ชาญฉลาด ด้วย iDash">
+      <div class="home-kpi" data-kpi="ccs_factory" data-accent="#16a34a" data-accent-2="#4ade80">
+        <div class="home-kpi-top">
+          <img class="home-kpi-icon" src="assets/icons/kpi/ccs_factory.png" alt="">
+          <div>
+            <div class="home-kpi-label">CCS of Factory</div>
+            <div class="home-kpi-value" data-kpi-value>—</div>
+            <div class="home-kpi-delta" data-kpi-delta>กำลังโหลด…</div>
+          </div>
+        </div>
+        <div class="home-kpi-spark" data-kpi-spark></div>
+      </div>
+
+      <div class="home-kpi" data-kpi="burnt_cane" data-accent="#f59e0b" data-accent-2="#fbbf24">
+        <div class="home-kpi-top">
+          <img class="home-kpi-icon" src="assets/icons/kpi/burnt_cane.png" alt="">
+          <div>
+            <div class="home-kpi-label">% Burnt Cane</div>
+            <div class="home-kpi-value" data-kpi-value>—</div>
+            <div class="home-kpi-delta" data-kpi-delta>กำลังโหลด…</div>
+          </div>
+        </div>
+        <div class="home-kpi-spark" data-kpi-spark></div>
+      </div>
+
+      <div class="home-kpi" data-kpi="cane_as_telq" data-accent="#7c3aed" data-accent-2="#a78bfa">
+        <div class="home-kpi-top">
+          <img class="home-kpi-icon" src="assets/icons/kpi/cane_as_telq.png" alt="">
+          <div>
+            <div class="home-kpi-label">% Cane as TELQ</div>
+            <div class="home-kpi-value" data-kpi-value>—</div>
+            <div class="home-kpi-delta" data-kpi-delta>กำลังโหลด…</div>
+          </div>
+        </div>
+        <div class="home-kpi-spark" data-kpi-spark></div>
+      </div>
+
+      <div class="home-kpi" data-kpi="edl_export" data-accent="#dc2626" data-accent-2="#f87171">
+        <div class="home-kpi-top">
+          <img class="home-kpi-icon" src="assets/icons/kpi/edl_export.png" alt="">
+          <div>
+            <div class="home-kpi-label">ขายไฟ (EDL)</div>
+            <div class="home-kpi-value" data-kpi-value>—</div>
+            <div class="home-kpi-delta" data-kpi-delta>กำลังโหลด…</div>
+          </div>
+        </div>
+        <div class="home-kpi-spark" data-kpi-spark></div>
+      </div>
     </div>
+
+    <!-- ─── HERO + AI AUTOPILOT ─── -->
+    <div class="home-hero-row">
+      <section class="home-hero">
+        <div class="home-hero-body">
+          <div class="home-hero-title">AI-Powered Dashboard for Smarter Factory</div>
+          <div class="home-hero-desc">อัปโหลดข้อมูล วิเคราะห์อัตโนมัติ<br>และสร้าง Dashboard อัจฉริยะในไม่กี่วินาที</div>
+        </div>
+        <div class="home-hero-art"></div>
+      </section>
+
+      <!-- REAL: this dropzone is the live AI Autopilot entry point -->
+      <section class="home-autopilot">
+        <div class="home-autopilot-head">
+          <svg class="bolt" viewBox="0 0 24 24" fill="currentColor"><path d="M13 2L3 14h7l-1 8 10-12h-7l1-8z"/></svg>
+          <span class="home-autopilot-title">AI Autopilot</span>
+          <span class="home-autopilot-pill">อัตโนมัติ</span>
+        </div>
+        <div class="home-dropzone mode-card" data-mode="autopilot">
+          <svg class="cloud" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 16.6A5 5 0 0018 7h-1.26A8 8 0 103 15.3"/><polyline points="16 15 12 11 8 15"/><line x1="12" y1="11" x2="12" y2="21"/></svg>
+          <div class="home-dropzone-title">คลิกหรือลากไฟล์มาวางที่นี่</div>
+          <div class="home-dropzone-hint">รองรับไฟล์ Excel, CSV, JSON</div>
+        </div>
+        <div class="home-autopilot-foot">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+          ทำงานในเครื่อง 100% ข้อมูลของคุณปลอดภัย
+        </div>
+      </section>
+    </div>
+
+    <!-- ─── QUICK ACCESS (placeholder targets) ─── -->
+    <div class="home-sec-head"><span class="home-sec-title">Quick Access</span></div>
+    <!-- Same targets as the Dashboard Center submenu: a card with a link opens it
+         directly; the rest stay disabled until their dashboard is wired up. -->
+    <div class="home-quick-row">
+      <a class="home-quick" href="embedded_dashboard.html?name=Production%20Dashboard&amp;view=dashboard&amp;url=https%3A%2F%2Fboboapp2020-design.github.io%2FML_Dashboard2026_2027%2F">
+        <svg class="qi" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 20h20V9l-6 4V9l-6 4V4H5l-3 7z"/></svg>
+        <div class="home-quick-body"><div class="home-quick-name">Production</div><div class="home-quick-sub">Dashboard</div></div>
+        <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+      </a>
+      <a class="home-quick" href="embedded_dashboard.html?name=Store%20Dashboard&amp;url=https%3A%2F%2Fshippingml.github.io%2FStockML%2F">
+        <svg class="qi" viewBox="0 0 24 24" fill="none" stroke="#0ea5e9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l1.5-5h15L21 9"/><path d="M3 9h18v10a1 1 0 01-1 1H4a1 1 0 01-1-1z"/><path d="M8 13h8"/></svg>
+        <div class="home-quick-body"><div class="home-quick-name">Store</div><div class="home-quick-sub">Dashboard</div></div>
+        <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+      </a>
+      <a class="home-quick" href="embedded_dashboard.html?name=QM%20Dashboard&amp;url=dashboards%2Fqm_dashboard.html">
+        <svg class="qi" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>
+        <div class="home-quick-body"><div class="home-quick-name">QM</div><div class="home-quick-sub">Dashboard</div></div>
+        <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+      </a>
+      <a class="home-quick" href="embedded_dashboard.html?name=BOI%20Dashboard&amp;url=https%3A%2F%2Fshippingml.github.io%2FBOI-ML%2F">
+        <svg class="qi" viewBox="0 0 24 24" fill="none" stroke="#6366f1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg>
+        <div class="home-quick-body"><div class="home-quick-name">BOI</div><div class="home-quick-sub">Dashboard</div></div>
+        <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+      </a>
+    </div>
+
+    <!-- ─── RECENT DASHBOARDS + AI CHATBOT ─── -->
+    <div class="home-bottom">
+
+      <!-- Recent dashboards — real template assets, click opens the lightbox preview -->
+      <section class="home-panel">
+        <div class="home-sec-head">
+          <span class="home-sec-title">Recent Dashboards</span>
+          <a class="home-sec-link" href="templates.html">ดูทั้งหมด</a>
+        </div>
+        <div class="home-recent-grid">
+          <div class="template-card">
+            <div class="template-thumb"><img src="assets/img/templates/003.png" alt="Production Summary"></div>
+            <div class="template-info">
+              <div class="template-name">Production Summary</div>
+              <div class="template-desc">อัปเดต 1 ชั่วโมงที่แล้ว</div>
+            </div>
+          </div>
+          <div class="template-card">
+            <div class="template-thumb"><img src="assets/img/templates/002.png" alt="Sugar Loss Analysis"></div>
+            <div class="template-info">
+              <div class="template-name">Sugar Loss Analysis</div>
+              <div class="template-desc">อัปเดต 2 ชั่วโมงที่แล้ว</div>
+            </div>
+          </div>
+          <div class="template-card">
+            <div class="template-thumb"><img src="assets/img/templates/004.png" alt="Raw Sugar Inventory"></div>
+            <div class="template-info">
+              <div class="template-name">Raw Sugar Inventory</div>
+              <div class="template-desc">อัปเดต 3 ชั่วโมงที่แล้ว</div>
+            </div>
+          </div>
+          <div class="template-card">
+            <div class="template-thumb"><img src="assets/img/templates/001.png" alt="Boiler Performance"></div>
+            <div class="template-info">
+              <div class="template-name">Boiler Performance</div>
+              <div class="template-desc">อัปเดต เมื่อวาน 16:30</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- AI Chatbot — entry point to ML Expert AI (opened full-page). -->
+      <section class="home-panel home-chat">
+        <div class="home-sec-head">
+          <span class="home-sec-title">
+            <span class="home-chat-badge">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="8" width="16" height="12" rx="2"/><circle cx="9" cy="14" r="1.2" fill="currentColor"/><circle cx="15" cy="14" r="1.2" fill="currentColor"/><path d="M12 8V4"/><circle cx="12" cy="3" r="1.2" fill="currentColor"/></svg>
+            </span>
+            AI Chatbot
+          </span>
+          <a class="home-chat-open" id="homeChatOpen" href="#">เปิดเต็มจอ →</a>
+        </div>
+
+        <!-- The real ML Expert AI, embedded live. At this width the app drops
+             to its single-column layout, so the card is a working chat rather
+             than a preview of one. -->
+        <div class="home-chat-embed">
+          <iframe id="homeChatFrame" title="AI Chatbot"
+                  src="https://boboapp2020-design.github.io/MLChatbot/"></iframe>
+        </div>
+      </section>
+    </div>
+
+    <div class="home-foot">iDash AI Dashboard Intelligence Platform &nbsp;·&nbsp; Version 1.0.0 &nbsp;·&nbsp; © 2025 Mitr Lao Sugar Co., Ltd.</div>
 
   </div>
 </main>
@@ -284,6 +303,7 @@
   <button class="lightbox-close" aria-label="Close">&times;</button>
   <img src="" alt="Preview">
 </div>
+
 
 <!-- Module Upload Modal -->
 <div class="modal-overlay" id="moduleUploadModal" hidden>
@@ -416,23 +436,6 @@
   </div>
 </div>
 
-<!-- AI Autopilot Reference Template Picker (45 user-authored styles) -->
-<div class="modal-overlay" id="refTplPickerModal" hidden>
-  <div class="modal-card" style="max-width:960px">
-    <button class="modal-close" id="refTplPickerClose" aria-label="Close">&times;</button>
-    <div class="modal-card-scroll">
-      <div class="modal-title">เลือกสไตล์ Dashboard</div>
-      <div class="modal-desc">เลือกแบบที่ใกล้เคียงกับที่ต้องการ — AI จะสร้าง Dashboard จากข้อมูลจริงของคุณตามสไตล์นี้ (ตัวอย่างด้านล่างเป็นภาพจำลองคร่าวๆ เพื่อช่วยตัดสินใจ)</div>
-      <div id="refTplPickerLoading" class="ref-tpl-loading">กำลังโหลดตัวอย่างสไตล์...</div>
-      <div id="refTplPickerGrid" class="ref-tpl-grid" hidden></div>
-      <div class="modal-actions" style="margin-top:16px">
-        <button class="modal-btn modal-btn-cancel" id="refTplPickerCancel">ยกเลิก</button>
-        <button class="modal-btn modal-btn-confirm" id="refTplPickerConfirm" disabled>ใช้สไตล์นี้ &amp; สร้าง Dashboard</button>
-      </div>
-    </div>
-  </div>
-</div>
-
 <!-- AI Autopilot Progress Modal -->
 <div class="modal-overlay" id="aiProgressModal" hidden>
   <div class="ai-progress-card">
@@ -523,21 +526,53 @@
   </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-<script src="js/profiler.js?v=20260722"></script>
-<script src="js/classifier.js?v=20260722"></script>
-<script src="js/kpi_engine.js?v=20260722"></script>
-<script src="js/decision_engine.js?v=20260722"></script>
-<script src="js/theme_palette.js?v=20260722"></script>
-<script src="js/style_library.js?v=20260722"></script>
-<script src="js/dashboard_templates.js?v=20260722"></script>
-<script src="js/composer.js?v=20260722"></script>
-<script src="js/business_frame.js?v=20260722"></script>
-<script src="js/insight_engine.js?v=20260722"></script>
-<script src="js/blank_dashboard_library.js?v=20260722"></script>
-<script src="js/reference_template_library.js?v=20260722"></script>
-<script src="js/interactive_dashboard_generator.js?v=20260722"></script>
-<script src="js/app.js?v=20260722"></script>
-<script src="js/sidebar.js?v=20260722"></script>
+<script src="vendor/xlsx.full.min.js"></script>
+<script src="js/profiler.js?v=20260728"></script>
+<script src="js/classifier.js?v=20260722c"></script>
+<script src="js/kpi_engine.js?v=20260722c"></script>
+<script src="js/decision_engine.js?v=20260722c"></script>
+<script src="js/theme_palette.js?v=20260722c"></script>
+<script src="js/style_library.js?v=20260722c"></script>
+<script src="js/composer.js?v=20260722c"></script>
+<script src="js/business_frame.js?v=20260722c"></script>
+<script src="js/insight_engine.js?v=20260722c"></script>
+<script src="kb/known_datasets/registry.js?v=20260722c"></script>
+<script src="js/kb_bundle.js?v=20260724"></script>
+<script src="js/known_dataset_registry.js?v=20260722c"></script>
+<script src="js/interactive_dashboard_generator.js?v=20260722c"></script>
+<script src="js/app.js?v=20260728"></script>
+<script src="js/sidebar.js?v=20260722c"></script>
+<script src="js/home_kpi_live.js?v=20260728"></script>
+<script>
+  // Live topbar values: greeting + today's date follow the viewer's real clock.
+  (function () {
+    var greet = document.getElementById('homeGreetText');
+    if (greet) {
+      var h = new Date().getHours();
+      greet.textContent = h < 12 ? 'Good Morning' : (h < 18 ? 'Good Afternoon' : 'Good Evening');
+    }
+    var dateEl = document.getElementById('homeDateText');
+    if (dateEl) {
+      dateEl.textContent = new Date().toLocaleDateString('th-TH', {
+        weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
+      });
+    }
+    // "เปิดเต็มจอ" hands the chat its own full page (chat.html) instead of the
+    // dashboard viewer shell, which would scale the app down into a panel.
+    var chatOpen = document.getElementById('homeChatOpen');
+    if (chatOpen) chatOpen.setAttribute('href', 'chat.html');
+
+    // Dashboard Center expand/collapse (sub-items are placeholders)
+    var toggle = document.getElementById('dashCenterToggle');
+    var menu = document.getElementById('dashCenterMenu');
+    var chev = document.getElementById('dashCenterChevron');
+    if (toggle && menu) {
+      toggle.addEventListener('click', function () {
+        menu.hidden = !menu.hidden;
+        if (chev) chev.classList.toggle('open', !menu.hidden);
+      });
+    }
+  })();
+</script>
 </body>
 </html>

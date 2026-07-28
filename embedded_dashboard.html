@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>iDash — Embedded Dashboard</title>
+  <link rel="stylesheet" href="css/style.css?v=20260722c">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect x='2' y='18' width='6' height='12' rx='1' fill='%232563eb'/><rect x='10' y='12' width='6' height='18' rx='1' fill='%233b82f6'/><rect x='18' y='6' width='6' height='24' rx='1' fill='%2360a5fa'/><rect x='26' y='2' width='6' height='28' rx='1' fill='%2393c5fd'/></svg>">
+  <style>
+    .embed-content { padding: 0; display: flex; flex-direction: column; height: 100vh; }
+    .embed-topbar {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 24px; border-bottom: 1px solid var(--border); background: #fff; flex-shrink: 0;
+    }
+    .embed-title { font-size: 16px; font-weight: 800; color: var(--gray-900); display: flex; align-items: center; gap: 8px; }
+    .embed-title svg { width: 18px; height: 18px; color: var(--primary); }
+    .embed-actions { display: flex; align-items: center; gap: 10px; }
+    .embed-btn {
+      display: flex; align-items: center; gap: 6px; padding: 7px 13px;
+      border-radius: var(--radius-sm); border: 1px solid var(--border); background: #fff;
+      color: var(--gray-600); font-size: 12.5px; font-weight: 600; cursor: pointer; text-decoration: none;
+    }
+    .embed-btn:hover { background: var(--gray-100); color: var(--text); }
+    .embed-btn svg { width: 14px; height: 14px; }
+    .embed-frame-wrap { flex: 1; position: relative; background: var(--gray-50); overflow: hidden; }
+    .embed-frame-wrap iframe {
+      position: absolute; top: 0; left: 0; border: none;
+      width: var(--iframe-nat-w, 1440px);
+      height: var(--iframe-nat-h, 900px);
+      transform-origin: 0 0;
+      transform: scale(var(--iframe-scale, 1));
+    }
+    .embed-empty {
+      position: absolute; inset: 0; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: 12px; color: var(--gray-500); text-align: center; padding: 24px;
+    }
+    .embed-frame-wrap:fullscreen { background: #000; }
+    .embed-frame-wrap:fullscreen iframe { width: 100% !important; height: 100% !important; transform: none !important; }
+    .embed-back {
+      display: inline-flex; align-items: center; gap: 5px; padding: 7px 14px;
+      border-radius: var(--radius-sm); border: 1px solid var(--border); background: #fff;
+      color: var(--gray-600); font-size: 12.5px; font-weight: 600; cursor: pointer; text-decoration: none;
+      transition: background .15s, color .15s;
+    }
+    .embed-back:hover { background: var(--gray-100); color: var(--text); }
+    .embed-back svg { width: 14px; height: 14px; }
+    .embed-empty svg { width: 40px; height: 40px; color: var(--gray-300); }
+    .embed-empty-title { font-size: 14px; font-weight: 700; color: var(--gray-700); }
+    .embed-empty-desc { font-size: 12.5px; max-width: 360px; }
+  </style>
+</head>
+<body>
+
+<!-- ─── SIDEBAR ─── -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect x="2" y="18" width="6" height="12" rx="1.5" fill="#2563eb"/>
+      <rect x="10" y="12" width="6" height="18" rx="1.5" fill="#3b82f6"/>
+      <rect x="18" y="6" width="6" height="24" rx="1.5" fill="#60a5fa"/>
+      <rect x="26" y="2" width="4" height="28" rx="1.5" fill="#93c5fd"/>
+    </svg>
+    <div>
+      <span class="logo-text">iDash</span>
+      <span class="logo-sub">AI Dashboard Intelligence Platform</span>
+    </div>
+  </div>
+
+  <nav class="sidebar-nav">
+    <a href="index.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      Home
+    </a>
+    <!-- Only the dashboard being viewed — its name is filled in by the script. -->
+    <a class="active" id="embedNavLabel">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+      <span id="embedNavText">Dashboard</span>
+    </a>
+  </nav>
+
+  <div class="sidebar-footer">
+    <div class="sidebar-user" id="sidebarUserTrigger">
+      <div class="user-avatar">A</div>
+      <div class="user-info">
+        <div class="user-name">Bobo</div>
+        <div class="user-role">Admin</div>
+      </div>
+      <div class="sidebar-user-menu" id="sidebarUserMenu" hidden>
+        <button type="button" data-action="profile">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          โปรไฟล์
+        </button>
+        <button type="button" data-action="settings">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06A1.65 1.65 0 004.6 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06A1.65 1.65 0 009 4.6a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+          ตั้งค่า
+        </button>
+        <div class="sidebar-user-menu-divider"></div>
+        <button type="button" data-action="logout" class="danger">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/></svg>
+          ออกจากระบบ
+        </button>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- ─── MAIN ─── -->
+<main class="main">
+  <div class="embed-content">
+    <div class="embed-topbar">
+      <div class="embed-title">
+        <a class="embed-back" href="index.html" title="ย้อนกลับ">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+          ย้อนกลับ
+        </a>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+        <span id="embedTitleText">Dashboard</span>
+      </div>
+      <div class="embed-actions">
+        <button class="embed-btn" id="embedFullscreen" type="button">
+          <svg id="fsIconExpand" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
+          <svg id="fsIconShrink" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><polyline points="4 14 10 14 10 20"/><polyline points="20 10 14 10 14 4"/><line x1="14" y1="10" x2="21" y2="3"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
+          <span id="fsLabel">Full Screen</span>
+        </button>
+        <button class="embed-btn" id="embedReload" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>
+          รีเฟรช
+        </button>
+      </div>
+    </div>
+    <div class="embed-frame-wrap">
+      <div class="embed-empty" id="embedEmpty" hidden>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12" y2="16"/></svg>
+        <div class="embed-empty-title">ยังไม่ได้ตั้งค่าลิงก์ Dashboard</div>
+        <div class="embed-empty-desc">แดชบอร์ดนี้ยังไม่ได้ผูกกับลิงก์ภายนอก — ติดต่อ Admin เพื่อฝัง URL ให้เมนูนี้</div>
+      </div>
+      <iframe id="embedFrame" hidden title="Embedded Dashboard"></iframe>
+    </div>
+  </div>
+</main>
+
+<script src="js/sidebar.js?v=20260722c"></script>
+<script>
+  (function () {
+    var params = new URLSearchParams(window.location.search);
+    var url = params.get('url');
+    var name = params.get('name') || 'Dashboard';
+
+    document.title = 'iDash — ' + name;
+    document.getElementById('embedTitleText').textContent = name;
+
+    document.getElementById('embedNavText').textContent = name;
+
+    var frame = document.getElementById('embedFrame');
+    var empty = document.getElementById('embedEmpty');
+    var reloadBtn = document.getElementById('embedReload');
+
+    var fsBtn = document.getElementById('embedFullscreen');
+    var fsIconExpand = document.getElementById('fsIconExpand');
+    var fsIconShrink = document.getElementById('fsIconShrink');
+    var fsLabel = document.getElementById('fsLabel');
+    var frameWrap = document.querySelector('.embed-frame-wrap');
+
+    function updateFsIcon() {
+      var isFs = !!document.fullscreenElement;
+      fsIconExpand.style.display = isFs ? 'none' : '';
+      fsIconShrink.style.display = isFs ? '' : 'none';
+      fsLabel.textContent = isFs ? 'Exit Full Screen' : 'Full Screen';
+    }
+    document.addEventListener('fullscreenchange', updateFsIcon);
+
+    fsBtn.addEventListener('click', function () {
+      if (document.fullscreenElement) {
+        document.exitFullscreen();
+      } else {
+        frameWrap.requestFullscreen().catch(function () {});
+      }
+    });
+
+    var IFRAME_W = 1440;
+    var IFRAME_H = 900;
+
+    function fitIframe() {
+      if (document.fullscreenElement) return;
+      var wrapW = frameWrap.clientWidth;
+      var wrapH = frameWrap.clientHeight;
+      if (!wrapW || !wrapH) return;
+      var scale = Math.min(wrapW / IFRAME_W, wrapH / IFRAME_H);
+      frameWrap.style.setProperty('--iframe-scale', scale);
+      frameWrap.style.setProperty('--iframe-nat-w', IFRAME_W + 'px');
+      frameWrap.style.setProperty('--iframe-nat-h', IFRAME_H + 'px');
+    }
+
+    // ── Optional deep link into a view of the embedded SPA ──────────────────
+    // The embedded page is cross-origin, so we cannot call into its iframe.
+    // Instead we fetch its HTML and append a tiny bootstrap that opens the
+    // wanted view, then run that through srcdoc.
+    //
+    // Views are a fixed allowlist. `probe` must exist in the fetched HTML for
+    // the deep link to be attempted, and `boot` is the code we append — neither
+    // is ever taken from the query string.
+    var VIEWS = {
+      dashboard: {
+        probe: 'goViewDashboard',
+        boot: function () { return 'if(typeof goViewDashboard==="function")goViewDashboard();'; }
+      },
+      // ML Expert AI: drop the question into its composer and send it.
+      chat: {
+        probe: 'btnSend',
+        boot: function (q) {
+          if (!q) return '';
+          return 'var i=document.getElementById("input"),b=document.getElementById("btnSend");' +
+                 'if(i&&b){i.value=' + jsString(q) + ';' +
+                 'i.dispatchEvent(new Event("input",{bubbles:true}));' +
+                 'setTimeout(function(){b.click();},350);}';
+        }
+      }
+    };
+    var view = params.get('view');
+    var viewSpec = view ? VIEWS[view] : null;
+    var viewArg = params.get('q') || '';
+
+    // Safe JS string literal — JSON escapes quotes/newlines, and "<" is escaped
+    // so a value can never close the injected <script> tag.
+    function jsString(s) {
+      return JSON.stringify(String(s)).replace(/</g, '\\u003c');
+    }
+
+    function loadPlain() {
+      frame.removeAttribute('srcdoc');
+      frame.src = url;
+    }
+
+    function loadWithView(spec, arg) {
+      fetch(url, { mode: 'cors' })
+        .then(function (res) {
+          if (!res.ok) throw new Error('HTTP ' + res.status);
+          return res.text();
+        })
+        .then(function (html) {
+          // If the page no longer exposes that hook, don't ship a broken frame
+          // — fall back to its normal landing view.
+          if (html.indexOf(spec.probe) === -1) throw new Error(spec.probe + ' not found');
+          var code = spec.boot(arg);
+          if (!code) throw new Error('nothing to run');
+
+          var boot =
+            '<scr' + 'ipt>window.addEventListener("load",function(){' +
+            'try{' + code + '}catch(e){}' +
+            '});</scr' + 'ipt>';
+          // srcdoc resolves relative URLs against iDash, not the source site.
+          var base = '<base href="' + url.split('#')[0] + '">';
+          var out = html.replace(/<head([^>]*)>/i, '<head$1>' + base);
+          out = /<\/body>/i.test(out) ? out.replace(/<\/body>/i, boot + '</body>') : out + boot;
+
+          frame.srcdoc = out;
+        })
+        .catch(function (err) {
+          console.warn('[iDash] deep link failed, showing default view:', err.message);
+          loadPlain();
+        });
+    }
+
+    function loadFrame() {
+      if (viewSpec) loadWithView(viewSpec, viewArg); else loadPlain();
+    }
+
+    if (url) {
+      frame.hidden = false;
+      loadFrame();
+      fitIframe();
+      window.addEventListener('resize', fitIframe);
+      document.addEventListener('fullscreenchange', function () { if (!document.fullscreenElement) setTimeout(fitIframe, 50); });
+      reloadBtn.addEventListener('click', loadFrame);
+    } else {
+      empty.hidden = false;
+      fsBtn.style.display = 'none';
+      reloadBtn.style.display = 'none';
+    }
+  })();
+</script>
+</body>
+</html>

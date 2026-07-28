@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ตัวอย่าง Template ทั้งหมด — iDash</title>
+  <link rel="stylesheet" href="css/style.css?v=20260722">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect x='2' y='18' width='6' height='12' rx='1' fill='%232563eb'/><rect x='10' y='12' width='6' height='18' rx='1' fill='%233b82f6'/><rect x='18' y='6' width='6' height='24' rx='1' fill='%2360a5fa'/><rect x='26' y='2' width='6' height='28' rx='1' fill='%2393c5fd'/></svg>">
+</head>
+<body>
+
+<!-- ─── SIDEBAR ─── -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect x="2" y="18" width="6" height="12" rx="1.5" fill="#2563eb"/>
+      <rect x="10" y="12" width="6" height="18" rx="1.5" fill="#3b82f6"/>
+      <rect x="18" y="6" width="6" height="24" rx="1.5" fill="#60a5fa"/>
+      <rect x="26" y="2" width="4" height="28" rx="1.5" fill="#93c5fd"/>
+    </svg>
+    <div>
+      <span class="logo-text">iDash</span>
+      <span class="logo-sub">AI Dashboard Intelligence Platform</span>
+    </div>
+  </div>
+
+  <nav class="sidebar-nav">
+    <a href="index.html" class="active">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      Home
+    </a>
+  </nav>
+
+  <div class="sidebar-footer">
+    <div class="sidebar-user" id="sidebarUserTrigger">
+      <div class="user-avatar">A</div>
+      <div class="user-info">
+        <div class="user-name">Bobo</div>
+        <div class="user-role">Admin</div>
+      </div>
+      <div class="sidebar-user-menu" id="sidebarUserMenu" hidden>
+        <button type="button" data-action="profile">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          โปรไฟล์
+        </button>
+        <button type="button" data-action="settings">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06A1.65 1.65 0 004.6 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06A1.65 1.65 0 009 4.6a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+          ตั้งค่า
+        </button>
+        <div class="sidebar-user-menu-divider"></div>
+        <button type="button" data-action="logout" class="danger">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          ออกจากระบบ
+        </button>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- ─── MAIN ─── -->
+<main class="main">
+  <div class="content">
+
+    <div class="gallery-header">
+      <a href="index.html" class="back-link">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+        กลับหน้าแรก
+      </a>
+      <h1>ตัวอย่าง Template ทั้งหมด</h1>
+      <p>ภาพตัวอย่าง Dashboard จากหลากหลายอุตสาหกรรม — กดที่ภาพเพื่อดูขนาดเต็ม</p>
+    </div>
+
+    <div class="gallery-grid" id="galleryGrid"></div>
+
+    <div class="tpl-empty" id="tplEmpty" hidden>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+      <div class="tpl-empty-title">กำลังจัดทำชุด Template ใหม่</div>
+      <div class="tpl-empty-desc">ชุดเดิมถูกนำออกแล้ว ระหว่างนี้ใช้ AI Autopilot สร้าง Dashboard จากไฟล์ของคุณได้ตามปกติ</div>
+      <a class="tpl-empty-btn" href="index.html">ไปที่ AI Autopilot</a>
+    </div>
+
+  </div>
+</main>
+
+<!-- Lightbox (view-only gallery — the pick-a-template flow was removed in
+     the single-module pivot; matching is automatic now) -->
+<div class="lightbox" id="lightbox">
+  <button class="lightbox-close" aria-label="Close">&times;</button>
+  <img src="" alt="Preview">
+</div>
+
+<style>
+  .tpl-filter-bar { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:20px; }
+  .tpl-filter-btn {
+    padding:6px 16px; border-radius:20px; border:1px solid #e2e8f0;
+    background:#fff; color:#475569; cursor:pointer; font-size:13px;
+    transition: all .15s;
+  }
+  .tpl-filter-btn:hover { border-color:#2563eb; color:#2563eb; }
+  .tpl-filter-btn.active { background:#2563eb; color:#fff; border-color:#2563eb; }
+  .lightbox-actions {
+    position:fixed; bottom:32px; left:50%; transform:translateX(-50%); z-index:1001;
+  }
+  .lightbox-use-btn {
+    display:flex; align-items:center; gap:8px;
+    padding:12px 28px; border-radius:10px; border:none;
+    background:#2563eb; color:#fff; font-size:15px; font-weight:600;
+    cursor:pointer; box-shadow:0 4px 24px rgba(37,99,235,.35);
+    transition: all .15s;
+  }
+  .lightbox-use-btn:hover { background:#1d4ed8; transform:translateY(-1px); }
+  .gallery-card { cursor:pointer; position:relative; }
+  .gallery-card::after {
+    content:''; position:absolute; inset:0; border-radius:12px;
+    background:rgba(37,99,235,.08); opacity:0; transition:opacity .15s; pointer-events:none;
+  }
+  .gallery-card:hover::after { opacity:1; }
+  .tpl-empty {
+    text-align:center; padding:72px 24px; color:var(--gray-500);
+    background:#fff; border:2px dashed var(--border); border-radius:var(--radius);
+  }
+  .tpl-empty svg { width:42px; height:42px; color:var(--gray-300); margin-bottom:14px; }
+  .tpl-empty-title { font-size:16px; font-weight:700; color:var(--gray-700); }
+  .tpl-empty-desc { font-size:13px; margin-top:7px; max-width:420px; margin-inline:auto; line-height:1.7; }
+  .tpl-empty-btn {
+    display:inline-block; margin-top:18px; padding:9px 22px; border-radius:var(--radius-sm);
+    background:var(--primary); color:#fff; font-size:13px; font-weight:700; text-decoration:none;
+  }
+  .tpl-empty-btn:hover { background:var(--primary-dark); }
+</style>
+
+<script>
+(function() {
+  'use strict';
+  // The template code library was removed; the preview images were kept. The
+  // gallery is therefore built straight from the image set — numbered only,
+  // with no category labels, because that metadata went with the library and
+  // guessing it would be inventing information.
+  var INDEX = [];
+  for (var n = 1; n <= 45; n++) INDEX.push({ id: n });
+
+  var grid = document.getElementById('galleryGrid');
+  var currentLightboxId = null;
+
+  if (!INDEX.length) {
+    document.getElementById('tplEmpty').hidden = false;
+    return;
+  }
+
+  function renderGrid() {
+    grid.innerHTML = '';
+    INDEX.forEach(function(t) {
+      var fig = document.createElement('div');
+      fig.className = 'gallery-card';
+      fig.setAttribute('data-tpl-id', t.id);
+      fig.innerHTML = '<img src="assets/img/gallery/' + t.id + '.png" alt="Template ' + t.id + '" loading="lazy">' +
+        '<div class="gallery-card-info"><span class="gallery-num">' + String(t.id).padStart(2, '0') + '</span></div>';
+      fig.addEventListener('click', function() { openLightbox(t.id); });
+      grid.appendChild(fig);
+    });
+  }
+
+
+  // Lightbox
+  var lb = document.getElementById('lightbox');
+  var lbImg = lb.querySelector('img');
+  function openLightbox(id) {
+    currentLightboxId = id;
+    lbImg.src = 'assets/img/gallery/' + id + '.png';
+    lbImg.alt = 'Template ' + id;
+    lb.classList.add('active');
+  }
+  lb.querySelector('.lightbox-close').addEventListener('click', function() { lb.classList.remove('active'); });
+  lb.addEventListener('click', function(e) { if (e.target === lb) lb.classList.remove('active'); });
+
+  renderGrid();
+})();
+</script>
+<script src="js/sidebar.js?v=20260722"></script>
+</body>
+</html>

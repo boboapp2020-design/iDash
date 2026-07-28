@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>iDash — AI Chatbot</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect x='2' y='18' width='6' height='12' rx='1' fill='%232563eb'/><rect x='10' y='12' width='6' height='18' rx='1' fill='%233b82f6'/><rect x='18' y='6' width='6' height='24' rx='1' fill='%2360a5fa'/><rect x='26' y='2' width='6' height='28' rx='1' fill='%2393c5fd'/></svg>">
+<style>
+/* Full-bleed chat: ML Expert AI owns the whole viewport. The only iDash
+   chrome is a floating button back to Home — deliberately NOT the dashboard
+   viewer shell, which would shrink the app into a scaled panel. */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; overflow: hidden; background: #f4f7fd; }
+
+/* A slim iDash strip on top, then the chat app owns everything below it.
+   A floating pill was tried first but the chatbot occupies all four corners
+   (sidebar left, theme/palette top-right, composer bottom), so a dedicated
+   band is the only placement that never covers its controls. */
+:root { --chat-bar-h: 44px; }
+
+.chat-bar {
+  position: fixed; top: 0; left: 0; right: 0; height: var(--chat-bar-h); z-index: 10;
+  display: flex; align-items: center; gap: 10px; padding: 0 16px;
+  background: #fff; border-bottom: 1px solid #dde3ec;
+  font-family: 'Inter', 'Noto Sans Thai', system-ui, sans-serif;
+}
+.chat-home {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 6px 14px 6px 10px; border-radius: 8px;
+  border: 1px solid #dde3ec; background: #fff;
+  color: #1e3a8a; font-size: 12.5px; font-weight: 700; text-decoration: none;
+  transition: background .15s, border-color .15s;
+}
+.chat-home:hover { background: #eef4ff; border-color: #2563eb; }
+.chat-home svg { width: 14px; height: 14px; flex-shrink: 0; }
+.chat-bar-title {
+  display: flex; align-items: center; gap: 7px;
+  font-size: 13px; font-weight: 700; color: #14161c;
+}
+.chat-bar-title .idash-mark { width: 17px; height: 17px; }
+.chat-bar-sub { font-size: 11.5px; color: #858b9c; font-weight: 500; }
+
+#chatFrame {
+  position: fixed; top: var(--chat-bar-h); left: 0; right: 0; bottom: 0;
+  width: 100%; height: calc(100% - var(--chat-bar-h));
+  border: none; display: block;
+}
+
+/* Shown only while the injected variant is being fetched. */
+.chat-loading {
+  position: fixed; top: var(--chat-bar-h); left: 0; right: 0; bottom: 0; z-index: 5;
+  display: flex; align-items: center; justify-content: center;
+  background: #f4f7fd; color: #64748b;
+  font-family: 'Inter', 'Noto Sans Thai', system-ui, sans-serif; font-size: 13.5px;
+}
+.chat-loading[hidden] { display: none; }
+</style>
+</head>
+<body>
+
+<div class="chat-bar">
+  <a class="chat-home" href="index.html" title="กลับหน้า iDash">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+    กลับ iDash
+  </a>
+  <div class="chat-bar-title">
+    <svg class="idash-mark" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <rect x="2" y="18" width="6" height="12" rx="1.5" fill="#1e40af"/>
+      <rect x="10" y="12" width="6" height="18" rx="1.5" fill="#2563eb"/>
+      <rect x="18" y="6" width="6" height="24" rx="1.5" fill="#60a5fa"/>
+      <rect x="26" y="2" width="4" height="28" rx="1.5" fill="#93c5fd"/>
+    </svg>
+    AI Chatbot
+  </div>
+  <span class="chat-bar-sub">ML Expert AI · ผู้ช่วยอัจฉริยะโรงงานน้ำตาล</span>
+</div>
+
+<div class="chat-loading" id="chatLoading">กำลังเปิดผู้ช่วย AI…</div>
+<iframe id="chatFrame" title="ML Expert AI"></iframe>
+
+<script>
+(function () {
+  'use strict';
+
+  var CHAT_URL = 'https://boboapp2020-design.github.io/MLChatbot/';
+  var frame = document.getElementById('chatFrame');
+  var loading = document.getElementById('chatLoading');
+  var question = new URLSearchParams(window.location.search).get('q') || '';
+
+  function done() { loading.hidden = true; }
+
+  // No question to hand over: load the app directly — fastest path, and it
+  // keeps working even if the app's internals change.
+  function loadPlain() {
+    frame.removeAttribute('srcdoc');
+    frame.src = CHAT_URL;
+    done();
+  }
+
+  // Safe JS string literal: JSON escapes quotes/newlines and "<" is escaped so
+  // a question can never close the injected <script> tag.
+  function jsString(s) {
+    return JSON.stringify(String(s)).replace(/</g, '\\u003c');
+  }
+
+  // With a question, fetch the app and append a bootstrap that types it into
+  // the composer and sends it. Any failure falls back to the plain load.
+  function loadWithQuestion(q) {
+    fetch(CHAT_URL, { mode: 'cors' })
+      .then(function (res) {
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        return res.text();
+      })
+      .then(function (html) {
+        if (html.indexOf('btnSend') === -1) throw new Error('composer not found');
+        var boot =
+          '<scr' + 'ipt>window.addEventListener("load",function(){try{' +
+          'var i=document.getElementById("input"),b=document.getElementById("btnSend");' +
+          'if(i&&b){i.value=' + jsString(q) + ';' +
+          'i.dispatchEvent(new Event("input",{bubbles:true}));' +
+          'setTimeout(function(){b.click();},350);}' +
+          '}catch(e){}});</scr' + 'ipt>';
+        var base = '<base href="' + CHAT_URL + '">';
+        var out = html.replace(/<head([^>]*)>/i, '<head$1>' + base);
+        out = /<\/body>/i.test(out) ? out.replace(/<\/body>/i, boot + '</body>') : out + boot;
+        frame.srcdoc = out;
+        done();
+      })
+      .catch(function (err) {
+        console.warn('[iDash] chat prefill skipped:', err.message);
+        loadPlain();
+      });
+  }
+
+  if (question) loadWithQuestion(question); else loadPlain();
+})();
+</script>
+</body>
+</html>

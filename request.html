@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>iDash — ขอสร้าง Dashboard</title>
+  <link rel="stylesheet" href="css/style.css?v=20260722c">
+  <link rel="stylesheet" href="css/request.css?v=20260728b">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect x='2' y='18' width='6' height='12' rx='1' fill='%232563eb'/><rect x='10' y='12' width='6' height='18' rx='1' fill='%233b82f6'/><rect x='18' y='6' width='6' height='24' rx='1' fill='%2360a5fa'/><rect x='26' y='2' width='6' height='28' rx='1' fill='%2393c5fd'/></svg>">
+</head>
+<body>
+
+<!-- ─── SIDEBAR ─── -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect x="2" y="18" width="6" height="12" rx="1.5" fill="#2563eb"/>
+      <rect x="10" y="12" width="6" height="18" rx="1.5" fill="#3b82f6"/>
+      <rect x="18" y="6" width="6" height="24" rx="1.5" fill="#60a5fa"/>
+      <rect x="26" y="2" width="4" height="28" rx="1.5" fill="#93c5fd"/>
+    </svg>
+    <div>
+      <span class="logo-text">iDash</span>
+      <span class="logo-sub">AI Dashboard Intelligence Platform</span>
+    </div>
+  </div>
+
+  <nav class="sidebar-nav">
+    <a href="index.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      Home
+    </a>
+    <a id="dashCenterToggle" style="cursor:pointer">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+      Dashboard Center
+      <svg class="nav-chevron" id="dashCenterChevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+    </a>
+    <div class="nav-submenu" id="dashCenterMenu" hidden>
+      <a href="embedded_dashboard.html?name=Production%20Dashboard&amp;view=dashboard&amp;url=https%3A%2F%2Fboboapp2020-design.github.io%2FML_Dashboard2026_2027%2F">Production Dashboard</a>
+      <a href="embedded_dashboard.html?name=QM%20Dashboard&amp;url=dashboards%2Fqm_dashboard.html">QM Dashboard</a>
+      <a href="embedded_dashboard.html?name=Store%20Dashboard&amp;url=https%3A%2F%2Fshippingml.github.io%2FStockML%2F">Store Dashboard</a>
+      <a href="embedded_dashboard.html?name=BOI%20Dashboard&amp;url=https%3A%2F%2Fshippingml.github.io%2FBOI-ML%2F">BOI Dashboard</a>
+    </div>
+    <a class="active" href="request.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+      Request Dashboard
+    </a>
+    <a href="chat.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="8" width="16" height="12" rx="2"/><circle cx="9" cy="14" r="1.2" fill="currentColor"/><circle cx="15" cy="14" r="1.2" fill="currentColor"/><path d="M12 8V4"/><circle cx="12" cy="3" r="1.2" fill="currentColor"/></svg>
+      AI Assistant
+    </a>
+    <a class="disabled is-mock" title="ยังไม่เปิดใช้งาน">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      Profile
+    </a>
+    <a class="disabled is-mock" title="ยังไม่เปิดใช้งาน">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06A1.65 1.65 0 004.6 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06A1.65 1.65 0 009 4.6a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+      Settings
+    </a>
+  </nav>
+
+  <div class="sidebar-footer">
+    <div class="sidebar-user" id="sidebarUserTrigger">
+      <div class="user-avatar">A</div>
+      <div class="user-info">
+        <div class="user-name">Bobo</div>
+        <div class="user-role">Admin</div>
+      </div>
+      <div class="sidebar-user-menu" id="sidebarUserMenu" hidden>
+        <button type="button" data-action="profile">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          โปรไฟล์
+        </button>
+        <button type="button" data-action="settings">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06A1.65 1.65 0 004.6 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06A1.65 1.65 0 009 4.6a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+          ตั้งค่า
+        </button>
+        <div class="sidebar-user-menu-divider"></div>
+        <button type="button" data-action="logout" class="danger">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          ออกจากระบบ
+        </button>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- ─── MAIN ─── -->
+<main class="main">
+  <div class="req-wrap">
+
+    <div class="req-head">
+      <div class="req-title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+        ขอสร้าง / แก้ไข Dashboard
+      </div>
+      <div class="req-sub">กรอกรายละเอียดที่ต้องการ แล้วส่งถึง Admin โดยตรง — ทีมงานจะติดต่อกลับทางอีเมลที่คุณระบุ</div>
+    </div>
+
+    <form class="req-letter" id="reqForm" novalidate>
+      <div class="req-letter-top"></div>
+
+      <div class="req-body">
+
+        <div class="req-field">
+          <label class="req-label" for="reqFrom">อีเมลผู้ส่ง <span class="req-req">*</span>
+            <span class="req-hint">Admin จะตอบกลับมาที่อีเมลนี้</span>
+          </label>
+          <input class="req-input" type="email" id="reqFrom" placeholder="yourname@mitrphol.com" autocomplete="email">
+        </div>
+
+        <div class="req-field">
+          <label class="req-label">ผู้รับ</label>
+          <div class="req-locked">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+            <span id="reqTo">Surasakna@mitrphol.com</span>
+            <span class="req-lock-note">กำหนดไว้แล้ว</span>
+          </div>
+        </div>
+
+        <div class="req-field">
+          <label class="req-label" for="reqSubject">ชื่อเรื่อง <span class="req-req">*</span></label>
+          <select class="req-select" id="reqSubject">
+            <option value="">— เลือกประเภทคำขอ —</option>
+            <option>ขอสร้าง Dashboard ใหม่</option>
+            <option>ขอแก้ไข Template / รูปแบบ Dashboard เดิม</option>
+            <option>ขอเพิ่ม / แก้ไข KPI หรือกราฟ</option>
+            <option>ขอเชื่อมต่อแหล่งข้อมูลใหม่ (Excel / Google Sheet / ระบบอื่น)</option>
+            <option>แจ้งปัญหา — ข้อมูลไม่ถูกต้อง หรือไม่อัปเดต</option>
+            <option>แจ้งปัญหา — ใช้งานระบบไม่ได้</option>
+            <option>ขอสิทธิ์เข้าถึง Dashboard</option>
+            <option>ขอ Export / รายงานประจำงวด</option>
+            <option>อื่น ๆ (ระบุในรายละเอียด)</option>
+          </select>
+        </div>
+
+        <div class="req-field">
+          <label class="req-label" for="reqDetails">รายละเอียด <span class="req-req">*</span>
+            <span class="req-hint">ยิ่งละเอียด ยิ่งตรงกับที่ต้องการ</span>
+          </label>
+          <textarea class="req-textarea" id="reqDetails"
+            placeholder="เช่น&#10;• ต้องการดูอะไร — ยอดผลิตรายวัน เทียบเป้าหมาย แยกตามกะ&#10;• ใครเป็นคนใช้ — หัวหน้ากะ / ผู้จัดการโรงงาน&#10;• ใช้ตัดสินใจเรื่องอะไร — ปรับแผนเดินเครื่องวันถัดไป&#10;• ข้อมูลมาจากไหน — ไฟล์ Daily Report ที่แนบมา"></textarea>
+        </div>
+
+        <!-- Only relevant when asking for a brand-new dashboard — revealed by
+             the subject dropdown, hidden (and cleared) for every other type. -->
+        <div class="req-field" id="reqExampleField" hidden>
+          <label class="req-label">ตัวอย่าง Dashboard ที่ต้องการ
+            <span class="req-hint">เลือกแบบที่ใกล้เคียงที่สุด 1 แบบ</span>
+          </label>
+
+          <div class="req-picker" id="reqPicker">
+            <button class="req-pick" type="button" data-name="Production Summary">
+              <span class="req-pick-thumb"><img src="assets/img/templates/003.png" alt="Production Summary"></span>
+              <span class="req-pick-name">Production Summary</span>
+              <span class="req-pick-tick">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+              </span>
+            </button>
+            <button class="req-pick" type="button" data-name="Sugar Loss Analysis">
+              <span class="req-pick-thumb"><img src="assets/img/templates/002.png" alt="Sugar Loss Analysis"></span>
+              <span class="req-pick-name">Sugar Loss Analysis</span>
+              <span class="req-pick-tick">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+              </span>
+            </button>
+            <button class="req-pick" type="button" data-name="Raw Sugar Inventory">
+              <span class="req-pick-thumb"><img src="assets/img/templates/004.png" alt="Raw Sugar Inventory"></span>
+              <span class="req-pick-name">Raw Sugar Inventory</span>
+              <span class="req-pick-tick">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+              </span>
+            </button>
+            <button class="req-pick" type="button" data-name="Boiler Performance">
+              <span class="req-pick-thumb"><img src="assets/img/templates/001.png" alt="Boiler Performance"></span>
+              <span class="req-pick-name">Boiler Performance</span>
+              <span class="req-pick-tick">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+              </span>
+            </button>
+          </div>
+
+          <div class="req-picker-foot">
+            <span id="reqPickCount">ยังไม่ได้เลือก</span>
+            <div class="req-picker-nav">
+              <button class="req-picker-arrow" type="button" id="reqPickPrev" aria-label="เลื่อนดูแบบก่อนหน้า">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+              </button>
+              <button class="req-picker-arrow" type="button" id="reqPickNext" aria-label="เลื่อนดูแบบถัดไป">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+              </button>
+            </div>
+          </div>
+
+          <textarea class="req-textarea short" id="reqExample"
+            placeholder="อธิบายเพิ่มเติมได้ที่นี่ เช่น อยากได้แบบ Production Summary แต่เพิ่มกราฟเทียบรายกะ&#10;หรือวางลิงก์ตัวอย่างจากที่อื่น"></textarea>
+        </div>
+
+        <div class="req-field">
+          <label class="req-label">แนบไฟล์
+            <span class="req-hint">ไฟล์ข้อมูล หรือรูปตัวอย่าง — สูงสุด 8 ไฟล์ รวมไม่เกิน 15 MB</span>
+          </label>
+          <div class="req-drop" id="reqDrop" tabindex="0" role="button">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            <div class="req-drop-title">คลิกเพื่อเลือกไฟล์ หรือลากไฟล์มาวางที่นี่</div>
+            <div class="req-drop-sub">Excel, CSV, PDF, รูปภาพ และอื่น ๆ</div>
+          </div>
+          <input type="file" id="reqFiles" multiple hidden>
+          <ul class="req-files" id="reqFileList"></ul>
+        </div>
+
+        <div id="reqStatus"></div>
+      </div>
+
+      <div class="req-foot">
+        <div class="req-foot-note">ส่งถึง <b id="reqFootTo">Surasakna@mitrphol.com</b> ทันทีเมื่อกดส่ง</div>
+        <button class="req-send" type="submit" id="reqSend">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          <span id="reqSendLabel">ส่งคำขอ</span>
+        </button>
+      </div>
+    </form>
+
+  </div>
+</main>
+
+<script src="js/sidebar.js?v=20260722c"></script>
+<script src="js/request.js?v=20260728d"></script>
+<script>
+  // Dashboard Center submenu toggle (same behaviour as the Home page).
+  (function () {
+    var toggle = document.getElementById('dashCenterToggle');
+    var menu = document.getElementById('dashCenterMenu');
+    var chevron = document.getElementById('dashCenterChevron');
+    if (!toggle || !menu) return;
+    toggle.addEventListener('click', function () {
+      menu.hidden = !menu.hidden;
+      if (chevron) chevron.style.transform = menu.hidden ? '' : 'rotate(90deg)';
+    });
+  })();
+</script>
+</body>
+</html>

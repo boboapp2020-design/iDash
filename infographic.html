@@ -1,0 +1,363 @@
+﻿<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Infographic Dashboard — iDash</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect x='2' y='18' width='6' height='12' rx='1' fill='%232563eb'/><rect x='10' y='12' width='6' height='18' rx='1' fill='%233b82f6'/><rect x='18' y='6' width='6' height='24' rx='1' fill='%2360a5fa'/><rect x='26' y='2' width='6' height='28' rx='1' fill='%2393c5fd'/></svg>">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; background: #0f172a; min-height: 100vh; }
+
+    .ig-toolbar {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 10px 24px; background: rgba(15,23,42,0.92); backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(148,163,184,0.1); gap: 12px;
+    }
+    .ig-toolbar-left { display: flex; align-items: center; gap: 14px; }
+    .ig-toolbar-logo {
+      width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;
+      background: rgba(37,99,235,0.15); border-radius: 8px; cursor: pointer;
+    }
+    .ig-toolbar-logo svg { width: 20px; height: 20px; }
+    .ig-toolbar-title { font-size: 15px; font-weight: 600; color: #f1f5f9; }
+    .ig-toolbar-sub { font-size: 11px; color: #64748b; }
+    .ig-toolbar-right { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+
+    .ig-toolbar-btn {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 7px 14px; border-radius: 8px; border: 1px solid rgba(203,213,225,0.35);
+      background: rgba(203,213,225,0.12); color: #e2e8f0; font-size: 13px; font-weight: 600;
+      cursor: pointer; transition: all 0.15s; white-space: nowrap;
+    }
+    .ig-toolbar-btn:hover { background: rgba(203,213,225,0.25); color: #ffffff; border-color: rgba(203,213,225,0.5); }
+    .ig-toolbar-btn svg { width: 15px; height: 15px; flex-shrink: 0; }
+    .ig-toolbar-btn.primary { background: #2563eb; color: #fff; border-color: #2563eb; }
+    .ig-toolbar-btn.primary:hover { background: #1d4ed8; }
+    .ig-toolbar-btn.experimental { background: rgba(168,85,247,0.15); color: #d8b4fe; border-color: rgba(168,85,247,0.35); }
+    .ig-toolbar-btn.experimental:hover { background: rgba(168,85,247,0.25); }
+    .ig-toolbar-btn[disabled] { opacity: 0.5; cursor: wait; pointer-events: none; }
+    @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+    .ig-ai-badge {
+      position: fixed; top: 60px; left: 50%; transform: translateX(-50%); z-index: 101;
+      display: none; align-items: center; gap: 8px;
+      padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 600;
+      background: rgba(168,85,247,0.95); color: #fff; box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+    }
+    .ig-ai-badge.warn { background: rgba(217,119,6,0.95); }
+
+    .ig-frame-wrap { position: fixed; top: 52px; left: 0; right: 0; bottom: 0; }
+    .ig-frame-wrap iframe { width: 100%; height: 100%; border: none; }
+
+    .ig-empty {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      height: calc(100vh - 52px); margin-top: 52px; color: #64748b; text-align: center; padding: 40px;
+    }
+    .ig-empty svg { width: 64px; height: 64px; margin-bottom: 16px; opacity: 0.3; color: #475569; }
+    .ig-empty h3 { font-size: 20px; color: #94a3b8; margin-bottom: 8px; }
+    .ig-empty p { font-size: 13px; max-width: 420px; line-height: 1.6; }
+
+    .ig-ai-loading {
+      display: none; flex-direction: column; align-items: center; justify-content: center;
+      height: calc(100vh - 52px); margin-top: 52px; color: #94a3b8; text-align: center; padding: 40px;
+    }
+    .ig-ai-loading .spinner {
+      width: 48px; height: 48px; border-radius: 50%;
+      border: 3px solid rgba(168,85,247,0.2); border-top-color: #a855f7;
+      animation: ig-spin 0.8s linear infinite; margin-bottom: 20px;
+    }
+    @keyframes ig-spin { to { transform: rotate(360deg); } }
+    .ig-ai-loading h3 { font-size: 18px; color: #e2e8f0; margin-bottom: 6px; }
+    .ig-ai-loading p { font-size: 13px; color: #64748b; }
+
+    @media print {
+      .ig-toolbar { display: none !important; }
+      .ig-frame-wrap { position: static; height: auto; }
+      .ig-frame-wrap iframe { height: 100vh; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Toolbar (floating, no sidebar) -->
+<div class="ig-toolbar">
+  <div class="ig-toolbar-left">
+    <div class="ig-toolbar-logo" onclick="window.location.href='index.html'" title="กลับหน้า Home">
+      <svg viewBox="0 0 32 32" fill="none">
+        <rect x="2" y="18" width="6" height="12" rx="1.5" fill="#2563eb"/>
+        <rect x="10" y="12" width="6" height="18" rx="1.5" fill="#3b82f6"/>
+        <rect x="18" y="6" width="6" height="24" rx="1.5" fill="#60a5fa"/>
+        <rect x="26" y="2" width="4" height="28" rx="1.5" fill="#93c5fd"/>
+      </svg>
+    </div>
+    <div>
+      <div class="ig-toolbar-title" id="igTitle">Infographic Dashboard</div>
+      <div class="ig-toolbar-sub" id="igSubtitle">อัปโหลดข้อมูลจากหน้า Home เพื่อสร้าง Infographic</div>
+    </div>
+  </div>
+  <div class="ig-toolbar-right">
+    <button class="ig-toolbar-btn" id="igBtnHome" title="กลับหน้า Home">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      Home
+    </button>
+    <button class="ig-toolbar-btn" id="igBtnDownload" title="บันทึก Dashboard ทั้งหน้าเป็นไฟล์ .html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      HTML
+    </button>
+    <button class="ig-toolbar-btn" id="igBtnPrint" title="พิมพ์">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+      Print
+    </button>
+    <button class="ig-toolbar-btn primary" id="igBtnLearn" style="display:none" title="ส่งข้อมูลชุดนี้ให้ Admin เพื่อสร้าง Dashboard Template ใหม่">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 4L12 13 2 4"/></svg>
+      ส่งข้อมูลให้ Admin
+    </button>
+  </div>
+</div>
+
+<div class="ig-ai-badge" id="igAiBadge"></div>
+
+<!-- Infographic content area -->
+<div class="ig-frame-wrap" id="igFrameWrap" style="display:none"></div>
+
+<!-- AI generation loading state -->
+<div class="ig-ai-loading" id="igAiLoading">
+  <div class="spinner"></div>
+  <h3 id="igAiLoadingTitle">โปรดรอสักครู่...</h3>
+</div>
+
+<!-- Empty state -->
+<div class="ig-empty" id="igEmpty">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+    <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+    <polyline points="14 2 14 8 20 8"/>
+    <line x1="16" y1="13" x2="8" y2="13"/>
+    <line x1="16" y1="17" x2="8" y2="17"/>
+  </svg>
+  <h3>ยังไม่มีข้อมูล</h3>
+  <p>อัปโหลดไฟล์ข้อมูลจากหน้า Home โดยเลือกโมดูลที่ต้องการ<br>ระบบจะวิเคราะห์ข้อมูลและสร้าง Infographic อัตโนมัติ</p>
+  <button class="ig-toolbar-btn primary" style="margin-top:20px" onclick="window.location.href='index.html'">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
+    ไปที่หน้า Home
+  </button>
+</div>
+
+<script src="js/theme_palette.js?v=20260722c"></script>
+<script src="js/interactive_dashboard_generator.js?v=20260722c"></script>
+<script>
+// Single-module offline iDash (pivot 2026-07-22): this page renders the
+// interactive dashboard generated by app.js — zero API calls. A known-dataset
+// registry hit shows a matched chip; unknown data offers the
+// "เรียนรู้ข้อมูลชุดนี้" learning-packet export (the growth loop: the owner
+// hands the packet to Claude, which adds a curated registry entry).
+(function () {
+  'use strict';
+
+  // ── Google Sheets Webhook ──────────────────────────────────────────────
+  // ตั้งค่า URL ของ Apps Script Web App ที่ deploy แล้ว
+  // ดูวิธีตั้งค่า: docs/google-sheets-webhook-setup.md
+  var LEARN_PACKET_WEBHOOK = 'https://script.google.com/macros/s/AKfycby_lBduMkdzdXl9QzHAE6nB7sabx0iD3VU-fhusNKCykGgW2arweOTSKgavaF67BQEQ/exec';
+
+  var generatedHtml = null;
+  var currentMeta = null;
+
+  function renderIframe(html) {
+    var wrap = document.getElementById('igFrameWrap');
+    wrap.innerHTML = '';
+    var iframe = document.createElement('iframe');
+    iframe.id = 'igFrame';
+    wrap.appendChild(iframe);
+    var doc = iframe.contentDocument || iframe.contentWindow.document;
+    doc.open();
+    doc.write(html);
+    doc.close();
+  }
+
+  function showBadge(text, warn) {
+    var badge = document.getElementById('igAiBadge');
+    badge.textContent = text;
+    badge.className = 'ig-ai-badge' + (warn ? ' warn' : '');
+    badge.style.display = 'flex';
+  }
+  function hideBadge() {
+    document.getElementById('igAiBadge').style.display = 'none';
+  }
+
+  // ── Learning packet: columns + inferred types + stats + sample rows ──
+  function inferColType(values) {
+    var num = 0, date = 0, checked = 0;
+    for (var i = 0; i < values.length && checked < 40; i++) {
+      var v = values[i];
+      if (v == null || v === '') continue;
+      checked++;
+      if (typeof v === 'string' && /^\d{4}-\d{2}-\d{2}([T ]|$)/.test(v)) { date++; continue; }
+      if (!isNaN(Number(v)) && String(v).trim() !== '') num++;
+    }
+    if (checked === 0) return 'empty';
+    if (date / checked > 0.7) return 'date';
+    if (num / checked > 0.8) return 'numeric';
+    return 'text';
+  }
+
+  function buildLearnPacket(dataset, meta) {
+    var data = dataset.data || [];
+    var columns = (dataset.columns || []).map(function (c) {
+      var name = typeof c === 'string' ? c : (c && c.name);
+      var vals = data.map(function (r) { return r[name]; });
+      var type = inferColType(vals);
+      var col = { name: name, inferredType: type };
+      if (type === 'numeric') {
+        var mn = Infinity, mx = -Infinity, sum = 0, cnt = 0;
+        vals.forEach(function (v) {
+          var x = Number(v);
+          if (v != null && v !== '' && !isNaN(x)) { sum += x; cnt++; if (x < mn) mn = x; if (x > mx) mx = x; }
+        });
+        if (cnt > 0) col.stats = { min: mn, max: mx, sum: sum, avg: Math.round(sum / cnt * 100) / 100, count: cnt };
+      } else {
+        var seen = {}, n = 0;
+        vals.forEach(function (v) { if (v != null && v !== '') { var k = String(v); if (!seen[k]) { seen[k] = 1; n++; } } });
+        col.distinctCount = n;
+        col.sampleValues = Object.keys(seen).slice(0, 10);
+      }
+      return col;
+    });
+    var MAX_ROWS = 500;
+    var truncated = data.length > MAX_ROWS;
+    return {
+      packetType: 'idash-learning-packet',
+      version: 2,
+      filename: meta.filename || dataset.filename || 'unknown',
+      exportedAt: new Date().toISOString(),
+      rowCount: data.length,
+      sentRows: truncated ? MAX_ROWS : data.length,
+      truncated: truncated,
+      columns: columns,
+      rows: truncated ? data.slice(0, MAX_ROWS) : data
+    };
+  }
+
+  function handleLearnClick() {
+    var datasetJson = sessionStorage.getItem('idash.dashboardDataset');
+    if (!datasetJson || !currentMeta) {
+      showBadge('ไม่พบข้อมูลต้นฉบับสำหรับส่งออก — ลองอัปโหลดไฟล์ใหม่อีกครั้ง', true);
+      setTimeout(hideBadge, 5000);
+      return;
+    }
+    var dataset = JSON.parse(datasetJson);
+    var packet = buildLearnPacket(dataset, currentMeta);
+
+    // If webhook URL is configured → POST to Google Sheets automatically
+    if (LEARN_PACKET_WEBHOOK) {
+      var btn = document.getElementById('igBtnLearn');
+      var origHtml = btn.innerHTML;
+      btn.disabled = true;
+      btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="animation:spin 1s linear infinite"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> กำลังส่ง...';
+
+      fetch(LEARN_PACKET_WEBHOOK, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'text/plain' },
+        body: JSON.stringify(packet)
+      })
+      .then(function () {
+        btn.disabled = false;
+        btn.innerHTML = origHtml;
+        showBadge('ส่งข้อมูลหา Admin เรียบร้อยแล้ว', false);
+        setTimeout(hideBadge, 6000);
+      })
+      .catch(function (err) {
+        btn.disabled = false;
+        btn.innerHTML = origHtml;
+        showBadge('ส่งข้อมูลไม่สำเร็จ — ตรวจสอบการเชื่อมต่ออินเทอร์เน็ต', true);
+        setTimeout(hideBadge, 6000);
+        fallbackDownload(packet);
+      });
+      return;
+    }
+
+    // Fallback: download JSON file locally
+    fallbackDownload(packet);
+    showBadge('ดาวน์โหลดชุดข้อมูลแล้ว — ส่งไฟล์นี้ให้ Admin เพื่อสร้าง Dashboard Template', false);
+    setTimeout(hideBadge, 7000);
+  }
+
+  function fallbackDownload(packet) {
+    var blob = new Blob([JSON.stringify(packet, null, 2)], { type: 'application/json;charset=utf-8' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    var base = (packet.filename || 'dataset').replace(/\.[^.]+$/, '').replace(/[\\/:*?"<>|]/g, '').trim().replace(/\s+/g, '_');
+    var dateStr = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+    a.href = url;
+    a.download = 'learn_' + base + '_' + dateStr + '.json';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
+  function init() {
+    var interactiveHtml = sessionStorage.getItem('idash.interactiveHtml');
+    var metaJson = sessionStorage.getItem('idash.dashboardMeta');
+    if (!interactiveHtml || !metaJson) return; // empty state stays visible
+    var meta;
+    try { meta = JSON.parse(metaJson); } catch (e) { return; }
+    currentMeta = meta;
+    generatedHtml = interactiveHtml;
+
+    var title = meta.datasetTitle || (meta.filename || '').replace(/\.(xlsx?|csv|json)$/i, '').replace(/[_\-]+/g, ' ') || 'Dashboard';
+    document.getElementById('igTitle').textContent = title;
+
+    // Matched registry entry → confirm which curated template applied.
+    var sub = meta.domainNameTH || '';
+    if (meta.matchedDataset) {
+      sub += (sub ? ' · ' : '') + 'จับคู่เทมเพลต: ' + meta.matchedDataset.nameTH + ' (' + meta.matchedDataset.score + '%)';
+    }
+    document.getElementById('igSubtitle').textContent = sub;
+    document.getElementById('igEmpty').style.display = 'none';
+
+    renderIframe(interactiveHtml);
+    document.getElementById('igFrameWrap').style.display = 'block';
+
+    // Unknown data → offer the learning-packet export.
+    if (meta.unknownDataset) {
+      var learnBtn = document.getElementById('igBtnLearn');
+      if (learnBtn) learnBtn.style.display = 'inline-flex';
+    }
+  }
+
+  document.getElementById('igBtnDownload').addEventListener('click', function () {
+    if (!generatedHtml) return;
+    var blob = new Blob([generatedHtml], { type: 'text/html;charset=utf-8' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    var meta = currentMeta || {};
+    var titleSlug = (document.getElementById('igTitle').textContent || meta.filename || 'dashboard')
+      .replace(/[\\/:*?"<>|]/g, '').trim().replace(/\s+/g, '_');
+    a.href = url;
+    a.download = titleSlug + '.html';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  });
+
+  document.getElementById('igBtnPrint').addEventListener('click', function () {
+    var iframe = document.getElementById('igFrame');
+    if (iframe && iframe.contentWindow) iframe.contentWindow.print();
+  });
+
+  document.getElementById('igBtnHome').addEventListener('click', function () {
+    window.location.href = 'index.html';
+  });
+
+  var learnBtn = document.getElementById('igBtnLearn');
+  if (learnBtn) learnBtn.addEventListener('click', handleLearnClick);
+
+  init();
+})();
+</script>
+
+</body>
+</html>
