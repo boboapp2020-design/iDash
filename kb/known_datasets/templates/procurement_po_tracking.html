@@ -1,0 +1,1550 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ติดตาม PR → PO | Mitr Phol Group</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js" onerror="window.__chartLoadFailed=true"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js" onerror="window.__xlsxLoadFailed=true"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" onerror="window.__html2canvasLoadFailed=true"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" onerror="window.__jspdfLoadFailed=true"></script>
+<style>
+  :root{
+    --navy-900:#0a1120;
+    --navy-800:#111a30;
+    --navy-700:#1a2540;
+    --navy-600:#243258;
+    --cream:#f7f4ec;
+    --paper:#ffffff;
+    --ink-900:#1c2333;
+    --ink-600:#54607a;
+    --ink-400:#8891a6;
+    --line:#e6e1d3;
+    --gold:#cf9d33;
+    --gold-light:#e8c168;
+    --gold-dim:#a97e23;
+    --st-nopo:#6b7590;
+    --st-overdue:#d5573b;
+    --st-warning:#e3a712;
+    --st-ontrack:#2f9166;
+    --shadow: 0 1px 2px rgba(20,20,10,.04), 0 8px 24px -12px rgba(20,20,10,.18);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:'Sarabun',sans-serif;
+    background:var(--cream);
+    color:var(--ink-900);
+    display:flex;
+    min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+  }
+  ::selection{ background:var(--gold-light); color:var(--navy-900); }
+  h1,h2,h3,.display{ font-family:'Kanit',sans-serif; }
+  .mono{ font-family:'IBM Plex Mono',monospace; }
+
+  /* ---------- Sidebar ---------- */
+  #sidebar{
+    width:280px;
+    min-width:280px;
+    background:
+      radial-gradient(120% 140% at 0% 0%, #14213e 0%, var(--navy-900) 55%);
+    color:#cfd6e8;
+    position:sticky;
+    top:0;
+    height:100vh;
+    display:flex;
+    flex-direction:column;
+    padding:22px 18px 18px;
+    overflow-y:auto;
+    border-right:1px solid #060b16;
+  }
+  #sidebar::-webkit-scrollbar{width:6px;}
+  #sidebar::-webkit-scrollbar-thumb{background:#2a3757;border-radius:6px;}
+
+  .brand{ display:flex; align-items:center; gap:12px; margin-bottom:6px; }
+  .brand-logo{ flex:none; width:38px; height:38px; border-radius:9px; background:#fff; padding:4px; display:flex; align-items:center; justify-content:center; box-shadow:0 2px 8px rgba(0,0,0,.25); }
+  .brand-logo img{ width:100%; height:100%; object-fit:contain; }
+  .brand-name{ font-family:'Kanit'; font-weight:700; font-size:15px; color:#f3ead4; letter-spacing:.2px; line-height:1.25;}
+  .brand-sub{ font-size:10.5px; color:#8f9ac0; letter-spacing:1.4px; text-transform:uppercase; margin-top:2px;}
+
+  .app-title{ margin-top:22px; padding-top:18px; border-top:1px solid #202c4a; }
+  .app-title h1{ font-size:17px; font-weight:600; color:#fff; margin:0 0 3px; line-height:1.35; }
+  .app-title p{ font-size:12px; color:#8f9ac0; margin:0; line-height:1.5; }
+
+  .side-block{ margin-top:22px; }
+  .side-label{
+    font-size:10.5px; letter-spacing:1.4px; text-transform:uppercase;
+    color:#7481a8; font-weight:600; margin-bottom:10px; display:flex; align-items:center; gap:6px;
+  }
+  .side-label:before{ content:''; width:12px; height:2px; background:var(--gold); display:inline-block; border-radius:2px;}
+
+  .filter-group{ margin-bottom:14px; }
+  .filter-group label{ display:block; font-size:11.5px; color:#a5aecb; margin-bottom:6px; }
+  select, input[type=text], input[type=search]{
+    width:100%; background:#0f1830; border:1px solid #2a3757; color:#e7ebf5;
+    padding:9px 10px; border-radius:8px; font-family:'Sarabun'; font-size:13px;
+    outline:none; transition:border-color .15s;
+  }
+  select:focus, input:focus{ border-color:var(--gold); }
+  select option{ background:#0f1830; }
+  select:disabled, input:disabled{ opacity:.45; cursor:not-allowed; }
+
+  .search-wrap{ position:relative; }
+  .search-wrap svg{ position:absolute; left:10px; top:50%; transform:translateY(-50%); opacity:.55; }
+  .search-wrap input{ padding-left:32px; }
+
+  .reset-btn{
+    width:100%; margin-top:4px; background:transparent; border:1px dashed #3a4870;
+    color:#9fabce; padding:9px 10px; border-radius:8px; font-size:12.5px; cursor:pointer;
+    font-family:'Sarabun'; transition:all .15s;
+  }
+  .reset-btn:hover{ border-color:var(--gold); color:var(--gold-light); }
+  .reset-btn:disabled{ opacity:.4; cursor:not-allowed; }
+
+  .side-stats{ margin-top:auto; padding-top:18px; border-top:1px solid #202c4a; font-size:11px; color:#7481a8; line-height:1.9;}
+  .side-stats b{ color:#d7deee; font-weight:600; }
+  .legend-mini{ display:flex; flex-direction:column; gap:7px; margin-top:14px; }
+  .legend-row{ display:flex; align-items:center; gap:8px; font-size:12px; color:#b6bfda; }
+  .dot{ width:9px; height:9px; border-radius:50%; flex:none; }
+
+  /* ---------- Upload panel ---------- */
+  .upload-panel{
+    margin-top:22px; padding-top:18px; border-top:1px solid #202c4a;
+  }
+  .upload-box{
+    border:1.5px dashed #3a4870; border-radius:10px; padding:14px 12px; text-align:center;
+    background:#0f1830; transition:border-color .15s;
+  }
+  .upload-box.has-file{ border-color:var(--gold); }
+  .upload-box.drag-over{ border-color:var(--gold); background:#152040; }
+  /* NOTE: intentionally not display:none — some embedded webviews / kiosk
+     browsers refuse to open the file picker for a label click on a
+     display:none input. Visually-hidden-but-present keeps it clickable. */
+  .upload-box input[type=file]{
+    position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden;
+    clip:rect(0,0,0,0); white-space:nowrap; border:0;
+  }
+  .upload-label{
+    display:inline-flex; align-items:center; gap:7px; cursor:pointer; font-size:12.5px;
+    color:#cfd6e8; background:#1a2540; border:1px solid #2a3757; padding:8px 12px; border-radius:8px;
+    transition:all .15s;
+  }
+  .upload-label:hover{ border-color:var(--gold); color:var(--gold-light); }
+  .file-name{ margin-top:9px; font-size:11px; color:#9fabce; word-break:break-all; line-height:1.5; }
+  .file-name b{ color:#e7ebf5; }
+  .generate-btn{
+    width:100%; margin-top:10px; background:var(--gold); border:none; color:#221703;
+    padding:10px 10px; border-radius:8px; font-size:13px; font-weight:600; cursor:pointer;
+    font-family:'Sarabun'; transition:all .15s;
+  }
+  .generate-btn:hover:not(:disabled){ background:var(--gold-light); }
+  .generate-btn:disabled{ opacity:.4; cursor:not-allowed; background:#3a4870; color:#8f9ac0; }
+  .upload-msg{ margin-top:9px; font-size:11px; line-height:1.6; }
+  .upload-msg.ok{ color:#7fd6a8; }
+  .upload-msg.err{ color:#f2a08c; }
+
+  /* ---------- Main ---------- */
+  #main{ flex:1; min-width:0; padding:26px 34px 60px; }
+  .topbar{ display:flex; justify-content:space-between; align-items:flex-end; gap:20px; margin-bottom:24px; flex-wrap:wrap;}
+  .topbar h1{ font-size:26px; margin:0 0 6px; color:var(--navy-900); font-weight:700; }
+  .topbar .sub{ font-size:13.5px; color:var(--ink-600); }
+  .asof{
+    display:flex; align-items:center; gap:8px; background:var(--paper); border:1px solid var(--line);
+    padding:9px 16px; border-radius:999px; font-size:12.5px; color:var(--ink-600); box-shadow:var(--shadow);
+  }
+  .asof b{ color:var(--navy-900); }
+  .asof .pulse{ width:8px; height:8px; border-radius:50%; background:var(--st-ontrack); box-shadow:0 0 0 3px rgba(47,145,102,.18); }
+
+  .export-group{ display:flex; align-items:center; gap:8px; }
+  .export-btn{
+    display:inline-flex; align-items:center; gap:7px; background:var(--paper); border:1px solid var(--line);
+    color:var(--navy-900); padding:9px 15px; border-radius:999px; font-size:12.5px; font-weight:600; cursor:pointer;
+    font-family:'Sarabun'; box-shadow:var(--shadow); transition:all .15s;
+  }
+  .export-btn:hover:not(:disabled){ border-color:var(--gold); color:var(--gold-dim); transform:translateY(-1px); }
+  .export-btn:disabled{ opacity:.45; cursor:not-allowed; }
+  .export-btn.alert-btn{ background:var(--navy-900); color:#f3ead4; border-color:var(--navy-900); }
+  .export-btn.alert-btn:hover:not(:disabled){ background:var(--navy-700); color:var(--gold-light); border-color:var(--navy-700); }
+
+  /* ---------- Insight modal ---------- */
+  #insightOverlay{
+    display:none; position:fixed; inset:0; z-index:1000;
+    background:rgba(10,17,32,.55); backdrop-filter:blur(3px);
+    align-items:flex-start; justify-content:center; padding:4vh 16px;
+    overflow-y:auto;
+  }
+  #insightOverlay.open{ display:flex; }
+  .insight-modal{
+    background:var(--paper); border-radius:16px; max-width:860px; width:100%;
+    box-shadow:0 24px 80px -20px rgba(0,0,0,.45); overflow:hidden;
+    display:flex; flex-direction:column; max-height:92vh;
+  }
+  .insight-head{
+    background:radial-gradient(120% 160% at 0% 0%, #14213e 0%, var(--navy-900) 60%);
+    color:#f3ead4; padding:18px 24px; display:flex; align-items:center; justify-content:space-between; gap:14px;
+    flex:none;
+  }
+  .insight-head h2{ margin:0; font-size:17px; font-weight:600; display:flex; align-items:center; gap:9px; }
+  .insight-head .ih-sub{ font-size:11.5px; color:#8f9ac0; margin-top:3px; }
+  .insight-close{
+    flex:none; background:transparent; border:1px solid #3a4870; color:#cfd6e8; width:32px; height:32px;
+    border-radius:8px; cursor:pointer; font-size:15px; line-height:1; transition:all .15s;
+  }
+  .insight-close:hover{ border-color:var(--gold); color:var(--gold-light); }
+  .insight-body{ padding:20px 24px 26px; overflow-y:auto; font-size:13px; line-height:1.65; color:var(--ink-900); }
+  .insight-body::-webkit-scrollbar{ width:8px; }
+  .insight-body::-webkit-scrollbar-thumb{ background:#d8d2c0; border-radius:8px; }
+
+  .ins-chips{ display:flex; flex-wrap:wrap; gap:10px; margin-bottom:6px; }
+  .ins-chip{
+    background:#faf8f2; border:1px solid var(--line); border-radius:10px; padding:9px 14px; flex:1; min-width:130px;
+  }
+  .ins-chip .c-label{ font-size:10.5px; color:var(--ink-600); letter-spacing:.3px; }
+  .ins-chip .c-val{ font-family:'Kanit'; font-size:20px; font-weight:700; color:var(--navy-900); line-height:1.2; }
+  .ins-chip .c-note{ font-size:10.5px; color:var(--ink-400); font-family:'IBM Plex Mono'; }
+  .ins-chip.crit{ border-color:#eec5b8; background:#fdf2ee; }
+  .ins-chip.crit .c-val{ color:var(--st-overdue); }
+  .ins-chip.warn2{ border-color:#eedcae; background:#fdf8e9; }
+  .ins-chip.warn2 .c-val{ color:#8a6608; }
+
+  .ins-sec{ margin-top:20px; }
+  .ins-sec h3{
+    font-size:13.5px; margin:0 0 8px; color:var(--navy-900); display:flex; align-items:center; gap:8px;
+    padding-bottom:6px; border-bottom:1px solid var(--line);
+  }
+  .ins-sec h3 .cnt{ font-family:'IBM Plex Mono'; font-size:11px; font-weight:600; color:#fff; border-radius:999px; padding:2px 9px; }
+  .cnt.c-red{ background:var(--st-overdue); }
+  .cnt.c-yel{ background:var(--st-warning); color:#3d2f00; }
+  .cnt.c-grey{ background:var(--st-nopo); }
+  .ins-sec .sec-why{ font-size:11.5px; color:var(--ink-600); margin-bottom:9px; }
+
+  .ins-table{ width:100%; border-collapse:collapse; font-size:12px; margin-top:4px; }
+  .ins-table th{
+    text-align:left; padding:6px 9px; background:#faf8f2; color:var(--ink-600); font-weight:600;
+    font-size:10.5px; text-transform:uppercase; letter-spacing:.3px; border-bottom:1px solid var(--line); white-space:nowrap;
+  }
+  .ins-table td{ padding:6px 9px; border-bottom:1px solid #f0ede3; vertical-align:top; }
+  .ins-table td.mono{ font-family:'IBM Plex Mono'; font-size:11px; color:var(--ink-600); white-space:nowrap; }
+  .ins-table td.days{ font-family:'IBM Plex Mono'; font-weight:700; white-space:nowrap; }
+  .days.d-red{ color:var(--st-overdue); }
+  .days.d-yel{ color:#8a6608; }
+  .ins-item{ max-width:270px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+
+  .ins-list{ margin:6px 0 0; padding-left:20px; }
+  .ins-list li{ margin-bottom:6px; }
+  .ins-list li b{ color:var(--navy-900); }
+  .ins-ok{ color:var(--st-ontrack); font-weight:600; }
+
+  .ins-note{
+    margin-top:20px; background:#faf8f2; border:1px dashed var(--line); border-radius:10px;
+    padding:11px 14px; font-size:11.5px; color:var(--ink-600); line-height:1.7;
+  }
+  .ins-note b{ color:var(--navy-900); }
+
+  @media (max-width: 640px){
+    .insight-modal{ max-height:96vh; }
+    .insight-body{ padding:16px; }
+    .ins-item{ max-width:150px; }
+  }
+
+  /* Empty state banner in main */
+  .main-empty{
+    background:var(--paper); border:1.5px dashed var(--line); border-radius:16px;
+    padding:70px 30px; text-align:center; box-shadow:var(--shadow);
+  }
+  .main-empty .icon{ font-size:38px; margin-bottom:14px; }
+  .main-empty h2{ font-size:18px; color:var(--navy-900); margin:0 0 8px; }
+  .main-empty p{ font-size:13px; color:var(--ink-600); max-width:440px; margin:0 auto; line-height:1.7; }
+
+  /* KPI cards */
+  .kpi-grid{ display:grid; grid-template-columns:repeat(6,1fr); gap:14px; margin-bottom:26px; }
+  .kpi{
+    background:var(--paper); border:1px solid var(--line); border-radius:14px; padding:16px 16px 14px;
+    box-shadow:var(--shadow); position:relative; overflow:hidden; cursor:pointer; transition:transform .15s, box-shadow .15s;
+  }
+  .kpi:hover{ transform:translateY(-2px); box-shadow:0 4px 8px rgba(20,20,10,.06), 0 14px 30px -12px rgba(20,20,10,.22); }
+  .kpi.active{ outline:2px solid var(--gold); outline-offset:-2px; }
+  .kpi .bar{ position:absolute; left:0; top:0; bottom:0; width:4px; }
+  .kpi .klabel{ font-size:11px; color:var(--ink-600); margin-bottom:8px; letter-spacing:.2px;}
+  .kpi .kval{ font-family:'Kanit'; font-size:26px; font-weight:700; color:var(--navy-900); line-height:1; }
+  .kpi .kpct{ font-size:11px; color:var(--ink-400); margin-top:6px; font-family:'IBM Plex Mono'; }
+
+  /* Panels / charts */
+  .grid{ display:grid; gap:16px; }
+  .g-3{ grid-template-columns: 1.15fr 1fr 1fr; }
+  .g-2b{ grid-template-columns: 1fr 1fr 0.85fr; }
+  .panel{
+    background:var(--paper); border:1px solid var(--line); border-radius:14px; padding:18px 20px 14px;
+    box-shadow:var(--shadow);
+  }
+  .panel h3{ font-size:14px; margin:0 0 2px; color:var(--navy-900); font-weight:600; display:flex; align-items:center; justify-content:space-between; }
+  .panel .phint{ font-size:11px; color:var(--ink-400); margin-bottom:12px; }
+  .chartwrap{ position:relative; height:230px; }
+  .chartwrap.tall{ height:280px; }
+
+  section{ margin-bottom:22px; }
+  .section-head{ display:flex; align-items:center; gap:10px; margin:30px 0 14px; }
+  .section-head .num{
+    font-family:'Kanit'; font-weight:700; font-size:12px; color:#fff; background:var(--navy-900);
+    width:22px; height:22px; border-radius:6px; display:flex; align-items:center; justify-content:center;
+  }
+  .section-head h2{ font-size:16.5px; margin:0; color:var(--navy-900); }
+  .section-head .rule{ flex:1; height:1px; background:var(--line); }
+
+  /* Urgent list */
+  .urgent-list{ display:flex; flex-direction:column; gap:0; }
+  .urow{ display:flex; align-items:center; gap:10px; padding:9px 0; border-bottom:1px dashed var(--line); font-size:12.5px; }
+  .urow:last-child{ border-bottom:none; }
+  .urow .uidx{ font-family:'IBM Plex Mono'; font-size:11px; color:var(--ink-400); width:16px; flex:none; }
+  .urow .utxt{ flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:var(--ink-900); }
+  .urow .umeta{ flex:none; color:var(--ink-400); font-family:'IBM Plex Mono'; font-size:11px; }
+  .urow .uday{ flex:none; font-family:'IBM Plex Mono'; font-size:11px; font-weight:600; padding:2px 8px; border-radius:999px; }
+
+  /* Table */
+  .tablewrap{ background:var(--paper); border:1px solid var(--line); border-radius:14px; box-shadow:var(--shadow); overflow:hidden; }
+  .table-toolbar{ display:flex; align-items:center; justify-content:space-between; padding:14px 18px; border-bottom:1px solid var(--line); gap:12px; flex-wrap:wrap; }
+  .table-toolbar .count{ font-size:12.5px; color:var(--ink-600); }
+  .table-toolbar .count b{ color:var(--navy-900); }
+  table{ width:100%; border-collapse:collapse; font-size:12.5px; }
+  thead th{
+    text-align:left; padding:10px 14px; background:#faf8f2; color:var(--ink-600); font-weight:600;
+    font-size:11px; text-transform:uppercase; letter-spacing:.4px; border-bottom:1px solid var(--line);
+    cursor:pointer; white-space:nowrap; position:sticky; top:0;
+  }
+  thead th:hover{ color:var(--navy-900); }
+  thead th .arrow{ opacity:.4; font-size:9px; margin-left:3px; }
+  tbody td{ padding:10px 14px; border-bottom:1px solid #f0ede3; color:var(--ink-900); vertical-align:top; }
+  tbody tr:hover{ background:#fbf9f3; }
+  tbody td.mono{ font-family:'IBM Plex Mono'; font-size:11.5px; color:var(--ink-600); }
+  .item-text{ max-width:290px; }
+  .badge{
+    display:inline-flex; align-items:center; gap:5px; font-size:11px; font-weight:600; padding:4px 9px;
+    border-radius:999px; white-space:nowrap;
+  }
+  .badge .dot{ width:6px; height:6px; border-radius:50%; }
+  .b-nopo{ background:#eef0f5; color:var(--st-nopo); }
+  .b-overdue{ background:#fbeae5; color:var(--st-overdue); }
+  .b-warning{ background:#fdf3dc; color:#8a6608; }
+  .b-ontrack{ background:#e5f4ec; color:var(--st-ontrack); }
+
+  .pager{ display:flex; align-items:center; justify-content:space-between; padding:12px 18px; border-top:1px solid var(--line); font-size:12px; color:var(--ink-600); }
+  .pager button{
+    border:1px solid var(--line); background:var(--paper); padding:6px 12px; border-radius:7px; cursor:pointer;
+    font-size:12px; color:var(--navy-900); font-family:'Sarabun';
+  }
+  .pager button:disabled{ opacity:.4; cursor:default; }
+  .pager button:not(:disabled):hover{ border-color:var(--gold); }
+  .pager .pnums{ display:flex; gap:6px; }
+
+  .empty-state{ padding:50px 20px; text-align:center; color:var(--ink-400); font-size:13px; }
+
+  footer{ margin-top:34px; padding-top:16px; border-top:1px solid var(--line); font-size:11.5px; color:var(--ink-400); display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px;}
+
+  @media (max-width: 1300px){
+    .kpi-grid{ grid-template-columns:repeat(3,1fr); }
+    .g-3{ grid-template-columns:1fr 1fr; }
+    .g-2b{ grid-template-columns:1fr 1fr; }
+  }
+  @media (max-width: 880px){
+    body{ flex-direction:column; }
+    #sidebar{ position:relative; height:auto; width:100%; min-width:0; }
+    .kpi-grid{ grid-template-columns:repeat(2,1fr); }
+    .g-3{ grid-template-columns:1fr; }
+    .g-2b{ grid-template-columns:1fr; }
+    #main{ padding:20px; }
+  }
+
+  #libBanner{
+    display:none; position:sticky; top:0; z-index:999; background:#7a2418; color:#ffe9e2;
+    padding:12px 20px; font-size:13px; line-height:1.6; box-shadow:0 2px 10px rgba(0,0,0,.25);
+  }
+  #libBanner b{ color:#fff; }
+  #libBanner ul{ margin:6px 0 0; padding-left:18px; }
+</style>
+</head>
+<body>
+
+<div id="libBanner">
+  <b>⚠ โหลดไลบรารีที่จำเป็นไม่สำเร็จ</b> — แดชบอร์ดนี้ต้องใช้อินเทอร์เน็ตเพื่อโหลดไลบรารีจาก CDN (Chart.js / SheetJS)
+  แต่โหลดไม่สำเร็จ จึงยังใช้ปุ่มอัปโหลด/สร้างแดชบอร์ดไม่ได้ กรุณาตรวจสอบ:
+  <ul>
+    <li>การเชื่อมต่ออินเทอร์เน็ตของเครื่องนี้</li>
+    <li>Firewall / Proxy ขององค์กรที่อาจบล็อก cdnjs.cloudflare.com — แจ้งฝ่าย IT ให้เปิดการเข้าถึงโดเมนนี้</li>
+    <li>ลองเปิดไฟล์นี้ด้วยเบราว์เซอร์อื่น (Chrome / Edge) แทนโปรแกรมอีเมลหรือแอปที่แสดงตัวอย่างไฟล์</li>
+  </ul>
+  <span id="libBannerDetail"></span>
+</div>
+
+<aside id="sidebar">
+  <div class="brand">
+    <div class="brand-logo"><img src="data:image/png;base64,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" alt="Mitr Phol logo"></div>
+    <div>
+      <div class="brand-name">MITR PHOL GROUP</div>
+      <div class="brand-sub">Procurement Ops</div>
+    </div>
+  </div>
+
+  <div class="app-title">
+    <h1>ติดตาม PR → PO</h1>
+    <p>แดชบอร์ดติดตามสถานะใบขอซื้อและใบสั่งซื้อ สำหรับหน่วยงานและงานจัดซื้อ</p>
+  </div>
+
+  <div class="upload-panel">
+    <div class="side-label">นำเข้าข้อมูล</div>
+    <div class="upload-box" id="uploadBox">
+      <label class="upload-label" for="fileInput">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12"/><path d="M7 8l5-5 5 5"/><path d="M5 21h14"/></svg>
+        เลือกไฟล์ Excel (.xlsx)
+      </label>
+      <input type="file" id="fileInput" accept=".xlsx,.xls">
+      <div class="file-name" id="fileNameDisplay">ยังไม่ได้เลือกไฟล์</div>
+      <button class="generate-btn" id="generateBtn" disabled>⚙ สร้างแดชบอร์ด (Generate)</button>
+      <div class="upload-msg" id="uploadMsg"></div>
+    </div>
+  </div>
+
+  <div class="side-block">
+    <div class="side-label">ค้นหา</div>
+    <div class="filter-group">
+      <div class="search-wrap">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8f9ac0" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="search" id="searchInput" placeholder="PR, PO, รายการ, ผู้ขอซื้อ..." disabled>
+      </div>
+    </div>
+  </div>
+
+  <div class="side-block">
+    <div class="side-label">ตัวกรอง</div>
+    <div class="filter-group">
+      <label>สถานะ</label>
+      <select id="fStatus" disabled>
+        <option value="all">ทั้งหมด</option>
+        <option value="no_po">ยังไม่ออก PO</option>
+        <option value="overdue">เลยกำหนดรับ</option>
+        <option value="warning">ใกล้ครบกำหนด</option>
+        <option value="on_track">อยู่ในกำหนด</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <label>กลุ่มจัดซื้อ (Purchasing Group)</label>
+      <select id="fGroup" disabled><option value="all">ทั้งหมด</option></select>
+    </div>
+    <div class="filter-group">
+      <label>ผู้จัดซื้อ (Purchaser)</label>
+      <select id="fBuyer" disabled><option value="all">ทั้งหมด</option></select>
+    </div>
+    <button class="reset-btn" id="resetBtn" disabled>↺ ล้างตัวกรองทั้งหมด</button>
+  </div>
+
+  <div class="side-block legend-mini">
+    <div class="side-label">คำอธิบายสถานะ</div>
+    <div class="legend-row"><span class="dot" style="background:var(--st-nopo)"></span> ยังไม่ออก PO — รอจัดซื้อดำเนินการ</div>
+    <div class="legend-row"><span class="dot" style="background:var(--st-overdue)"></span> เลยกำหนดรับสินค้าแล้ว</div>
+    <div class="legend-row"><span class="dot" style="background:var(--st-warning)"></span> ใกล้ถึงวันครบกำหนด</div>
+    <div class="legend-row"><span class="dot" style="background:var(--st-ontrack)"></span> อยู่ในกำหนดปกติ</div>
+  </div>
+
+  <div class="side-stats">
+    ข้อมูลทั้งหมด <b id="sideTotalRows">–</b> รายการ<br>
+    จาก <b id="sideTotalPR">–</b> ใบขอซื้อ (PR)<br>
+    สถานะคำนวณจากวันที่ปัจจุบันเทียบกับวันครบกำหนด
+  </div>
+</aside>
+
+<main id="main">
+
+  <div class="topbar">
+    <div>
+      <h1>ภาพรวมการติดตามจัดซื้อ</h1>
+      <div class="sub">ที่มา: ใบขอซื้อ (PR) ที่ได้รับอนุมัติแล้ว — ติดตามจนถึงวันที่คาดว่าจะได้รับสินค้า</div>
+    </div>
+    <div class="export-group">
+      <div class="asof"><span class="pulse"></span> ข้อมูล ณ วันที่ <b id="asOfDate">–</b></div>
+      <button class="export-btn" id="exportHtmlBtn" disabled title="บันทึกแดชบอร์ดปัจจุบันเป็นไฟล์ HTML">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12"/><path d="M7 8l5-5 5 5"/><path d="M5 21h14"/></svg>
+        Export HTML
+      </button>
+      <button class="export-btn" id="exportPdfBtn" disabled title="บันทึกแดชบอร์ดเป็นไฟล์ PDF ไฟล์เดียว แยกเป็นหลายหน้า แต่ละหน้าคมชัดความละเอียดสูง">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 3v4a1 1 0 0 0 1 1h4"/><path d="M17 21H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7l5 5v11a2 2 0 0 1-2 2z"/><path d="M9 17v-4h1.5a1.5 1.5 0 0 1 0 3H9"/><path d="M13 17v-4h1.6a1.4 1.4 0 0 1 1.4 1.4v1.2a1.4 1.4 0 0 1-1.4 1.4H13z"/></svg>
+        Export PDF
+      </button>
+      <button class="export-btn alert-btn" id="insightBtn" disabled title="สรุปประเด็นที่งานจัดซื้อต้องเร่งติดตามและข้อควรกังวล วิเคราะห์จากข้อมูลที่โหลด">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        ข้อควรกังวล &amp; เร่งติดตาม
+      </button>
+    </div>
+  </div>
+
+  <div id="insightOverlay">
+    <div class="insight-modal" role="dialog" aria-modal="true" aria-labelledby="insightTitle">
+      <div class="insight-head">
+        <div>
+          <h2 id="insightTitle">⚠ ข้อคิดเห็นงานจัดซื้อ — สิ่งที่ต้องเร่งติดตาม</h2>
+          <div class="ih-sub" id="insightSub"></div>
+        </div>
+        <button class="insight-close" id="insightCloseBtn" title="ปิด (Esc)">✕</button>
+      </div>
+      <div class="insight-body" id="insightBody"></div>
+    </div>
+  </div>
+
+  <div id="emptyState" class="main-empty">
+    <div class="icon">📊</div>
+    <h2>ยังไม่มีข้อมูลในแดชบอร์ด</h2>
+    <p>กรุณาอัปโหลดไฟล์ Excel การติดตาม PR → PO (ต้องมีชีตชื่อ "Data" ตามโครงสร้างมาตรฐาน) แล้วกดปุ่ม "สร้างแดชบอร์ด" ที่แถบด้านซ้าย เพื่อแสดงผลกราฟและตารางข้อมูล</p>
+  </div>
+
+  <div id="dashboardContent" style="display:none;">
+
+    <div class="kpi-grid" id="kpiGrid"></div>
+
+    <section class="g-3 grid">
+      <div class="panel">
+        <h3>สัดส่วนสถานะรายการ</h3>
+        <div class="phint">คลิกที่โดนัทหรือการ์ด KPI เพื่อกรองข้อมูล</div>
+        <div class="chartwrap"><canvas id="statusDonut"></canvas></div>
+      </div>
+      <div class="panel">
+        <h3>รายการตามกลุ่มจัดซื้อ</h3>
+        <div class="phint">จำนวนรายการ แยกตามสถานะ (Purchasing Group)</div>
+        <div class="chartwrap"><canvas id="groupBar"></canvas></div>
+      </div>
+      <div class="panel">
+        <h3>แนวโน้มการขอซื้อรายสัปดาห์</h3>
+        <div class="phint">จำนวนรายการตามวันที่อนุมัติ PR</div>
+        <div class="chartwrap"><canvas id="trendLine"></canvas></div>
+      </div>
+    </section>
+
+    <section class="g-2b grid">
+      <div class="panel">
+        <h3>ผู้ขอซื้อสูงสุด 10 อันดับ</h3>
+        <div class="phint">จำนวนรายการที่ขอซื้อ</div>
+        <div class="chartwrap tall"><canvas id="reqBar"></canvas></div>
+      </div>
+      <div class="panel">
+        <h3>ภาระงานผู้จัดซื้อ</h3>
+        <div class="phint">จำนวนรายการ แยกตามสถานะ</div>
+        <div class="chartwrap tall"><canvas id="buyerBar"></canvas></div>
+      </div>
+      <div class="panel">
+        <h3>⚠ รายการเร่งด่วน</h3>
+        <div class="phint">PR ที่ยังไม่ออก PO เรียงตามวันที่ค้างนานที่สุด</div>
+        <div class="urgent-list" id="urgentList"></div>
+      </div>
+    </section>
+
+    <div class="section-head">
+      <div class="num">4</div>
+      <h2>รายการทั้งหมด</h2>
+      <div class="rule"></div>
+    </div>
+
+    <div class="tablewrap">
+      <div class="table-toolbar">
+        <div class="count">แสดง <b id="rowCountShown">–</b> จาก <b id="rowCountTotal">–</b> รายการ</div>
+        <div class="count" id="activeFilterSummary" style="color:var(--gold-dim); font-weight:600;"></div>
+      </div>
+      <div style="overflow-x:auto;">
+        <table>
+          <thead>
+            <tr>
+              <th data-k="st">สถานะ <span class="arrow">↕</span></th>
+              <th data-k="pr">PR <span class="arrow">↕</span></th>
+              <th data-k="po">PO <span class="arrow">↕</span></th>
+              <th data-k="item">รายการ <span class="arrow">↕</span></th>
+              <th data-k="qty">จำนวน <span class="arrow">↕</span></th>
+              <th data-k="req">ผู้ขอซื้อ <span class="arrow">↕</span></th>
+              <th data-k="grp">กลุ่ม <span class="arrow">↕</span></th>
+              <th data-k="buy">ผู้จัดซื้อ <span class="arrow">↕</span></th>
+              <th data-k="rel">วันที่อนุมัติ PR <span class="arrow">↕</span></th>
+              <th data-k="comp">วันครบกำหนด <span class="arrow">↕</span></th>
+            </tr>
+          </thead>
+          <tbody id="tableBody"></tbody>
+        </table>
+      </div>
+      <div class="pager">
+        <div id="pagerInfo"></div>
+        <div style="display:flex; align-items:center; gap:10px;">
+          <button id="prevBtn">‹ ก่อนหน้า</button>
+          <span id="pageIndicator" class="mono"></span>
+          <button id="nextBtn">ถัดไป ›</button>
+        </div>
+      </div>
+    </div>
+
+    <footer>
+      <div>สร้างโดยหน่วยงานจัดซื้อ Mitr Phol Group · ข้อมูลใช้เพื่อการติดตามภายในเท่านั้น</div>
+      <div id="footerSummary"></div>
+    </footer>
+
+  </div>
+
+</main>
+
+<script>
+// ==================================================================
+// Column mapping is LOCKED to the standard "Data" sheet structure:
+// B: Purchase Requisition   C: Purchase order        D: Release Date
+// E: Short Text             F: Quantity requested     G: Unit of Measure
+// H: Requisitioner          I: Purchasing Group       J: Purchaser
+// K: Delivery date Warning  L: Delivery date Complete
+// ==================================================================
+const COL = { pr:1, po:2, rel:3, item:4, qty:5, uom:6, req:7, grp:8, buy:9, warn:10, comp:11 };
+const SHEET_NAME = 'Data';
+
+const STATUS_META = {
+  no_po:   { label:'ยังไม่ออก PO',   color:'#6b7590', badge:'b-nopo' },
+  overdue: { label:'เลยกำหนดรับ',    color:'#d5573b', badge:'b-overdue' },
+  warning: { label:'ใกล้ครบกำหนด',   color:'#e3a712', badge:'b-warning' },
+  on_track:{ label:'อยู่ในกำหนด',    color:'#2f9166', badge:'b-ontrack' }
+};
+const STATUS_ORDER = ['no_po','overdue','warning','on_track'];
+
+// Guard against CDN library load failures so the upload UI still works
+// and gives a clear error instead of the page silently doing nothing.
+const LIBS_OK = (typeof Chart !== 'undefined') && (typeof XLSX !== 'undefined');
+if(typeof Chart !== 'undefined'){
+  Chart.defaults.font.family = "'Sarabun', sans-serif";
+  Chart.defaults.color = '#54607a';
+  Chart.defaults.font.size = 11.5;
+}
+
+// ---------------- global data / state ----------------
+let RAW = [];
+let groups = [];
+let buyers = [];
+let TODAY = '';
+let state = { status:'all', group:'all', buyer:'all', search:'', sortKey:'rel', sortDir:'desc', page:1, pageSize:12 };
+let chartDonut, chartGroup, chartTrend, chartReq, chartBuyer;
+
+function todayISO(){
+  const d = new Date();
+  const y = d.getFullYear(), m = String(d.getMonth()+1).padStart(2,'0'), day = String(d.getDate()).padStart(2,'0');
+  return `${y}-${m}-${day}`;
+}
+function fmtDateShort(iso){
+  if(!iso) return '—';
+  const [y,m,day] = iso.split('-');
+  const months = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+  return `${parseInt(day)} ${months[parseInt(m)-1]} ${y}`;
+}
+function fmtDateThaiLong(iso){
+  if(!iso) return '–';
+  const [y,m,day] = iso.split('-');
+  const months = ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
+  return `${parseInt(day)} ${months[parseInt(m)-1]} ${y}`;
+}
+function daysBetween(iso1, iso2){
+  const d1 = new Date(iso1+'T00:00:00'), d2 = new Date(iso2+'T00:00:00');
+  return Math.round((d2-d1)/86400000);
+}
+function excelCellToISO(v){
+  if(v===null || v===undefined || v==='') return '';
+  if(v instanceof Date){
+    const y=v.getFullYear(), m=String(v.getMonth()+1).padStart(2,'0'), d=String(v.getDate()).padStart(2,'0');
+    return `${y}-${m}-${d}`;
+  }
+  if(typeof v === 'number'){
+    // Excel serial date fallback (days since 1899-12-30)
+    const ms = Math.round((v - 25569) * 86400 * 1000);
+    const d = new Date(ms);
+    const y=d.getUTCFullYear(), m=String(d.getUTCMonth()+1).padStart(2,'0'), day=String(d.getUTCDate()).padStart(2,'0');
+    return `${y}-${m}-${day}`;
+  }
+  const s = String(v).trim();
+  // try to parse common date string formats
+  const m1 = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+  if(m1) return `${m1[1]}-${m1[2].padStart(2,'0')}-${m1[3].padStart(2,'0')}`;
+  const d = new Date(s);
+  if(!isNaN(d.getTime())){
+    const y=d.getFullYear(), m=String(d.getMonth()+1).padStart(2,'0'), day=String(d.getDate()).padStart(2,'0');
+    return `${y}-${m}-${day}`;
+  }
+  return '';
+}
+function computeStatus(po, warn, comp, today){
+  if(!po) return 'no_po';
+  if(!comp || !warn) return 'no_po';
+  if(today > comp) return 'overdue';
+  if(today >= warn) return 'warning';
+  return 'on_track';
+}
+
+// ---------------- upload / parse ----------------
+const fileInput = document.getElementById('fileInput');
+const fileNameDisplay = document.getElementById('fileNameDisplay');
+const generateBtn = document.getElementById('generateBtn');
+const uploadBox = document.getElementById('uploadBox');
+const uploadMsg = document.getElementById('uploadMsg');
+
+let pendingFile = null;
+
+// The upload panel is stripped out of exported HTML copies (see exportHtmlBtn
+// below), so every reference to its elements is guarded — this block simply
+// does nothing on an exported file, where data is already preloaded.
+const HAS_UPLOAD_PANEL = !!(fileInput && generateBtn && uploadBox && uploadMsg);
+
+if(!LIBS_OK){
+  const missing = [];
+  if(typeof Chart === 'undefined') missing.push('Chart.js (สร้างกราฟ)');
+  if(typeof XLSX === 'undefined') missing.push('SheetJS (อ่านไฟล์ Excel)');
+  const banner = document.getElementById('libBanner');
+  const detail = document.getElementById('libBannerDetail');
+  if(banner){
+    detail.textContent = 'ไลบรารีที่ขาดหายไป: ' + missing.join(', ');
+    banner.style.display = 'block';
+  }
+  if(HAS_UPLOAD_PANEL){
+    uploadMsg.textContent = '⚠ ไลบรารีที่จำเป็น (Chart.js / SheetJS) โหลดจาก CDN ไม่สำเร็จ — ตรวจสอบการเชื่อมต่ออินเทอร์เน็ต แล้วลองรีเฟรชหน้านี้ใหม่ (ปุ่มอัปโหลดจะยังใช้เลือกไฟล์ได้ แต่จะสร้างแดชบอร์ดไม่ได้จนกว่าไลบรารีจะโหลดสำเร็จ)';
+    uploadMsg.className = 'upload-msg err';
+  }
+}
+
+function showUploadMsg(text, ok){
+  if(!HAS_UPLOAD_PANEL) return;
+  uploadMsg.textContent = text;
+  uploadMsg.className = 'upload-msg ' + (ok ? 'ok' : 'err');
+}
+
+function acceptFile(f){
+  if(!HAS_UPLOAD_PANEL) return;
+  uploadMsg.textContent = '';
+  uploadMsg.className = 'upload-msg';
+  if(!f){
+    pendingFile = null;
+    fileNameDisplay.textContent = 'ยังไม่ได้เลือกไฟล์';
+    uploadBox.classList.remove('has-file');
+    generateBtn.disabled = true;
+    return;
+  }
+  const nameLower = (f.name || '').toLowerCase();
+  if(!nameLower.endsWith('.xlsx') && !nameLower.endsWith('.xls')){
+    showUploadMsg('✕ ไฟล์ที่เลือก ("'+f.name+'") ไม่ใช่ไฟล์ Excel (.xlsx หรือ .xls) กรุณาเลือกไฟล์ให้ถูกต้อง', false);
+    pendingFile = null;
+    generateBtn.disabled = true;
+    return;
+  }
+  if(f.size === 0){
+    showUploadMsg('✕ ไฟล์ที่เลือกว่างเปล่า (0 bytes) กรุณาตรวจสอบไฟล์อีกครั้ง', false);
+    pendingFile = null;
+    generateBtn.disabled = true;
+    return;
+  }
+  pendingFile = f;
+  fileNameDisplay.innerHTML = `เลือกแล้ว: <b>${f.name}</b> (${(f.size/1024).toFixed(0)} KB)`;
+  uploadBox.classList.add('has-file');
+  generateBtn.disabled = !LIBS_OK;
+  if(!LIBS_OK){
+    showUploadMsg('⚠ เลือกไฟล์แล้ว แต่ยังสร้างแดชบอร์ดไม่ได้เพราะไลบรารีที่จำเป็นโหลดจาก CDN ไม่สำเร็จ (ดูรายละเอียดด้านบน)', false);
+  }
+}
+
+// All upload-panel wiring lives inside this guard so it's a no-op on
+// exported HTML copies, which have the upload panel removed entirely.
+if(HAS_UPLOAD_PANEL){
+
+fileInput.addEventListener('change', (e)=>{
+  acceptFile(e.target.files && e.target.files[0]);
+});
+
+// Drag-and-drop as a fallback path in case the native file picker is
+// blocked or unavailable in the host environment (e.g. some embedded
+// webviews / kiosk browsers).
+['dragenter','dragover'].forEach(evt=>{
+  uploadBox.addEventListener(evt, (e)=>{
+    e.preventDefault(); e.stopPropagation();
+    uploadBox.classList.add('drag-over');
+  });
+});
+['dragleave','drop'].forEach(evt=>{
+  uploadBox.addEventListener(evt, (e)=>{
+    e.preventDefault(); e.stopPropagation();
+    uploadBox.classList.remove('drag-over');
+  });
+});
+uploadBox.addEventListener('drop', (e)=>{
+  const f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+  if(f){
+    try{
+      const dt = new DataTransfer();
+      dt.items.add(f);
+      fileInput.files = dt.files;
+    }catch(err){ /* DataTransfer assignment unsupported — pendingFile still gets set below */ }
+    acceptFile(f);
+  }
+});
+
+generateBtn.addEventListener('click', ()=>{
+  if(!pendingFile){
+    showUploadMsg('✕ กรุณาเลือกไฟล์ Excel ก่อนกดสร้างแดชบอร์ด', false);
+    return;
+  }
+  if(typeof XLSX === 'undefined' || typeof Chart === 'undefined'){
+    showUploadMsg('✕ โหลดไลบรารีที่จำเป็น (Chart.js / SheetJS) จาก CDN ไม่สำเร็จ กรุณาตรวจสอบการเชื่อมต่ออินเทอร์เน็ต แล้วรีเฟรชหน้านี้ใหม่', false);
+    return;
+  }
+  generateBtn.disabled = true;
+  generateBtn.textContent = '⏳ กำลังประมวลผล...';
+  uploadMsg.textContent = '';
+  uploadMsg.className = 'upload-msg';
+
+  const reader = new FileReader();
+  reader.onload = (e)=>{
+    try{
+      const data = new Uint8Array(e.target.result);
+
+      let wb;
+      try{
+        wb = XLSX.read(data, { type:'array', cellDates:true });
+      }catch(parseErr){
+        console.error(parseErr);
+        throw new Error('ไม่สามารถอ่านไฟล์นี้เป็น Excel ได้ — ไฟล์อาจเสียหาย ถูกป้องกันด้วยรหัสผ่าน หรือไม่ใช่ไฟล์ .xlsx/.xls ที่ถูกต้อง');
+      }
+      if(!wb.SheetNames || !wb.SheetNames.length){
+        throw new Error('ไฟล์ Excel นี้ไม่มีชีตข้อมูลเลย');
+      }
+
+      const wsName = wb.SheetNames.includes(SHEET_NAME) ? SHEET_NAME : wb.SheetNames[0];
+      const usedFallbackSheet = !wb.SheetNames.includes(SHEET_NAME);
+      const ws = wb.Sheets[wsName];
+      const rows = XLSX.utils.sheet_to_json(ws, { header:1, raw:true, defval:'' });
+
+      TODAY = todayISO();
+      const parsed = [];
+      for(let i=1; i<rows.length; i++){
+        const row = rows[i];
+        if(!row || row.length===0) continue;
+        const pr = String(row[COL.pr] ?? '').trim();
+        if(!pr) continue; // skip blank trailing rows
+        const po = String(row[COL.po] ?? '').trim();
+        const rel = excelCellToISO(row[COL.rel]);
+        const item = String(row[COL.item] ?? '').trim();
+        const qty = Number(row[COL.qty]) || 0;
+        const uom = String(row[COL.uom] ?? '').trim();
+        const req = String(row[COL.req] ?? '').trim();
+        const grp = String(row[COL.grp] ?? '').trim();
+        const buy = String(row[COL.buy] ?? '').trim();
+        const warn = excelCellToISO(row[COL.warn]);
+        const comp = excelCellToISO(row[COL.comp]);
+        const st = computeStatus(po, warn, comp, TODAY);
+        parsed.push({ pr, po, rel, item, qty, uom, req, grp, buy, warn, comp, st });
+      }
+
+      if(!parsed.length){
+        throw new Error('ไม่พบข้อมูลที่อ่านได้ในชีต "'+wsName+'" กรุณาตรวจสอบว่าไฟล์มีชีตชื่อ "Data" ตามโครงสร้างมาตรฐาน (คอลัมน์ B–L: Purchase Requisition, Purchase order, Release Date, Short Text, Quantity requested, Unit of Measure, Requisitioner, Purchasing Group, Purchaser, Delivery date Warning, Delivery date)');
+      }
+
+      RAW = parsed;
+      loadIntoDashboard(wsName, rows.length-1);
+      if(usedFallbackSheet){
+        showUploadMsg(`⚠ ไม่พบชีตชื่อ "${SHEET_NAME}" ในไฟล์ — ใช้ชีต "${wsName}" แทน และโหลดข้อมูลสำเร็จ ${RAW.length.toLocaleString('th-TH')} รายการ (โปรดตรวจสอบความถูกต้องของข้อมูล)`, true);
+      }
+
+    } catch(err){
+      console.error(err);
+      showUploadMsg('✕ เกิดข้อผิดพลาด: ' + err.message, false);
+    } finally {
+      generateBtn.disabled = false;
+      generateBtn.textContent = '⚙ สร้างแดชบอร์ด (Generate)';
+    }
+  };
+  reader.onerror = ()=>{
+    showUploadMsg('✕ ไม่สามารถอ่านไฟล์ได้ (เบราว์เซอร์ปฏิเสธการเข้าถึงไฟล์ หรือไฟล์ถูกลบ/ย้ายระหว่างอ่าน)', false);
+    generateBtn.disabled = false;
+    generateBtn.textContent = '⚙ สร้างแดชบอร์ด (Generate)';
+  };
+  reader.readAsArrayBuffer(pendingFile);
+});
+
+} // end HAS_UPLOAD_PANEL
+
+function loadIntoDashboard(sheetUsed, rowCount){
+  // reset filter state
+  state = { status:'all', group:'all', buyer:'all', search:'', sortKey:'rel', sortDir:'desc', page:1, pageSize:12 };
+
+  groups = [...new Set(RAW.map(r=>r.grp))].filter(Boolean).sort();
+  buyers = [...new Set(RAW.map(r=>r.buy))].filter(Boolean).sort();
+
+  populateSelect('fGroup', groups);
+  populateSelect('fBuyer', buyers);
+  document.getElementById('fStatus').value = 'all';
+  document.getElementById('fGroup').value = 'all';
+  document.getElementById('fBuyer').value = 'all';
+  document.getElementById('searchInput').value = '';
+
+  ['fStatus','fGroup','fBuyer','searchInput','resetBtn'].forEach(id=>{
+    document.getElementById(id).disabled = false;
+  });
+
+  document.getElementById('sideTotalRows').textContent = RAW.length.toLocaleString('th-TH');
+  document.getElementById('sideTotalPR').textContent = new Set(RAW.map(r=>r.pr)).size.toLocaleString('th-TH');
+  document.getElementById('asOfDate').textContent = fmtDateThaiLong(TODAY);
+  document.getElementById('footerSummary').textContent =
+    `PR ${new Set(RAW.map(r=>r.pr)).size.toLocaleString('th-TH')} รายการ · ${RAW.length.toLocaleString('th-TH')} line items · อัปเดตล่าสุด ${fmtDateShort(TODAY)}`;
+
+  document.getElementById('emptyState').style.display = 'none';
+  document.getElementById('dashboardContent').style.display = 'block';
+
+  document.getElementById('exportHtmlBtn').disabled = false;
+  document.getElementById('exportPdfBtn').disabled = false;
+  document.getElementById('insightBtn').disabled = false;
+
+  if(HAS_UPLOAD_PANEL){
+    uploadMsg.textContent = `✓ โหลดข้อมูลสำเร็จจากชีต "${sheetUsed}" — ${RAW.length.toLocaleString('th-TH')} รายการ`;
+    uploadMsg.className = 'upload-msg ok';
+  }
+
+  renderAll();
+}
+
+function populateSelect(id, values){
+  const sel = document.getElementById(id);
+  sel.innerHTML = '<option value="all">ทั้งหมด</option>';
+  values.forEach(v=>{
+    const o = document.createElement('option');
+    o.value = v; o.textContent = v;
+    sel.appendChild(o);
+  });
+}
+
+// ---------------- filtering ----------------
+function getFiltered(){
+  const q = state.search.trim().toLowerCase();
+  return RAW.filter(r=>{
+    if(state.status!=='all' && r.st!==state.status) return false;
+    if(state.group!=='all' && r.grp!==state.group) return false;
+    if(state.buyer!=='all' && r.buy!==state.buyer) return false;
+    if(q){
+      const hay = (r.pr+' '+r.po+' '+r.item+' '+r.req).toLowerCase();
+      if(!hay.includes(q)) return false;
+    }
+    return true;
+  });
+}
+
+// ---------------- KPI ----------------
+function renderKPI(){
+  const total = RAW.length;
+  const counts = { all: total };
+  STATUS_ORDER.forEach(s=> counts[s] = RAW.filter(r=>r.st===s).length);
+  const prCount = new Set(RAW.map(r=>r.pr)).size;
+
+  const cards = [
+    { key:'all', label:'PR ทั้งหมด (ใบขอซื้อ)', val: prCount, pct:'', color:'#0a1120' },
+    { key:'all', label:'รายการทั้งหมด (line items)', val: total, pct:'', color:'#0a1120' },
+    { key:'no_po', label:'ยังไม่ออก PO', val: counts.no_po, pct: total?((counts.no_po/total)*100).toFixed(1)+'% ของรายการ':'', color: STATUS_META.no_po.color },
+    { key:'overdue', label:'เลยกำหนดรับสินค้า', val: counts.overdue, pct: total?((counts.overdue/total)*100).toFixed(1)+'% ของรายการ':'', color: STATUS_META.overdue.color },
+    { key:'warning', label:'ใกล้ครบกำหนด', val: counts.warning, pct: total?((counts.warning/total)*100).toFixed(1)+'% ของรายการ':'', color: STATUS_META.warning.color },
+    { key:'on_track', label:'อยู่ในกำหนดปกติ', val: counts.on_track, pct: total?((counts.on_track/total)*100).toFixed(1)+'% ของรายการ':'', color: STATUS_META.on_track.color },
+  ];
+
+  const grid = document.getElementById('kpiGrid');
+  grid.innerHTML = '';
+  cards.forEach((c,i)=>{
+    const el = document.createElement('div');
+    el.className = 'kpi' + ((state.status===c.key && c.key!=='all') ? ' active':'');
+    el.innerHTML = `<div class="bar" style="background:${c.color}"></div>
+      <div class="klabel">${c.label}</div>
+      <div class="kval mono">${c.val.toLocaleString('th-TH')}</div>
+      <div class="kpct">${c.pct}</div>`;
+    if(c.key!=='all'){
+      el.addEventListener('click', ()=>{
+        state.status = (state.status===c.key) ? 'all' : c.key;
+        document.getElementById('fStatus').value = state.status;
+        state.page = 1;
+        renderAll();
+      });
+    } else if (i===1){
+      el.addEventListener('click', ()=>{ state.status='all'; document.getElementById('fStatus').value='all'; state.page=1; renderAll(); });
+    }
+    grid.appendChild(el);
+  });
+}
+
+// ---------------- Charts ----------------
+function renderDonut(){
+  const data = getFiltered();
+  const counts = STATUS_ORDER.map(s=> data.filter(r=>r.st===s).length);
+  const ctx = document.getElementById('statusDonut');
+  if(chartDonut) chartDonut.destroy();
+  chartDonut = new Chart(ctx, {
+    type:'doughnut',
+    data:{
+      labels: STATUS_ORDER.map(s=>STATUS_META[s].label),
+      datasets:[{ data:counts, backgroundColor: STATUS_ORDER.map(s=>STATUS_META[s].color), borderWidth:3, borderColor:'#fff', hoverOffset:6 }]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false, cutout:'68%',
+      plugins:{ legend:{ position:'bottom', labels:{ boxWidth:9, boxHeight:9, padding:12, usePointStyle:true, pointStyle:'circle' } },
+        tooltip:{ callbacks:{ label:(c)=> ` ${c.label}: ${c.raw} รายการ` } } },
+      onClick:(evt, els)=>{
+        if(els.length){
+          const idx = els[0].index; const s = STATUS_ORDER[idx];
+          state.status = (state.status===s)?'all':s;
+          document.getElementById('fStatus').value = state.status;
+          state.page=1; renderAll();
+        }
+      }
+    }
+  });
+}
+
+function renderGroupBar(){
+  const data = getFiltered();
+  const grps = groups;
+  const ctx = document.getElementById('groupBar');
+  const datasets = STATUS_ORDER.map(s=>({
+    label: STATUS_META[s].label,
+    data: grps.map(g=> data.filter(r=>r.grp===g && r.st===s).length),
+    backgroundColor: STATUS_META[s].color,
+    stack:'a', borderRadius:3, maxBarThickness:26
+  }));
+  if(chartGroup) chartGroup.destroy();
+  chartGroup = new Chart(ctx, {
+    type:'bar',
+    data:{ labels:grps, datasets },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      scales:{ x:{ stacked:true, grid:{display:false} }, y:{ stacked:true, grid:{color:'#f0ede3'}, ticks:{precision:0} } },
+      plugins:{ legend:{display:false}, tooltip:{ mode:'index', intersect:false } }
+    }
+  });
+}
+
+function renderTrend(){
+  const data = getFiltered();
+  const weekMap = {};
+  data.forEach(r=>{
+    if(!r.rel) return;
+    const d = new Date(r.rel+'T00:00:00');
+    const day = d.getDay() || 7;
+    const monday = new Date(d); monday.setDate(d.getDate()-day+1);
+    const key = monday.toISOString().slice(0,10);
+    weekMap[key] = (weekMap[key]||0)+1;
+  });
+  const keys = Object.keys(weekMap).sort();
+  const ctx = document.getElementById('trendLine');
+  if(chartTrend) chartTrend.destroy();
+  chartTrend = new Chart(ctx, {
+    type:'line',
+    data:{
+      labels: keys.map(k=>fmtDateShort(k)),
+      datasets:[{
+        data: keys.map(k=>weekMap[k]),
+        borderColor:'#cf9d33', backgroundColor:'rgba(207,157,51,0.14)',
+        borderWidth:2.5, tension:.35, fill:true, pointRadius:3, pointBackgroundColor:'#cf9d33'
+      }]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{display:false}, tooltip:{ callbacks:{ label:(c)=>` ${c.raw} รายการ` } } },
+      scales:{ x:{ grid:{display:false}, ticks:{maxRotation:0, autoSkip:true, maxTicksLimit:6} }, y:{ grid:{color:'#f0ede3'}, ticks:{precision:0} } }
+    }
+  });
+}
+
+function renderReqBar(){
+  const data = getFiltered();
+  const counts = {};
+  data.forEach(r=> counts[r.req] = (counts[r.req]||0)+1);
+  const top = Object.entries(counts).sort((a,b)=>b[1]-a[1]).slice(0,10);
+  const ctx = document.getElementById('reqBar');
+  if(chartReq) chartReq.destroy();
+  chartReq = new Chart(ctx, {
+    type:'bar',
+    data:{
+      labels: top.map(t=>t[0]),
+      datasets:[{ data: top.map(t=>t[1]), backgroundColor:'#1a2540', borderRadius:4, maxBarThickness:16 }]
+    },
+    options:{
+      indexAxis:'y', responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{display:false}, tooltip:{ callbacks:{ label:(c)=>` ${c.raw} รายการ` } } },
+      scales:{ x:{ grid:{color:'#f0ede3'}, ticks:{precision:0} }, y:{ grid:{display:false} } }
+    }
+  });
+}
+
+function renderBuyerBar(){
+  const data = getFiltered();
+  const ctx = document.getElementById('buyerBar');
+  const datasets = STATUS_ORDER.map(s=>({
+    label: STATUS_META[s].label,
+    data: buyers.map(b=> data.filter(r=>r.buy===b && r.st===s).length),
+    backgroundColor: STATUS_META[s].color, stack:'a', borderRadius:3, maxBarThickness:60
+  }));
+  if(chartBuyer) chartBuyer.destroy();
+  chartBuyer = new Chart(ctx, {
+    type:'bar',
+    data:{ labels:buyers, datasets },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{ position:'bottom', labels:{boxWidth:9, boxHeight:9, padding:10, usePointStyle:true, pointStyle:'circle'} } },
+      scales:{ x:{ stacked:true, grid:{display:false} }, y:{ stacked:true, grid:{color:'#f0ede3'}, ticks:{precision:0} } }
+    }
+  });
+}
+
+// ---------------- Urgent list ----------------
+function renderUrgent(){
+  const data = getFiltered().filter(r=>r.st==='no_po')
+    .sort((a,b)=> (a.rel||'').localeCompare(b.rel||''))
+    .slice(0,8);
+  const el = document.getElementById('urgentList');
+  if(!data.length){ el.innerHTML = '<div class="empty-state">ไม่มีรายการค้าง PO ตามตัวกรองปัจจุบัน</div>'; return; }
+  el.innerHTML = data.map((r,i)=>{
+    const age = r.rel ? daysBetween(r.rel, TODAY) : 0;
+    return `<div class="urow">
+      <span class="uidx mono">${i+1}</span>
+      <span class="utxt" title="${r.item}">${r.item}</span>
+      <span class="umeta">PR ${r.pr}</span>
+      <span class="uday" style="background:#fbeae5;color:#c1442c;">${age} วัน</span>
+    </div>`;
+  }).join('');
+}
+
+// ---------------- Table ----------------
+function renderTable(){
+  let data = getFiltered();
+  data = data.slice().sort((a,b)=>{
+    let va = a[state.sortKey], vb = b[state.sortKey];
+    if(state.sortKey==='qty'){ va=Number(va); vb=Number(vb); }
+    if(va<vb) return state.sortDir==='asc' ? -1:1;
+    if(va>vb) return state.sortDir==='asc' ? 1:-1;
+    return 0;
+  });
+
+  document.getElementById('rowCountShown').textContent = data.length.toLocaleString('th-TH');
+  document.getElementById('rowCountTotal').textContent = RAW.length.toLocaleString('th-TH');
+
+  const filterBits = [];
+  if(state.status!=='all') filterBits.push(STATUS_META[state.status].label);
+  if(state.group!=='all') filterBits.push('กลุ่ม '+state.group);
+  if(state.buyer!=='all') filterBits.push(state.buyer);
+  if(state.search) filterBits.push('"'+state.search+'"');
+  document.getElementById('activeFilterSummary').textContent = filterBits.length ? ('กรอง: '+filterBits.join(' · ')) : '';
+
+  const totalPages = Math.max(1, Math.ceil(data.length/state.pageSize));
+  if(state.page>totalPages) state.page = totalPages;
+  const startIdx = (state.page-1)*state.pageSize;
+  const pageData = data.slice(startIdx, startIdx+state.pageSize);
+
+  const tbody = document.getElementById('tableBody');
+  if(!pageData.length){
+    tbody.innerHTML = `<tr><td colspan="10"><div class="empty-state">ไม่พบรายการที่ตรงกับเงื่อนไข</div></td></tr>`;
+  } else {
+    tbody.innerHTML = pageData.map(r=>{
+      const sm = STATUS_META[r.st];
+      return `<tr>
+        <td><span class="badge ${sm.badge}"><span class="dot" style="background:${sm.color}"></span>${sm.label}</span></td>
+        <td class="mono">${r.pr}</td>
+        <td class="mono">${r.po || '—'}</td>
+        <td class="item-text">${r.item}</td>
+        <td class="mono">${r.qty.toLocaleString('th-TH')} ${r.uom}</td>
+        <td>${r.req}</td>
+        <td class="mono">${r.grp}</td>
+        <td>${r.buy}</td>
+        <td class="mono">${fmtDateShort(r.rel)}</td>
+        <td class="mono">${fmtDateShort(r.comp)}</td>
+      </tr>`;
+    }).join('');
+  }
+
+  document.getElementById('pagerInfo').textContent = data.length ? `หน้า ${state.page} จาก ${totalPages} (${startIdx+1}–${Math.min(startIdx+state.pageSize,data.length)} จาก ${data.length})` : '';
+  document.getElementById('pageIndicator').textContent = `${state.page} / ${totalPages}`;
+  document.getElementById('prevBtn').disabled = state.page<=1;
+  document.getElementById('nextBtn').disabled = state.page>=totalPages;
+}
+
+// ---------------- wiring ----------------
+document.getElementById('fStatus').addEventListener('change', e=>{ state.status=e.target.value; state.page=1; renderAll(); });
+document.getElementById('fGroup').addEventListener('change', e=>{ state.group=e.target.value; state.page=1; renderAll(); });
+document.getElementById('fBuyer').addEventListener('change', e=>{ state.buyer=e.target.value; state.page=1; renderAll(); });
+let searchTimer;
+document.getElementById('searchInput').addEventListener('input', e=>{
+  clearTimeout(searchTimer);
+  searchTimer = setTimeout(()=>{ state.search = e.target.value; state.page=1; renderAll(); }, 180);
+});
+document.getElementById('resetBtn').addEventListener('click', ()=>{
+  state = { status:'all', group:'all', buyer:'all', search:'', sortKey:'rel', sortDir:'desc', page:1, pageSize:12 };
+  document.getElementById('fStatus').value='all';
+  document.getElementById('fGroup').value='all';
+  document.getElementById('fBuyer').value='all';
+  document.getElementById('searchInput').value='';
+  renderAll();
+});
+document.querySelectorAll('thead th').forEach(th=>{
+  th.addEventListener('click', ()=>{
+    const k = th.dataset.k;
+    if(state.sortKey===k){ state.sortDir = state.sortDir==='asc'?'desc':'asc'; }
+    else { state.sortKey=k; state.sortDir='asc'; }
+    renderTable();
+  });
+});
+document.getElementById('prevBtn').addEventListener('click', ()=>{ if(state.page>1){ state.page--; renderTable(); } });
+document.getElementById('nextBtn').addEventListener('click', ()=>{ state.page++; renderTable(); });
+
+function renderAll(){
+  renderKPI();
+  renderDonut();
+  renderGroupBar();
+  renderTrend();
+  renderReqBar();
+  renderBuyerBar();
+  renderUrgent();
+  renderTable();
+}
+
+// ==================================================================
+// Procurement insight engine
+// Logic follows the procurement-management skill (SKILL.md):
+//  - ageing นับจาก Release Date เทียบ SLA ภายใน (+15 เตือน / +30 เกินกำหนด)
+//    ห้ามตีความ Delivery date Warning/Complete เป็น ETA จาก supplier
+//  - รายงานตัวเลขแยก "บรรทัด" กับ "ใบ PR" เสมอ (1 PR มีหลายบรรทัด)
+//  - ตรวจ Partial PO ระดับบรรทัด (backlog ที่มองไม่เห็นถ้าดูระดับใบ)
+//  - แยกภาระงานตาม Purchaser เพื่อชี้ workload ไม่สมดุล
+//  - flag งานบริการ UOM = JOB ที่ต้องมี scope of work ก่อนขอราคา
+//  - data quality check ก่อนรายงาน และไม่แต่งข้อเท็จจริงนอกข้อมูล
+// ==================================================================
+function esc(s){
+  return String(s ?? '').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function analyzeProcurement(){
+  const t = TODAY || todayISO();
+  const lines = RAW;
+  const prAll = new Set(lines.map(r=>r.pr));
+
+  // Backlog = บรรทัดที่ยังไม่มีเลข PO (นิยามตาม skill: Purchase order ว่าง)
+  const backlog = lines.filter(r=>!r.po);
+  const backlogPR = new Set(backlog.map(r=>r.pr));
+  const backlogNoRel = backlog.filter(r=>!r.rel);
+  const aged = backlog.filter(r=>r.rel).map(r=>Object.assign({}, r, { age: daysBetween(r.rel, t) }));
+  const red    = aged.filter(r=>r.age>=30).sort((a,b)=>b.age-a.age);
+  const yellow = aged.filter(r=>r.age>=15 && r.age<30).sort((a,b)=>b.age-a.age);
+  const green  = aged.filter(r=>r.age<15);
+
+  // บรรทัดที่ออก PO แล้ว — ติดตามเทียบเส้น SLA ภายใน
+  const poLines = lines.filter(r=>r.po);
+  const poOverdue = poLines.filter(r=>r.comp && t > r.comp)
+    .map(r=>Object.assign({}, r, { over: daysBetween(r.comp, t) }))
+    .sort((a,b)=>b.over-a.over);
+  const poWarn = poLines.filter(r=>r.comp && r.warn && t >= r.warn && t <= r.comp);
+  const poMissingDates = poLines.filter(r=>!r.comp || !r.warn);
+
+  // Partial PO: PR ใบเดียวกันมีทั้งบรรทัดที่ออก PO แล้วและยังไม่ออก
+  const prMap = new Map();
+  lines.forEach(r=>{
+    if(!prMap.has(r.pr)) prMap.set(r.pr, { withPO:0, noPO:0 });
+    const e = prMap.get(r.pr);
+    if(r.po) e.withPO++; else e.noPO++;
+  });
+  const partialPRs = [...prMap.entries()].filter(([,e])=>e.withPO>0 && e.noPO>0);
+  const partialLines = partialPRs.reduce((s,[,e])=>s+e.noPO, 0);
+
+  // ภาระ backlog ตามผู้จัดซื้อ (normalize ตัวพิมพ์ก่อนจัดกลุ่ม ตาม skill)
+  const byBuyer = new Map();
+  backlog.forEach(r=>{
+    const raw = String(r.buy||'').trim();
+    const key = raw.toLowerCase() || '(ไม่ระบุ)';
+    if(!byBuyer.has(key)) byBuyer.set(key, { display: raw || '(ไม่ระบุ)', total:0, red:0 });
+    const e = byBuyer.get(key);
+    e.total++;
+    if(r.rel && daysBetween(r.rel, t) >= 30) e.red++;
+  });
+  const buyerRank = [...byBuyer.values()].sort((a,b)=>b.total-a.total);
+  const topBuyer = buyerRank[0] || null;
+  const topBuyerShare = (topBuyer && backlog.length) ? Math.round(topBuyer.total/backlog.length*100) : 0;
+
+  // งานบริการ UOM = JOB ที่ยังไม่ออก PO — ต้องมี scope of work ชัดก่อนขอราคา
+  const jobLines = backlog.filter(r=>String(r.uom).trim().toUpperCase()==='JOB');
+
+  // Data quality: ชื่อผู้ขอซื้อสะกดต่างกันเฉพาะตัวพิมพ์ จะถูกนับเป็นคนละคน
+  const reqCase = new Map();
+  lines.forEach(r=>{
+    const k = String(r.req||'').trim().toLowerCase();
+    if(!k) return;
+    if(!reqCase.has(k)) reqCase.set(k, new Set());
+    reqCase.get(k).add(String(r.req).trim());
+  });
+  const caseDupNames = [...reqCase.values()].filter(s=>s.size>1).map(s=>[...s].join(' / '));
+
+  return { t, lines, prAll, backlog, backlogPR, backlogNoRel, red, yellow, green,
+           poLines, poOverdue, poWarn, poMissingDates, partialPRs, partialLines,
+           buyerRank, topBuyer, topBuyerShare, jobLines, caseDupNames };
+}
+
+function insightRowTable(rows, mode){
+  // mode 'age' = PR ค้าง (แสดงวันค้างจาก Release), mode 'over' = PO เลยเส้นตาย
+  let h = '<table class="ins-table"><thead><tr>' +
+    '<th>PR</th>' + (mode==='over' ? '<th>PO</th>' : '') +
+    '<th>รายการ</th><th>ผู้ขอซื้อ</th><th>ผู้จัดซื้อ</th>' +
+    (mode==='over' ? '<th>ครบกำหนด (SLA)</th><th>เลยมาแล้ว</th>' : '<th>อนุมัติ PR</th><th>ค้างมาแล้ว</th>') +
+    '</tr></thead><tbody>';
+  rows.forEach(r=>{
+    h += '<tr><td class="mono">'+esc(r.pr)+'</td>' +
+      (mode==='over' ? '<td class="mono">'+esc(r.po)+'</td>' : '') +
+      '<td><div class="ins-item" title="'+esc(r.item)+'">'+esc(r.item)+'</div></td>' +
+      '<td>'+esc(r.req||'—')+'</td><td>'+esc(r.buy||'—')+'</td>' +
+      (mode==='over'
+        ? '<td class="mono">'+fmtDateShort(r.comp)+'</td><td class="days d-red">'+r.over+' วัน</td>'
+        : '<td class="mono">'+fmtDateShort(r.rel)+'</td><td class="days '+(r.age>=30?'d-red':'d-yel')+'">'+r.age+' วัน</td>');
+    h += '</tr>';
+  });
+  return h + '</tbody></table>';
+}
+
+function buildInsightHTML(){
+  const a = analyzeProcurement();
+  const th = n => n.toLocaleString('th-TH');
+  let h = '';
+
+  // ---------- สรุปภาพรวม ----------
+  h += '<div class="ins-chips">';
+  h += '<div class="ins-chip"><div class="c-label">ทั้งหมด</div><div class="c-val">'+th(a.lines.length)+'</div><div class="c-note">บรรทัด / '+th(a.prAll.size)+' ใบ PR</div></div>';
+  h += '<div class="ins-chip'+(a.backlog.length? '':'')+'"><div class="c-label">ยังไม่ออก PO (backlog)</div><div class="c-val">'+th(a.backlog.length)+'</div><div class="c-note">บรรทัด / '+th(a.backlogPR.size)+' ใบ PR</div></div>';
+  h += '<div class="ins-chip'+(a.red.length?' crit':'')+'"><div class="c-label">ค้าง ≥ 30 วัน (ต้อง escalate)</div><div class="c-val">'+th(a.red.length)+'</div><div class="c-note">บรรทัด</div></div>';
+  h += '<div class="ins-chip'+(a.poOverdue.length?' crit':'')+'"><div class="c-label">PO เลยเส้นตาย SLA</div><div class="c-val">'+th(a.poOverdue.length)+'</div><div class="c-note">บรรทัด</div></div>';
+  h += '<div class="ins-chip'+((a.yellow.length+a.poWarn.length)?' warn2':'')+'"><div class="c-label">เข้าเขตเตือน (15–29 วัน)</div><div class="c-val">'+th(a.yellow.length+a.poWarn.length)+'</div><div class="c-note">PR '+th(a.yellow.length)+' + PO '+th(a.poWarn.length)+'</div></div>';
+  h += '</div>';
+
+  // ---------- 1) PR ค้างเกิน 30 วัน ----------
+  h += '<div class="ins-sec"><h3>🔴 PR ค้างเกิน 30 วัน — ต้อง escalate ทันที <span class="cnt c-red">'+th(a.red.length)+' บรรทัด</span></h3>';
+  h += '<div class="sec-why">เลยเส้น Delivery date Complete (Release Date + 30 วัน ซึ่งเป็น SLA ภายในของฝ่ายจัดซื้อ) — PR ที่ค้างนานระดับนี้เสี่ยงให้ผู้ขอไปซื้อเองนอกระบบ (maverick spend) และทำให้อำนาจอนุมัติเสียความหมาย</div>';
+  if(a.red.length){
+    h += insightRowTable(a.red.slice(0,10), 'age');
+    if(a.red.length>10) h += '<div class="sec-why" style="margin-top:6px;">แสดง 10 อันดับที่ค้างนานที่สุด จากทั้งหมด '+th(a.red.length)+' บรรทัด — ดูรายการเต็มได้จากตัวกรองสถานะ "ยังไม่ออก PO" ในหน้าหลัก</div>';
+  } else {
+    h += '<div class="ins-ok">✅ ไม่มีรายการค้างเกิน 30 วัน</div>';
+  }
+  h += '</div>';
+
+  // ---------- 2) PO เลยเส้นตาย ----------
+  h += '<div class="ins-sec"><h3>🟠 PO ที่เลยเส้นตาย SLA แล้วยังไม่ปิดรายการ — ต้องเร่ง expedite <span class="cnt c-red">'+th(a.poOverdue.length)+' บรรทัด</span></h3>';
+  h += '<div class="sec-why">ออก PO แล้วแต่เลย Delivery date Complete — ต้องติดต่อ supplier เพื่อยืนยัน ETA จริง จำแนกผลกระทบ (หยุดผลิต / เลื่อนได้ / ไม่กระทบ) แล้วแก้ตามระดับผลกระทบ หมายเหตุ: วันที่ในไฟล์เป็น SLA ภายใน ไม่ใช่วันส่งที่ supplier ยืนยัน</div>';
+  if(a.poOverdue.length){
+    h += insightRowTable(a.poOverdue.slice(0,7), 'over');
+    if(a.poOverdue.length>7) h += '<div class="sec-why" style="margin-top:6px;">แสดง 7 อันดับที่เลยมานานที่สุด จากทั้งหมด '+th(a.poOverdue.length)+' บรรทัด</div>';
+  } else {
+    h += '<div class="ins-ok">✅ ไม่มี PO ที่เลยเส้นตาย SLA</div>';
+  }
+  h += '</div>';
+
+  // ---------- 3) เขตเตือน ----------
+  h += '<div class="ins-sec"><h3>🟡 เข้าเขตเตือน — จัดคิวก่อนจะกลายเป็นรายการเกินกำหนด <span class="cnt c-yel">'+th(a.yellow.length+a.poWarn.length)+' บรรทัด</span></h3>';
+  h += '<div class="sec-why">PR ค้าง 15–29 วัน จำนวน '+th(a.yellow.length)+' บรรทัด และ PO ที่เข้าเขต Delivery date Warning อีก '+th(a.poWarn.length)+' บรรทัด — กลุ่มนี้คือรายการเกินกำหนดของสัปดาห์หน้า ถ้าไม่จัดคิวตอนนี้</div>';
+  if(a.yellow.length) h += insightRowTable(a.yellow.slice(0,5), 'age');
+  h += '</div>';
+
+  // ---------- 4) ความเสี่ยงเชิงโครงสร้าง ----------
+  const structRisks = [];
+  if(a.partialPRs.length){
+    structRisks.push('<li><b>Partial PO ' + th(a.partialPRs.length) + ' ใบ PR</b> — ออก PO ไปแล้วบางบรรทัด เหลือค้างอีก ' + th(a.partialLines) + ' บรรทัด ซึ่งจะมองไม่เห็นถ้าติดตามที่ระดับใบ PR ต้องไล่ปิดที่ระดับบรรทัด</li>');
+  }
+  if(a.topBuyer && a.topBuyerShare >= 40){
+    structRisks.push('<li><b>Backlog กระจุกตัวที่ '+esc(a.topBuyer.display)+'</b> — ถือ '+th(a.topBuyer.total)+' จาก '+th(a.backlog.length)+' บรรทัด ('+a.topBuyerShare+'% โดยเป็นรายการเกิน 30 วัน '+th(a.topBuyer.red)+' บรรทัด) — ควรตรวจว่าเป็นภาระงานไม่สมดุล หรือเป็นประเภทของที่จัดหายาก แล้วพิจารณาเกลี่ยงาน</li>');
+  } else if(a.topBuyer && a.backlog.length){
+    structRisks.push('<li>ผู้จัดซื้อที่ถือ backlog มากสุดคือ <b>'+esc(a.topBuyer.display)+'</b> ('+th(a.topBuyer.total)+' บรรทัด, '+a.topBuyerShare+'%) — ยังไม่ถึงระดับกระจุกตัวผิดปกติ</li>');
+  }
+  if(a.jobLines.length){
+    structRisks.push('<li><b>งานบริการ (UOM = JOB) ที่ยังไม่ออก PO '+th(a.jobLines.length)+' บรรทัด</b> — งานบริการมักไม่มีสเปกที่วัดได้ ต้องมี scope of work ระบุขอบเขต ระยะเวลา และเกณฑ์รับงานให้ชัดก่อนขอราคา ไม่เช่นนั้นการเทียบราคาไม่มีความหมาย</li>');
+  }
+  h += '<div class="ins-sec"><h3>⚠ ความเสี่ยงเชิงโครงสร้างที่ควรกังวล</h3>';
+  h += structRisks.length ? '<ul class="ins-list">'+structRisks.join('')+'</ul>' : '<div class="ins-ok">✅ ไม่พบความเสี่ยงเชิงโครงสร้างจากข้อมูลชุดนี้</div>';
+  h += '</div>';
+
+  // ---------- 5) คุณภาพข้อมูล ----------
+  const dq = [];
+  if(a.backlogNoRel.length) dq.push('<li>PR ค้างที่ไม่มี Release Date <b>'+th(a.backlogNoRel.length)+' บรรทัด</b> — คำนวณ ageing ไม่ได้ จึงไม่รวมในตัวเลขข้างบน ควรกลับไปเติมวันที่ในไฟล์</li>');
+  if(a.poMissingDates.length) dq.push('<li>บรรทัดที่ออก PO แล้วแต่ไม่มีวัน Warning/Complete <b>'+th(a.poMissingDates.length)+' บรรทัด</b> — ติดตามเส้นตายไม่ได้ ควรเติมสูตร +15/+30 ให้ครบ</li>');
+  if(a.caseDupNames.length) dq.push('<li>ชื่อผู้ขอซื้อสะกดต่างกันเฉพาะตัวพิมพ์ <b>'+th(a.caseDupNames.length)+' ชุด</b> (เช่น '+esc(a.caseDupNames.slice(0,3).join(', '))+') — ระบบจะนับเป็นคนละคนถ้าไม่ normalize</li>');
+  dq.push('<li>ไฟล์นี้ไม่มีคอลัมน์วันที่ออก PO และวันรับของจริง (GR date) — จึงยังคำนวณ <b>PR-to-PO cycle time</b> และ <b>on-time delivery rate</b> ไม่ได้ แนะนำให้เพิ่ม 2 คอลัมน์นี้ (อย่าใช้ Changed On แทน เพราะเปลี่ยนทุกครั้งที่แก้แถว)</li>');
+  h += '<div class="ins-sec"><h3>🧹 ข้อจำกัดและคุณภาพข้อมูล</h3><ul class="ins-list">'+dq.join('')+'</ul></div>';
+
+  // ---------- 6) ข้อเสนอแนะ ----------
+  const recs = [];
+  if(a.red.length) recs.push('<li><b>สัปดาห์นี้:</b> เปิด Backlog Review รายการเกิน 30 วันทั้ง '+th(a.red.length)+' บรรทัด — ระบุสาเหตุที่ค้างเป็นรายรายการ มอบหมายผู้รับผิดชอบ และกำหนดวันปิดให้ชัด (เรียงลำดับโดยดู ageing ร่วมกับความสำคัญของของ เช่น อะไหล่ที่กระทบสายการผลิตต้องมาก่อนของใช้สำนักงาน)</li>');
+  if(a.poOverdue.length) recs.push('<li><b>วันนี้–พรุ่งนี้:</b> โทรตาม supplier ของ PO ที่เลยเส้นตาย '+th(a.poOverdue.length)+' บรรทัด ขอ ETA จริงเป็นลายลักษณ์อักษร แล้วบันทึกไว้เป็น audit trail</li>');
+  if(a.yellow.length) recs.push('<li><b>กันไฟ:</b> จัดคิวเคลียร์กลุ่ม 15–29 วัน ('+th(a.yellow.length)+' บรรทัด) ก่อนไหลไปเป็นรายการเกินกำหนดในรอบหน้า</li>');
+  if(a.partialPRs.length) recs.push('<li>ไล่ปิดบรรทัดค้างใน PR ที่ออก PO บางส่วนแล้ว ('+th(a.partialPRs.length)+' ใบ) — อย่าปล่อยให้เป็น backlog ที่มองไม่เห็น</li>');
+  if(a.jobLines.length) recs.push('<li>ขอ scope of work จากผู้ขอซื้อสำหรับงานบริการ (JOB) ทั้ง '+th(a.jobLines.length)+' บรรทัดก่อนส่ง RFQ</li>');
+  recs.push('<li>เพิ่มคอลัมน์ <b>PO Date</b> และ <b>GR Date</b> ในไฟล์ติดตาม เพื่อให้วัด cycle time และ on-time delivery ได้จริงในรอบถัดไป</li>');
+  h += '<div class="ins-sec"><h3>✅ ข้อเสนอแนะ (เรียงตามผลกระทบ)</h3><ul class="ins-list">'+recs.join('')+'</ul></div>';
+
+  // ---------- หมายเหตุวิธีอ่านตัวเลข ----------
+  h += '<div class="ins-note"><b>วิธีอ่านตัวเลขในรายงานนี้:</b> ตัวเลขนับเป็นระดับ "บรรทัด" (line item) เว้นแต่ระบุว่าเป็น "ใบ PR" · ageing นับจาก Release Date ถึงวันนี้ · เส้น Warning/Complete คือ SLA ภายในของฝ่ายจัดซื้อ (Release + 15/30 วัน) <b>ไม่ใช่วันส่งที่ supplier ยืนยัน</b> จึงใช้เร่งรัดภายในได้ แต่ห้ามใช้คำนวณ on-time delivery ของ supplier · วิเคราะห์จากข้อมูลทั้งชุดที่โหลด ไม่ขึ้นกับตัวกรองที่เลือกอยู่</div>';
+
+  return h;
+}
+
+// ---------------- insight modal wiring ----------------
+const insightBtn = document.getElementById('insightBtn');
+const insightOverlay = document.getElementById('insightOverlay');
+
+insightBtn.addEventListener('click', ()=>{
+  if(!RAW.length) return;
+  document.getElementById('insightBody').innerHTML = buildInsightHTML();
+  document.getElementById('insightSub').textContent =
+    'วิเคราะห์ตามหลัก procurement management · ข้อมูล ณ ' + fmtDateThaiLong(TODAY || todayISO()) +
+    ' · ' + RAW.length.toLocaleString('th-TH') + ' บรรทัด จาก ' + new Set(RAW.map(r=>r.pr)).size.toLocaleString('th-TH') + ' ใบ PR';
+  insightOverlay.classList.add('open');
+  document.querySelector('.insight-body').scrollTop = 0;
+});
+document.getElementById('insightCloseBtn').addEventListener('click', ()=>insightOverlay.classList.remove('open'));
+insightOverlay.addEventListener('click', (e)=>{ if(e.target === insightOverlay) insightOverlay.classList.remove('open'); });
+document.addEventListener('keydown', (e)=>{ if(e.key === 'Escape') insightOverlay.classList.remove('open'); });
+
+// ---------------- export ----------------
+function exportFileStamp(){
+  const d = new Date();
+  const p = n => String(n).padStart(2,'0');
+  return `${d.getFullYear()}${p(d.getMonth()+1)}${p(d.getDate())}_${p(d.getHours())}${p(d.getMinutes())}`;
+}
+function triggerDownload(blob, filename){
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url), 2000);
+}
+
+const exportHtmlBtn = document.getElementById('exportHtmlBtn');
+const exportPdfBtn = document.getElementById('exportPdfBtn');
+
+exportHtmlBtn.addEventListener('click', ()=>{
+  // Clone the whole page (keeps all scripts, filters, search, sort intact),
+  // strip the upload panel entirely (the exported copy must not offer a way
+  // to upload a new file — it ships with data already baked in), and append
+  // a data-injection script that reloads the current RAW data straight into
+  // loadIntoDashboard() — so the exported file stays a fully working,
+  // interactive copy of the dashboard, not a frozen snapshot.
+  const clone = document.documentElement.cloneNode(true);
+
+  const uploadPanel = clone.querySelector('.upload-panel');
+  if(uploadPanel) uploadPanel.remove();
+  const banner = clone.querySelector('#libBanner');
+  if(banner) banner.remove();
+  const clonedOverlay = clone.querySelector('#insightOverlay');
+  if(clonedOverlay) clonedOverlay.classList.remove('open');
+
+  const dataJson = JSON.stringify(RAW).replace(/<\/script/gi, '<\\/script');
+  const dataScript = document.createElement('script');
+  dataScript.textContent = `
+    RAW = ${dataJson};
+    TODAY = ${JSON.stringify(TODAY)};
+    loadIntoDashboard('Exported Data', RAW.length);
+  `;
+  clone.querySelector('body').appendChild(dataScript);
+
+  const html = '<!DOCTYPE html>\n' + clone.outerHTML;
+  const blob = new Blob([html], { type:'text/html;charset=utf-8' });
+  triggerDownload(blob, `Procurement_Dashboard_${exportFileStamp()}.html`);
+});
+
+// PDF export แบบหลายหน้า: แยกแดชบอร์ดเป็นภาพทีละส่วนที่ scale สูง
+// เพื่อให้แต่ละภาพใหญ่และคมชัด แล้ววางแต่ละภาพเป็นคนละหน้าใน PDF ไฟล์เดียว
+function pdfPageHeader(title, pageNo, pageCount){
+  const h = document.createElement('div');
+  h.style.cssText = 'font-family:Kanit,sans-serif;font-size:18px;font-weight:600;color:#0a1120;'
+    + 'padding:2px 2px 14px;display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap;';
+  h.innerHTML = '<span>ติดตาม PR → PO · '+esc(title)+'</span>'
+    + '<span style="font-family:Sarabun,sans-serif;font-size:12.5px;font-weight:400;color:#54607a;">'
+    + 'หน้า '+pageNo+'/'+pageCount+' · ข้อมูล ณ '+esc(fmtDateThaiLong(TODAY || todayISO()))+'</span>';
+  return h;
+}
+
+exportPdfBtn.addEventListener('click', async ()=>{
+  if(typeof html2canvas === 'undefined'){
+    alert('ไม่สามารถโหลดไลบรารี html2canvas จาก CDN ได้ กรุณาตรวจสอบการเชื่อมต่ออินเทอร์เน็ตแล้วลองใหม่');
+    return;
+  }
+  if(typeof window.jspdf === 'undefined'){
+    alert('ไม่สามารถโหลดไลบรารี jsPDF จาก CDN ได้ กรุณาตรวจสอบการเชื่อมต่ออินเทอร์เน็ตแล้วลองใหม่');
+    return;
+  }
+  const { jsPDF } = window.jspdf;
+  const stamp = exportFileStamp();
+  const pages = [
+    { title:'ภาพรวม KPI และสถานะ',
+      els:[document.getElementById('kpiGrid'), document.querySelector('section.g-3')] },
+    { title:'ผู้ขอซื้อ · ภาระงานผู้จัดซื้อ · รายการเร่งด่วน',
+      els:[document.querySelector('section.g-2b')] },
+    { title:'ตารางรายการ (ตามหน้าที่แสดงอยู่)',
+      els:[document.querySelector('.tablewrap'), document.querySelector('#main footer')] },
+  ].map(p=>({ ...p, els: p.els.filter(Boolean) })).filter(p=>p.els.length);
+
+  exportPdfBtn.disabled = true;
+  const original = exportPdfBtn.innerHTML;
+  try{
+    // บังคับให้ทุกกราฟวาดใหม่แบบไม่มีแอนิเมชัน (update('none')) ก่อน capture เสมอ
+    // เพราะ Chart.js วาดผ่าน requestAnimationFrame — ถ้าเพิ่งเปลี่ยนตัวกรองหรือ
+    // เพิ่งโหลดข้อมูลแล้วรีบกดส่งออกทันที กราฟอาจยังวาดไม่เสร็จตอนที่ html2canvas
+    // อ่านค่า pixel ของ canvas ทำให้ได้ภาพว่างเปล่า การ update('none') วาดจบทันที
+    // แบบ synchronous จึงตัดปัญหานี้ได้ตรงจุดกว่าการหน่วงเวลาเฉย ๆ
+    [chartDonut, chartGroup, chartTrend, chartReq, chartBuyer].forEach(c=>{
+      if(c) c.update('none');
+    });
+    await new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)));
+
+    let pdf = null;
+    // px → pt โดยถือว่า capture มาที่ 96px/inch ก่อนคูณ scale (html2canvas คิด
+    // ขนาด layout เป็น CSS px เสมอไม่ว่า scale เท่าไหร่) จึงหาร scale ออกก่อนแปลงเป็น pt
+    const PX_TO_PT = 72 / 96;
+
+    for(let i=0; i<pages.length; i++){
+      exportPdfBtn.textContent = '⏳ กำลังสร้างหน้า ('+(i+1)+'/'+pages.length+')...';
+      const p = pages[i];
+
+      // ย้าย element เข้า wrapper ชั่วคราวเพื่อใส่หัวกระดาษ — จงใจไม่ใส่
+      // padding แนวนอน เพื่อให้ความกว้างของกราฟไม่เปลี่ยน (กัน Chart.js
+      // trigger resize/redraw กลางคันระหว่าง capture)
+      const first = p.els[0];
+      const wrap = document.createElement('div');
+      wrap.style.cssText = 'padding:14px 0 8px;background:#f7f4ec;';
+      first.parentNode.insertBefore(wrap, first);
+      const anchors = p.els.map(el=>{
+        const a = document.createComment('pdf-slot');
+        el.parentNode.insertBefore(a, el);
+        return a;
+      });
+      wrap.appendChild(pdfPageHeader(p.title, i+1, pages.length));
+      p.els.forEach(el=>wrap.appendChild(el));
+
+      let canvas;
+      try{
+        canvas = await html2canvas(wrap, { backgroundColor:'#f7f4ec', scale:3, useCORS:true });
+      } finally {
+        // คืน element กลับตำแหน่งเดิมเสมอ แม้ capture จะพัง
+        p.els.forEach((el, j)=>{ anchors[j].parentNode.insertBefore(el, anchors[j]); });
+        anchors.forEach(a=>a.remove());
+        wrap.remove();
+      }
+
+      const wPt = (canvas.width / 3) * PX_TO_PT;
+      const hPt = (canvas.height / 3) * PX_TO_PT;
+      const orientation = wPt > hPt ? 'l' : 'p';
+      const imgData = canvas.toDataURL('image/jpeg', 0.92);
+
+      if(!pdf){
+        pdf = new jsPDF({ unit:'pt', format:[wPt, hPt], orientation });
+      } else {
+        pdf.addPage([wPt, hPt], orientation);
+      }
+      pdf.addImage(imgData, 'JPEG', 0, 0, wPt, hPt);
+    }
+
+    exportPdfBtn.textContent = '⏳ กำลังบันทึกไฟล์...';
+    pdf.save(`Procurement_Dashboard_${stamp}.pdf`);
+  } catch(err){
+    console.error(err);
+    alert('เกิดข้อผิดพลาดระหว่างสร้าง PDF: ' + err.message);
+  } finally {
+    exportPdfBtn.disabled = false;
+    exportPdfBtn.innerHTML = original;
+  }
+});
+</script>
+</body>
+</html>

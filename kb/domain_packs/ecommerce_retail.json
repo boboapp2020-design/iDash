@@ -1,0 +1,216 @@
+{
+  "id": "ecommerce_retail",
+  "version": "1.0.0",
+  "parent": null,
+
+  "identity": {
+    "nameTH": "อีคอมเมิร์ซและค้าปลีก",
+    "nameEN": "E-commerce & Retail",
+    "nameLO": "ອີຄອມເມີສ ແລະ ຄ້າປີກ"
+  },
+
+  "signatures": {
+    "lexicon": {
+      "columns": {
+        "th": [
+          "คำสั่งซื้อ", "หมายเลขคำสั่งซื้อ", "ตะกร้า", "ชำระเงิน",
+          "ค่าจัดส่ง", "ค่าส่ง", "ที่อยู่จัดส่ง", "วิธีชำระ",
+          "สินค้า", "รหัสสินค้า", "ชื่อสินค้า", "หมวดสินค้า",
+          "ราคา", "ราคาขาย", "ส่วนลด", "คูปอง", "โปรโมชั่น",
+          "จำนวนสั่ง", "ยอดรวม", "ยอดสุทธิ",
+          "ลูกค้า", "สมาชิก", "ลูกค้าใหม่", "ลูกค้าเก่า",
+          "คืนสินค้า", "เปลี่ยนสินค้า", "คืนเงิน",
+          "แพลตฟอร์ม", "Shopee", "Lazada", "LINE", "เว็บไซต์",
+          "รีวิว", "ให้คะแนน", "ดาว", "ความพึงพอใจ",
+          "สถานะคำสั่งซื้อ", "รอชำระ", "กำลังจัดส่ง", "ส่งแล้ว",
+          "หน้าร้าน", "สาขา", "POS", "ใบเสร็จ"
+        ],
+        "en": [
+          "order", "order id", "order number", "order date",
+          "cart", "add to cart", "checkout", "basket",
+          "product", "product id", "product name", "product category",
+          "sku", "variant", "size", "color",
+          "price", "unit price", "sale price", "discount", "coupon",
+          "quantity", "subtotal", "total", "net amount",
+          "shipping fee", "shipping cost", "delivery fee",
+          "payment method", "credit card", "bank transfer", "cod",
+          "customer", "customer id", "member", "new customer", "returning",
+          "return", "refund", "exchange", "return rate",
+          "platform", "shopee", "lazada", "amazon", "website", "marketplace",
+          "review", "rating", "stars",
+          "order status", "pending", "shipped", "delivered", "cancelled",
+          "browse", "view", "wishlist", "favorite",
+          "store", "branch", "pos", "receipt",
+          "gmv", "gross merchandise value", "aov",
+          "repeat purchase", "purchase frequency", "customer lifetime value",
+          "conversion rate", "cart abandonment", "bounce rate"
+        ],
+        "lo": [
+          "ຄຳສັ່ງຊື້", "ສິນຄ້າ", "ລາຄາ", "ລູກຄ້າ",
+          "ຊຳລະ", "ຈັດສົ່ງ", "ຄ່າສົ່ງ", "ສ່ວນລົດ",
+          "ຮ້ານ", "ສາຂາ"
+        ]
+      },
+      "sheets": [
+        "orders", "คำสั่งซื้อ", "รายการขาย", "sales",
+        "products", "สินค้า", "customers", "ลูกค้า",
+        "returns", "คืนสินค้า", "inventory", "POS",
+        "shopee", "lazada", "marketplace"
+      ],
+      "weightPerHit": 1.5
+    },
+    "valueShapes": [
+      {
+        "columnLike": "cart.abandonment|อัตราทิ้งตะกร้า",
+        "type": "percentage",
+        "range": [30, 90],
+        "weight": 3.5,
+        "note": "Cart abandonment rate; definitive ecommerce metric"
+      },
+      {
+        "columnLike": "return.rate|อัตราคืนสินค้า|refund.rate",
+        "type": "percentage",
+        "range": [0, 30],
+        "weight": 3.0,
+        "note": "Product return/refund rate"
+      },
+      {
+        "columnLike": "aov|average.order.value|มูลค่าเฉลี่ยต่อคำสั่ง",
+        "type": "number",
+        "range": [50, 50000],
+        "weight": 2.5,
+        "note": "Average order value"
+      },
+      {
+        "columnLike": "gmv|gross.merchandise|ยอดขายรวม",
+        "type": "number",
+        "range": [1000, 1000000000],
+        "weight": 2.5,
+        "note": "Gross Merchandise Value"
+      },
+      {
+        "columnLike": "conversion.rate|cvr|อัตราคอนเวอร์ชั่น",
+        "type": "percentage",
+        "range": [0.5, 15],
+        "weight": 2.5,
+        "note": "Site/app conversion rate"
+      },
+      {
+        "columnLike": "shipping.fee|ค่าจัดส่ง|ค่าส่ง|delivery.fee",
+        "type": "number",
+        "range": [0, 500],
+        "weight": 2.0,
+        "note": "Per-order shipping fee"
+      }
+    ],
+    "unitPatterns": [
+      "บาท", "THB", "ชิ้น", "รายการ", "ออเดอร์",
+      "ดาว", "stars", "คะแนน", "คำสั่ง"
+    ],
+    "negative": [
+      { "lexicon": ["patient", "ผู้ป่วย", "diagnosis", "โรค"], "weight": -3.0 },
+      { "lexicon": ["ccs", "pol", "brix", "bagasse", "อ้อย"], "weight": -2.0 },
+      { "lexicon": ["oee", "defect rate", "cycle time", "mtbf"], "weight": -2.0 },
+      { "lexicon": ["salary", "เงินเดือน", "payroll", "turnover rate"], "weight": -2.0 },
+      { "lexicon": ["gl", "general ledger", "debit", "credit", "trial balance"], "weight": -2.0 },
+      { "lexicon": ["student", "enrollment", "gpa", "semester", "curriculum"], "weight": -3.0 },
+      { "lexicon": ["occupancy", "adr", "revpar", "check_in", "room_type"], "weight": -2.5 },
+      { "lexicon": ["shipment_id", "carrier", "freight", "tracking_events", "bill of lading"], "weight": -2.0 },
+      { "lexicon": ["impression", "ctr", "cpc", "roas", "campaign_id", "ad_group"], "weight": -1.5 },
+      { "lexicon": ["pipeline", "deal", "opportunity", "quota", "salesperson"], "weight": -2.0 },
+      { "lexicon": ["subscriber", "dau", "mau", "activation", "mrr", "arr", "churn_rate", "arpu", "expansion_mrr", "net_new_mrr"], "weight": -3.0 },
+      { "lexicon": ["protocol", "chain", "apy", "staking", "defi", "wallet", "token", "ticker", "open", "high", "low", "close", "market_cap"], "weight": -3.0 },
+      { "lexicon": ["goals", "assists", "tackles", "player", "league", "match", "games_played", "pass_accuracy"], "weight": -3.0 },
+      { "lexicon": ["property", "bedrooms", "rent", "tenant", "mortgage", "gross_yield", "net_yield"], "weight": -2.5 },
+      { "lexicon": ["menu", "recipe", "prep_time", "ingredient", "food_cost", "restaurant"], "weight": -2.5 },
+      { "lexicon": ["sprint", "story_points", "epic", "assignee", "task_id"], "weight": -2.0 },
+      { "lexicon": ["requisition", "procurement", "tender", "จัดซื้อ", "ผู้ขาย", "purchase requisition", "purchasing group"], "weight": -3.0 },
+      { "lexicon": ["asset_class", "unrealized_pnl", "dividend_yield", "portfolio"], "weight": -2.5 },
+      { "lexicon": ["doctors", "nurses", "patients_mtd", "infection_rate", "avg_wait_min"], "weight": -3.0 },
+      { "lexicon": ["feature", "adoption_rate", "active_30d", "total_users", "avg_usage_per_day", "support_tickets"], "weight": -2.5 }
+    ]
+  },
+
+  "business": {
+    "processes": [
+      {
+        "id": "purchase_flow",
+        "stages": ["เลือกสินค้า", "หยิบใส่ตะกร้า", "ชำระเงิน", "ยืนยันคำสั่งซื้อ", "จัดเตรียม", "จัดส่ง", "รับสินค้า"]
+      },
+      {
+        "id": "returns_management",
+        "stages": ["แจ้งคืน/เปลี่ยน", "อนุมัติ", "รับสินค้าคืน", "ตรวจสอบ", "คืนเงิน/เปลี่ยน"]
+      },
+      {
+        "id": "merchandising",
+        "stages": ["เลือกสินค้า", "กำหนดราคา", "จัดโปรโมชั่น", "จัดหน้าร้าน/เว็บ", "ติดตามยอด", "ปรับปรุง"]
+      }
+    ],
+    "goals": [
+      "grow GMV and revenue",
+      "increase conversion rate and reduce cart abandonment",
+      "increase average order value",
+      "reduce return/refund rate",
+      "grow customer base and repeat purchase rate",
+      "optimize product assortment and pricing",
+      "expand marketplace channel presence",
+      "improve customer satisfaction and review scores"
+    ],
+    "personas": [
+      {
+        "type": "executive",
+        "cares": ["GMV trend", "customer growth", "platform performance", "margin"],
+        "cadence": "weekly"
+      },
+      {
+        "type": "ecommerce_manager",
+        "cares": ["conversion funnel", "top products", "return rate", "promotion effectiveness"],
+        "cadence": "daily"
+      },
+      {
+        "type": "merchandiser",
+        "cares": ["product performance", "stock vs demand", "pricing", "category mix"],
+        "cadence": "daily"
+      }
+    ],
+    "decisionCatalog": [
+      "optimize-pricing",
+      "manage-assortment",
+      "explain-variance",
+      "reduce-returns",
+      "plan-promotion",
+      "plan-forecast",
+      "expand-channel",
+      "improve-conversion"
+    ],
+    "seasonality": "Mega-sale events (11.11, 12.12, 9.9, Black Friday). Holiday gifting seasons. Payday spikes (25th-1st monthly). Back-to-school, Songkran, year-end."
+  },
+
+  "kpiRefs": [
+    "kpi.ecom.gmv",
+    "kpi.ecom.order_count",
+    "kpi.ecom.aov",
+    "kpi.ecom.conversion_rate",
+    "kpi.ecom.cart_abandonment",
+    "kpi.ecom.return_rate",
+    "kpi.ecom.repeat_purchase_rate",
+    "kpi.ecom.customer_count",
+    "kpi.ecom.revenue_per_customer",
+    "kpi.ecom.avg_rating"
+  ],
+
+  "genomeRefs": [
+    "genome.ecom_sales_overview_v1",
+    "genome.ecom_product_performance_v1",
+    "genome.ecom_customer_analysis_v1"
+  ],
+
+  "vizOverrides": [
+    { "rule": "line chart for GMV/order count trend over time", "cites": "doc 06 §3" },
+    { "rule": "bar chart for revenue by product category or platform", "cites": "doc 06 §3" },
+    { "rule": "funnel for purchase funnel (view → cart → checkout → purchase)", "cites": "doc 06 §5" },
+    { "rule": "donut for revenue by platform/channel mix", "cites": "doc 06 §2" }
+  ],
+
+  "fixtures": []
+}

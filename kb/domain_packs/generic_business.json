@@ -1,0 +1,112 @@
+{
+  "id": "generic_business",
+  "version": "1.0.0",
+  "parent": null,
+
+  "identity": {
+    "nameTH": "ธุรกิจทั่วไป",
+    "nameEN": "Generic Business",
+    "nameLO": "ທຸລະກິດທົ່ວໄປ"
+  },
+
+  "signatures": {
+    "lexicon": {
+      "columns": {
+        "th": [
+          "วันที่", "เดือน", "ปี", "จำนวน", "ยอดรวม",
+          "มูลค่า", "หมวดหมู่", "ประเภท", "ชื่อ", "รหัส",
+          "สถานะ", "หมายเหตุ", "รายการ", "ลำดับ",
+          "กลุ่ม", "แผนก", "หน่วยงาน", "ผู้รับผิดชอบ",
+          "เป้าหมาย", "ผลงาน", "อัตรา", "สัดส่วน",
+          "เพิ่มขึ้น", "ลดลง", "เปรียบเทียบ", "แนวโน้ม"
+        ],
+        "en": [
+          "date", "month", "year", "amount", "total",
+          "value", "category", "type", "name", "code",
+          "status", "remarks", "item", "sequence",
+          "group", "department", "unit", "responsible",
+          "target", "actual", "rate", "ratio",
+          "increase", "decrease", "compare", "trend",
+          "id", "description", "title", "label",
+          "count", "score", "level", "result",
+          "average", "percent", "pct",
+          "city", "region", "country", "location",
+          "notes", "created", "updated",
+          "timestamp", "start_date", "end_date",
+          "price", "cost", "quantity",
+          "duration", "time", "hours", "days",
+          "min", "max", "change", "size"
+        ],
+        "lo": [
+          "ວັນທີ", "ເດືອນ", "ປີ", "ຈຳນວນ", "ຍອດລວມ",
+          "ມູນຄ່າ", "ໝວດໝູ່", "ປະເພດ", "ຊື່", "ລະຫັດ",
+          "ສະຖານະ", "ລາຍການ"
+        ]
+      },
+      "sheets": [],
+      "weightPerHit": 0.5
+    },
+    "valueShapes": [],
+    "unitPatterns": [
+      "บาท", "กีบ", "THB", "LAK", "USD",
+      "ชิ้น", "รายการ", "ครั้ง", "คน", "วัน", "%"
+    ],
+    "negative": []
+  },
+
+  "business": {
+    "processes": [
+      {
+        "id": "generic_workflow",
+        "stages": ["วางแผน", "ดำเนินการ", "ติดตาม", "ประเมินผล", "ปรับปรุง"]
+      }
+    ],
+    "goals": [
+      "monitor key measures over time",
+      "identify trends and outliers in the data",
+      "compare performance across categories or dimensions",
+      "understand concentration and distribution",
+      "provide clear data summary for decision-making"
+    ],
+    "personas": [
+      {
+        "type": "executive",
+        "cares": ["top-line trends", "key metric changes", "distribution across categories"],
+        "cadence": "weekly"
+      },
+      {
+        "type": "analyst",
+        "cares": ["patterns", "outliers", "correlations", "period-over-period changes"],
+        "cadence": "ad-hoc"
+      }
+    ],
+    "decisionCatalog": [
+      "monitor",
+      "explain-variance",
+      "plan-forecast"
+    ],
+    "seasonality": "No assumed seasonality. If the profiler detects a date/time column, the system will surface temporal patterns automatically."
+  },
+
+  "kpiRefs": [
+    "kpi.generic.top_measure_total",
+    "kpi.generic.top_measure_trend",
+    "kpi.generic.category_concentration",
+    "kpi.generic.period_over_period_change",
+    "kpi.generic.record_count",
+    "kpi.generic.distinct_category_count"
+  ],
+
+  "genomeRefs": [
+    "genome.generic_summary_v1"
+  ],
+
+  "vizOverrides": [
+    { "rule": "bar chart for top-N categories by primary measure (fallback)", "cites": "doc 06 §3" },
+    { "rule": "line chart when a date dimension and numeric measure are detected", "cites": "doc 06 §3" },
+    { "rule": "KPI card for the single most important aggregate", "cites": "doc 06 §3" },
+    { "rule": "table as safe fallback when no clear chart rule fires", "cites": "doc 06 §3" }
+  ],
+
+  "fixtures": []
+}

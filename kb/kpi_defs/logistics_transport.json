@@ -1,0 +1,199 @@
+[
+  {
+    "id": "kpi.log.otd_rate",
+    "version": "1.0.0",
+    "domain": "logistics_transport",
+    "name": { "th": "อัตราส่งตรงเวลา", "en": "On-Time Delivery Rate" },
+    "formula": "100 * count(on_time) / count(deliveries)",
+    "inputs": {
+      "on_time": { "role": "measure", "unit": "count", "synonyms": { "th": ["ส่งตรงเวลา", "ตรงเวลา"], "en": ["on time", "on_time", "otd"] } },
+      "deliveries": { "role": "measure", "unit": "count", "synonyms": { "th": ["จำนวนเที่ยว", "จำนวนจัดส่ง", "เที่ยว"], "en": ["deliveries", "shipments", "trips", "total deliveries"] } }
+    },
+    "aggNature": "intensive",
+    "direction": "higher-better",
+    "format": { "kind": "percentage", "decimals": 1 },
+    "target": { "policy": "fixed", "benchmark": { "good": 95, "warn": 90 } },
+    "grain": ["daily", "weekly", "monthly"],
+    "answers": ["What percentage of deliveries arrive on time?", "Is delivery performance improving?"],
+    "variance": true,
+    "forecastCandidate": true,
+    "caveats": ["Define 'on time' window consistently (e.g. ±1 hour, same day)"]
+  },
+  {
+    "id": "kpi.log.cost_per_delivery",
+    "version": "1.0.0",
+    "domain": "logistics_transport",
+    "name": { "th": "ต้นทุนต่อเที่ยว", "en": "Cost per Delivery" },
+    "formula": "sum(transport_cost) / count(deliveries)",
+    "inputs": {
+      "transport_cost": { "role": "measure", "unit": "currency", "synonyms": { "th": ["ค่าขนส่ง", "ค่าจัดส่ง", "ต้นทุนขนส่ง"], "en": ["shipping cost", "transport cost", "freight cost", "delivery cost"] } },
+      "deliveries": { "role": "measure", "unit": "count", "synonyms": { "th": ["จำนวนเที่ยว", "เที่ยว"], "en": ["deliveries", "shipments", "trips"] } }
+    },
+    "aggNature": "intensive",
+    "direction": "lower-better",
+    "format": { "kind": "currency", "decimals": 0 },
+    "target": { "policy": "period-median", "benchmark": { "good": null, "warn": null } },
+    "grain": ["daily", "weekly", "monthly"],
+    "answers": ["How much does each delivery cost on average?", "Are transport costs trending up or down?"],
+    "variance": true,
+    "forecastCandidate": true,
+    "caveats": ["Include fuel, toll, labor, and vehicle depreciation for true cost"]
+  },
+  {
+    "id": "kpi.log.cost_per_km",
+    "version": "1.0.0",
+    "domain": "logistics_transport",
+    "name": { "th": "ต้นทุนต่อกม.", "en": "Cost per Kilometer" },
+    "formula": "sum(transport_cost) / sum(distance)",
+    "inputs": {
+      "transport_cost": { "role": "measure", "unit": "currency", "synonyms": { "th": ["ค่าขนส่ง"], "en": ["transport cost", "shipping cost"] } },
+      "distance": { "role": "measure", "unit": "km", "synonyms": { "th": ["ระยะทาง", "กม."], "en": ["distance", "km", "mileage", "kilometers"] } }
+    },
+    "aggNature": "intensive",
+    "direction": "lower-better",
+    "format": { "kind": "currency", "decimals": 2 },
+    "target": { "policy": "period-median", "benchmark": { "good": null, "warn": null } },
+    "grain": ["weekly", "monthly"],
+    "answers": ["What is the unit cost per kilometer?"],
+    "variance": true,
+    "forecastCandidate": false,
+    "caveats": ["Varies significantly by vehicle type and load factor"]
+  },
+  {
+    "id": "kpi.log.fleet_utilization",
+    "version": "1.0.0",
+    "domain": "logistics_transport",
+    "name": { "th": "อัตราใช้งานรถ", "en": "Fleet Utilization" },
+    "formula": "100 * count(active_vehicles) / count(total_vehicles)",
+    "inputs": {
+      "active_vehicles": { "role": "measure", "unit": "count", "synonyms": { "th": ["รถที่ใช้งาน", "เที่ยวรถ"], "en": ["active vehicles", "utilized", "trips"] } },
+      "total_vehicles": { "role": "measure", "unit": "count", "synonyms": { "th": ["รถทั้งหมด", "จำนวนรถ"], "en": ["total vehicles", "fleet size", "vehicles"] } }
+    },
+    "aggNature": "intensive",
+    "direction": "higher-better",
+    "format": { "kind": "percentage", "decimals": 1 },
+    "target": { "policy": "fixed", "benchmark": { "good": 85, "warn": 70 } },
+    "grain": ["daily", "weekly", "monthly"],
+    "answers": ["What percentage of the fleet is actively used?"],
+    "variance": true,
+    "forecastCandidate": false,
+    "caveats": ["Exclude vehicles in scheduled maintenance"]
+  },
+  {
+    "id": "kpi.log.avg_transit_days",
+    "version": "1.0.0",
+    "domain": "logistics_transport",
+    "name": { "th": "ระยะเวลาจัดส่งเฉลี่ย", "en": "Average Transit Time (Days)" },
+    "formula": "avg(transit_days)",
+    "inputs": {
+      "transit_days": { "role": "measure", "unit": "days", "synonyms": { "th": ["ระยะเวลาจัดส่ง", "วันจัดส่ง", "เวลาขนส่ง"], "en": ["transit time", "delivery days", "transit days", "lead time", "avg delivery days"] } }
+    },
+    "aggNature": "intensive",
+    "direction": "lower-better",
+    "format": { "kind": "number", "decimals": 1 },
+    "target": { "policy": "period-median", "benchmark": { "good": null, "warn": null } },
+    "grain": ["weekly", "monthly"],
+    "answers": ["How many days does delivery take on average?"],
+    "variance": true,
+    "forecastCandidate": true,
+    "caveats": ["Segment by route/destination for meaningful comparison"]
+  },
+  {
+    "id": "kpi.log.damage_rate",
+    "version": "1.0.0",
+    "domain": "logistics_transport",
+    "name": { "th": "อัตราสินค้าเสียหาย", "en": "Damage Rate" },
+    "formula": "100 * count(damaged) / count(deliveries)",
+    "inputs": {
+      "damaged": { "role": "measure", "unit": "count", "synonyms": { "th": ["เสียหาย", "สินค้าเสียหาย", "ชำรุด"], "en": ["damaged", "damage", "claim", "loss"] } },
+      "deliveries": { "role": "measure", "unit": "count", "synonyms": { "th": ["จำนวนเที่ยว"], "en": ["deliveries", "shipments"] } }
+    },
+    "aggNature": "intensive",
+    "direction": "lower-better",
+    "format": { "kind": "percentage", "decimals": 2 },
+    "target": { "policy": "fixed", "benchmark": { "good": 0.5, "warn": 2 } },
+    "grain": ["weekly", "monthly"],
+    "answers": ["What percentage of shipments arrive damaged?"],
+    "variance": true,
+    "forecastCandidate": false,
+    "caveats": ["Include both full loss and partial damage"]
+  },
+  {
+    "id": "kpi.log.total_deliveries",
+    "version": "1.0.0",
+    "domain": "logistics_transport",
+    "name": { "th": "จำนวนเที่ยวจัดส่ง", "en": "Total Deliveries" },
+    "formula": "count(deliveries)",
+    "inputs": {
+      "deliveries": { "role": "measure", "unit": "count", "synonyms": { "th": ["เที่ยว", "จำนวนเที่ยว", "จำนวนจัดส่ง"], "en": ["deliveries", "shipments", "trips", "total deliveries"] } }
+    },
+    "aggNature": "extensive",
+    "direction": "higher-better",
+    "format": { "kind": "number", "decimals": 0 },
+    "target": { "policy": "column", "benchmark": { "good": null, "warn": null } },
+    "grain": ["daily", "weekly", "monthly"],
+    "answers": ["How many deliveries were completed?"],
+    "variance": true,
+    "forecastCandidate": true,
+    "caveats": []
+  },
+  {
+    "id": "kpi.log.empty_trip_pct",
+    "version": "1.0.0",
+    "domain": "logistics_transport",
+    "name": { "th": "อัตราเที่ยวว่าง", "en": "Empty Trip Percentage" },
+    "formula": "100 * count(empty_trips) / count(total_trips)",
+    "inputs": {
+      "empty_trips": { "role": "measure", "unit": "count", "synonyms": { "th": ["เที่ยวว่าง", "เที่ยวเปล่า"], "en": ["empty trip", "empty run", "deadhead"] } },
+      "total_trips": { "role": "measure", "unit": "count", "synonyms": { "th": ["จำนวนเที่ยว", "เที่ยวทั้งหมด"], "en": ["total trips", "trips", "runs"] } }
+    },
+    "aggNature": "intensive",
+    "direction": "lower-better",
+    "format": { "kind": "percentage", "decimals": 1 },
+    "target": { "policy": "fixed", "benchmark": { "good": 10, "warn": 25 } },
+    "grain": ["weekly", "monthly"],
+    "answers": ["What percentage of trips run empty (no cargo)?"],
+    "variance": true,
+    "forecastCandidate": false,
+    "caveats": ["High empty-trip % indicates poor backhaul planning"]
+  },
+  {
+    "id": "kpi.log.fuel_cost_per_km",
+    "version": "1.0.0",
+    "domain": "logistics_transport",
+    "name": { "th": "ค่าน้ำมันต่อกม.", "en": "Fuel Cost per Km" },
+    "formula": "sum(fuel_cost) / sum(distance)",
+    "inputs": {
+      "fuel_cost": { "role": "measure", "unit": "currency", "synonyms": { "th": ["ค่าน้ำมัน", "ค่าเชื้อเพลิง"], "en": ["fuel cost", "fuel expense", "diesel cost"] } },
+      "distance": { "role": "measure", "unit": "km", "synonyms": { "th": ["ระยะทาง"], "en": ["distance", "km", "mileage"] } }
+    },
+    "aggNature": "intensive",
+    "direction": "lower-better",
+    "format": { "kind": "currency", "decimals": 2 },
+    "target": { "policy": "period-median", "benchmark": { "good": null, "warn": null } },
+    "grain": ["weekly", "monthly"],
+    "answers": ["How much does fuel cost per kilometer?"],
+    "variance": true,
+    "forecastCandidate": false,
+    "caveats": ["Affected by fuel price fluctuations and vehicle efficiency"]
+  },
+  {
+    "id": "kpi.log.volume_delivered",
+    "version": "1.0.0",
+    "domain": "logistics_transport",
+    "name": { "th": "ปริมาณขนส่ง", "en": "Volume Delivered" },
+    "formula": "sum(volume)",
+    "inputs": {
+      "volume": { "role": "measure", "unit": "tons", "synonyms": { "th": ["ปริมาณ", "น้ำหนัก", "ตัน", "น้ำหนักบรรทุก"], "en": ["volume", "weight", "tons", "cargo weight", "load"] } }
+    },
+    "aggNature": "extensive",
+    "direction": "higher-better",
+    "format": { "kind": "number", "decimals": 0 },
+    "target": { "policy": "column", "benchmark": { "good": null, "warn": null } },
+    "grain": ["daily", "weekly", "monthly"],
+    "answers": ["What is the total volume delivered?"],
+    "variance": true,
+    "forecastCandidate": true,
+    "caveats": ["Unit depends on industry: tons, CBM, pallets, etc."]
+  }
+]

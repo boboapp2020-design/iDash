@@ -1,0 +1,207 @@
+[
+  {
+    "id": "chromo.executive_summary",
+    "version": "1.0.0",
+    "intent": "5-second answer to the top-ranked decisions",
+    "audience": ["executive"],
+    "slots": [
+      { "slot": "headline_kpis", "gene": "gene.kpi_card_trend", "count": [3, 5], "fill": "Top KPIs by decision rank" },
+      { "slot": "hero", "gene_any": ["gene.trend_target_band", "gene.contribution_waterfall"], "count": 1, "fill": "Primary decision visual" },
+      { "slot": "alerts", "gene": "gene.alert_strip", "count": [0, 1], "fill_when": "Any KPI breaches target or band" },
+      { "slot": "narrative", "gene": "gene.insight_strip", "count": 1, "fill": "Top insight headline with fact citation" }
+    ],
+    "layout_hint": "kpi-row-then-hero",
+    "attentionBudget": 8
+  },
+  {
+    "id": "chromo.trend_context",
+    "version": "1.0.0",
+    "intent": "Show how key measures move over time to establish temporal context",
+    "audience": ["executive", "strategic", "operational"],
+    "slots": [
+      { "slot": "primary_trend", "gene_any": ["gene.trend_target_band", "gene.trend_line", "gene.trend_area"], "count": 1, "fill": "Primary KPI trend for the top decision" },
+      { "slot": "secondary_trends", "gene_any": ["gene.trend_line", "gene.trend_multi_line"], "count": [0, 2], "fill": "Supporting KPI trends" },
+      { "slot": "period_compare", "gene": "gene.period_comparison_bar", "count": [0, 1], "fill_when": "Prior period data available" }
+    ],
+    "layout_hint": "hero-then-side-by-side",
+    "attentionBudget": 8
+  },
+  {
+    "id": "chromo.diagnostic_breakdown",
+    "version": "1.0.0",
+    "intent": "Explain why a KPI moved — decompose causes, rank contributors",
+    "audience": ["operational", "analytical"],
+    "slots": [
+      { "slot": "pareto", "gene_any": ["gene.pareto_bar", "gene.ranking_hbar"], "count": 1, "fill": "Top contributors to the variance or issue" },
+      { "slot": "waterfall", "gene": "gene.contribution_waterfall", "count": [0, 1], "fill_when": "Change is decomposable into additive parts" },
+      { "slot": "variance", "gene": "gene.variance_bar", "count": [0, 1], "fill_when": "Target or plan data available" },
+      { "slot": "detail", "gene": "gene.ranking_hbar_topn", "count": [0, 1], "fill_when": "Dimension cardinality > 8" }
+    ],
+    "layout_hint": "two-col-diagnostic",
+    "attentionBudget": 10
+  },
+  {
+    "id": "chromo.composition",
+    "version": "1.0.0",
+    "intent": "Show how a whole breaks down into its parts",
+    "audience": ["executive", "operational", "analytical"],
+    "slots": [
+      { "slot": "primary_comp", "gene_any": ["gene.composition_donut", "gene.composition_stacked_bar", "gene.composition_treemap"], "count": 1, "fill": "Primary composition view for the top extensive KPI" },
+      { "slot": "time_comp", "gene": "gene.composition_stacked_area", "count": [0, 1], "fill_when": "Time dimension available and composition changes over time are relevant" },
+      { "slot": "narrative", "gene": "gene.insight_strip", "count": [0, 1], "fill": "Composition insight" }
+    ],
+    "layout_hint": "side-by-side",
+    "attentionBudget": 6
+  },
+  {
+    "id": "chromo.process_monitor",
+    "version": "1.0.0",
+    "intent": "Real-time or near-real-time operational monitoring with control limits and alerts",
+    "audience": ["operational"],
+    "slots": [
+      { "slot": "kpis", "gene": "gene.kpi_card_trend", "count": [3, 5], "fill": "Operational KPIs with trend sparks" },
+      { "slot": "control", "gene_any": ["gene.control_chart", "gene.trend_target_band"], "count": [1, 2], "fill": "Process stability charts with spec limits" },
+      { "slot": "alerts", "gene": "gene.alert_strip", "count": [0, 1], "fill_when": "Any control limit breach detected" },
+      { "slot": "heatmap", "gene": "gene.heatmap_time_category", "count": [0, 1], "fill_when": "Multiple shifts or lines to compare" }
+    ],
+    "layout_hint": "kpi-row-then-two-col",
+    "attentionBudget": 12
+  },
+  {
+    "id": "chromo.inventory_position",
+    "version": "1.0.0",
+    "intent": "Show current stock levels, aging, and movement patterns",
+    "audience": ["operational", "executive"],
+    "slots": [
+      { "slot": "kpis", "gene": "gene.kpi_card_trend", "count": [3, 4], "fill": "Stock value, turnover, days-on-hand, stockout count" },
+      { "slot": "aging", "gene": "gene.aging_stacked_bar", "count": 1, "fill": "Inventory aging distribution by bucket" },
+      { "slot": "movement", "gene_any": ["gene.trend_line", "gene.bar_vertical"], "count": [0, 1], "fill": "Inbound vs outbound flow" },
+      { "slot": "ranking", "gene": "gene.ranking_hbar_topn", "count": [0, 1], "fill_when": "SKU count > 10" }
+    ],
+    "layout_hint": "kpi-row-then-hero-detail",
+    "attentionBudget": 10
+  },
+  {
+    "id": "chromo.financial_statement",
+    "version": "1.0.0",
+    "intent": "Present financial summary with variance decomposition and P&L structure",
+    "audience": ["executive", "strategic"],
+    "slots": [
+      { "slot": "headline_kpis", "gene": "gene.kpi_card_trend", "count": [3, 5], "fill": "Revenue, COGS, gross margin, net income, EBITDA" },
+      { "slot": "waterfall", "gene": "gene.contribution_waterfall", "count": 1, "fill": "P&L bridge or variance walk" },
+      { "slot": "table", "gene": "gene.detail_table_subtotals", "count": [0, 1], "fill": "Financial statement table with subtotals" },
+      { "slot": "trend", "gene": "gene.trend_line", "count": [0, 1], "fill_when": "Multi-period data available" }
+    ],
+    "layout_hint": "kpi-row-then-waterfall-table",
+    "attentionBudget": 10
+  },
+  {
+    "id": "chromo.comparison",
+    "version": "1.0.0",
+    "intent": "Compare performance across entities, periods, or groups side by side",
+    "audience": ["executive", "analytical", "strategic"],
+    "slots": [
+      { "slot": "bars", "gene_any": ["gene.bar_vertical", "gene.ranking_hbar"], "count": 1, "fill": "Primary comparison chart" },
+      { "slot": "period", "gene": "gene.period_comparison_bar", "count": [0, 1], "fill_when": "Multiple time periods to compare" },
+      { "slot": "deviation", "gene": "gene.deviation_bar", "count": [0, 1], "fill_when": "Reference value or benchmark available" },
+      { "slot": "table", "gene": "gene.detail_table", "count": [0, 1], "fill": "Comparison data table" }
+    ],
+    "layout_hint": "two-col",
+    "attentionBudget": 8
+  },
+  {
+    "id": "chromo.forecast_outlook",
+    "version": "1.0.0",
+    "intent": "Forward-looking section: projections, scenarios, progress toward targets",
+    "audience": ["strategic", "executive"],
+    "slots": [
+      { "slot": "progress", "gene": "gene.progress_bar_set", "count": [0, 1], "fill": "Progress toward annual/quarterly targets" },
+      { "slot": "trend_forecast", "gene_any": ["gene.trend_target_band", "gene.trend_line"], "count": 1, "fill": "Trend with projection overlay" },
+      { "slot": "gauges", "gene": "gene.gauge_target", "count": [0, 3], "fill_when": "KPI has a real target; max 3 per page" },
+      { "slot": "narrative", "gene": "gene.insight_strip", "count": [0, 1], "fill": "Forecast narrative" }
+    ],
+    "layout_hint": "kpi-row-then-hero",
+    "attentionBudget": 8
+  },
+  {
+    "id": "chromo.quality_control",
+    "version": "1.0.0",
+    "intent": "Monitor product or process quality with control charts and defect analysis",
+    "audience": ["operational", "analytical"],
+    "slots": [
+      { "slot": "kpis", "gene": "gene.kpi_card_trend", "count": [2, 4], "fill": "Quality KPIs: defect rate, yield, OEE, CpK" },
+      { "slot": "control", "gene": "gene.control_chart", "count": [1, 2], "fill": "Quality parameter control charts" },
+      { "slot": "pareto", "gene": "gene.pareto_bar", "count": [0, 1], "fill_when": "Defect categories available" },
+      { "slot": "distribution", "gene": "gene.distribution_histogram", "count": [0, 1], "fill_when": "Sufficient row count for distribution analysis" }
+    ],
+    "layout_hint": "kpi-row-then-two-col",
+    "attentionBudget": 12
+  },
+  {
+    "id": "chromo.workforce",
+    "version": "1.0.0",
+    "intent": "HR view: headcount, turnover, composition, hiring pipeline",
+    "audience": ["executive", "operational"],
+    "slots": [
+      { "slot": "kpis", "gene": "gene.kpi_card_trend", "count": [3, 5], "fill": "Headcount, turnover rate, open positions, time-to-hire" },
+      { "slot": "composition", "gene_any": ["gene.composition_donut", "gene.composition_stacked_bar"], "count": [0, 1], "fill": "Workforce breakdown by department/level/type" },
+      { "slot": "trend", "gene": "gene.trend_line", "count": [0, 1], "fill_when": "Monthly headcount or turnover trend available" },
+      { "slot": "ranking", "gene": "gene.ranking_hbar", "count": [0, 1], "fill": "Department or team comparison" }
+    ],
+    "layout_hint": "kpi-row-then-side-by-side",
+    "attentionBudget": 10
+  },
+  {
+    "id": "chromo.pipeline_funnel",
+    "version": "1.0.0",
+    "intent": "Sales or process funnel with conversion at each stage",
+    "audience": ["executive", "operational"],
+    "slots": [
+      { "slot": "kpis", "gene": "gene.kpi_card_trend", "count": [2, 4], "fill": "Pipeline value, win rate, average deal size, cycle time" },
+      { "slot": "funnel", "gene": "gene.funnel", "count": 1, "fill": "Stage-by-stage funnel" },
+      { "slot": "ranking", "gene_any": ["gene.ranking_hbar", "gene.bar_vertical"], "count": [0, 1], "fill": "Top deals or reps" },
+      { "slot": "trend", "gene": "gene.trend_line", "count": [0, 1], "fill_when": "Time series pipeline data available" }
+    ],
+    "layout_hint": "kpi-row-then-funnel-side",
+    "attentionBudget": 10
+  },
+  {
+    "id": "chromo.alerts_exceptions",
+    "version": "1.0.0",
+    "intent": "Dedicated section for exceptions, anomalies, and items requiring attention",
+    "audience": ["operational", "analytical"],
+    "slots": [
+      { "slot": "alert_bar", "gene": "gene.alert_strip", "count": 1, "fill": "All current threshold breaches" },
+      { "slot": "exception_table", "gene": "gene.detail_table", "count": [0, 1], "fill": "Detailed exception records" },
+      { "slot": "trend", "gene_any": ["gene.trend_line", "gene.control_chart"], "count": [0, 1], "fill_when": "Exception frequency changes over time" }
+    ],
+    "layout_hint": "alert-then-table",
+    "attentionBudget": 6
+  },
+  {
+    "id": "chromo.data_detail",
+    "version": "1.0.0",
+    "intent": "Full data table for lookup, verification, and export — always the last section",
+    "audience": ["operational", "analytical"],
+    "slots": [
+      { "slot": "stats", "gene": "gene.summary_stat_row", "count": [0, 1], "fill": "Dataset summary statistics" },
+      { "slot": "table", "gene_any": ["gene.detail_table", "gene.detail_table_subtotals"], "count": 1, "fill": "Full data table with sort and scroll" },
+      { "slot": "gaps", "gene": "gene.gap_card", "count": [0, 2], "fill_when": "Unanswerable questions identified" }
+    ],
+    "layout_hint": "full-width-table",
+    "attentionBudget": 6
+  },
+  {
+    "id": "chromo.insight_story",
+    "version": "1.0.0",
+    "intent": "AI-generated narrative page: Context, Facts, Insights, Recommendations, Next Action",
+    "audience": ["executive", "strategic", "presentation"],
+    "slots": [
+      { "slot": "narrative", "gene": "gene.insight_narrative_block", "count": 1, "fill": "Full layered insight story" },
+      { "slot": "supporting_chart", "gene_any": ["gene.trend_line", "gene.bar_vertical", "gene.composition_donut"], "count": [0, 2], "fill": "Charts that support the narrative" },
+      { "slot": "gaps", "gene": "gene.gap_card", "count": [0, 2], "fill_when": "Key questions remain unanswerable" }
+    ],
+    "layout_hint": "narrative-with-side-charts",
+    "attentionBudget": 6
+  }
+]

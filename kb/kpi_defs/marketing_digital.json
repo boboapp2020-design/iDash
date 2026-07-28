@@ -1,0 +1,218 @@
+[
+  {
+    "id": "kpi.mkt.roas",
+    "version": "1.0.0",
+    "domain": "marketing_digital",
+    "name": { "th": "ผลตอบแทนค่าโฆษณา", "en": "Return on Ad Spend (ROAS)" },
+    "formula": "sum(revenue_from_ads) / sum(ad_spend)",
+    "inputs": {
+      "revenue_from_ads": { "role": "measure", "unit": "currency", "synonyms": { "th": ["รายได้จากโฆษณา", "ยอดขายจากโฆษณา"], "en": ["revenue from ads", "ad revenue", "attributed revenue"] } },
+      "ad_spend": { "role": "measure", "unit": "currency", "synonyms": { "th": ["งบโฆษณา", "ค่าโฆษณา", "ค่าใช้จ่ายโฆษณา"], "en": ["ad spend", "spend", "cost", "advertising cost"] } }
+    },
+    "aggNature": "intensive",
+    "direction": "higher-better",
+    "format": { "kind": "number", "decimals": 2 },
+    "target": { "policy": "fixed", "benchmark": { "good": 4, "warn": 2 } },
+    "grain": ["daily", "weekly", "monthly"],
+    "answers": ["What is the return on ad spend?", "Are ad campaigns profitable?"],
+    "variance": true,
+    "forecastCandidate": true,
+    "caveats": ["Attribution model affects ROAS significantly"]
+  },
+  {
+    "id": "kpi.mkt.cpa",
+    "version": "1.0.0",
+    "domain": "marketing_digital",
+    "name": { "th": "ต้นทุนต่อการได้ลูกค้า", "en": "Cost per Acquisition (CPA)" },
+    "formula": "sum(ad_spend) / count(conversions)",
+    "inputs": {
+      "ad_spend": { "role": "measure", "unit": "currency", "synonyms": { "th": ["งบโฆษณา", "ค่าโฆษณา"], "en": ["ad spend", "spend", "cost"] } },
+      "conversions": { "role": "measure", "unit": "count", "synonyms": { "th": ["คอนเวอร์ชั่น", "ลูกค้าใหม่"], "en": ["conversions", "acquisitions", "purchases"] } }
+    },
+    "aggNature": "intensive",
+    "direction": "lower-better",
+    "format": { "kind": "currency", "decimals": 0 },
+    "target": { "policy": "period-median", "benchmark": { "good": null, "warn": null } },
+    "grain": ["daily", "weekly", "monthly"],
+    "answers": ["How much does it cost to acquire a customer?"],
+    "variance": true,
+    "forecastCandidate": true,
+    "caveats": ["CPA varies greatly by channel and product"]
+  },
+  {
+    "id": "kpi.mkt.ctr",
+    "version": "1.0.0",
+    "domain": "marketing_digital",
+    "name": { "th": "อัตราการคลิก", "en": "Click-Through Rate (CTR)" },
+    "formula": "100 * count(clicks) / count(impressions)",
+    "inputs": {
+      "clicks": { "role": "measure", "unit": "count", "synonyms": { "th": ["คลิก", "การคลิก"], "en": ["clicks", "click"] } },
+      "impressions": { "role": "measure", "unit": "count", "synonyms": { "th": ["การแสดงผล", "impression"], "en": ["impressions", "views", "shows"] } }
+    },
+    "aggNature": "intensive",
+    "direction": "higher-better",
+    "format": { "kind": "percentage", "decimals": 2 },
+    "target": { "policy": "period-median", "benchmark": { "good": null, "warn": null } },
+    "grain": ["daily", "weekly", "monthly"],
+    "answers": ["What is the click-through rate?"],
+    "variance": true,
+    "forecastCandidate": false,
+    "caveats": ["CTR benchmarks vary significantly by platform and ad format"]
+  },
+  {
+    "id": "kpi.mkt.conversion_rate",
+    "version": "1.0.0",
+    "domain": "marketing_digital",
+    "name": { "th": "อัตราคอนเวอร์ชั่น", "en": "Conversion Rate" },
+    "formula": "100 * count(conversions) / count(clicks)",
+    "inputs": {
+      "conversions": { "role": "measure", "unit": "count", "synonyms": { "th": ["คอนเวอร์ชั่น"], "en": ["conversions", "purchases", "sign ups"] } },
+      "clicks": { "role": "measure", "unit": "count", "synonyms": { "th": ["คลิก"], "en": ["clicks", "visits", "sessions"] } }
+    },
+    "aggNature": "intensive",
+    "direction": "higher-better",
+    "format": { "kind": "percentage", "decimals": 2 },
+    "target": { "policy": "period-median", "benchmark": { "good": null, "warn": null } },
+    "grain": ["daily", "weekly", "monthly"],
+    "answers": ["What percentage of visitors convert?"],
+    "variance": true,
+    "forecastCandidate": true,
+    "caveats": ["Define conversion event consistently"]
+  },
+  {
+    "id": "kpi.mkt.total_spend",
+    "version": "1.0.0",
+    "domain": "marketing_digital",
+    "name": { "th": "งบโฆษณารวม", "en": "Total Ad Spend" },
+    "formula": "sum(ad_spend)",
+    "inputs": {
+      "ad_spend": { "role": "measure", "unit": "currency", "synonyms": { "th": ["งบโฆษณา", "ค่าโฆษณา"], "en": ["ad spend", "spend", "budget", "cost", "advertising cost"] } }
+    },
+    "aggNature": "extensive",
+    "direction": "neutral",
+    "format": { "kind": "currency", "decimals": 0 },
+    "target": { "policy": "column", "benchmark": { "good": null, "warn": null } },
+    "grain": ["daily", "weekly", "monthly"],
+    "answers": ["How much was spent on advertising?"],
+    "variance": true,
+    "forecastCandidate": true,
+    "caveats": []
+  },
+  {
+    "id": "kpi.mkt.impressions",
+    "version": "1.0.0",
+    "domain": "marketing_digital",
+    "name": { "th": "จำนวนแสดงผล", "en": "Impressions" },
+    "formula": "sum(impressions)",
+    "inputs": {
+      "impressions": { "role": "measure", "unit": "count", "synonyms": { "th": ["การแสดงผล", "impression"], "en": ["impressions", "views", "shows"] } }
+    },
+    "aggNature": "extensive",
+    "direction": "higher-better",
+    "format": { "kind": "number", "decimals": 0 },
+    "target": { "policy": "column", "benchmark": { "good": null, "warn": null } },
+    "grain": ["daily", "weekly", "monthly"],
+    "answers": ["How many times were ads shown?"],
+    "variance": true,
+    "forecastCandidate": true,
+    "caveats": []
+  },
+  {
+    "id": "kpi.mkt.reach",
+    "version": "1.0.0",
+    "domain": "marketing_digital",
+    "name": { "th": "การเข้าถึง", "en": "Reach" },
+    "formula": "sum(reach)",
+    "inputs": {
+      "reach": { "role": "measure", "unit": "count", "synonyms": { "th": ["การเข้าถึง", "คนเข้าถึง"], "en": ["reach", "unique reach", "people reached"] } }
+    },
+    "aggNature": "extensive",
+    "direction": "higher-better",
+    "format": { "kind": "number", "decimals": 0 },
+    "target": { "policy": "column", "benchmark": { "good": null, "warn": null } },
+    "grain": ["daily", "weekly", "monthly"],
+    "answers": ["How many unique people saw the content?"],
+    "variance": true,
+    "forecastCandidate": true,
+    "caveats": ["Reach counts unique users; impressions count total views"]
+  },
+  {
+    "id": "kpi.mkt.engagement_rate",
+    "version": "1.0.0",
+    "domain": "marketing_digital",
+    "name": { "th": "อัตรา Engagement", "en": "Engagement Rate" },
+    "formula": "100 * count(engagements) / count(reach)",
+    "inputs": {
+      "engagements": { "role": "measure", "unit": "count", "synonyms": { "th": ["engagement", "ปฏิสัมพันธ์"], "en": ["engagements", "interactions", "likes", "comments", "shares"] } },
+      "reach": { "role": "measure", "unit": "count", "synonyms": { "th": ["การเข้าถึง"], "en": ["reach", "impressions", "views"] } }
+    },
+    "aggNature": "intensive",
+    "direction": "higher-better",
+    "format": { "kind": "percentage", "decimals": 2 },
+    "target": { "policy": "period-median", "benchmark": { "good": null, "warn": null } },
+    "grain": ["daily", "weekly", "monthly"],
+    "answers": ["How engaged is the audience with our content?"],
+    "variance": true,
+    "forecastCandidate": false,
+    "caveats": ["Engagement definition varies by platform"]
+  },
+  {
+    "id": "kpi.mkt.open_rate",
+    "version": "1.0.0",
+    "domain": "marketing_digital",
+    "name": { "th": "อัตราเปิดอ่าน", "en": "Email Open Rate" },
+    "formula": "100 * count(opens) / count(delivered)",
+    "inputs": {
+      "opens": { "role": "measure", "unit": "count", "synonyms": { "th": ["เปิดอ่าน"], "en": ["opens", "opened"] } },
+      "delivered": { "role": "measure", "unit": "count", "synonyms": { "th": ["ส่งสำเร็จ"], "en": ["delivered", "sent", "emails sent"] } }
+    },
+    "aggNature": "intensive",
+    "direction": "higher-better",
+    "format": { "kind": "percentage", "decimals": 1 },
+    "target": { "policy": "fixed", "benchmark": { "good": 25, "warn": 15 } },
+    "grain": ["per-campaign", "weekly", "monthly"],
+    "answers": ["What percentage of emails are opened?"],
+    "variance": true,
+    "forecastCandidate": false,
+    "caveats": ["Apple Mail Privacy Protection inflates open rates"]
+  },
+  {
+    "id": "kpi.mkt.leads_generated",
+    "version": "1.0.0",
+    "domain": "marketing_digital",
+    "name": { "th": "จำนวน Lead", "en": "Leads Generated" },
+    "formula": "count(leads)",
+    "inputs": {
+      "leads": { "role": "measure", "unit": "count", "synonyms": { "th": ["lead", "ลูกค้าสนใจ"], "en": ["leads", "lead", "mql", "sql", "inquiries"] } }
+    },
+    "aggNature": "extensive",
+    "direction": "higher-better",
+    "format": { "kind": "number", "decimals": 0 },
+    "target": { "policy": "column", "benchmark": { "good": null, "warn": null } },
+    "grain": ["daily", "weekly", "monthly"],
+    "answers": ["How many leads did marketing generate?"],
+    "variance": true,
+    "forecastCandidate": true,
+    "caveats": ["Qualify leads (MQL vs SQL) for meaningful comparison"]
+  },
+  {
+    "id": "kpi.mkt.cost_per_lead",
+    "version": "1.0.0",
+    "domain": "marketing_digital",
+    "name": { "th": "ต้นทุนต่อ Lead", "en": "Cost per Lead (CPL)" },
+    "formula": "sum(ad_spend) / count(leads)",
+    "inputs": {
+      "ad_spend": { "role": "measure", "unit": "currency", "synonyms": { "th": ["งบโฆษณา"], "en": ["ad spend", "spend"] } },
+      "leads": { "role": "measure", "unit": "count", "synonyms": { "th": ["lead"], "en": ["leads", "lead"] } }
+    },
+    "aggNature": "intensive",
+    "direction": "lower-better",
+    "format": { "kind": "currency", "decimals": 0 },
+    "target": { "policy": "period-median", "benchmark": { "good": null, "warn": null } },
+    "grain": ["weekly", "monthly"],
+    "answers": ["How much does each lead cost?"],
+    "variance": true,
+    "forecastCandidate": true,
+    "caveats": ["CPL varies significantly by channel and industry"]
+  }
+]

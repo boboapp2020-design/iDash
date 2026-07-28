@@ -1,0 +1,224 @@
+[
+  {
+    "id": "kpi.manufacturing.oee",
+    "version": "1.0.0",
+    "domain": "manufacturing",
+    "name": { "th": "ประสิทธิผลโดยรวมของเครื่องจักร (OEE)", "en": "Overall Equipment Effectiveness (OEE)" },
+    "formula": "(sum(run_time) / sum(planned_production_time)) * (sum(total_units) / (sum(run_time) * avg(ideal_rate))) * (sum(good_units) / sum(total_units)) * 100",
+    "inputs": {
+      "run_time": { "role": "measure", "unit": "hour", "synonyms": { "th": ["เวลาเดินเครื่อง", "เวลาทำงานจริง"], "en": ["run time", "operating time", "uptime"] } },
+      "planned_production_time": { "role": "measure", "unit": "hour", "synonyms": { "th": ["เวลาผลิตตามแผน", "เวลาทำการ"], "en": ["planned production time", "scheduled time", "available time"] } },
+      "total_units": { "role": "measure", "unit": "unit", "synonyms": { "th": ["จำนวนผลิตทั้งหมด", "ชิ้นงานทั้งหมด"], "en": ["total units", "total output", "total pieces"] } },
+      "ideal_rate": { "role": "measure", "unit": "unit/hour", "synonyms": { "th": ["อัตราผลิตมาตรฐาน", "อัตราอุดมคติ"], "en": ["ideal rate", "standard rate", "nameplate rate"] } },
+      "good_units": { "role": "measure", "unit": "unit", "synonyms": { "th": ["ชิ้นงานดี", "ผลผลิตดี", "จำนวนชิ้นดี"], "en": ["good units", "good output", "conforming units"] } }
+    },
+    "aggNature": "intensive",
+    "direction": "higher-better",
+    "format": { "kind": "percentage", "decimals": 1 },
+    "target": { "policy": "domain-benchmark", "benchmark": { "good": 85.0, "warn": 65.0 } },
+    "grain": ["shift", "daily", "weekly", "monthly"],
+    "answers": ["How effectively is the equipment being used?", "What is the combined impact of availability, performance, and quality losses?"],
+    "variance": true,
+    "forecastCandidate": true,
+    "caveats": ["World-class OEE is 85%; interpret in context of industry", "Requires accurate ideal rate definition"]
+  },
+  {
+    "id": "kpi.manufacturing.availability",
+    "version": "1.0.0",
+    "domain": "manufacturing",
+    "name": { "th": "อัตราความพร้อมเครื่องจักร", "en": "Availability Rate" },
+    "formula": "100 * sum(run_time) / sum(planned_production_time)",
+    "inputs": {
+      "run_time": { "role": "measure", "unit": "hour", "synonyms": { "th": ["เวลาเดินเครื่อง", "เวลาทำงานจริง"], "en": ["run time", "operating time", "uptime"] } },
+      "planned_production_time": { "role": "measure", "unit": "hour", "synonyms": { "th": ["เวลาผลิตตามแผน", "เวลาทำการ"], "en": ["planned production time", "scheduled time", "available time"] } }
+    },
+    "aggNature": "intensive",
+    "direction": "higher-better",
+    "format": { "kind": "percentage", "decimals": 1 },
+    "target": { "policy": "domain-benchmark", "benchmark": { "good": 90.0, "warn": 80.0 } },
+    "grain": ["shift", "daily", "weekly", "monthly"],
+    "answers": ["How much scheduled time is the equipment actually running?", "What proportion of time is lost to downtime?"],
+    "variance": true,
+    "forecastCandidate": false,
+    "caveats": ["OEE sub-component — interpret alongside Performance and Quality"]
+  },
+  {
+    "id": "kpi.manufacturing.performance_rate",
+    "version": "1.0.0",
+    "domain": "manufacturing",
+    "name": { "th": "อัตราสมรรถนะ", "en": "Performance Rate" },
+    "formula": "100 * sum(total_units) / (sum(run_time) * avg(ideal_rate))",
+    "inputs": {
+      "total_units": { "role": "measure", "unit": "unit", "synonyms": { "th": ["จำนวนผลิตทั้งหมด", "ชิ้นงานทั้งหมด"], "en": ["total units", "total output", "total pieces"] } },
+      "run_time": { "role": "measure", "unit": "hour", "synonyms": { "th": ["เวลาเดินเครื่อง", "เวลาทำงานจริง"], "en": ["run time", "operating time"] } },
+      "ideal_rate": { "role": "measure", "unit": "unit/hour", "synonyms": { "th": ["อัตราผลิตมาตรฐาน", "อัตราอุดมคติ"], "en": ["ideal rate", "standard rate", "nameplate rate"] } }
+    },
+    "aggNature": "intensive",
+    "direction": "higher-better",
+    "format": { "kind": "percentage", "decimals": 1 },
+    "target": { "policy": "domain-benchmark", "benchmark": { "good": 95.0, "warn": 85.0 } },
+    "grain": ["shift", "daily", "weekly", "monthly"],
+    "answers": ["Is the equipment running at its rated speed?", "How much speed loss is occurring?"],
+    "variance": true,
+    "forecastCandidate": false,
+    "caveats": ["OEE sub-component — interpret alongside Availability and Quality"]
+  },
+  {
+    "id": "kpi.manufacturing.quality_rate",
+    "version": "1.0.0",
+    "domain": "manufacturing",
+    "name": { "th": "อัตราคุณภาพ", "en": "Quality Rate" },
+    "formula": "100 * sum(good_units) / sum(total_units)",
+    "inputs": {
+      "good_units": { "role": "measure", "unit": "unit", "synonyms": { "th": ["ชิ้นงานดี", "ผลผลิตดี"], "en": ["good units", "good output", "conforming units", "first-pass yield"] } },
+      "total_units": { "role": "measure", "unit": "unit", "synonyms": { "th": ["จำนวนผลิตทั้งหมด", "ชิ้นงานทั้งหมด"], "en": ["total units", "total output", "total pieces"] } }
+    },
+    "aggNature": "intensive",
+    "direction": "higher-better",
+    "format": { "kind": "percentage", "decimals": 1 },
+    "target": { "policy": "domain-benchmark", "benchmark": { "good": 99.0, "warn": 95.0 } },
+    "grain": ["shift", "daily", "weekly", "monthly"],
+    "answers": ["What proportion of output meets quality standards?", "How much production is lost to defects?"],
+    "variance": true,
+    "forecastCandidate": false,
+    "caveats": ["OEE sub-component — interpret alongside Availability and Performance"]
+  },
+  {
+    "id": "kpi.manufacturing.throughput",
+    "version": "1.0.0",
+    "domain": "manufacturing",
+    "name": { "th": "ปริมาณผลผลิต", "en": "Throughput" },
+    "formula": "sum(total_units)",
+    "inputs": {
+      "total_units": { "role": "measure", "unit": "unit", "synonyms": { "th": ["จำนวนผลิต", "ชิ้นงาน", "ผลผลิต", "หน่วยผลิต"], "en": ["total units", "output", "production volume", "units produced", "throughput"] } }
+    },
+    "aggNature": "extensive",
+    "direction": "higher-better",
+    "format": { "kind": "number", "decimals": 0 },
+    "target": { "policy": "column", "benchmark": { "good": null, "warn": null } },
+    "grain": ["shift", "daily", "weekly", "monthly"],
+    "answers": ["How much was produced?", "Is production volume on target?"],
+    "variance": true,
+    "forecastCandidate": true,
+    "caveats": ["Must normalize by product type for meaningful cross-line comparison"]
+  },
+  {
+    "id": "kpi.manufacturing.defect_rate",
+    "version": "1.0.0",
+    "domain": "manufacturing",
+    "name": { "th": "อัตราของเสีย", "en": "Defect Rate" },
+    "formula": "100 * sum(defect_units) / sum(total_units)",
+    "inputs": {
+      "defect_units": { "role": "measure", "unit": "unit", "synonyms": { "th": ["ของเสีย", "ชิ้นงานเสีย", "NG", "จำนวนเสีย"], "en": ["defect units", "defects", "rejects", "non-conforming", "NG count"] } },
+      "total_units": { "role": "measure", "unit": "unit", "synonyms": { "th": ["จำนวนผลิตทั้งหมด", "ชิ้นงานทั้งหมด"], "en": ["total units", "total output", "total pieces"] } }
+    },
+    "aggNature": "intensive",
+    "direction": "lower-better",
+    "format": { "kind": "percentage", "decimals": 2 },
+    "target": { "policy": "domain-benchmark", "benchmark": { "good": 0.5, "warn": 2.0 } },
+    "grain": ["shift", "daily", "weekly", "monthly"],
+    "answers": ["What percentage of output is defective?", "Is quality deteriorating?"],
+    "variance": true,
+    "forecastCandidate": true,
+    "caveats": ["Interpret alongside defect type Pareto for root cause"]
+  },
+  {
+    "id": "kpi.manufacturing.scrap_pct",
+    "version": "1.0.0",
+    "domain": "manufacturing",
+    "name": { "th": "อัตราเศษซาก", "en": "Scrap %" },
+    "formula": "100 * sum(scrap_value) / sum(material_value)",
+    "inputs": {
+      "scrap_value": { "role": "measure", "unit": "currency", "synonyms": { "th": ["มูลค่าเศษซาก", "ค่าสูญเสียวัสดุ", "เศษเหลือ"], "en": ["scrap value", "scrap cost", "waste cost"] } },
+      "material_value": { "role": "measure", "unit": "currency", "synonyms": { "th": ["มูลค่าวัตถุดิบ", "ต้นทุนวัสดุ"], "en": ["material value", "material cost", "raw material cost"] } }
+    },
+    "aggNature": "intensive",
+    "direction": "lower-better",
+    "format": { "kind": "percentage", "decimals": 2 },
+    "target": { "policy": "domain-benchmark", "benchmark": { "good": 1.0, "warn": 3.0 } },
+    "grain": ["daily", "weekly", "monthly"],
+    "answers": ["How much material is being wasted?", "Is material utilization efficient?"],
+    "variance": true,
+    "forecastCandidate": true,
+    "caveats": ["May be measured in weight or value — ensure consistency"]
+  },
+  {
+    "id": "kpi.manufacturing.downtime",
+    "version": "1.0.0",
+    "domain": "manufacturing",
+    "name": { "th": "เวลาหยุดเครื่อง", "en": "Downtime Hours" },
+    "formula": "sum(downtime_hours)",
+    "inputs": {
+      "downtime_hours": { "role": "measure", "unit": "hour", "synonyms": { "th": ["ชั่วโมงหยุด", "เวลาหยุดเครื่อง", "ชม.หยุด"], "en": ["downtime hours", "downtime", "stop time", "unplanned downtime"] } }
+    },
+    "aggNature": "extensive",
+    "direction": "lower-better",
+    "format": { "kind": "number", "decimals": 1 },
+    "target": { "policy": "column", "benchmark": { "good": null, "warn": null } },
+    "grain": ["shift", "daily", "weekly", "monthly"],
+    "answers": ["How much production time is being lost?", "Is downtime trending up or down?"],
+    "variance": true,
+    "forecastCandidate": true,
+    "caveats": ["Distinguish planned maintenance from unplanned breakdowns for actionability"]
+  },
+  {
+    "id": "kpi.manufacturing.mtbf",
+    "version": "1.0.0",
+    "domain": "manufacturing",
+    "name": { "th": "ระยะเวลาเฉลี่ยระหว่างการขัดข้อง (MTBF)", "en": "Mean Time Between Failures (MTBF)" },
+    "formula": "sum(operating_time) / count(failure_events)",
+    "inputs": {
+      "operating_time": { "role": "measure", "unit": "hour", "synonyms": { "th": ["เวลาเดินเครื่อง", "เวลาทำงาน"], "en": ["operating time", "run time", "uptime hours"] } },
+      "failure_events": { "role": "measure", "unit": "count", "synonyms": { "th": ["จำนวนครั้งเสีย", "ครั้งที่ขัดข้อง", "จำนวนเหตุขัดข้อง"], "en": ["failure events", "failures", "breakdowns", "fault count"] } }
+    },
+    "aggNature": "intensive",
+    "direction": "higher-better",
+    "format": { "kind": "number", "decimals": 1 },
+    "target": { "policy": "domain-benchmark", "benchmark": { "good": 200, "warn": 50 } },
+    "grain": ["weekly", "monthly"],
+    "answers": ["How reliable is the equipment?", "Is equipment reliability improving?"],
+    "variance": true,
+    "forecastCandidate": true,
+    "caveats": ["Meaningful only with consistent failure recording", "Should be tracked per machine or line"]
+  },
+  {
+    "id": "kpi.manufacturing.mttr",
+    "version": "1.0.0",
+    "domain": "manufacturing",
+    "name": { "th": "ระยะเวลาเฉลี่ยในการซ่อม (MTTR)", "en": "Mean Time To Repair (MTTR)" },
+    "formula": "sum(repair_time) / count(failure_events)",
+    "inputs": {
+      "repair_time": { "role": "measure", "unit": "hour", "synonyms": { "th": ["เวลาซ่อม", "เวลาแก้ไข", "ชม.ซ่อม"], "en": ["repair time", "time to repair", "fix time", "restoration time"] } },
+      "failure_events": { "role": "measure", "unit": "count", "synonyms": { "th": ["จำนวนครั้งเสีย", "ครั้งที่ขัดข้อง"], "en": ["failure events", "failures", "breakdowns"] } }
+    },
+    "aggNature": "intensive",
+    "direction": "lower-better",
+    "format": { "kind": "number", "decimals": 1 },
+    "target": { "policy": "domain-benchmark", "benchmark": { "good": 1.0, "warn": 4.0 } },
+    "grain": ["weekly", "monthly"],
+    "answers": ["How quickly are failures being resolved?", "Is maintenance response time acceptable?"],
+    "variance": true,
+    "forecastCandidate": false,
+    "caveats": ["Includes diagnosis time — separate if maintenance log supports it"]
+  },
+  {
+    "id": "kpi.manufacturing.plan_attainment",
+    "version": "1.0.0",
+    "domain": "manufacturing",
+    "name": { "th": "อัตราบรรลุแผนผลิต", "en": "Plan Attainment %" },
+    "formula": "100 * sum(actual_output) / sum(planned_output)",
+    "inputs": {
+      "actual_output": { "role": "measure", "unit": "unit", "synonyms": { "th": ["ผลผลิตจริง", "ผลิตจริง", "จำนวนผลิตจริง"], "en": ["actual output", "actual production", "actual units"] } },
+      "planned_output": { "role": "measure", "unit": "unit", "synonyms": { "th": ["แผนผลิต", "เป้าผลิต", "แผนการผลิต"], "en": ["planned output", "production plan", "target output", "scheduled output"] } }
+    },
+    "aggNature": "intensive",
+    "direction": "target-band",
+    "format": { "kind": "percentage", "decimals": 1 },
+    "target": { "policy": "column", "benchmark": { "good": 100.0, "warn": 90.0 } },
+    "grain": ["daily", "weekly", "monthly"],
+    "answers": ["Is production meeting the plan?", "Are we over- or under-producing relative to schedule?"],
+    "variance": true,
+    "forecastCandidate": true,
+    "caveats": ["Over-attainment (>105%) may indicate planning problems, not success"]
+  }
+]

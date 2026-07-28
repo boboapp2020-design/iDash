@@ -1,0 +1,212 @@
+{
+  "id": "hotel_hospitality",
+  "version": "1.0.0",
+  "parent": null,
+
+  "identity": {
+    "nameTH": "โรงแรมและบริการ",
+    "nameEN": "Hotel & Hospitality",
+    "nameLO": "ໂຮງແຮມ ແລະ ການບໍລິການ"
+  },
+
+  "signatures": {
+    "lexicon": {
+      "columns": {
+        "th": [
+          "ห้องพัก", "ประเภทห้อง", "จำนวนห้อง", "ห้องว่าง", "ห้องที่จอง",
+          "เช็คอิน", "เช็คเอาท์", "คืนที่พัก", "วันเข้าพัก", "วันออก",
+          "อัตราเข้าพัก", "ราคาห้อง", "ราคาห้องเฉลี่ย", "รายได้ต่อห้อง",
+          "ผู้เข้าพัก", "ชื่อลูกค้า", "สัญชาติ", "ช่องทางจอง",
+          "จองตรง", "จองผ่านเอเจนซี่", "OTA", "walk in",
+          "อาหารเช้า", "มินิบาร์", "สปา", "ซักรีด", "รูมเซอร์วิส",
+          "ข้อร้องเรียน", "ความพึงพอใจ", "รีวิว", "คะแนนรีวิว",
+          "ฤดูกาล", "ไฮซีซั่น", "โลว์ซีซั่น", "โปรโมชั่น",
+          "กรุ๊ปทัวร์", "FIT", "สัมมนา", "จัดเลี้ยง", "ห้องประชุม",
+          "ยอดจอง", "ยกเลิกจอง", "no show"
+        ],
+        "en": [
+          "room", "room type", "room number", "room category",
+          "check in", "check out", "check_in", "check_out",
+          "nights", "length of stay", "los",
+          "occupancy", "occupancy rate", "occ", "occupied rooms",
+          "adr", "average daily rate", "room rate", "rate",
+          "revpar", "revenue per available room",
+          "guest", "guest name", "nationality", "guest count",
+          "booking", "reservation", "booking channel", "booking source",
+          "direct booking", "ota", "travel agent", "walk in",
+          "no show", "no_show", "cancellation", "cancel rate",
+          "housekeeping", "room status", "clean", "dirty", "inspected",
+          "f&b", "food and beverage", "minibar", "spa", "laundry",
+          "banquet", "conference", "meeting room", "event",
+          "guest satisfaction", "review score", "rating",
+          "high season", "low season", "peak", "shoulder",
+          "group", "fit", "corporate", "leisure",
+          "available rooms", "total rooms", "out of order"
+        ],
+        "lo": [
+          "ຫ້ອງພັກ", "ແຂກ", "ຈອງ", "ເຂົ້າພັກ", "ອອກ",
+          "ລາຄາຫ້ອງ", "ຄືນ", "ປະເພດຫ້ອງ", "ບໍລິການ"
+        ]
+      },
+      "sheets": [
+        "booking", "reservation", "การจอง", "ยอดจอง",
+        "occupancy", "อัตราเข้าพัก", "room", "ห้องพัก",
+        "guest", "ผู้เข้าพัก", "revenue", "รายได้",
+        "housekeeping", "F&B", "banquet", "จัดเลี้ยง"
+      ],
+      "weightPerHit": 1.8
+    },
+    "valueShapes": [
+      {
+        "columnLike": "occupancy|อัตราเข้าพัก|occ.rate",
+        "type": "percentage",
+        "range": [10, 100],
+        "weight": 3.5,
+        "note": "Room occupancy rate; definitive hotel metric"
+      },
+      {
+        "columnLike": "adr|average.daily.rate|ราคาห้องเฉลี่ย",
+        "type": "number",
+        "range": [500, 50000],
+        "weight": 3.5,
+        "note": "Average Daily Rate in local currency"
+      },
+      {
+        "columnLike": "revpar|revenue.per.available|รายได้ต่อห้อง",
+        "type": "number",
+        "range": [200, 30000],
+        "weight": 3.5,
+        "note": "Revenue Per Available Room"
+      },
+      {
+        "columnLike": "no.show|no_show",
+        "type": "percentage",
+        "range": [0, 30],
+        "weight": 2.5,
+        "note": "No-show rate"
+      },
+      {
+        "columnLike": "length.of.stay|los|คืนที่พัก",
+        "type": "number",
+        "range": [1, 30],
+        "weight": 2.0,
+        "note": "Average length of stay in nights"
+      },
+      {
+        "columnLike": "review.score|คะแนนรีวิว|guest.satisfaction",
+        "type": "number",
+        "range": [1, 10],
+        "weight": 2.0,
+        "note": "Guest review/satisfaction score"
+      }
+    ],
+    "unitPatterns": [
+      "คืน", "nights", "ห้อง", "rooms", "ท่าน", "pax",
+      "บาท/คืน", "THB/night", "USD/night"
+    ],
+    "negative": [
+      { "lexicon": ["patient", "ผู้ป่วย", "diagnosis", "โรค"], "weight": -3.0 },
+      { "lexicon": ["ccs", "pol", "brix", "bagasse", "อ้อย"], "weight": -2.0 },
+      { "lexicon": ["oee", "defect rate", "cycle time", "mtbf"], "weight": -2.0 },
+      { "lexicon": ["salary", "เงินเดือน", "payroll", "leave", "turnover rate"], "weight": -2.0 },
+      { "lexicon": ["gl", "general ledger", "debit", "credit", "trial balance"], "weight": -2.0 },
+      { "lexicon": ["pipeline", "deal", "opportunity", "win rate", "quota"], "weight": -2.0 },
+      { "lexicon": ["student", "enrollment", "gpa", "semester", "curriculum"], "weight": -3.0 },
+      { "lexicon": ["shipment_id", "carrier", "freight", "tracking_events", "bill of lading"], "weight": -2.0 },
+      { "lexicon": ["impression", "ctr", "cpc", "roas", "campaign_id"], "weight": -2.0 },
+      { "lexicon": ["cart", "add_to_cart", "checkout", "browse", "wishlist", "sku"], "weight": -2.0 },
+      { "lexicon": ["stock", "inventory", "reorder", "warehouse", "bin"], "weight": -2.0 },
+      { "lexicon": ["doctors", "nurses", "patients_mtd", "infection_rate", "avg_wait_min", "avg_consult_min"], "weight": -4.0 },
+      { "lexicon": ["property", "bedrooms", "monthly_rent", "annual_rent", "tenant", "mortgage", "purchase_price", "gross_yield", "net_yield"], "weight": -3.5 },
+      { "lexicon": ["goals", "assists", "tackles", "player", "league", "match", "games_played", "pass_accuracy", "player_id"], "weight": -4.0 },
+      { "lexicon": ["menu", "recipe", "prep_time", "ingredient", "food_cost", "popularity_rank"], "weight": -3.0 },
+      { "lexicon": ["subscriber", "dau", "mau", "mrr", "arr", "arpu"], "weight": -2.5 },
+      { "lexicon": ["protocol", "chain", "apy", "staking", "defi", "token"], "weight": -2.5 },
+      { "lexicon": ["sprint", "story_points", "epic", "assignee", "task_id"], "weight": -2.0 },
+      { "lexicon": ["table_id", "party_size", "wait_time", "special_requests", "reservation_id"], "weight": -3.5 }
+    ]
+  },
+
+  "business": {
+    "processes": [
+      {
+        "id": "guest_journey",
+        "stages": ["จอง", "เช็คอิน", "เข้าพัก", "ใช้บริการ", "เช็คเอาท์", "ชำระเงิน", "รีวิว"]
+      },
+      {
+        "id": "revenue_management",
+        "stages": ["พยากรณ์ demand", "กำหนดราคา", "จัดโปรโมชั่น", "จัดสรรห้อง", "ติดตาม RevPAR"]
+      },
+      {
+        "id": "housekeeping",
+        "stages": ["ตรวจสอบสถานะห้อง", "ทำความสะอาด", "ตรวจรับ", "อัปเดตสถานะ"]
+      }
+    ],
+    "goals": [
+      "maximize occupancy rate",
+      "increase ADR and RevPAR",
+      "reduce no-show and cancellation rates",
+      "improve guest satisfaction and review scores",
+      "optimize channel mix (direct vs OTA)",
+      "grow F&B and ancillary revenue",
+      "manage seasonal demand effectively",
+      "reduce operational cost per occupied room"
+    ],
+    "personas": [
+      {
+        "type": "executive",
+        "cares": ["RevPAR trend", "occupancy vs budget", "guest satisfaction", "channel performance"],
+        "cadence": "weekly"
+      },
+      {
+        "type": "revenue_manager",
+        "cares": ["ADR", "booking pace", "forecast accuracy", "rate parity"],
+        "cadence": "daily"
+      },
+      {
+        "type": "front_office",
+        "cares": ["today arrivals/departures", "room status", "no-shows", "guest requests"],
+        "cadence": "per-shift"
+      }
+    ],
+    "decisionCatalog": [
+      "adjust-pricing",
+      "manage-inventory",
+      "optimize-channel",
+      "explain-variance",
+      "plan-forecast",
+      "improve-service",
+      "allocate-rooms",
+      "investigate-complaint"
+    ],
+    "seasonality": "Strong seasonality: high season (Nov-Feb for tropical destinations, summer for temperate), low season discounts, holiday peaks (New Year, Songkran, Chinese New Year). Conference/event seasons."
+  },
+
+  "kpiRefs": [
+    "kpi.htl.occupancy_rate",
+    "kpi.htl.adr",
+    "kpi.htl.revpar",
+    "kpi.htl.total_room_revenue",
+    "kpi.htl.no_show_rate",
+    "kpi.htl.cancel_rate",
+    "kpi.htl.avg_los",
+    "kpi.htl.guest_satisfaction",
+    "kpi.htl.direct_booking_pct",
+    "kpi.htl.fb_revenue"
+  ],
+
+  "genomeRefs": [
+    "genome.htl_occupancy_dashboard_v1",
+    "genome.htl_revenue_management_v1",
+    "genome.htl_guest_analysis_v1"
+  ],
+
+  "vizOverrides": [
+    { "rule": "line chart for occupancy rate trend with ADR overlay on secondary context (use dual KPI cards, not dual axes)", "cites": "doc 06 §3" },
+    { "rule": "bar chart for revenue by booking channel with direct-booking target line", "cites": "doc 06 §3" },
+    { "rule": "donut for room type mix or nationality mix (limit 6 segments)", "cites": "doc 06 §2" },
+    { "rule": "heatmap for occupancy by day-of-week × month", "cites": "doc 06 §5" }
+  ],
+
+  "fixtures": []
+}

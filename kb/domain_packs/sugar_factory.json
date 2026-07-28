@@ -1,0 +1,265 @@
+{
+  "id": "sugar_factory",
+  "version": "1.0.0",
+  "parent": "manufacturing",
+
+  "identity": {
+    "nameTH": "โรงงานน้ำตาล",
+    "nameEN": "Sugar Factory",
+    "nameLO": "ໂຮງງານນ້ຳຕານ"
+  },
+
+  "signatures": {
+    "lexicon": {
+      "columns": {
+        "th": [
+          "ซีซีเอส", "พอล", "บริกซ์", "อ้อยเข้าหีบ", "กากอ้อย", "โมลาส",
+          "น้ำเชื่อม", "หม้อเคี่ยว", "ค่าความหวาน", "อัตราการสกัด",
+          "น้ำตาลทราย", "ตันอ้อย", "กะการผลิต", "ฤดูหีบ", "ชานอ้อย",
+          "น้ำอ้อย", "ตะกอน", "ปูนขาว", "ทำใส", "เคี่ยว", "ปั่น",
+          "ค่า CCS", "อ้อยไฟไหม้", "อ้อยสด", "อ้อยยอดยาว",
+          "อัตราการหีบ", "สูญเสียน้ำตาล", "กากน้ำตาล", "ค่าความบริสุทธิ์",
+          "น้ำตาลที่ผลิตได้", "ปริมาณอ้อย", "ค่า Pol", "ค่า Brix",
+          "ตั๋วชั่ง", "ชาวไร่", "พันธุ์อ้อย", "ไร่อ้อย",
+          "สูญเสียที่ไม่ทราบสาเหตุ", "หม้อต้ม", "เครื่องสับอ้อย",
+          "ลูกหีบ", "เครื่องแยก", "ไอน้ำ", "เชื้อเพลิงชีวมวล",
+          "ผลผลิตต่อไร่", "โควตาอ้อย", "แขวง", "เมือง",
+          "ปุ๋ย", "ยาฆ่าแมลง", "สารเคมีเกษตร", "แปลง",
+          "ดิน", "ฟอสฟอรัส", "ไนโตรเจน", "โพแทสเซียม",
+          "อินทรียวัตถุ", "ความอุดมสมบูรณ์", "เก็บตัวอย่าง"
+        ],
+        "en": [
+          "ccs", "pol", "brix", "purity", "bagasse", "molasses",
+          "massecuite", "imbibition", "bhr", "recovery", "extraction",
+          "sugar", "cane", "crushing", "boiling", "centrifugal",
+          "syrup", "clarification", "evaporation", "crystallization",
+          "ton cane", "tcd", "tchr", "sugar loss", "undetermined loss",
+          "juice", "mixed juice", "clear juice", "raw sugar",
+          "refined sugar", "white sugar", "icumsa", "supersaturation",
+          "false grain", "pan boiling", "vacuum pan", "strike",
+          "magma", "affination", "filter cake", "mud",
+          "fiber", "trash", "dextran", "reducing sugar",
+          "retention time", "steam economy", "bpe", "vapor bleeding",
+          "cane quality", "burnt cane", "fresh cane", "weighbridge",
+          "farmer", "variety", "ratoon", "plant cane",
+          "first expressed juice", "last mill", "overall recovery",
+          "extraction rate", "pol in cane", "pol in bagasse"
+        ],
+        "lo": [
+          "ອ້ອຍ", "ນ້ຳຕານ", "ໂຮງງານ", "ຫີບ", "ກາກ",
+          "ໂມລາດ", "ນ້ຳອ້ອຍ", "ຊາວໄຮ່", "ໄຮ່ອ້ອຍ",
+          "ຕັນອ້ອຍ", "ການຜະລິດ", "ຄຸນນະພາບ", "ນ້ຳຕານຊາຍ",
+          "ເຂດ", "ແຂວງ", "ບ້ານ", "ແປງ", "ພັນ"
+        ]
+      },
+      "sheets": [
+        "หีบอ้อย", "crushing", "boiling house", "การผลิต",
+        "daily production", "lab analysis", "cane receiving",
+        "สรุปผลผลิต", "ตั๋วชั่ง", "quality lab", "utility",
+        "ผลวิเคราะห์", "downtime",
+        "fertilizer", "pesticide", "ปุ๋ย", "ยาฆ่าแมลง",
+        "water usage", "การใช้น้ำ", "สารเคมีเกษตร", "ไร่อ้อย"
+      ],
+      "weightPerHit": 2.0
+    },
+    "valueShapes": [
+      {
+        "columnLike": "pol|พอล|Pol \\(%\\)",
+        "type": "percentage",
+        "range": [5, 20],
+        "weight": 4.0,
+        "note": "Pol % cane physically lives here; near-proof signal"
+      },
+      {
+        "columnLike": "brix|บริกซ์|Brix",
+        "type": "percentage",
+        "range": [10, 25],
+        "weight": 3.0,
+        "note": "Brix % in juice or cane; strong sugar-industry signal"
+      },
+      {
+        "columnLike": "ccs|ซีซีเอส|CCS",
+        "type": "number",
+        "range": [8, 16],
+        "weight": 4.0,
+        "note": "Commercial Cane Sugar; definitive if within physics range"
+      },
+      {
+        "columnLike": "recovery|Overall Recovery|อัตราการสกัด",
+        "type": "percentage",
+        "range": [70, 98],
+        "weight": 3.0,
+        "note": "Overall recovery % in boiling house; high-confidence signal"
+      },
+      {
+        "columnLike": "bhr|boiling house recovery",
+        "type": "percentage",
+        "range": [75, 98],
+        "weight": 3.5,
+        "note": "Boiling House Recovery; specific to sugar processing"
+      },
+      {
+        "columnLike": "purity|ความบริสุทธิ์|Purity",
+        "type": "percentage",
+        "range": [60, 100],
+        "weight": 2.5,
+        "note": "Juice or sugar purity; strong but also appears in other labs"
+      },
+      {
+        "columnLike": "icumsa|ICUMSA|สี ICUMSA",
+        "type": "number",
+        "range": [20, 5000],
+        "weight": 3.5,
+        "note": "ICUMSA color units; definitive sugar quality metric"
+      },
+      {
+        "columnLike": "อ้อยเข้าหีบ|cane crushed|ตันอ้อย|ton cane",
+        "type": "number",
+        "range": [100, 50000],
+        "weight": 2.5,
+        "note": "Daily cane throughput in tons; confirms scale"
+      },
+      {
+        "columnLike": "fiber|เส้นใย|ไฟเบอร์",
+        "type": "percentage",
+        "range": [10, 18],
+        "weight": 2.0,
+        "note": "Fiber % in cane; ancillary sugar signal"
+      },
+      {
+        "columnLike": "imbibition|น้ำท่วม",
+        "type": "percentage",
+        "range": [150, 350],
+        "weight": 3.0,
+        "note": "Imbibition % on fiber; unique to sugar milling"
+      }
+    ],
+    "unitPatterns": [
+      "ตันอ้อย", "ton cane", "tcd", "tchr", "ตัน/วัน",
+      "IU", "ICUMSA", "กก./ตันอ้อย", "kg/tc"
+    ],
+    "negative": [
+      { "lexicon": ["diagnosis", "patient", "ผู้ป่วย", "โรค"], "weight": -3.0 },
+      { "lexicon": ["student", "นักเรียน", "grade", "เกรด", "GPA"], "weight": -2.0 },
+      { "lexicon": ["portfolio", "stock price", "หุ้น", "กองทุน"], "weight": -2.0 },
+      { "lexicon": ["hotel", "booking", "reservation", "check-in"], "weight": -1.5 },
+      { "lexicon": ["pollutant", "air_quality", "emission", "carbon", "pm25", "pm10", "no2", "so2", "co_ppm"], "weight": -3.0 },
+      { "lexicon": ["shipment_id", "carrier", "freight", "tracking_events", "bill of lading", "cost_per_delivery"], "weight": -2.0 },
+      { "lexicon": ["impression", "ctr", "cpc", "roas", "campaign_id", "ad_group", "engagement_rate"], "weight": -2.0 },
+      { "lexicon": ["cart", "add_to_cart", "checkout", "shipping_fee", "marketplace", "shopee", "lazada"], "weight": -2.0 },
+      { "lexicon": ["occupancy", "adr", "revpar", "check_in", "room_type", "no_shows"], "weight": -2.0 }
+    ]
+  },
+
+  "business": {
+    "processes": [
+      {
+        "id": "cane_supply",
+        "stages": ["ส่งเสริมชาวไร่", "ปลูกอ้อย", "เก็บเกี่ยว", "ขนส่ง", "ชั่งน้ำหนัก", "ตรวจคุณภาพ"]
+      },
+      {
+        "id": "crushing",
+        "stages": ["รับอ้อย", "สับ/ย่อย", "หีบ (ลูกหีบ 1-5)", "น้ำอ้อยรวม", "กากอ้อย→เชื้อเพลิง"]
+      },
+      {
+        "id": "clarification",
+        "stages": ["ชั่ง/วัดน้ำอ้อย", "ให้ความร้อน", "เติมปูนขาว", "ตกตะกอน", "กรอง", "น้ำอ้อยใส"]
+      },
+      {
+        "id": "evaporation",
+        "stages": ["น้ำอ้อยใส", "ระเหยหลายชั้น", "น้ำเชื่อม (60-65 Brix)"]
+      },
+      {
+        "id": "boiling_crystallization",
+        "stages": ["เคี่ยว (หม้อเคี่ยว)", "ตกผลึก", "แมสคิวท์ A/B/C", "โมลาส"]
+      },
+      {
+        "id": "centrifugal_drying",
+        "stages": ["ปั่นแยก", "ล้างผลึก", "อบแห้ง", "ร่อนคัดขนาด", "บรรจุ"]
+      }
+    ],
+    "goals": [
+      "maximize extraction rate and overall recovery",
+      "minimize sugar loss (undetermined loss < 2%)",
+      "maximize CCS-based revenue per ton cane",
+      "minimize downtime and maximize crushing capacity (TCD)",
+      "optimize cane quality (fresh cane ratio, reduce burnt cane)",
+      "maximize steam economy and cogeneration efficiency",
+      "meet ICUMSA color spec for premium grade sugar",
+      "ensure cane supply continuity throughout crushing season"
+    ],
+    "personas": [
+      {
+        "type": "executive",
+        "cares": ["revenue", "recovery", "vs-plan", "cane supply forecast", "season projection"],
+        "cadence": "daily-morning"
+      },
+      {
+        "type": "operational",
+        "cares": ["downtime", "shift performance", "loss points", "CCS trend", "extraction rate"],
+        "cadence": "per-shift"
+      },
+      {
+        "type": "quality_lab",
+        "cares": ["Pol", "Brix", "Purity", "ICUMSA", "process control limits"],
+        "cadence": "per-shift"
+      },
+      {
+        "type": "agricultural",
+        "cares": ["cane supply volume", "farmer delivery", "cane freshness", "variety performance"],
+        "cadence": "daily"
+      }
+    ],
+    "decisionCatalog": [
+      "intervene-in-operations",
+      "explain-variance",
+      "allocate-maintenance",
+      "plan-forecast",
+      "adjust-process-parameters",
+      "route-cane-supply",
+      "schedule-pan-boiling",
+      "investigate-loss"
+    ],
+    "seasonality": "crushing season (Nov–Apr); off-season dashboards shift to maintenance planning, cane development tracking, and equipment overhaul framing. Peak crushing Dec–Feb."
+  },
+
+  "kpiRefs": [
+    "kpi.sugar.ccs",
+    "kpi.sugar.extraction_pct",
+    "kpi.sugar.bhr",
+    "kpi.sugar.overall_recovery",
+    "kpi.sugar.undetermined_loss",
+    "kpi.sugar.downtime_hr",
+    "kpi.sugar.cane_crushed",
+    "kpi.sugar.pol_in_cane",
+    "kpi.sugar.pol_in_bagasse",
+    "kpi.sugar.fiber_pct",
+    "kpi.sugar.imbibition_pct",
+    "kpi.sugar.sugar_produced",
+    "kpi.sugar.icumsa_color",
+    "kpi.sugar.steam_consumption",
+    "kpi.sugar.cane_freshness_ratio",
+    "kpi.sugar.tcd",
+    "kpi.mfg.oee"
+  ],
+
+  "genomeRefs": [
+    "genome.sugar_daily_production_v3",
+    "genome.sugar_udl_analysis_v1",
+    "genome.sugar_quality_lab_v1",
+    "genome.sugar_cane_supply_v1"
+  ],
+
+  "vizOverrides": [
+    { "rule": "control-chart preferred for Pol/Brix stability monitoring", "cites": "doc 06 §5" },
+    { "rule": "time-series with target band for CCS and recovery trends", "cites": "doc 06 §3" },
+    { "rule": "waterfall chart for sugar loss breakdown (extraction→clarification→evaporation→boiling→centrifugal)", "cites": "doc 06 §4" },
+    { "rule": "gauge/bullet for shift KPIs vs target (TCD, recovery)", "cites": "doc 06 §3" },
+    { "rule": "heatmap for hourly crushing rate by day-of-season", "cites": "doc 06 §5" }
+  ],
+
+  "fixtures": [
+    "ตัวอย่าง Data/Mock_Dashboard_Data/01_เกษตรและไร่อ้อย/*.json",
+    "ตัวอย่าง Data/Mock_Dashboard_Data/06_การผลิต/*.json"
+  ]
+}

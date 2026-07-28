@@ -1,0 +1,224 @@
+{
+  "id": "hr_people",
+  "version": "1.0.0",
+  "parent": null,
+
+  "identity": {
+    "nameTH": "ทรัพยากรบุคคล",
+    "nameEN": "HR & People",
+    "nameLO": "ຊັບພະຍາກອນບຸກຄົນ"
+  },
+
+  "signatures": {
+    "lexicon": {
+      "columns": {
+        "th": [
+          "พนักงาน", "เงินเดือน", "ตำแหน่ง", "ลาออก", "เลิกจ้าง",
+          "รหัสพนักงาน", "ชื่อ-สกุล", "แผนก", "หน่วยงาน", "ฝ่าย",
+          "วันที่เริ่มงาน", "อายุงาน", "ประเภทการจ้าง",
+          "พนักงานประจำ", "พนักงานรายวัน", "พนักงานสัญญาจ้าง",
+          "จำนวนพนักงาน", "อัตรากำลัง", "อัตราการลาออก",
+          "สวัสดิการ", "ค่าล่วงเวลา", "โอที", "เบี้ยเลี้ยง",
+          "ลาป่วย", "ลากิจ", "ลาพักร้อน", "วันลา", "สิทธิ์ลา",
+          "ประเมินผล", "คะแนนประเมิน", "KPI พนักงาน",
+          "อบรม", "พัฒนา", "ชั่วโมงอบรม", "หลักสูตร",
+          "สมัครงาน", "สัมภาษณ์", "บรรจุ", "ทดลองงาน",
+          "ค่าจ้าง", "ค่าตอบแทน", "โบนัส", "ค่าครองชีพ",
+          "ประกันสังคม", "กองทุนสำรองเลี้ยงชีพ",
+          "เกษียณ", "ปลดเกษียณ", "โครงสร้างองค์กร",
+          "ระดับ", "ชั้น", "ขั้น", "กลุ่มงาน"
+        ],
+        "en": [
+          "employee", "staff", "headcount", "personnel",
+          "salary", "wage", "compensation", "payroll", "pay",
+          "position", "title", "role", "department", "division",
+          "hire date", "start date", "tenure", "seniority",
+          "turnover", "attrition", "resignation", "termination",
+          "retention", "voluntary", "involuntary",
+          "full time", "part time", "contract", "temporary",
+          "leave", "absence", "sick leave", "vacation", "pto",
+          "overtime", "ot", "allowance", "benefit",
+          "performance review", "performance appraisal", "kpi",
+          "training", "development", "learning hours",
+          "recruitment", "hiring", "onboarding", "probation",
+          "bonus", "incentive", "cost of living",
+          "social security", "provident fund",
+          "retirement", "org chart", "span of control",
+          "grade", "level", "band", "job family",
+          "comp ratio", "compa ratio", "market rate"
+        ],
+        "lo": [
+          "ພະນັກງານ", "ເງິນເດືອນ", "ຕຳແໜ່ງ", "ລາອອກ",
+          "ແຜນກ", "ຫົວໜ່ວຍ", "ຝ່າຍ", "ສະຫວັດດີການ",
+          "ປະກັນສັງຄົມ", "ອົບຮົມ", "ຄ່າຈ້າງ", "ໂບນັດ",
+          "ລາພັກ", "ລາປ່ວຍ", "ການຈ້າງ"
+        ]
+      },
+      "sheets": [
+        "employee", "พนักงาน", "ทรัพยากรบุคคล", "HR",
+        "headcount", "อัตรากำลัง", "salary", "เงินเดือน",
+        "payroll", "leave", "วันลา", "training", "อบรม",
+        "performance review", "ประเมินผล", "recruitment", "สมัครงาน",
+        "turnover", "การลาออก", "org chart"
+      ],
+      "weightPerHit": 1.5
+    },
+    "valueShapes": [
+      {
+        "columnLike": "อัตราการลาออก|turnover rate|attrition rate|attrition %",
+        "type": "percentage",
+        "range": [0, 50],
+        "weight": 3.5,
+        "note": "Annual turnover/attrition rate; definitive HR metric"
+      },
+      {
+        "columnLike": "comp ratio|compa ratio|อัตราค่าตอบแทนเทียบตลาด",
+        "type": "percentage",
+        "range": [70, 150],
+        "weight": 3.0,
+        "note": "Compensation ratio vs market midpoint"
+      },
+      {
+        "columnLike": "อายุงาน|tenure|seniority",
+        "type": "number",
+        "range": [0, 40],
+        "weight": 2.0,
+        "note": "Years of service"
+      },
+      {
+        "columnLike": "training hours|ชั่วโมงอบรม|learning hours",
+        "type": "number",
+        "range": [0, 200],
+        "weight": 2.0,
+        "note": "Training hours per employee per year"
+      },
+      {
+        "columnLike": "performance rating|คะแนนประเมิน|appraisal score",
+        "type": "number",
+        "range": [1, 5],
+        "weight": 2.5,
+        "note": "Performance rating on typical 1-5 scale"
+      },
+      {
+        "columnLike": "absence rate|อัตราการขาดงาน|sick rate",
+        "type": "percentage",
+        "range": [0, 20],
+        "weight": 2.5,
+        "note": "Absence/sick leave rate"
+      }
+    ],
+    "unitPatterns": [
+      "คน", "อัตรา", "ตำแหน่ง", "บาท/เดือน", "กีบ/เดือน",
+      "ชั่วโมง/คน", "วัน/คน", "headcount", "FTE"
+    ],
+    "negative": [
+      { "lexicon": ["patient", "ผู้ป่วย", "diagnosis", "โรค"], "weight": -3.0 },
+      { "lexicon": ["ccs", "pol", "brix", "bagasse", "อ้อย"], "weight": -2.0 },
+      { "lexicon": ["stock", "inventory", "sku", "reorder", "product_id", "units_sold"], "weight": -1.5 },
+      { "lexicon": ["pipeline", "deal", "opportunity", "win rate"], "weight": -1.5 },
+      { "lexicon": ["player", "goals_for", "assists", "tackles", "league", "standings", "match_result", "scored"], "weight": -3.0 },
+      { "lexicon": ["student", "enrollment", "gpa", "credits", "semester", "curriculum", "instructor", "completion_rate", "avg_grade", "dropout", "enrolled"], "weight": -3.0 },
+      { "lexicon": ["followers", "likes", "shares", "impressions", "reach", "hashtag", "post_id"], "weight": -3.0 },
+      { "lexicon": ["incident_id", "severity", "deployment", "uptime", "firmware", "sensor"], "weight": -2.0 },
+      { "lexicon": ["guest", "booking", "occupancy", "check_in", "room_type"], "weight": -2.0 },
+      { "lexicon": ["pageviews", "bounce_rate", "sessions", "page_path", "core_web_vital"], "weight": -2.0 },
+      { "lexicon": ["supplier", "requisition", "purchase_order", "ผู้ขาย", "จัดซื้อ"], "weight": -2.0 },
+      { "lexicon": ["protocol", "chain", "apy", "defi", "staking", "wallet", "token", "pool"], "weight": -3.0 },
+      { "lexicon": ["shipment_id", "carrier", "freight", "tracking_events", "bill of lading", "cost_per_delivery"], "weight": -2.0 },
+      { "lexicon": ["impression", "ctr", "cpc", "roas", "campaign_id", "ad_group"], "weight": -2.0 },
+      { "lexicon": ["cart", "add_to_cart", "checkout", "shipping_fee", "marketplace", "shopee", "lazada"], "weight": -2.0 },
+      { "lexicon": ["occupancy", "adr", "revpar", "check_in", "room_type", "no_shows"], "weight": -2.0 }
+    ]
+  },
+
+  "business": {
+    "processes": [
+      {
+        "id": "hire_to_retire",
+        "stages": ["วางแผนอัตรากำลัง", "สรรหา", "สัมภาษณ์/คัดเลือก", "บรรจุ/ทดลองงาน", "พัฒนา", "ประเมินผล", "เกษียณ/ลาออก"]
+      },
+      {
+        "id": "payroll_cycle",
+        "stages": ["บันทึกเวลา", "คำนวณค่าจ้าง/OT", "หักภาษี/ประกันสังคม", "อนุมัติ", "จ่ายเงินเดือน"]
+      },
+      {
+        "id": "performance_management",
+        "stages": ["ตั้งเป้าหมาย", "ติดตามผลงาน", "ประเมินกลางปี", "ประเมินปลายปี", "จ่ายโบนัส/ปรับเงินเดือน"]
+      },
+      {
+        "id": "training_development",
+        "stages": ["สำรวจความต้องการ", "จัดทำแผนอบรม", "ดำเนินการ", "ประเมินผลอบรม", "ติดตามการนำไปใช้"]
+      }
+    ],
+    "goals": [
+      "attract and retain quality talent",
+      "reduce turnover rate especially in critical roles",
+      "develop employee capabilities and career paths",
+      "ensure competitive compensation and benefits",
+      "maintain optimal headcount and staffing ratios",
+      "improve employee engagement and satisfaction",
+      "ensure labor law compliance",
+      "optimize HR cost as percentage of revenue"
+    ],
+    "personas": [
+      {
+        "type": "executive",
+        "cares": ["headcount vs budget", "turnover trend", "HR cost ratio", "engagement score"],
+        "cadence": "monthly"
+      },
+      {
+        "type": "hr_manager",
+        "cares": ["vacancies", "attrition hotspots", "training compliance", "payroll accuracy"],
+        "cadence": "weekly"
+      },
+      {
+        "type": "department_head",
+        "cares": ["my team headcount", "leave patterns", "performance ratings", "overtime cost"],
+        "cadence": "monthly"
+      }
+    ],
+    "decisionCatalog": [
+      "manage-people",
+      "allocate-headcount",
+      "plan-forecast",
+      "explain-variance",
+      "investigate-turnover",
+      "approve-compensation",
+      "develop-talent",
+      "optimize-workforce"
+    ],
+    "seasonality": "Annual performance review cycle (typically Q4 or fiscal year-end). Bonus/salary adjustment season. New graduate hiring season (Mar-Jun). Seasonal labor for crushing season (Nov-Apr) in sugar factories."
+  },
+
+  "kpiRefs": [
+    "kpi.hr.headcount",
+    "kpi.hr.turnover_rate",
+    "kpi.hr.voluntary_turnover",
+    "kpi.hr.time_to_fill",
+    "kpi.hr.comp_ratio",
+    "kpi.hr.training_hours_per_employee",
+    "kpi.hr.absence_rate",
+    "kpi.hr.overtime_rate",
+    "kpi.hr.tenure_avg",
+    "kpi.hr.hr_cost_ratio",
+    "kpi.hr.engagement_score",
+    "kpi.hr.vacancy_rate"
+  ],
+
+  "genomeRefs": [
+    "genome.hr_headcount_overview_v1",
+    "genome.hr_turnover_analysis_v1",
+    "genome.hr_compensation_review_v1"
+  ],
+
+  "vizOverrides": [
+    { "rule": "treemap or sunburst for org structure / headcount by department", "cites": "doc 06 §5" },
+    { "rule": "bar chart for turnover rate by department with company-average reference line", "cites": "doc 06 §3" },
+    { "rule": "histogram for tenure distribution", "cites": "doc 06 §5" },
+    { "rule": "heatmap for leave patterns by month and department", "cites": "doc 06 §5" }
+  ],
+
+  "fixtures": [
+    "ตัวอย่าง Data/Mock_Dashboard_Data/09_ทรัพยากรบุคคล/*.json"
+  ]
+}

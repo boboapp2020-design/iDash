@@ -1,0 +1,221 @@
+{
+  "id": "sales_crm",
+  "version": "1.0.0",
+  "parent": null,
+
+  "identity": {
+    "nameTH": "การขายและลูกค้าสัมพันธ์",
+    "nameEN": "Sales & CRM",
+    "nameLO": "ການຂາຍ ແລະ ລູກຄ້າສຳພັນ"
+  },
+
+  "signatures": {
+    "lexicon": {
+      "columns": {
+        "th": [
+          "ลูกค้า", "ยอดขาย", "ใบสั่งขาย", "ใบเสนอราคา", "ช่องทาง",
+          "รหัสลูกค้า", "ชื่อลูกค้า", "ประเภทลูกค้า", "กลุ่มลูกค้า",
+          "มูลค่าขาย", "ปริมาณขาย", "ราคาต่อหน่วย", "ส่วนลด",
+          "ยอดขายสะสม", "เป้าขาย", "ผลงานขาย", "สัดส่วนขาย",
+          "ใบสั่งซื้อ", "คำสั่งซื้อ", "สถานะคำสั่งซื้อ", "วันที่สั่งขาย",
+          "การจัดส่ง", "ใบส่งของ", "สถานะการจัดส่ง", "ปลายทาง",
+          "วงเงินเครดิต", "เงื่อนไขชำระ", "ยอดค้างชำระ",
+          "พนักงานขาย", "ทีมขาย", "เขตขาย", "ภาค",
+          "ขายในประเทศ", "ส่งออก", "ตลาดต่างประเทศ",
+          "ชื่อสินค้า", "กลุ่มสินค้า", "รายการสินค้า",
+          "ใบแจ้งหนี้", "ใบกำกับภาษี", "มูลค่ารวม",
+          "ลูกค้าใหม่", "ลูกค้าเก่า", "ลูกค้าที่สูญเสีย",
+          "ความพึงพอใจ", "ข้อร้องเรียน", "บริการหลังการขาย"
+        ],
+        "en": [
+          "customer", "client", "account", "sales", "revenue",
+          "sales order", "quotation", "quote", "proposal",
+          "pipeline", "opportunity", "deal", "lead", "prospect",
+          "win rate", "conversion", "close rate", "funnel",
+          "channel", "segment", "territory", "region",
+          "aov", "average order value", "basket size",
+          "churn", "retention", "lifetime value", "ltv", "clv",
+          "crm", "contact", "activity", "follow up",
+          "target", "quota", "attainment", "commission",
+          "product", "sku", "unit price", "discount",
+          "shipment", "delivery", "dispatch", "invoice",
+          "domestic", "export", "international",
+          "salesperson", "sales rep", "sales team",
+          "customer satisfaction", "nps", "complaint",
+          "upsell", "cross-sell", "repeat purchase"
+        ],
+        "lo": [
+          "ລູກຄ້າ", "ການຂາຍ", "ຍອດຂາຍ", "ສິນຄ້າ", "ລາຄາ",
+          "ສ່ວນລົດ", "ຊ່ອງທາງ", "ພະນັກງານຂາຍ", "ເປົ້າໝາຍ",
+          "ຄຳສັ່ງຊື້", "ການຈັດສົ່ງ", "ໃບແຈ້ງໜີ້"
+        ]
+      },
+      "sheets": [
+        "sales", "ยอดขาย", "การขาย", "customer", "ลูกค้า",
+        "orders", "คำสั่งซื้อ", "ใบสั่งขาย", "pipeline",
+        "CRM", "shipment", "การจัดส่ง",
+        "sales by product", "ยอดขายตามสินค้า", "revenue"
+      ],
+      "weightPerHit": 1.5
+    },
+    "valueShapes": [
+      {
+        "columnLike": "win rate|conversion rate|อัตราปิดการขาย",
+        "type": "percentage",
+        "range": [5, 80],
+        "weight": 3.5,
+        "note": "Deal win/conversion rate; definitive sales funnel metric"
+      },
+      {
+        "columnLike": "aov|average order value|มูลค่าเฉลี่ยต่อคำสั่ง",
+        "type": "number",
+        "range": [100, 10000000],
+        "weight": 2.5,
+        "note": "Average order value; scale varies by industry"
+      },
+      {
+        "columnLike": "churn|retention|อัตราการรักษาลูกค้า",
+        "type": "percentage",
+        "range": [0, 100],
+        "weight": 3.0,
+        "note": "Customer churn or retention rate"
+      },
+      {
+        "columnLike": "nps|Net Promoter Score|ความพึงพอใจ",
+        "type": "number",
+        "range": [-100, 100],
+        "weight": 2.5,
+        "note": "NPS ranges -100 to 100"
+      },
+      {
+        "columnLike": "สัดส่วนขายส่งออก|export ratio|สัดส่วนส่งออก",
+        "type": "percentage",
+        "range": [0, 100],
+        "weight": 2.0,
+        "note": "Export vs domestic sales ratio"
+      },
+      {
+        "columnLike": "quota attainment|ผลงานเทียบเป้า",
+        "type": "percentage",
+        "range": [0, 200],
+        "weight": 2.5,
+        "note": "Sales quota attainment percentage"
+      }
+    ],
+    "unitPatterns": [
+      "บาท", "กีบ", "THB", "LAK", "USD", "฿",
+      "หน่วยบรรจุ", "ตัน", "กล่อง", "ชิ้น", "ราย"
+    ],
+    "negative": [
+      { "lexicon": ["patient", "ผู้ป่วย", "diagnosis", "โรค"], "weight": -3.0 },
+      { "lexicon": ["ccs", "pol", "brix", "bagasse", "อ้อย"], "weight": -2.0 },
+      { "lexicon": ["oee", "defect rate", "cycle time", "mtbf"], "weight": -1.5 },
+      { "lexicon": ["salary", "เงินเดือน", "payroll", "leave"], "weight": -1.5 },
+      { "lexicon": ["subscriber", "dau", "mau", "activation", "mrr", "arr", "churn_rate", "arpu", "expansion_mrr", "net_new_mrr"], "weight": -2.5 },
+      { "lexicon": ["carrier", "freight", "tracking_events", "shipment_id", "delay_days"], "weight": -2.0 },
+      { "lexicon": ["enrollment", "semester", "course", "curriculum", "gpa", "student", "tuition", "enrolled"], "weight": -3.0 },
+      { "lexicon": ["open_rate", "unsubscribe", "bounce_rate", "ctr", "impression"], "weight": -2.0 },
+      { "lexicon": ["requisition", "procurement", "tender", "จัดซื้อ", "ผู้ขาย", "purchase order", "purchasing group"], "weight": -2.0 },
+      { "lexicon": ["occupancy", "adr", "revpar", "check_in", "room_type", "no_shows"], "weight": -2.5 },
+      { "lexicon": ["on_time", "damaged", "cost_per_delivery", "avg_delivery_days", "total_deliveries"], "weight": -4.0 },
+      { "lexicon": ["cart", "add_to_cart", "checkout", "shipping_fee", "marketplace", "shopee", "lazada", "gmv"], "weight": -2.0 },
+      { "lexicon": ["roas", "campaign_id", "ad_group", "cpc", "engagement_rate", "ad_spend"], "weight": -2.0 }
+    ]
+  },
+
+  "business": {
+    "processes": [
+      {
+        "id": "order_to_cash",
+        "stages": ["รับคำสั่งซื้อ", "ยืนยันสั่ง", "จัดเตรียม", "จัดส่ง", "ออกใบแจ้งหนี้", "รับชำระ"]
+      },
+      {
+        "id": "sales_pipeline",
+        "stages": ["ค้นหาลูกค้า", "นำเสนอ", "เสนอราคา", "เจรจา", "ปิดการขาย", "ส่งมอบ"]
+      },
+      {
+        "id": "customer_management",
+        "stages": ["ลงทะเบียนลูกค้า", "จัดกลุ่ม", "ดูแลความสัมพันธ์", "ขายเพิ่ม", "รักษาลูกค้า"]
+      }
+    ],
+    "goals": [
+      "maximize revenue and revenue growth rate",
+      "increase win rate and pipeline coverage",
+      "grow average order value",
+      "reduce customer churn and increase retention",
+      "achieve sales quota across teams and territories",
+      "optimize channel mix (domestic vs export, online vs offline)",
+      "improve customer satisfaction and NPS",
+      "shorten sales cycle time"
+    ],
+    "personas": [
+      {
+        "type": "executive",
+        "cares": ["revenue vs target", "growth rate", "top customers", "channel performance"],
+        "cadence": "weekly"
+      },
+      {
+        "type": "sales_manager",
+        "cares": ["team quota attainment", "pipeline health", "win rate", "lost deals"],
+        "cadence": "daily"
+      },
+      {
+        "type": "salesperson",
+        "cares": ["my pipeline", "pending orders", "delivery status", "commission"],
+        "cadence": "daily"
+      },
+      {
+        "type": "customer_service",
+        "cares": ["complaints", "delivery issues", "satisfaction scores", "escalations"],
+        "cadence": "daily"
+      }
+    ],
+    "decisionCatalog": [
+      "find-opportunity",
+      "monitor-performance",
+      "explain-variance",
+      "plan-forecast",
+      "allocate-territory",
+      "prioritize-pipeline",
+      "investigate-churn",
+      "optimize-channel"
+    ],
+    "seasonality": "Seasonal demand peaks vary by product (festive seasons, year-end). Sugar sales peak during/after crushing season. Export contracts may follow global commodity cycles."
+  },
+
+  "kpiRefs": [
+    "kpi.sales.revenue",
+    "kpi.sales.revenue_growth",
+    "kpi.sales.order_count",
+    "kpi.sales.aov",
+    "kpi.sales.win_rate",
+    "kpi.sales.pipeline_value",
+    "kpi.sales.quota_attainment",
+    "kpi.sales.churn_rate",
+    "kpi.sales.retention_rate",
+    "kpi.sales.customer_count",
+    "kpi.sales.new_customers",
+    "kpi.sales.revenue_per_customer",
+    "kpi.sales.channel_mix",
+    "kpi.sales.nps"
+  ],
+
+  "genomeRefs": [
+    "genome.sales_performance_v1",
+    "genome.sales_pipeline_v1",
+    "genome.sales_product_mix_v1",
+    "genome.sales_customer_analysis_v1"
+  ],
+
+  "vizOverrides": [
+    { "rule": "funnel chart for sales pipeline stages", "cites": "doc 06 §5" },
+    { "rule": "bar chart with target line for revenue vs quota by salesperson/team", "cites": "doc 06 §3" },
+    { "rule": "pie/donut for revenue by channel or product mix (limit to top-5 + other)", "cites": "doc 06 §3" },
+    { "rule": "line chart for revenue trend with YoY comparison", "cites": "doc 06 §3" },
+    { "rule": "scatter for customer value vs order frequency (RFM-style)", "cites": "doc 06 §5" }
+  ],
+
+  "fixtures": [
+    "ตัวอย่าง Data/Mock_Dashboard_Data/07_ลูกค้าและการขาย/*.json"
+  ]
+}

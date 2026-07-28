@@ -1,0 +1,129 @@
+/* ─── AI AUTOPILOT PROGRESS MODAL ─── */
+
+.ai-progress-card {
+  background: var(--card-bg); border-radius: var(--radius-lg);
+  width: 100%; max-width: 460px; max-height: 94vh; overflow-y: auto;
+  position: relative; box-shadow: var(--shadow-lg);
+  padding: 22px 26px 26px;
+}
+
+.ai-progress-header {
+  display: flex; align-items: center; gap: 12px;
+  padding-bottom: 16px; margin-bottom: 4px; border-bottom: 1px solid var(--border);
+}
+.ai-progress-header-icon {
+  width: 42px; height: 42px; border-radius: 50%; flex-shrink: 0; overflow: hidden;
+  background: var(--gray-50); box-shadow: inset 0 0 0 1px var(--border);
+}
+.ai-progress-header-icon img { width: 100%; height: 100%; object-fit: cover; }
+.ai-progress-header-title { font-size: 15px; font-weight: 800; color: var(--gray-900); }
+.ai-progress-header-sub { font-size: 11px; color: var(--text-muted); margin-top: 1px; }
+
+/* ── Hero graphic ── */
+.ai-progress-hero {
+  position: relative; height: 170px; display: flex; align-items: center; justify-content: center;
+  margin: 8px 0 4px;
+}
+.ai-progress-hero-glow {
+  position: absolute; inset: 0; margin: auto; width: 170px; height: 170px; border-radius: 50%;
+  background: radial-gradient(circle, var(--primary-lighter) 0%, rgba(219,234,254,.25) 55%, transparent 75%);
+}
+.ai-progress-deco {
+  position: absolute; border-radius: 50%; border: 2px solid var(--primary-light); opacity: .55;
+  animation: ai-deco-float 3.6s ease-in-out infinite;
+}
+.deco-1 { width: 14px; height: 14px; top: 14px; left: 46px; animation-delay: 0s; }
+.deco-2 { width: 9px; height: 9px; top: 52px; right: 30px; border-color: var(--accent-green); animation-delay: .5s; }
+.deco-3 { width: 7px; height: 7px; bottom: 30px; left: 30px; border-color: var(--accent-purple); animation-delay: 1s; }
+.deco-4 {
+  width: 11px; height: 11px; bottom: 18px; right: 54px; border-radius: 3px;
+  transform: rotate(45deg); border-color: var(--primary-light); animation-delay: 1.4s;
+}
+.deco-5 {
+  width: 8px; height: 8px; top: 30px; right: 66px; border-radius: 2px;
+  transform: rotate(45deg); border-color: var(--accent-green); animation-delay: 1.9s;
+}
+@keyframes ai-deco-float {
+  0%, 100% { transform: translateY(0) rotate(0deg); opacity: .35; }
+  50% { transform: translateY(-8px) rotate(20deg); opacity: .85; }
+}
+.deco-4, .deco-4:hover { transform: rotate(45deg); }
+
+.ai-progress-doc { position: relative; filter: drop-shadow(0 10px 18px rgba(37,99,235,.18)); }
+.ai-progress-badge {
+  position: absolute; right: -6px; bottom: -6px; width: 28px; height: 28px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary-light), var(--primary));
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 4px 10px -2px rgba(37,99,235,.6), 0 0 0 4px var(--card-bg);
+  animation: ai-badge-pulse 2s ease-in-out infinite;
+}
+@keyframes ai-badge-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+.ai-progress-title { font-size: 16px; font-weight: 800; color: var(--gray-900); text-align: center; margin-top: 6px; }
+.ai-progress-desc { font-size: 11.5px; color: var(--text-secondary); text-align: center; margin-top: 4px; line-height: 1.5; }
+
+/* ── Progress bar card ── */
+.ai-progress-bar-card {
+  margin-top: 16px; padding: 12px 14px; border-radius: var(--radius-sm);
+  background: var(--primary-lightest); border: 1px solid var(--primary-lighter);
+}
+.ai-progress-bar-row {
+  display: flex; justify-content: space-between; align-items: center;
+  font-size: 11.5px; font-weight: 700; color: var(--primary); margin-bottom: 8px;
+}
+.ai-progress-bar-track { height: 7px; border-radius: 4px; background: #dbeafe; overflow: hidden; }
+.ai-progress-bar-fill {
+  height: 100%; border-radius: 4px; background: linear-gradient(90deg, var(--primary-light), var(--primary));
+  transition: width .4s ease-out;
+}
+
+/* ── Steps checklist ── */
+.ai-progress-steps { list-style: none; margin-top: 12px; }
+.ai-progress-step {
+  display: flex; align-items: center; gap: 10px; padding: 8px 2px;
+}
+.ai-step-icon {
+  width: 20px; height: 20px; border-radius: 50%; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--gray-100); box-shadow: inset 0 0 0 1px var(--border);
+}
+.ai-progress-step[data-status="done"] .ai-step-icon { background: var(--accent-green); box-shadow: none; }
+.ai-progress-step[data-status="active"] .ai-step-icon {
+  background: var(--card-bg); box-shadow: inset 0 0 0 2px var(--primary-lighter);
+}
+.ai-step-spinner {
+  width: 12px; height: 12px; border-radius: 50%;
+  border: 2px solid var(--primary-lighter); border-top-color: var(--primary);
+  animation: ai-spin .7s linear infinite;
+}
+@keyframes ai-spin { to { transform: rotate(360deg); } }
+
+.ai-step-label { flex: 1; font-size: 12px; font-weight: 600; color: var(--gray-400); }
+.ai-progress-step[data-status="done"] .ai-step-label,
+.ai-progress-step[data-status="active"] .ai-step-label { color: var(--gray-800); }
+
+.ai-step-status { font-size: 10.5px; font-weight: 700; color: var(--gray-400); flex-shrink: 0; }
+.ai-progress-step[data-status="done"] .ai-step-status { color: var(--accent-green); }
+.ai-progress-step[data-status="active"] .ai-step-status { color: var(--primary); }
+
+/* ── Tip box ── */
+.ai-progress-tip {
+  display: flex; align-items: flex-start; gap: 10px; margin-top: 16px;
+  padding: 11px 12px; border-radius: var(--radius-sm);
+  background: var(--primary-lightest);
+}
+.ai-progress-tip-icon {
+  width: 24px; height: 24px; border-radius: 50%; flex-shrink: 0;
+  background: linear-gradient(135deg, var(--primary-light), var(--primary));
+  display: flex; align-items: center; justify-content: center;
+}
+.ai-progress-tip-title { font-size: 11px; font-weight: 700; color: var(--primary); }
+.ai-progress-tip-desc { font-size: 10.5px; color: var(--gray-600); line-height: 1.5; margin-top: 2px; }
+
+.ai-progress-error {
+  margin-top: 14px; padding: 10px 12px; border-radius: var(--radius-sm);
+  background: #fef2f2; border: 1px solid #fecaca; color: var(--accent-red); font-size: 11.5px;
+}

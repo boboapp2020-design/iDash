@@ -1,0 +1,177 @@
+[
+  {
+    "id": "kpi.hr.headcount",
+    "version": "1.0.0",
+    "domain": "hr_people",
+    "name": { "th": "จำนวนพนักงาน", "en": "Headcount" },
+    "formula": "count_distinct(employee_id)",
+    "inputs": {
+      "employee_id": { "role": "dimension", "unit": "id", "synonyms": { "th": ["รหัสพนักงาน", "พนักงาน", "รหัสประจำตัว", "ลูกจ้าง"], "en": ["employee ID", "employee", "staff", "worker", "headcount", "personnel"] } }
+    },
+    "aggNature": "extensive",
+    "direction": "target-band",
+    "format": { "kind": "number", "decimals": 0 },
+    "target": { "policy": "column", "benchmark": { "good": null, "warn": null } },
+    "grain": ["monthly", "quarterly", "yearly"],
+    "answers": ["How many employees do we have?", "Is headcount aligned with budget?"],
+    "variance": true,
+    "forecastCandidate": true,
+    "caveats": ["Distinguish FTE vs head count; include/exclude contractors consistently"]
+  },
+  {
+    "id": "kpi.hr.attrition_pct",
+    "version": "1.0.0",
+    "domain": "hr_people",
+    "name": { "th": "อัตราการลาออก", "en": "Attrition Rate %" },
+    "formula": "100 * count(exits) / avg(headcount)",
+    "inputs": {
+      "exits": { "role": "measure", "unit": "count", "synonyms": { "th": ["จำนวนลาออก", "พนักงานออก", "ลาออก", "พ้นสภาพ"], "en": ["exits", "terminations", "separations", "leavers", "turnover count"] } },
+      "headcount": { "role": "measure", "unit": "count", "synonyms": { "th": ["จำนวนพนักงาน", "อัตรากำลัง"], "en": ["headcount", "total employees", "workforce size"] } }
+    },
+    "aggNature": "intensive",
+    "direction": "lower-better",
+    "format": { "kind": "percentage", "decimals": 1 },
+    "target": { "policy": "domain-benchmark", "benchmark": { "good": 8.0, "warn": 15.0 } },
+    "grain": ["monthly", "quarterly", "yearly"],
+    "answers": ["What is the employee turnover rate?", "Is attrition increasing?"],
+    "variance": true,
+    "forecastCandidate": true,
+    "caveats": ["Separate voluntary from involuntary for actionability", "Annualize monthly rates for comparison"]
+  },
+  {
+    "id": "kpi.hr.new_hires",
+    "version": "1.0.0",
+    "domain": "hr_people",
+    "name": { "th": "จำนวนพนักงานใหม่", "en": "New Hires" },
+    "formula": "count(new_hires)",
+    "inputs": {
+      "new_hires": { "role": "measure", "unit": "count", "synonyms": { "th": ["พนักงานใหม่", "เข้าใหม่", "จ้างใหม่", "รับเข้า"], "en": ["new hires", "hires", "joiners", "new employees", "onboarded"] } }
+    },
+    "aggNature": "extensive",
+    "direction": "target-band",
+    "format": { "kind": "number", "decimals": 0 },
+    "target": { "policy": "column", "benchmark": { "good": null, "warn": null } },
+    "grain": ["monthly", "quarterly", "yearly"],
+    "answers": ["How many new employees joined this period?", "Is hiring keeping pace with attrition?"],
+    "variance": true,
+    "forecastCandidate": true,
+    "caveats": ["Compare against open positions to assess hiring velocity"]
+  },
+  {
+    "id": "kpi.hr.exits",
+    "version": "1.0.0",
+    "domain": "hr_people",
+    "name": { "th": "จำนวนพนักงานออก", "en": "Exits" },
+    "formula": "count(exits)",
+    "inputs": {
+      "exits": { "role": "measure", "unit": "count", "synonyms": { "th": ["จำนวนลาออก", "พนักงานออก", "ลาออก", "เกษียณ", "พ้นสภาพ"], "en": ["exits", "terminations", "separations", "leavers", "departures"] } }
+    },
+    "aggNature": "extensive",
+    "direction": "lower-better",
+    "format": { "kind": "number", "decimals": 0 },
+    "target": { "policy": "period-median", "benchmark": { "good": null, "warn": null } },
+    "grain": ["monthly", "quarterly", "yearly"],
+    "answers": ["How many employees left this period?", "Is the departure rate stable?"],
+    "variance": true,
+    "forecastCandidate": true,
+    "caveats": ["Distinguish voluntary, involuntary, and retirement for actionability"]
+  },
+  {
+    "id": "kpi.hr.tenure_mix",
+    "version": "1.0.0",
+    "domain": "hr_people",
+    "name": { "th": "สัดส่วนอายุงาน", "en": "Tenure Mix" },
+    "formula": "avg(tenure_years)",
+    "inputs": {
+      "tenure_years": { "role": "measure", "unit": "year", "synonyms": { "th": ["อายุงาน", "ระยะเวลาทำงาน", "ปีทำงาน"], "en": ["tenure", "years of service", "service years", "length of service", "seniority"] } }
+    },
+    "aggNature": "intensive",
+    "direction": "target-band",
+    "format": { "kind": "number", "decimals": 1 },
+    "target": { "policy": "period-median", "benchmark": { "good": null, "warn": null } },
+    "grain": ["quarterly", "yearly"],
+    "answers": ["What is the experience profile of the workforce?", "Is institutional knowledge at risk from tenure concentration?"],
+    "variance": false,
+    "forecastCandidate": false,
+    "caveats": ["Average hides distribution — present as histogram/bands for actionability"]
+  },
+  {
+    "id": "kpi.hr.comp_ratio",
+    "version": "1.0.0",
+    "domain": "hr_people",
+    "name": { "th": "อัตราส่วนค่าตอบแทน", "en": "Comp Ratio" },
+    "formula": "avg(actual_salary) / avg(midpoint_salary)",
+    "inputs": {
+      "actual_salary": { "role": "measure", "unit": "currency", "synonyms": { "th": ["เงินเดือนจริง", "ค่าตอบแทนจริง", "เงินเดือน"], "en": ["actual salary", "current salary", "base pay", "compensation"] } },
+      "midpoint_salary": { "role": "measure", "unit": "currency", "synonyms": { "th": ["เงินเดือนกลาง", "ค่ากลางเงินเดือน", "เงินเดือนมาตรฐาน"], "en": ["midpoint salary", "salary midpoint", "market rate", "pay grade midpoint"] } }
+    },
+    "aggNature": "intensive",
+    "direction": "target-band",
+    "format": { "kind": "number", "decimals": 2 },
+    "target": { "policy": "domain-benchmark", "benchmark": { "good": 1.0, "warn": 0.85 } },
+    "grain": ["quarterly", "yearly"],
+    "answers": ["Are employees paid at, above, or below market/grade midpoint?", "Is compensation equitable?"],
+    "variance": true,
+    "forecastCandidate": false,
+    "caveats": ["Requires pay grade structure to be meaningful", "Aggregate comp ratio hides pay equity issues within groups"]
+  },
+  {
+    "id": "kpi.hr.absence_rate",
+    "version": "1.0.0",
+    "domain": "hr_people",
+    "name": { "th": "อัตราการขาดงาน", "en": "Absence Rate %" },
+    "formula": "100 * sum(absent_days) / sum(available_days)",
+    "inputs": {
+      "absent_days": { "role": "measure", "unit": "day", "synonyms": { "th": ["วันขาดงาน", "วันลา", "วันหยุดป่วย", "ขาดงาน"], "en": ["absent days", "absence days", "sick days", "leave days", "days off"] } },
+      "available_days": { "role": "measure", "unit": "day", "synonyms": { "th": ["วันทำงาน", "วันทำการ", "วันที่ควรมา"], "en": ["available days", "working days", "scheduled days", "workdays"] } }
+    },
+    "aggNature": "intensive",
+    "direction": "lower-better",
+    "format": { "kind": "percentage", "decimals": 1 },
+    "target": { "policy": "domain-benchmark", "benchmark": { "good": 2.0, "warn": 5.0 } },
+    "grain": ["monthly", "quarterly", "yearly"],
+    "answers": ["What proportion of working days are lost to absence?", "Is absenteeism worsening?"],
+    "variance": true,
+    "forecastCandidate": true,
+    "caveats": ["Distinguish planned leave from unplanned absence for root cause analysis"]
+  },
+  {
+    "id": "kpi.hr.ot_hours",
+    "version": "1.0.0",
+    "domain": "hr_people",
+    "name": { "th": "ชั่วโมงทำงานล่วงเวลา", "en": "Overtime Hours" },
+    "formula": "sum(ot_hours)",
+    "inputs": {
+      "ot_hours": { "role": "measure", "unit": "hour", "synonyms": { "th": ["ชั่วโมง OT", "ทำงานล่วงเวลา", "โอที", "ชม.ล่วงเวลา"], "en": ["overtime hours", "OT hours", "overtime", "extra hours"] } }
+    },
+    "aggNature": "extensive",
+    "direction": "lower-better",
+    "format": { "kind": "number", "decimals": 0 },
+    "target": { "policy": "column", "benchmark": { "good": null, "warn": null } },
+    "grain": ["weekly", "monthly", "quarterly"],
+    "answers": ["How many overtime hours were worked?", "Is overtime indicating understaffing?"],
+    "variance": true,
+    "forecastCandidate": true,
+    "caveats": ["High OT may indicate understaffing, seasonal peaks, or poor planning — context is essential"]
+  },
+  {
+    "id": "kpi.hr.span_of_control",
+    "version": "1.0.0",
+    "domain": "hr_people",
+    "name": { "th": "สัดส่วนผู้ใต้บังคับบัญชา", "en": "Span of Control" },
+    "formula": "count(employees) / count(managers)",
+    "inputs": {
+      "employees": { "role": "measure", "unit": "count", "synonyms": { "th": ["จำนวนพนักงาน", "ลูกน้อง", "ผู้ใต้บังคับบัญชา"], "en": ["employees", "direct reports", "subordinates", "team members"] } },
+      "managers": { "role": "measure", "unit": "count", "synonyms": { "th": ["จำนวนหัวหน้า", "ผู้จัดการ", "ผู้บังคับบัญชา", "หัวหน้างาน"], "en": ["managers", "supervisors", "leaders", "management headcount"] } }
+    },
+    "aggNature": "intensive",
+    "direction": "target-band",
+    "format": { "kind": "number", "decimals": 1 },
+    "target": { "policy": "domain-benchmark", "benchmark": { "good": 7.0, "warn": 3.0 } },
+    "grain": ["quarterly", "yearly"],
+    "answers": ["How many direct reports does each manager have on average?", "Is the management structure efficient?"],
+    "variance": false,
+    "forecastCandidate": false,
+    "caveats": ["Optimal span varies by function — operational roles tolerate wider spans than knowledge work"]
+  }
+]

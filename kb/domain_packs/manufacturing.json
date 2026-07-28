@@ -1,0 +1,236 @@
+{
+  "id": "manufacturing",
+  "version": "1.0.0",
+  "parent": null,
+
+  "identity": {
+    "nameTH": "การผลิต",
+    "nameEN": "Manufacturing",
+    "nameLO": "ການຜະລິດ"
+  },
+
+  "signatures": {
+    "lexicon": {
+      "columns": {
+        "th": [
+          "ผลิต", "ของเสีย", "เครื่องจักร", "กะ", "กำลังการผลิต",
+          "ปริมาณผลิต", "อัตราการผลิต", "เวลาหยุด", "เวลาเดินเครื่อง",
+          "ประสิทธิภาพ", "คุณภาพ", "ของดี", "ชิ้นงาน", "ล็อต",
+          "แผนการผลิต", "ยอดผลิต", "หน่วยผลิต", "สายการผลิต",
+          "วัตถุดิบ", "ผลผลิต", "ผลิตภัณฑ์", "เครื่องสับ",
+          "เครื่องบด", "เครื่องอบ", "เครื่องบรรจุ", "เครื่องตรวจ",
+          "หยุดซ่อม", "หยุดเครื่อง", "ซ่อมบำรุง", "ซ่อมแซม",
+          "อะไหล่", "แม่พิมพ์", "ชั่วโมงเดินเครื่อง", "ชั่วโมงหยุด",
+          "ตารางการผลิต", "ใบสั่งผลิต", "BOM", "สูตรการผลิต",
+          "อัตราของเสีย", "เปอร์เซ็นต์ของเสีย", "สาเหตุการหยุด",
+          "ผลกระทบต่อการผลิต", "ตันสูญเสีย",
+          "ซ่อม", "ใบสั่งงานซ่อม", "บำรุงรักษา", "อุปกรณ์",
+          "สาเหตุการเสีย", "ค่าซ่อม", "แจ้งซ่อม",
+          "เครื่อง", "เดินเครื่อง", "หยุดเครื่อง"
+        ],
+        "en": [
+          "oee", "availability", "performance", "quality rate",
+          "downtime", "uptime", "defect", "reject", "scrap",
+          "production", "output", "yield", "throughput", "capacity",
+          "shift", "batch", "lot", "work order", "bom",
+          "cycle time", "takt time", "lead time", "changeover",
+          "machine", "equipment", "line", "cell", "station",
+          "mtbf", "mttr", "planned maintenance", "unplanned downtime",
+          "first pass yield", "rework", "waste", "efficiency",
+          "utilization", "bottleneck", "wip", "work in progress",
+          "raw material", "finished goods", "semi-finished",
+          "inspection", "quality control", "non-conformance", "ncr",
+          "production plan", "actual vs plan", "variance"
+        ],
+        "lo": [
+          "ການຜະລິດ", "ເຄື່ອງຈັກ", "ຂອງເສຍ", "ຄຸນນະພາບ",
+          "ກະ", "ປະສິດທິພາບ", "ວັດຖຸດິບ", "ຜະລິດຕະພັນ",
+          "ສາຍການຜະລິດ", "ແຜນຜະລິດ"
+        ]
+      },
+      "sheets": [
+        "production", "การผลิต", "downtime", "quality control", "คุณภาพการผลิต",
+        "OEE", "shift report", "รายงานกะ", "defect", "ของเสีย",
+        "machine log", "output summary", "สรุปผลผลิต"
+      ],
+      "weightPerHit": 1.5
+    },
+    "valueShapes": [
+      {
+        "columnLike": "oee|OEE|ประสิทธิภาพโดยรวม",
+        "type": "percentage",
+        "range": [30, 100],
+        "weight": 3.5,
+        "note": "Overall Equipment Effectiveness; definitive manufacturing metric"
+      },
+      {
+        "columnLike": "availability|อัตราการเดินเครื่อง",
+        "type": "percentage",
+        "range": [50, 100],
+        "weight": 2.5,
+        "note": "Machine availability component of OEE"
+      },
+      {
+        "columnLike": "performance rate|อัตราสมรรถนะ",
+        "type": "percentage",
+        "range": [50, 100],
+        "weight": 2.5,
+        "note": "Performance rate component of OEE"
+      },
+      {
+        "columnLike": "quality rate|อัตราคุณภาพ|first pass yield",
+        "type": "percentage",
+        "range": [80, 100],
+        "weight": 2.5,
+        "note": "Quality rate / first pass yield component of OEE"
+      },
+      {
+        "columnLike": "defect rate|อัตราของเสีย|reject rate|เปอร์เซ็นต์ของเสีย",
+        "type": "percentage",
+        "range": [0, 15],
+        "weight": 3.0,
+        "note": "Defect/reject rate; typically low single digits in good operations"
+      },
+      {
+        "columnLike": "cycle time|เวลารอบ",
+        "type": "number",
+        "range": [0.1, 3600],
+        "weight": 2.0,
+        "note": "Cycle time in seconds or minutes per unit"
+      },
+      {
+        "columnLike": "mtbf|MTBF",
+        "type": "number",
+        "range": [1, 10000],
+        "weight": 3.0,
+        "note": "Mean Time Between Failures in hours; strong manufacturing signal"
+      },
+      {
+        "columnLike": "mttr|MTTR",
+        "type": "number",
+        "range": [0.1, 100],
+        "weight": 3.0,
+        "note": "Mean Time To Repair in hours"
+      },
+      {
+        "columnLike": "downtime|เวลาหยุด|ชั่วโมงหยุด",
+        "type": "number",
+        "range": [0, 24],
+        "weight": 2.0,
+        "note": "Downtime hours per shift or per day"
+      }
+    ],
+    "unitPatterns": [
+      "ชิ้น/ชม.", "pcs/hr", "units/hr", "ตัน/วัน", "tons/day",
+      "kg/hr", "กก./ชม.", "ชิ้น", "ล็อต", "batch"
+    ],
+    "negative": [
+      { "lexicon": ["diagnosis", "patient", "ผู้ป่วย", "โรค"], "weight": -3.0 },
+      { "lexicon": ["student", "นักเรียน", "grade", "GPA"], "weight": -2.0 },
+      { "lexicon": ["portfolio", "dividend", "หุ้น", "กองทุน"], "weight": -2.0 },
+      { "lexicon": ["hotel", "booking", "reservation"], "weight": -1.5 },
+      { "lexicon": ["aqi", "pm25", "pm10", "o3_ppb", "no2_ppb", "so2_ppb", "co_ppm", "pollutant", "dominant_pollutant", "health_concern"], "weight": -3.0 },
+      { "lexicon": ["csat", "first_contact_resolution", "reopen_rate", "tickets_resolved", "handle_time"], "weight": -3.0 },
+      { "lexicon": ["shipment_id", "carrier", "freight", "tracking_events", "bill of lading", "cost_per_delivery"], "weight": -1.5 },
+      { "lexicon": ["impression", "ctr", "cpc", "roas", "campaign_id", "ad_group"], "weight": -2.0 },
+      { "lexicon": ["cart", "add_to_cart", "checkout", "shipping_fee", "marketplace", "shopee", "lazada"], "weight": -2.0 },
+      { "lexicon": ["student", "enrollment", "gpa", "semester", "curriculum", "tuition"], "weight": -3.0 },
+      { "lexicon": ["occupancy", "adr", "revpar", "check_in", "room_type", "no_shows"], "weight": -2.0 }
+    ]
+  },
+
+  "business": {
+    "processes": [
+      {
+        "id": "production_flow",
+        "stages": ["วางแผนผลิต", "เตรียมวัตถุดิบ", "ผลิต", "ตรวจสอบคุณภาพ", "บรรจุ", "จัดเก็บ"]
+      },
+      {
+        "id": "quality_control",
+        "stages": ["ตรวจรับวัตถุดิบ", "ตรวจระหว่างผลิต", "ตรวจสุดท้าย", "ปล่อยผ่าน/กักกัน"]
+      },
+      {
+        "id": "maintenance",
+        "stages": ["วางแผนบำรุงรักษา", "PM ตามรอบ", "แจ้งซ่อม", "ดำเนินการซ่อม", "ทดสอบ", "คืนเครื่อง"]
+      }
+    ],
+    "goals": [
+      "maximize OEE (availability x performance x quality)",
+      "minimize defect rate and rework",
+      "maximize throughput and capacity utilization",
+      "minimize unplanned downtime",
+      "reduce cycle time and lead time",
+      "optimize raw material consumption and yield",
+      "meet production plan targets",
+      "reduce maintenance cost through preventive programs"
+    ],
+    "personas": [
+      {
+        "type": "executive",
+        "cares": ["output vs plan", "cost per unit", "OEE trend", "quality incidents"],
+        "cadence": "daily-morning"
+      },
+      {
+        "type": "operational",
+        "cares": ["shift output", "downtime events", "defect count", "machine status"],
+        "cadence": "per-shift"
+      },
+      {
+        "type": "maintenance",
+        "cares": ["MTBF", "MTTR", "PM schedule compliance", "spare parts availability"],
+        "cadence": "daily"
+      },
+      {
+        "type": "quality",
+        "cares": ["defect rate", "NCR count", "first pass yield", "inspection results"],
+        "cadence": "per-shift"
+      }
+    ],
+    "decisionCatalog": [
+      "intervene-in-operations",
+      "explain-variance",
+      "allocate-maintenance",
+      "plan-forecast",
+      "adjust-production-schedule",
+      "investigate-quality-issue",
+      "rebalance-line",
+      "approve-rework-or-scrap"
+    ],
+    "seasonality": "Varies by sub-industry. General manufacturing may have demand seasonality (holiday peaks, fiscal year-end). Some plants run continuous 3-shift operations year-round."
+  },
+
+  "kpiRefs": [
+    "kpi.mfg.oee",
+    "kpi.mfg.availability",
+    "kpi.mfg.performance_rate",
+    "kpi.mfg.quality_rate",
+    "kpi.mfg.defect_rate",
+    "kpi.mfg.throughput",
+    "kpi.mfg.yield",
+    "kpi.mfg.downtime_hr",
+    "kpi.mfg.mtbf",
+    "kpi.mfg.mttr",
+    "kpi.mfg.cycle_time",
+    "kpi.mfg.plan_attainment",
+    "kpi.mfg.capacity_utilization",
+    "kpi.mfg.cost_per_unit"
+  ],
+
+  "genomeRefs": [
+    "genome.mfg_shift_report_v1",
+    "genome.mfg_oee_dashboard_v1",
+    "genome.mfg_quality_tracker_v1"
+  ],
+
+  "vizOverrides": [
+    { "rule": "OEE waterfall showing availability x performance x quality breakdown", "cites": "doc 06 §4" },
+    { "rule": "Pareto chart for downtime causes and defect categories", "cites": "doc 06 §5" },
+    { "rule": "control-chart for process parameter stability monitoring", "cites": "doc 06 §5" },
+    { "rule": "stacked bar for shift-over-shift output comparison", "cites": "doc 06 §3" }
+  ],
+
+  "fixtures": [
+    "ตัวอย่าง Data/Mock_Dashboard_Data/06_การผลิต/*.json",
+    "ตัวอย่าง Data/Mock_Dashboard_Data/10_ซ่อมบำรุง/*.json"
+  ]
+}

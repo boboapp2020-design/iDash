@@ -1,0 +1,211 @@
+{
+  "id": "finance_accounting",
+  "version": "1.0.0",
+  "parent": null,
+
+  "identity": {
+    "nameTH": "การเงินและบัญชี",
+    "nameEN": "Finance & Accounting",
+    "nameLO": "ການເງິນ ແລະ ບັນຊີ"
+  },
+
+  "signatures": {
+    "lexicon": {
+      "columns": {
+        "th": [
+          "บัญชี", "งบ", "รายรับ", "รายจ่าย", "กำไร", "ขาดทุน",
+          "เดบิต", "เครดิต", "งบกำไรขาดทุน", "งบดุล", "งบแสดงฐานะ",
+          "รายได้", "ต้นทุน", "ค่าใช้จ่าย", "กำไรขั้นต้น", "กำไรสุทธิ",
+          "งบประมาณ", "ผังบัญชี", "รหัสบัญชี", "หมวดบัญชี",
+          "ลูกหนี้", "เจ้าหนี้", "ใบแจ้งหนี้", "ใบเสร็จ",
+          "ภาษี", "VAT", "หัก ณ ที่จ่าย", "ภาษีมูลค่าเพิ่ม",
+          "เงินสด", "กระแสเงินสด", "เงินฝาก", "ดอกเบี้ย",
+          "สินทรัพย์", "หนี้สิน", "ส่วนของเจ้าของ", "ทุน",
+          "ค่าเสื่อมราคา", "ค่าตัดจำหน่าย", "งบลงทุน",
+          "ศูนย์ต้นทุน", "หน่วยงาน", "แผนก", "โสหุ้ย",
+          "ต้นทุนผันแปร", "ต้นทุนคงที่", "อัตรากำไร",
+          "มูลค่าหนี้", "คงค้าง", "อายุหนี้", "วงเงินเครดิต",
+          "ใบสำคัญจ่าย", "เงินสดต้นวัน", "เงินสดปลายวัน",
+          "มูลค่าใบแจ้งหนี้", "สถานะการชำระ", "วันครบกำหนด"
+        ],
+        "en": [
+          "gl", "general ledger", "account", "debit", "credit",
+          "revenue", "expense", "profit", "loss", "income",
+          "balance sheet", "income statement", "p&l", "pnl",
+          "budget", "actual", "variance", "forecast",
+          "cost center", "chart of accounts", "account code",
+          "accounts receivable", "accounts payable", "ar", "ap",
+          "invoice", "receipt", "payment", "aging",
+          "tax", "vat", "withholding tax",
+          "cash flow", "cash", "bank", "interest",
+          "asset", "liability", "equity", "capital",
+          "depreciation", "amortization", "capex", "opex",
+          "gross margin", "net margin", "ebitda", "ebit",
+          "journal entry", "trial balance", "closing",
+          "fiscal year", "fy", "ytd", "mtd",
+          "cost element", "overhead", "fixed cost", "variable cost"
+        ],
+        "lo": [
+          "ບັນຊີ", "ລາຍຮັບ", "ລາຍຈ່າຍ", "ກຳໄລ", "ຂາດທຶນ",
+          "ງົບປະມານ", "ເງິນສົດ", "ໜີ້ສິນ", "ຊັບສິນ",
+          "ທຶນ", "ພາສີ", "ເງິນເດືອນ", "ຄ່າໃຊ້ຈ່າຍ",
+          "ກະແສເງິນສົດ", "ເຈົ້າໜີ້", "ລູກໜີ້"
+        ]
+      },
+      "sheets": [
+        "GL", "general ledger", "บัญชี", "ผังบัญชี", "งบกำไรขาดทุน",
+        "P&L", "balance sheet", "งบดุล", "budget", "งบประมาณ",
+        "cash flow", "กระแสเงินสด", "AR", "AP", "ลูกหนี้", "เจ้าหนี้",
+        "journal", "trial balance", "cost center", "ศูนย์ต้นทุน"
+      ],
+      "weightPerHit": 1.8
+    },
+    "valueShapes": [
+      {
+        "columnLike": "อัตรากำไรขั้นต้น|gross margin|GM%",
+        "type": "percentage",
+        "range": [0, 80],
+        "weight": 3.0,
+        "note": "Gross margin percentage; strong finance signal"
+      },
+      {
+        "columnLike": "อัตรากำไรสุทธิ|net margin",
+        "type": "percentage",
+        "range": [-20, 50],
+        "weight": 2.5,
+        "note": "Net profit margin; can be negative"
+      },
+      {
+        "columnLike": "budget variance|ส่วนต่างงบ",
+        "type": "percentage",
+        "range": [-50, 50],
+        "weight": 2.5,
+        "note": "Budget vs actual variance percentage"
+      },
+      {
+        "columnLike": "aging|อายุหนี้",
+        "type": "category",
+        "range": null,
+        "weight": 3.0,
+        "note": "AR/AP aging buckets (current, 30, 60, 90, 120+ days)"
+      },
+      {
+        "columnLike": "debit|เดบิต|credit|เครดิต",
+        "type": "number",
+        "range": null,
+        "weight": 2.0,
+        "note": "Debit/credit amounts; definitive GL signal"
+      }
+    ],
+    "unitPatterns": [
+      "บาท", "กีบ", "LAK", "THB", "USD", "฿",
+      "ล้านบาท", "พันบาท", "ล้านกีบ"
+    ],
+    "negative": [
+      { "lexicon": ["patient", "ผู้ป่วย", "diagnosis", "clinical", "dosage"], "weight": -3.0 },
+      { "lexicon": ["ccs", "pol", "brix", "bagasse", "อ้อย"], "weight": -2.0 },
+      { "lexicon": ["defect rate", "oee", "cycle time"], "weight": -1.5 },
+      { "lexicon": ["sprint", "backlog", "story_point", "velocity", "scrum", "tasks_blocked"], "weight": -3.0 },
+      { "lexicon": ["sensor", "device_id", "telemetry", "firmware", "temperature_c", "humidity"], "weight": -3.0 },
+      { "lexicon": ["impression", "ctr", "cpc", "cpa", "roas", "clicks", "campaign_id", "open_rate", "click_rate", "unsubscribe_rate", "bounce_rate", "conversions", "sessions", "campaign_name"], "weight": -3.0 },
+      { "lexicon": ["emission", "carbon", "pollutant", "air_quality", "renewable", "pm25"], "weight": -2.0 },
+      { "lexicon": ["student", "enrollment", "gpa", "credits", "semester", "exam_average"], "weight": -3.0 },
+      { "lexicon": ["occupancy", "check_in", "room_type", "guest", "reservation"], "weight": -2.0 },
+      { "lexicon": ["player", "goals_for", "assists", "tackles", "league"], "weight": -2.0 },
+      { "lexicon": ["shipment_id", "carrier", "freight", "tracking_events", "bill of lading", "cost_per_delivery"], "weight": -1.5 },
+      { "lexicon": ["cart", "add_to_cart", "checkout", "shipping_fee", "marketplace", "shopee", "lazada"], "weight": -2.0 }
+    ]
+  },
+
+  "business": {
+    "processes": [
+      {
+        "id": "accounting_cycle",
+        "stages": ["บันทึกรายการ", "ผ่านรายการ", "ปรับปรุง", "ปิดบัญชี", "จัดทำงบ", "ตรวจสอบ"]
+      },
+      {
+        "id": "budget_management",
+        "stages": ["จัดทำงบประมาณ", "อนุมัติ", "จัดสรร", "ติดตามใช้จ่าย", "ทบทวน", "ปรับแผน"]
+      },
+      {
+        "id": "receivables_management",
+        "stages": ["ออกใบแจ้งหนี้", "ติดตามชำระ", "รับชำระ", "ตัดหนี้สูญ"]
+      },
+      {
+        "id": "payables_management",
+        "stages": ["รับใบแจ้งหนี้", "ตรวจสอบ", "อนุมัติจ่าย", "ชำระเงิน", "บันทึกบัญชี"]
+      }
+    ],
+    "goals": [
+      "close books accurately and on time",
+      "optimize cost structure and reduce expense ratio",
+      "maintain healthy cash flow and liquidity",
+      "minimize AR aging and bad debt",
+      "achieve budget compliance across departments",
+      "maximize gross margin and EBITDA",
+      "ensure tax compliance and optimize tax position",
+      "provide timely and accurate financial reporting"
+    ],
+    "personas": [
+      {
+        "type": "executive",
+        "cares": ["revenue trend", "profit margin", "cash position", "budget variance"],
+        "cadence": "monthly"
+      },
+      {
+        "type": "finance_manager",
+        "cares": ["cash flow", "AR aging", "AP scheduling", "budget utilization"],
+        "cadence": "weekly"
+      },
+      {
+        "type": "accountant",
+        "cares": ["journal accuracy", "reconciliation", "closing checklist", "GL balance"],
+        "cadence": "daily"
+      }
+    ],
+    "decisionCatalog": [
+      "explain-variance",
+      "optimize-cost",
+      "plan-forecast",
+      "allocate-budget",
+      "approve-expenditure",
+      "collect-receivable",
+      "schedule-payment",
+      "close-period"
+    ],
+    "seasonality": "Fiscal year cycles (annual closing, quarterly reporting). Budget season typically Q4. Tax filing deadlines. Month-end close pressure."
+  },
+
+  "kpiRefs": [
+    "kpi.fin.revenue",
+    "kpi.fin.gross_margin_pct",
+    "kpi.fin.net_margin_pct",
+    "kpi.fin.ebitda",
+    "kpi.fin.expense_ratio",
+    "kpi.fin.budget_variance",
+    "kpi.fin.ar_aging_avg_days",
+    "kpi.fin.ap_aging_avg_days",
+    "kpi.fin.cash_flow_net",
+    "kpi.fin.current_ratio",
+    "kpi.fin.cost_per_unit",
+    "kpi.fin.opex_vs_budget"
+  ],
+
+  "genomeRefs": [
+    "genome.fin_pnl_monthly_v1",
+    "genome.fin_budget_tracking_v1",
+    "genome.fin_cash_flow_v1",
+    "genome.fin_ar_ap_aging_v1"
+  ],
+
+  "vizOverrides": [
+    { "rule": "waterfall chart for P&L breakdown (revenue → COGS → gross profit → opex → EBIT)", "cites": "doc 06 §4" },
+    { "rule": "variance bar chart for budget vs actual by cost center", "cites": "doc 06 §3" },
+    { "rule": "stacked horizontal bar for AR/AP aging buckets", "cites": "doc 06 §3" },
+    { "rule": "line+area for cash flow trend with forecast band", "cites": "doc 06 §3" }
+  ],
+
+  "fixtures": [
+    "ตัวอย่าง Data/Mock_Dashboard_Data/02_การเงินและบัญชี/*.json"
+  ]
+}

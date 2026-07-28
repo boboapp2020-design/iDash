@@ -1,0 +1,201 @@
+[
+  {
+    "id": "kpi.finance.revenue",
+    "version": "1.0.0",
+    "domain": "finance_accounting",
+    "name": { "th": "รายได้", "en": "Revenue" },
+    "formula": "sum(revenue)",
+    "inputs": {
+      "revenue": { "role": "measure", "unit": "currency", "synonyms": { "th": ["รายได้", "ยอมขาย", "ยอดขาย", "รายรับ"], "en": ["revenue", "sales", "income", "total sales", "net revenue"] } }
+    },
+    "aggNature": "extensive",
+    "direction": "higher-better",
+    "format": { "kind": "currency", "decimals": 0 },
+    "target": { "policy": "column", "benchmark": { "good": null, "warn": null } },
+    "grain": ["daily", "weekly", "monthly", "quarterly", "yearly"],
+    "answers": ["What is total revenue for the period?", "Is revenue on track against budget?"],
+    "variance": true,
+    "forecastCandidate": true,
+    "caveats": ["Ensure gross vs net revenue consistency", "Currency must be uniform or converted"]
+  },
+  {
+    "id": "kpi.finance.cogs",
+    "version": "1.0.0",
+    "domain": "finance_accounting",
+    "name": { "th": "ต้นทุนขาย", "en": "Cost of Goods Sold (COGS)" },
+    "formula": "sum(cogs)",
+    "inputs": {
+      "cogs": { "role": "measure", "unit": "currency", "synonyms": { "th": ["ต้นทุนขาย", "ต้นทุนสินค้า", "ต้นทุนสินค้าขาย", "COGS"], "en": ["COGS", "cost of goods sold", "cost of sales", "direct cost"] } }
+    },
+    "aggNature": "extensive",
+    "direction": "lower-better",
+    "format": { "kind": "currency", "decimals": 0 },
+    "target": { "policy": "column", "benchmark": { "good": null, "warn": null } },
+    "grain": ["monthly", "quarterly", "yearly"],
+    "answers": ["What is the direct cost of products sold?", "Is cost of goods sold trending up?"],
+    "variance": true,
+    "forecastCandidate": true,
+    "caveats": ["Must align with revenue recognition period"]
+  },
+  {
+    "id": "kpi.finance.gross_margin_pct",
+    "version": "1.0.0",
+    "domain": "finance_accounting",
+    "name": { "th": "อัตรากำไรขั้นต้น", "en": "Gross Margin %" },
+    "formula": "100 * (sum(revenue) - sum(cogs)) / sum(revenue)",
+    "inputs": {
+      "revenue": { "role": "measure", "unit": "currency", "synonyms": { "th": ["รายได้", "ยอดขาย"], "en": ["revenue", "sales", "net revenue"] } },
+      "cogs": { "role": "measure", "unit": "currency", "synonyms": { "th": ["ต้นทุนขาย", "ต้นทุนสินค้า"], "en": ["COGS", "cost of goods sold", "cost of sales"] } }
+    },
+    "aggNature": "intensive",
+    "direction": "higher-better",
+    "format": { "kind": "percentage", "decimals": 1 },
+    "target": { "policy": "domain-benchmark", "benchmark": { "good": 40.0, "warn": 25.0 } },
+    "grain": ["monthly", "quarterly", "yearly"],
+    "answers": ["What proportion of revenue remains after direct costs?", "Is gross profitability improving?"],
+    "variance": true,
+    "forecastCandidate": true,
+    "caveats": ["Benchmark varies enormously by industry — sugar ~15-25%, SaaS ~70-85%"]
+  },
+  {
+    "id": "kpi.finance.opex_ratio",
+    "version": "1.0.0",
+    "domain": "finance_accounting",
+    "name": { "th": "สัดส่วนค่าใช้จ่ายดำเนินงาน", "en": "Operating Expense Ratio" },
+    "formula": "100 * sum(opex) / sum(revenue)",
+    "inputs": {
+      "opex": { "role": "measure", "unit": "currency", "synonyms": { "th": ["ค่าใช้จ่ายดำเนินงาน", "ค่าใช้จ่ายในการขายและบริหาร", "SGA"], "en": ["operating expenses", "opex", "SGA", "SG&A", "overhead"] } },
+      "revenue": { "role": "measure", "unit": "currency", "synonyms": { "th": ["รายได้", "ยอดขาย"], "en": ["revenue", "sales", "net revenue"] } }
+    },
+    "aggNature": "intensive",
+    "direction": "lower-better",
+    "format": { "kind": "percentage", "decimals": 1 },
+    "target": { "policy": "domain-benchmark", "benchmark": { "good": 20.0, "warn": 35.0 } },
+    "grain": ["monthly", "quarterly", "yearly"],
+    "answers": ["How much of revenue is consumed by operating expenses?", "Is cost control effective?"],
+    "variance": true,
+    "forecastCandidate": true,
+    "caveats": ["Benchmark is highly industry-dependent"]
+  },
+  {
+    "id": "kpi.finance.budget_variance",
+    "version": "1.0.0",
+    "domain": "finance_accounting",
+    "name": { "th": "ผลต่างงบประมาณ", "en": "Budget Variance %" },
+    "formula": "100 * (sum(actual_amount) - sum(budget_amount)) / sum(budget_amount)",
+    "inputs": {
+      "actual_amount": { "role": "measure", "unit": "currency", "synonyms": { "th": ["ยอมจริง", "จ่ายจริง", "ค่าใช้จ่ายจริง", "ผลจริง"], "en": ["actual amount", "actual spend", "actual cost", "actuals"] } },
+      "budget_amount": { "role": "measure", "unit": "currency", "synonyms": { "th": ["งบประมาณ", "เป้า", "แผน", "งบ"], "en": ["budget", "budgeted amount", "plan", "target amount"] } }
+    },
+    "aggNature": "intensive",
+    "direction": "target-band",
+    "format": { "kind": "percentage", "decimals": 1 },
+    "target": { "policy": "column", "benchmark": { "good": 0.0, "warn": 10.0 } },
+    "grain": ["monthly", "quarterly", "yearly"],
+    "answers": ["Are we spending within budget?", "Which categories are over or under budget?"],
+    "variance": true,
+    "forecastCandidate": true,
+    "caveats": ["Positive variance can mean overspend (expense) or overperformance (revenue) — context matters"]
+  },
+  {
+    "id": "kpi.finance.ar_aging",
+    "version": "1.0.0",
+    "domain": "finance_accounting",
+    "name": { "th": "อายุลูกหนี้การค้า", "en": "Accounts Receivable Aging (Days)" },
+    "formula": "wavg(ar_days_outstanding, ar_balance)",
+    "inputs": {
+      "ar_days_outstanding": { "role": "measure", "unit": "day", "synonyms": { "th": ["อายุลูกหนี้", "วันค้างชำระ", "จำนวนวันลูกหนี้"], "en": ["AR days outstanding", "days receivable", "DSO", "receivable aging"] } },
+      "ar_balance": { "role": "measure", "unit": "currency", "synonyms": { "th": ["ยอมลูกหนี้", "ลูกหนี้คงค้าง", "ยอดลูกหนี้"], "en": ["AR balance", "accounts receivable", "receivable balance", "outstanding receivables"] } }
+    },
+    "aggNature": "intensive",
+    "direction": "lower-better",
+    "format": { "kind": "number", "decimals": 0 },
+    "target": { "policy": "domain-benchmark", "benchmark": { "good": 30, "warn": 60 } },
+    "grain": ["monthly", "quarterly"],
+    "answers": ["How quickly are customers paying?", "Is receivable collection deteriorating?"],
+    "variance": true,
+    "forecastCandidate": true,
+    "caveats": ["Industry payment terms vary widely; compare against own credit policy"]
+  },
+  {
+    "id": "kpi.finance.ap_aging",
+    "version": "1.0.0",
+    "domain": "finance_accounting",
+    "name": { "th": "อายุเจ้าหนี้การค้า", "en": "Accounts Payable Aging (Days)" },
+    "formula": "wavg(ap_days_outstanding, ap_balance)",
+    "inputs": {
+      "ap_days_outstanding": { "role": "measure", "unit": "day", "synonyms": { "th": ["อายุเจ้าหนี้", "วันค้างจ่าย", "จำนวนวันเจ้าหนี้"], "en": ["AP days outstanding", "days payable", "DPO", "payable aging"] } },
+      "ap_balance": { "role": "measure", "unit": "currency", "synonyms": { "th": ["ยอดเจ้าหนี้", "เจ้าหนี้คงค้าง"], "en": ["AP balance", "accounts payable", "payable balance", "outstanding payables"] } }
+    },
+    "aggNature": "intensive",
+    "direction": "target-band",
+    "format": { "kind": "number", "decimals": 0 },
+    "target": { "policy": "domain-benchmark", "benchmark": { "good": 45, "warn": 90 } },
+    "grain": ["monthly", "quarterly"],
+    "answers": ["How long are we taking to pay suppliers?", "Are we at risk of late payment penalties?"],
+    "variance": true,
+    "forecastCandidate": false,
+    "caveats": ["Stretching payables improves cash flow but may damage supplier relationships"]
+  },
+  {
+    "id": "kpi.finance.cash_conversion_cycle",
+    "version": "1.0.0",
+    "domain": "finance_accounting",
+    "name": { "th": "วงจรเงินสด", "en": "Cash Conversion Cycle (Days)" },
+    "formula": "avg(dso) + avg(dio) - avg(dpo)",
+    "inputs": {
+      "dso": { "role": "measure", "unit": "day", "synonyms": { "th": ["วันลูกหนี้", "DSO"], "en": ["DSO", "days sales outstanding", "receivable days"] } },
+      "dio": { "role": "measure", "unit": "day", "synonyms": { "th": ["วันสินค้าคงคลัง", "DIO"], "en": ["DIO", "days inventory outstanding", "inventory days"] } },
+      "dpo": { "role": "measure", "unit": "day", "synonyms": { "th": ["วันเจ้าหนี้", "DPO"], "en": ["DPO", "days payable outstanding", "payable days"] } }
+    },
+    "aggNature": "intensive",
+    "direction": "lower-better",
+    "format": { "kind": "number", "decimals": 0 },
+    "target": { "policy": "period-median", "benchmark": { "good": null, "warn": null } },
+    "grain": ["monthly", "quarterly"],
+    "answers": ["How long does it take to convert resource investments into cash?", "Is working capital management improving?"],
+    "variance": true,
+    "forecastCandidate": true,
+    "caveats": ["Negative CCC (common in retail) means suppliers finance operations — not always sustainable"]
+  },
+  {
+    "id": "kpi.finance.expense_per_unit",
+    "version": "1.0.0",
+    "domain": "finance_accounting",
+    "name": { "th": "ต้นทุนต่อหน่วย", "en": "Expense per Unit" },
+    "formula": "sum(total_cost) / sum(units_produced)",
+    "inputs": {
+      "total_cost": { "role": "measure", "unit": "currency", "synonyms": { "th": ["ต้นทุนรวม", "ค่าใช้จ่ายรวม", "ต้นทุนทั้งหมด"], "en": ["total cost", "total expense", "total expenditure"] } },
+      "units_produced": { "role": "measure", "unit": "unit", "synonyms": { "th": ["จำนวนผลิต", "หน่วยผลิต", "ชิ้นงาน"], "en": ["units produced", "output units", "production volume"] } }
+    },
+    "aggNature": "intensive",
+    "direction": "lower-better",
+    "format": { "kind": "currency", "decimals": 2 },
+    "target": { "policy": "column", "benchmark": { "good": null, "warn": null } },
+    "grain": ["monthly", "quarterly", "yearly"],
+    "answers": ["What does it cost to produce one unit?", "Is unit cost trending up or down?"],
+    "variance": true,
+    "forecastCandidate": true,
+    "caveats": ["Must define unit consistently — weight, piece, lot"]
+  },
+  {
+    "id": "kpi.finance.net_profit_margin",
+    "version": "1.0.0",
+    "domain": "finance_accounting",
+    "name": { "th": "อัตรากำไรสุทธิ", "en": "Net Profit Margin %" },
+    "formula": "100 * sum(net_profit) / sum(revenue)",
+    "inputs": {
+      "net_profit": { "role": "measure", "unit": "currency", "synonyms": { "th": ["กำไรสุทธิ", "กำไรหลังภาษี", "ผลกำไร"], "en": ["net profit", "net income", "bottom line", "profit after tax"] } },
+      "revenue": { "role": "measure", "unit": "currency", "synonyms": { "th": ["รายได้", "ยอดขาย"], "en": ["revenue", "sales", "net revenue"] } }
+    },
+    "aggNature": "intensive",
+    "direction": "higher-better",
+    "format": { "kind": "percentage", "decimals": 1 },
+    "target": { "policy": "domain-benchmark", "benchmark": { "good": 15.0, "warn": 5.0 } },
+    "grain": ["monthly", "quarterly", "yearly"],
+    "answers": ["What proportion of revenue becomes profit?", "Is overall profitability healthy?"],
+    "variance": true,
+    "forecastCandidate": true,
+    "caveats": ["Benchmark varies enormously by industry and business model"]
+  }
+]

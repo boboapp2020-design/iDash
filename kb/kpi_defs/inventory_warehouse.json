@@ -1,0 +1,178 @@
+[
+  {
+    "id": "kpi.inventory.stock_on_hand",
+    "version": "1.0.0",
+    "domain": "inventory_warehouse",
+    "name": { "th": "มูลค่าสินค้าคงคลัง", "en": "Stock on Hand (Value)" },
+    "formula": "sum(stock_value)",
+    "inputs": {
+      "stock_value": { "role": "measure", "unit": "currency", "synonyms": { "th": ["มูลค่าสต็อก", "มูลค่าคงคลัง", "มูลค่าสินค้าคงเหลือ", "ยอดคงคลัง"], "en": ["stock value", "inventory value", "stock on hand", "on-hand value", "inventory balance"] } }
+    },
+    "aggNature": "extensive",
+    "direction": "target-band",
+    "format": { "kind": "currency", "decimals": 0 },
+    "target": { "policy": "column", "benchmark": { "good": null, "warn": null } },
+    "grain": ["daily", "weekly", "monthly"],
+    "answers": ["What is the total value of inventory on hand?", "Is inventory investment within acceptable limits?"],
+    "variance": true,
+    "forecastCandidate": true,
+    "caveats": ["Point-in-time snapshot — use period-end or average for trend analysis", "Valuation method (FIFO/LIFO/WAC) affects comparability"]
+  },
+  {
+    "id": "kpi.inventory.turnover",
+    "version": "1.0.0",
+    "domain": "inventory_warehouse",
+    "name": { "th": "อัตราหมุนเวียนสินค้าคงคลัง", "en": "Inventory Turnover" },
+    "formula": "sum(cogs) / avg(stock_value)",
+    "inputs": {
+      "cogs": { "role": "measure", "unit": "currency", "synonyms": { "th": ["ต้นทุนขาย", "ต้นทุนสินค้าขาย"], "en": ["COGS", "cost of goods sold", "cost of sales"] } },
+      "stock_value": { "role": "measure", "unit": "currency", "synonyms": { "th": ["มูลค่าสต็อก", "มูลค่าคงคลัง", "มูลค่าสินค้าคงเหลือ"], "en": ["stock value", "inventory value", "average inventory"] } }
+    },
+    "aggNature": "intensive",
+    "direction": "higher-better",
+    "format": { "kind": "number", "decimals": 1 },
+    "target": { "policy": "domain-benchmark", "benchmark": { "good": 8.0, "warn": 4.0 } },
+    "grain": ["monthly", "quarterly", "yearly"],
+    "answers": ["How many times does inventory cycle through in a period?", "Is inventory moving efficiently?"],
+    "variance": true,
+    "forecastCandidate": true,
+    "caveats": ["Benchmark varies by industry — perishables turn faster than durable goods"]
+  },
+  {
+    "id": "kpi.inventory.days_on_hand",
+    "version": "1.0.0",
+    "domain": "inventory_warehouse",
+    "name": { "th": "จำนวนวันสินค้าคงคลัง", "en": "Days on Hand (DOH)" },
+    "formula": "avg(stock_value) / (sum(cogs) / 365)",
+    "inputs": {
+      "stock_value": { "role": "measure", "unit": "currency", "synonyms": { "th": ["มูลค่าสต็อก", "มูลค่าคงคลัง"], "en": ["stock value", "inventory value", "average inventory"] } },
+      "cogs": { "role": "measure", "unit": "currency", "synonyms": { "th": ["ต้นทุนขาย", "ต้นทุนสินค้าขาย"], "en": ["COGS", "cost of goods sold", "cost of sales"] } }
+    },
+    "aggNature": "intensive",
+    "direction": "lower-better",
+    "format": { "kind": "number", "decimals": 0 },
+    "target": { "policy": "domain-benchmark", "benchmark": { "good": 30, "warn": 60 } },
+    "grain": ["monthly", "quarterly"],
+    "answers": ["How many days of inventory do we hold?", "Is inventory being held too long?"],
+    "variance": true,
+    "forecastCandidate": true,
+    "caveats": ["Inverse of turnover — use whichever is more intuitive for the audience"]
+  },
+  {
+    "id": "kpi.inventory.fill_rate",
+    "version": "1.0.0",
+    "domain": "inventory_warehouse",
+    "name": { "th": "อัตราการเติมเต็มคำสั่งซื้อ", "en": "Fill Rate %" },
+    "formula": "100 * sum(fulfilled_lines) / sum(total_order_lines)",
+    "inputs": {
+      "fulfilled_lines": { "role": "measure", "unit": "count", "synonyms": { "th": ["รายการที่จัดส่งได้", "รายการครบ", "ออเดอร์ที่สำเร็จ"], "en": ["fulfilled lines", "filled orders", "complete lines", "shipped lines"] } },
+      "total_order_lines": { "role": "measure", "unit": "count", "synonyms": { "th": ["รายการสั่งซื้อทั้งหมด", "รายการทั้งหมด", "จำนวนออเดอร์"], "en": ["total order lines", "total orders", "order lines", "demand lines"] } }
+    },
+    "aggNature": "intensive",
+    "direction": "higher-better",
+    "format": { "kind": "percentage", "decimals": 1 },
+    "target": { "policy": "domain-benchmark", "benchmark": { "good": 98.0, "warn": 95.0 } },
+    "grain": ["daily", "weekly", "monthly"],
+    "answers": ["What proportion of orders can we fulfill from stock?", "Is service level meeting targets?"],
+    "variance": true,
+    "forecastCandidate": true,
+    "caveats": ["Line fill rate vs order fill rate vs unit fill rate — define clearly"]
+  },
+  {
+    "id": "kpi.inventory.stockout_count",
+    "version": "1.0.0",
+    "domain": "inventory_warehouse",
+    "name": { "th": "จำนวนครั้งสินค้าขาด", "en": "Stockout Count" },
+    "formula": "count(stockout_events)",
+    "inputs": {
+      "stockout_events": { "role": "measure", "unit": "count", "synonyms": { "th": ["ครั้งสินค้าขาด", "สินค้าหมด", "สต็อกเอาท์", "ครั้งของขาด"], "en": ["stockout events", "stockouts", "out-of-stock", "OOS events", "zero stock events"] } }
+    },
+    "aggNature": "extensive",
+    "direction": "lower-better",
+    "format": { "kind": "number", "decimals": 0 },
+    "target": { "policy": "period-median", "benchmark": { "good": null, "warn": null } },
+    "grain": ["daily", "weekly", "monthly"],
+    "answers": ["How often are we running out of stock?", "Which SKUs are most frequently out of stock?"],
+    "variance": true,
+    "forecastCandidate": true,
+    "caveats": ["Count alone does not capture revenue impact — pair with lost-sales estimate if available"]
+  },
+  {
+    "id": "kpi.inventory.dead_stock_pct",
+    "version": "1.0.0",
+    "domain": "inventory_warehouse",
+    "name": { "th": "สัดส่วนสินค้าไม่เคลื่อนไหว", "en": "Dead Stock %" },
+    "formula": "100 * sum(dead_stock_value) / sum(stock_value)",
+    "inputs": {
+      "dead_stock_value": { "role": "measure", "unit": "currency", "synonyms": { "th": ["มูลค่าสินค้าค้างคลัง", "สินค้าไม่เคลื่อนไหว", "สต็อกตาย"], "en": ["dead stock value", "obsolete stock", "non-moving stock", "slow-moving value"] } },
+      "stock_value": { "role": "measure", "unit": "currency", "synonyms": { "th": ["มูลค่าสต็อก", "มูลค่าคงคลัง"], "en": ["stock value", "inventory value", "total stock value"] } }
+    },
+    "aggNature": "intensive",
+    "direction": "lower-better",
+    "format": { "kind": "percentage", "decimals": 1 },
+    "target": { "policy": "domain-benchmark", "benchmark": { "good": 3.0, "warn": 10.0 } },
+    "grain": ["monthly", "quarterly"],
+    "answers": ["How much capital is tied up in non-moving inventory?", "Is dead stock increasing?"],
+    "variance": true,
+    "forecastCandidate": false,
+    "caveats": ["Definition of 'dead' varies — typically no movement in 6-12 months"]
+  },
+  {
+    "id": "kpi.inventory.receipt_volume",
+    "version": "1.0.0",
+    "domain": "inventory_warehouse",
+    "name": { "th": "ปริมาณรับเข้า", "en": "Receipt Volume" },
+    "formula": "sum(receipt_qty)",
+    "inputs": {
+      "receipt_qty": { "role": "measure", "unit": "unit", "synonyms": { "th": ["จำนวนรับเข้า", "ปริมาณรับ", "ยอดรับ", "ของเข้า"], "en": ["receipt quantity", "goods received", "inbound quantity", "receipts", "GRN quantity"] } }
+    },
+    "aggNature": "extensive",
+    "direction": "target-band",
+    "format": { "kind": "number", "decimals": 0 },
+    "target": { "policy": "column", "benchmark": { "good": null, "warn": null } },
+    "grain": ["daily", "weekly", "monthly"],
+    "answers": ["How much inventory was received this period?", "Is inbound flow matching expectations?"],
+    "variance": true,
+    "forecastCandidate": true,
+    "caveats": ["Spike in receipts without corresponding demand may indicate overstocking"]
+  },
+  {
+    "id": "kpi.inventory.issue_volume",
+    "version": "1.0.0",
+    "domain": "inventory_warehouse",
+    "name": { "th": "ปริมาณจ่ายออก", "en": "Issue Volume" },
+    "formula": "sum(issue_qty)",
+    "inputs": {
+      "issue_qty": { "role": "measure", "unit": "unit", "synonyms": { "th": ["จำนวนจ่ายออก", "ปริมาณจ่าย", "ยอดจ่าย", "ของออก", "เบิกจ่าย"], "en": ["issue quantity", "goods issued", "outbound quantity", "issues", "picks", "dispatched quantity"] } }
+    },
+    "aggNature": "extensive",
+    "direction": "higher-better",
+    "format": { "kind": "number", "decimals": 0 },
+    "target": { "policy": "column", "benchmark": { "good": null, "warn": null } },
+    "grain": ["daily", "weekly", "monthly"],
+    "answers": ["How much inventory was issued this period?", "Is outbound flow matching demand?"],
+    "variance": true,
+    "forecastCandidate": true,
+    "caveats": ["Should correlate with sales/production — divergence signals process issues"]
+  },
+  {
+    "id": "kpi.inventory.accuracy",
+    "version": "1.0.0",
+    "domain": "inventory_warehouse",
+    "name": { "th": "ความถูกต้องของสินค้าคงคลัง", "en": "Inventory Accuracy %" },
+    "formula": "100 * sum(matching_lines) / sum(counted_lines)",
+    "inputs": {
+      "matching_lines": { "role": "measure", "unit": "count", "synonyms": { "th": ["รายการตรง", "รายการถูกต้อง", "จำนวนตรง"], "en": ["matching lines", "accurate counts", "correct items"] } },
+      "counted_lines": { "role": "measure", "unit": "count", "synonyms": { "th": ["รายการนับ", "รายการตรวจ", "จำนวนนับ"], "en": ["counted lines", "total counts", "counted items", "cycle count lines"] } }
+    },
+    "aggNature": "intensive",
+    "direction": "higher-better",
+    "format": { "kind": "percentage", "decimals": 1 },
+    "target": { "policy": "domain-benchmark", "benchmark": { "good": 99.0, "warn": 95.0 } },
+    "grain": ["weekly", "monthly", "quarterly"],
+    "answers": ["How accurately does the system reflect actual stock?", "Is inventory record accuracy acceptable?"],
+    "variance": true,
+    "forecastCandidate": false,
+    "caveats": ["Requires cycle count or physical count data to compute"]
+  }
+]

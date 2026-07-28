@@ -1,0 +1,240 @@
+[
+  {
+    "id": "kpi.sugar.ccs",
+    "version": "1.0.0",
+    "domain": "sugar_factory",
+    "name": { "th": "ค่าความหวาน (CCS)", "en": "Commercial Cane Sugar (CCS)" },
+    "formula": "100 * (sum(pol_pct_cane) - 0.5 * sum(brix_pct_cane) - sum(pol_pct_cane)) / 100 + sum(pol_pct_cane) * (1 - 0.01 * sum(fibre_pct_cane))",
+    "inputs": {
+      "pol_pct_cane": { "role": "measure", "unit": "%", "synonyms": { "th": ["พอล%อ้อย", "พอลเปอร์เซ็นต์อ้อย", "โพล%อ้อย"], "en": ["pol % cane", "pol pct cane", "pol percent cane"] } },
+      "brix_pct_cane": { "role": "measure", "unit": "%", "synonyms": { "th": ["บริกซ์%อ้อย", "บริกซ์เปอร์เซ็นต์อ้อย"], "en": ["brix % cane", "brix pct cane", "brix percent cane"] } },
+      "fibre_pct_cane": { "role": "measure", "unit": "%", "synonyms": { "th": ["เส้นใย%อ้อย", "ไฟเบอร์%อ้อย"], "en": ["fibre % cane", "fiber % cane", "fibre pct cane"] } }
+    },
+    "aggNature": "intensive",
+    "direction": "higher-better",
+    "format": { "kind": "number", "decimals": 2 },
+    "target": { "policy": "domain-benchmark", "benchmark": { "good": 12.5, "warn": 11.0 } },
+    "grain": ["daily", "weekly", "monthly", "season"],
+    "answers": ["What is the recoverable sugar content of the cane?", "Is cane quality on target?"],
+    "variance": true,
+    "forecastCandidate": true,
+    "caveats": ["Meaningless off-season", "Formula variant differs by country (Australian vs South African CCS)"]
+  },
+  {
+    "id": "kpi.sugar.extraction_pct",
+    "version": "1.0.0",
+    "domain": "sugar_factory",
+    "name": { "th": "ประสิทธิภาพการหีบสกัด", "en": "Extraction %" },
+    "formula": "100 * sum(pol_extracted) / sum(pol_in_cane)",
+    "inputs": {
+      "pol_extracted": { "role": "measure", "unit": "ton", "synonyms": { "th": ["พอลที่สกัดได้", "พอลในน้ำอ้อยรวม"], "en": ["pol extracted", "pol in mixed juice"] } },
+      "pol_in_cane": { "role": "measure", "unit": "ton", "synonyms": { "th": ["พอลในอ้อย", "พอลอ้อย"], "en": ["pol in cane", "cane pol"] } }
+    },
+    "aggNature": "intensive",
+    "direction": "higher-better",
+    "format": { "kind": "percentage", "decimals": 1 },
+    "target": { "policy": "domain-benchmark", "benchmark": { "good": 96.5, "warn": 95.0 } },
+    "grain": ["daily", "shift"],
+    "answers": ["Is extraction on plan?", "How efficiently is the milling tandem recovering pol from cane?"],
+    "variance": true,
+    "forecastCandidate": true,
+    "caveats": ["Meaningless off-season"]
+  },
+  {
+    "id": "kpi.sugar.bhr",
+    "version": "1.0.0",
+    "domain": "sugar_factory",
+    "name": { "th": "ค่า BHR (Boiling House Recovery)", "en": "Boiling House Recovery (BHR)" },
+    "formula": "100 * sum(sugar_pol) / sum(mixed_juice_pol)",
+    "inputs": {
+      "sugar_pol": { "role": "measure", "unit": "ton", "synonyms": { "th": ["พอลในน้ำตาล", "พอลน้ำตาลผลิตได้"], "en": ["sugar pol", "pol in sugar produced"] } },
+      "mixed_juice_pol": { "role": "measure", "unit": "ton", "synonyms": { "th": ["พอลน้ำอ้อยรวม", "พอลในน้ำอ้อยรวม"], "en": ["mixed juice pol", "pol in mixed juice"] } }
+    },
+    "aggNature": "intensive",
+    "direction": "higher-better",
+    "format": { "kind": "percentage", "decimals": 1 },
+    "target": { "policy": "domain-benchmark", "benchmark": { "good": 88.0, "warn": 85.0 } },
+    "grain": ["daily", "weekly", "monthly", "season"],
+    "answers": ["How efficiently does the boiling house recover sugar from juice?", "Is process house performance acceptable?"],
+    "variance": true,
+    "forecastCandidate": true,
+    "caveats": ["BHR alone does not indicate overall recovery — must combine with extraction"]
+  },
+  {
+    "id": "kpi.sugar.pol_pct_cane",
+    "version": "1.0.0",
+    "domain": "sugar_factory",
+    "name": { "th": "โพล % อ้อย", "en": "Pol % Cane" },
+    "formula": "avg(pol_pct_cane)",
+    "inputs": {
+      "pol_pct_cane": { "role": "measure", "unit": "%", "synonyms": { "th": ["พอล%อ้อย", "โพล%อ้อย", "พอลเปอร์เซ็นต์อ้อย"], "en": ["pol % cane", "pol pct cane", "pol percent cane", "cane pol percent"] } }
+    },
+    "aggNature": "intensive",
+    "direction": "higher-better",
+    "format": { "kind": "percentage", "decimals": 2 },
+    "target": { "policy": "domain-benchmark", "benchmark": { "good": 13.0, "warn": 11.5 } },
+    "grain": ["daily", "weekly", "monthly", "season"],
+    "answers": ["What is the sucrose content of the incoming cane?", "Is cane quality improving or declining?"],
+    "variance": true,
+    "forecastCandidate": true,
+    "caveats": ["Heavily affected by cane variety, age, and harvesting method"]
+  },
+  {
+    "id": "kpi.sugar.undetermined_loss",
+    "version": "1.0.0",
+    "domain": "sugar_factory",
+    "name": { "th": "การสูญเสียที่ไม่ทราบสาเหตุ", "en": "Undetermined Loss %" },
+    "formula": "100 - (100 * sum(pol_in_sugar) / sum(pol_in_cane)) - sum(known_loss_pct)",
+    "inputs": {
+      "pol_in_sugar": { "role": "measure", "unit": "ton", "synonyms": { "th": ["พอลในน้ำตาล", "พอลผลิตภัณฑ์"], "en": ["pol in sugar", "pol in product"] } },
+      "pol_in_cane": { "role": "measure", "unit": "ton", "synonyms": { "th": ["พอลในอ้อย", "พอลอ้อย"], "en": ["pol in cane", "cane pol"] } },
+      "known_loss_pct": { "role": "measure", "unit": "%", "synonyms": { "th": ["การสูญเสียที่ทราบสาเหตุ", "สูญเสียระบุได้"], "en": ["known loss", "determined loss", "identified loss"] } }
+    },
+    "aggNature": "intensive",
+    "direction": "lower-better",
+    "format": { "kind": "percentage", "decimals": 2 },
+    "target": { "policy": "domain-benchmark", "benchmark": { "good": 1.5, "warn": 2.5 } },
+    "grain": ["daily", "weekly", "monthly", "season"],
+    "answers": ["How much pol is being lost through unidentified causes?", "Are there hidden process inefficiencies?"],
+    "variance": true,
+    "forecastCandidate": false,
+    "caveats": ["High values often indicate measurement errors rather than true process loss", "Requires accurate pol balances across all stations"]
+  },
+  {
+    "id": "kpi.sugar.mill_downtime",
+    "version": "1.0.0",
+    "domain": "sugar_factory",
+    "name": { "th": "เวลาหยุดหีบ", "en": "Mill Downtime %" },
+    "formula": "100 * sum(downtime_hours) / sum(available_hours)",
+    "inputs": {
+      "downtime_hours": { "role": "measure", "unit": "hour", "synonyms": { "th": ["ชั่วโมงหยุด", "เวลาหยุด", "ชม.หยุดหีบ"], "en": ["downtime hours", "stop hours", "mill stop time"] } },
+      "available_hours": { "role": "measure", "unit": "hour", "synonyms": { "th": ["ชั่วโมงทำงาน", "เวลาทั้งหมด", "ชม.ทำการ"], "en": ["available hours", "scheduled hours", "total hours"] } }
+    },
+    "aggNature": "intensive",
+    "direction": "lower-better",
+    "format": { "kind": "percentage", "decimals": 1 },
+    "target": { "policy": "domain-benchmark", "benchmark": { "good": 5.0, "warn": 10.0 } },
+    "grain": ["daily", "shift", "weekly", "monthly"],
+    "answers": ["How much production time is lost to stoppages?", "Is mill reliability acceptable?"],
+    "variance": true,
+    "forecastCandidate": false,
+    "caveats": ["Must distinguish planned maintenance from unplanned stoppages for actionability"]
+  },
+  {
+    "id": "kpi.sugar.cane_crushed_per_day",
+    "version": "1.0.0",
+    "domain": "sugar_factory",
+    "name": { "th": "ปริมาณอ้อยหีบต่อวัน", "en": "Cane Crushed per Day" },
+    "formula": "sum(cane_crushed)",
+    "inputs": {
+      "cane_crushed": { "role": "measure", "unit": "ton", "synonyms": { "th": ["อ้อยหีบ", "ปริมาณอ้อย", "อ้อยเข้าหีบ", "ตันอ้อย"], "en": ["cane crushed", "cane processed", "tons cane", "cane weight"] } }
+    },
+    "aggNature": "extensive",
+    "direction": "higher-better",
+    "format": { "kind": "number", "decimals": 0 },
+    "target": { "policy": "column", "benchmark": { "good": null, "warn": null } },
+    "grain": ["daily", "shift"],
+    "answers": ["How much cane was processed today?", "Is the factory meeting its crushing capacity?"],
+    "variance": true,
+    "forecastCandidate": true,
+    "caveats": ["Seasonal — zero during off-season", "Affected by cane supply logistics, not just factory capacity"]
+  },
+  {
+    "id": "kpi.sugar.tcd_utilization",
+    "version": "1.0.0",
+    "domain": "sugar_factory",
+    "name": { "th": "อัตราใช้กำลังการผลิต (TCD)", "en": "TCD Utilization %" },
+    "formula": "100 * sum(cane_crushed) / sum(tcd_capacity)",
+    "inputs": {
+      "cane_crushed": { "role": "measure", "unit": "ton", "synonyms": { "th": ["อ้อยหีบ", "ปริมาณอ้อย", "อ้อยเข้าหีบ"], "en": ["cane crushed", "cane processed", "tons cane"] } },
+      "tcd_capacity": { "role": "measure", "unit": "ton", "synonyms": { "th": ["กำลังการผลิต", "ความสามารถหีบ", "TCD"], "en": ["TCD capacity", "crushing capacity", "rated capacity"] } }
+    },
+    "aggNature": "intensive",
+    "direction": "higher-better",
+    "format": { "kind": "percentage", "decimals": 1 },
+    "target": { "policy": "domain-benchmark", "benchmark": { "good": 95.0, "warn": 85.0 } },
+    "grain": ["daily", "weekly", "monthly"],
+    "answers": ["Is the factory running at rated capacity?", "How much headroom remains in crushing capacity?"],
+    "variance": true,
+    "forecastCandidate": true,
+    "caveats": ["Capacity may vary with cane fibre content and condition"]
+  },
+  {
+    "id": "kpi.sugar.molasses_purity",
+    "version": "1.0.0",
+    "domain": "sugar_factory",
+    "name": { "th": "ความบริสุทธิ์กากน้ำตาล", "en": "Molasses Purity" },
+    "formula": "avg(molasses_purity)",
+    "inputs": {
+      "molasses_purity": { "role": "measure", "unit": "%", "synonyms": { "th": ["ความบริสุทธิ์กากน้ำตาล", "เพียวริตี้โมลาส", "พิวริตี้กากน้ำตาล"], "en": ["molasses purity", "final molasses purity", "C-mol purity"] } }
+    },
+    "aggNature": "intensive",
+    "direction": "lower-better",
+    "format": { "kind": "percentage", "decimals": 1 },
+    "target": { "policy": "domain-benchmark", "benchmark": { "good": 32.0, "warn": 36.0 } },
+    "grain": ["daily", "weekly", "monthly", "season"],
+    "answers": ["Is the factory exhausting molasses efficiently?", "Is sucrose being lost to molasses?"],
+    "variance": true,
+    "forecastCandidate": true,
+    "caveats": ["Target purity depends on non-sucrose composition and is variety-dependent"]
+  },
+  {
+    "id": "kpi.sugar.steam_pct_cane",
+    "version": "1.0.0",
+    "domain": "sugar_factory",
+    "name": { "th": "ไอน้ำ % อ้อย", "en": "Steam % Cane" },
+    "formula": "100 * sum(steam_produced) / sum(cane_crushed)",
+    "inputs": {
+      "steam_produced": { "role": "measure", "unit": "ton", "synonyms": { "th": ["ไอน้ำผลิต", "ปริมาณไอน้ำ", "ไอน้ำ"], "en": ["steam produced", "steam generation", "total steam"] } },
+      "cane_crushed": { "role": "measure", "unit": "ton", "synonyms": { "th": ["อ้อยหีบ", "ปริมาณอ้อย", "อ้อยเข้าหีบ"], "en": ["cane crushed", "cane processed", "tons cane"] } }
+    },
+    "aggNature": "intensive",
+    "direction": "lower-better",
+    "format": { "kind": "percentage", "decimals": 1 },
+    "target": { "policy": "domain-benchmark", "benchmark": { "good": 45.0, "warn": 55.0 } },
+    "grain": ["daily", "weekly", "monthly", "season"],
+    "answers": ["How energy-efficient is the factory?", "Is steam consumption within acceptable limits?"],
+    "variance": true,
+    "forecastCandidate": true,
+    "caveats": ["Includes process steam and power generation steam", "Modern cogen plants may have different optimal ranges"]
+  },
+  {
+    "id": "kpi.sugar.sugar_produced",
+    "version": "1.0.0",
+    "domain": "sugar_factory",
+    "name": { "th": "น้ำตาลผลิตได้", "en": "Sugar Produced" },
+    "formula": "sum(sugar_produced)",
+    "inputs": {
+      "sugar_produced": { "role": "measure", "unit": "ton", "synonyms": { "th": ["น้ำตาลผลิต", "ผลผลิตน้ำตาล", "น้ำตาลทราย", "ตันน้ำตาล"], "en": ["sugar produced", "sugar production", "sugar output", "tons sugar"] } }
+    },
+    "aggNature": "extensive",
+    "direction": "higher-better",
+    "format": { "kind": "number", "decimals": 0 },
+    "target": { "policy": "column", "benchmark": { "good": null, "warn": null } },
+    "grain": ["daily", "weekly", "monthly", "season"],
+    "answers": ["How much sugar has been produced?", "Is production on track for seasonal targets?"],
+    "variance": true,
+    "forecastCandidate": true,
+    "caveats": ["Must specify sugar grade (raw, refined, white) for meaningful comparison"]
+  },
+  {
+    "id": "kpi.sugar.yield_per_ton_cane",
+    "version": "1.0.0",
+    "domain": "sugar_factory",
+    "name": { "th": "ผลผลิตน้ำตาลต่อตันอ้อย", "en": "Sugar Yield per Ton Cane" },
+    "formula": "sum(sugar_produced) / sum(cane_crushed)",
+    "inputs": {
+      "sugar_produced": { "role": "measure", "unit": "ton", "synonyms": { "th": ["น้ำตาลผลิต", "ผลผลิตน้ำตาล", "ตันน้ำตาล"], "en": ["sugar produced", "sugar production", "sugar output"] } },
+      "cane_crushed": { "role": "measure", "unit": "ton", "synonyms": { "th": ["อ้อยหีบ", "ปริมาณอ้อย", "อ้อยเข้าหีบ", "ตันอ้อย"], "en": ["cane crushed", "cane processed", "tons cane"] } }
+    },
+    "aggNature": "intensive",
+    "direction": "higher-better",
+    "format": { "kind": "number", "decimals": 3 },
+    "target": { "policy": "domain-benchmark", "benchmark": { "good": 0.110, "warn": 0.095 } },
+    "grain": ["daily", "weekly", "monthly", "season"],
+    "answers": ["How much sugar is recovered per ton of cane?", "Is overall factory recovery satisfactory?"],
+    "variance": true,
+    "forecastCandidate": true,
+    "caveats": ["Combines cane quality and factory efficiency — decompose with CCS and BHR for root cause"]
+  }
+]

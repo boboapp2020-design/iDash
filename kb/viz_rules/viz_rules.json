@@ -1,0 +1,243 @@
+[
+  {
+    "id": "viz.trend.single",
+    "version": "1.0.0",
+    "question": "trend",
+    "dataShape": { "measures": 1, "time": true },
+    "chart": "line",
+    "notes": "Peak markPoint labeled; area variant if volume emphasis",
+    "gene": "gene.trend_line",
+    "constraints": ["axis-units-required", "time-axis-period-stated", "peak-labeled"]
+  },
+  {
+    "id": "viz.trend.single_area",
+    "version": "1.0.0",
+    "question": "trend",
+    "dataShape": { "measures": 1, "time": true, "volumeEmphasis": true },
+    "chart": "area",
+    "notes": "Use area when volume emphasis is the intent",
+    "gene": "gene.trend_area",
+    "constraints": ["axis-units-required", "time-axis-period-stated"]
+  },
+  {
+    "id": "viz.trend.multi",
+    "version": "1.0.0",
+    "question": "trend",
+    "dataShape": { "measures": [2, 4], "time": true, "sameUnit": true, "magnitudeRatio": "<=20" },
+    "chart": "multi-line",
+    "notes": "Split to separate charts if magnitude ratio > 20x or mixed units; never dual axis",
+    "gene": "gene.trend_multi_line",
+    "constraints": ["no-dual-axis", "axis-units-required", "time-axis-period-stated", "max-4-series"]
+  },
+  {
+    "id": "viz.target_attainment.line_band",
+    "version": "1.0.0",
+    "question": "target-attainment",
+    "dataShape": { "kpi": true, "target": true, "time": true },
+    "chart": "line",
+    "notes": "Line with target band overlay; gauge allowed only for target-attainment, max 3 per page",
+    "gene": "gene.trend_target_band",
+    "constraints": ["target-required", "axis-units-required"]
+  },
+  {
+    "id": "viz.target_attainment.bullet",
+    "version": "1.0.0",
+    "question": "target-attainment",
+    "dataShape": { "kpi": true, "target": true },
+    "chart": "bullet",
+    "notes": "Compact alternative to gauge for target comparison",
+    "gene": "gene.bullet_chart",
+    "constraints": ["target-required"]
+  },
+  {
+    "id": "viz.target_attainment.gauge",
+    "version": "1.0.0",
+    "question": "target-attainment",
+    "dataShape": { "kpi": true, "target": true },
+    "chart": "gauge",
+    "notes": "Gauge only with real target; max 3 per page; forbidden without target",
+    "gene": "gene.gauge_target",
+    "constraints": ["target-required", "max-3-per-page", "no-gauge-without-target"]
+  },
+  {
+    "id": "viz.magnitude.bar_small",
+    "version": "1.0.0",
+    "question": "magnitude-comparison",
+    "dataShape": { "measures": 1, "dim": { "cardinality": [1, 7] } },
+    "chart": "bar",
+    "notes": "Vertical bar; leader emphasized; value-labeled",
+    "gene": "gene.bar_vertical",
+    "constraints": ["bar-starts-at-zero", "value-labeled", "leader-emphasized", "sort-by-value"]
+  },
+  {
+    "id": "viz.magnitude.hbar_medium",
+    "version": "1.0.0",
+    "question": "magnitude-comparison",
+    "dataShape": { "measures": 1, "dim": { "cardinality": [8, 15] } },
+    "chart": "bar-horizontal",
+    "notes": "Horizontal bar; top-N with 'Others' bucket; ranking reads downward",
+    "gene": "gene.ranking_hbar",
+    "constraints": ["bar-starts-at-zero", "sort-by-value", "ranking-reads-down"]
+  },
+  {
+    "id": "viz.magnitude.hbar_large",
+    "version": "1.0.0",
+    "question": "magnitude-comparison",
+    "dataShape": { "measures": 1, "dim": { "cardinality": [16, 999] } },
+    "chart": "bar-horizontal",
+    "notes": "Top-N horizontal bar + detail table; never a 30-bar chart",
+    "gene": "gene.ranking_hbar_topn",
+    "constraints": ["bar-starts-at-zero", "top-n-with-others", "detail-table-companion"]
+  },
+  {
+    "id": "viz.composition.donut",
+    "version": "1.0.0",
+    "question": "composition",
+    "dataShape": { "measures": 1, "aggNature": "extensive", "dim": { "cardinality": [2, 6] } },
+    "chart": "donut",
+    "notes": "% labels mandatory; intensive measures never in donut/pie",
+    "gene": "gene.composition_donut",
+    "constraints": ["no-intensive-measures", "max-6-slices", "pct-labels-mandatory"]
+  },
+  {
+    "id": "viz.composition.stacked_bar",
+    "version": "1.0.0",
+    "question": "composition",
+    "dataShape": { "measures": 1, "aggNature": "extensive", "dim": { "cardinality": [2, 6] } },
+    "chart": "stacked-bar",
+    "notes": "Alternative to donut for composition; preferred when comparing across groups",
+    "gene": "gene.composition_stacked_bar",
+    "constraints": ["no-intensive-measures", "pct-labels-mandatory"]
+  },
+  {
+    "id": "viz.composition.treemap",
+    "version": "1.0.0",
+    "question": "composition",
+    "dataShape": { "measures": 1, "aggNature": "extensive", "dim": { "cardinality": [7, 999] } },
+    "chart": "treemap",
+    "notes": "For 7+ parts or hierarchical categories",
+    "gene": "gene.composition_treemap",
+    "constraints": ["no-intensive-measures"]
+  },
+  {
+    "id": "viz.composition_over_time",
+    "version": "1.0.0",
+    "question": "composition",
+    "dataShape": { "measures": 1, "aggNature": "extensive", "dim": { "cardinality": [2, 5] }, "time": true },
+    "chart": "stacked-area",
+    "notes": "Stacked area or bar for composition over time; max 5 series",
+    "gene": "gene.composition_stacked_area",
+    "constraints": ["no-intensive-measures", "max-5-series"]
+  },
+  {
+    "id": "viz.distribution.histogram",
+    "version": "1.0.0",
+    "question": "distribution",
+    "dataShape": { "measures": 1, "rows": { "min": 30 } },
+    "chart": "histogram",
+    "notes": "Axes named including row count axis label",
+    "gene": "gene.distribution_histogram",
+    "constraints": ["axis-units-required", "min-30-rows"]
+  },
+  {
+    "id": "viz.distribution.boxplot",
+    "version": "1.0.0",
+    "question": "distribution",
+    "dataShape": { "measures": 1, "dim": { "cardinality": [2, 12] }, "rows": { "min": 30 } },
+    "chart": "boxplot",
+    "notes": "Distribution by group; compare spread across categories",
+    "gene": "gene.distribution_boxplot",
+    "constraints": ["axis-units-required", "min-30-rows"]
+  },
+  {
+    "id": "viz.relationship.scatter",
+    "version": "1.0.0",
+    "question": "relationship",
+    "dataShape": { "measures": 2, "rows": { "min": 20 } },
+    "chart": "scatter",
+    "notes": "Correlation caveat in caption; r value cited",
+    "gene": "gene.correlation_scatter",
+    "constraints": ["correlation-caveat-required", "min-20-rows"]
+  },
+  {
+    "id": "viz.decomposition.waterfall",
+    "version": "1.0.0",
+    "question": "decomposition-of-change",
+    "dataShape": { "measures": 1, "additiveParts": true },
+    "chart": "waterfall",
+    "notes": "P&L bridges, variance walks; color by direction (positive/negative)",
+    "gene": "gene.contribution_waterfall",
+    "constraints": ["color-direction"]
+  },
+  {
+    "id": "viz.flow.sankey",
+    "version": "1.0.0",
+    "question": "flow",
+    "dataShape": { "source": true, "target": true, "measure": true },
+    "chart": "sankey",
+    "notes": "Only with real flow columns (source, target, value)",
+    "gene": "gene.sankey_flow",
+    "constraints": ["real-flow-columns-required"]
+  },
+  {
+    "id": "viz.schedule_density.calendar",
+    "version": "1.0.0",
+    "question": "schedule-density",
+    "dataShape": { "time": true, "grain": "daily" },
+    "chart": "calendar-heatmap",
+    "notes": "Events or measures on a calendar grid",
+    "gene": "gene.calendar_density",
+    "constraints": ["daily-grain-required"]
+  },
+  {
+    "id": "viz.dense_matrix.heatmap",
+    "version": "1.0.0",
+    "question": "dense-matrix",
+    "dataShape": { "time": true, "dim": { "cardinality": [2, 20] } },
+    "chart": "heatmap",
+    "notes": "Sequential palette only; time x category grid",
+    "gene": "gene.heatmap_time_category",
+    "constraints": ["sequential-palette-only"]
+  },
+  {
+    "id": "viz.funnel.standard",
+    "version": "1.0.0",
+    "question": "funnel",
+    "dataShape": { "stages": true, "monotonic": true },
+    "chart": "funnel",
+    "notes": "Ordered stages with monotonically decreasing values; conversion % labeled",
+    "gene": "gene.funnel",
+    "constraints": ["ordered-stages-required", "conversion-labeled"]
+  },
+  {
+    "id": "viz.stability.control_chart",
+    "version": "1.0.0",
+    "question": "stability-control",
+    "dataShape": { "measures": 1, "time": true, "specLimits": true },
+    "chart": "control-chart",
+    "notes": "Sugar/manufacturing packs prefer this over plain line for stability KPIs",
+    "gene": "gene.control_chart",
+    "constraints": ["spec-limits-required", "violation-points-marked"]
+  },
+  {
+    "id": "viz.detail.table",
+    "version": "1.0.0",
+    "question": "detail-lookup",
+    "dataShape": { "any": true },
+    "chart": "table",
+    "notes": "Last section only per layout rules (doc 07); always a safe fallback",
+    "gene": "gene.detail_table",
+    "constraints": ["last-section-only"]
+  },
+  {
+    "id": "viz.refusal.safe_form",
+    "version": "1.0.0",
+    "question": "_no_rule_fires",
+    "dataShape": { "any": true },
+    "chart": "table",
+    "notes": "When no rule fires confidently: render as KPI card, ranked list, or table. Log viz-gap event. Never improvise a chart.",
+    "gene": "gene.detail_table",
+    "constraints": ["log-viz-gap-event", "never-improvise"],
+    "refusal": true
+  }
+]

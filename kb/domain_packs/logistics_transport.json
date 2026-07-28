@@ -1,0 +1,211 @@
+{
+  "id": "logistics_transport",
+  "version": "1.0.0",
+  "parent": null,
+
+  "identity": {
+    "nameTH": "โลจิสติกส์และขนส่ง",
+    "nameEN": "Logistics & Transportation",
+    "nameLO": "ການຂົນສົ່ງ ແລະ ໂລຈິສຕິກ"
+  },
+
+  "signatures": {
+    "lexicon": {
+      "columns": {
+        "th": [
+          "การจัดส่ง", "ขนส่ง", "เที่ยวรถ", "ทะเบียนรถ", "พนักงานขับ",
+          "ต้นทาง", "ปลายทาง", "ระยะทาง", "น้ำหนักบรรทุก", "ค่าขนส่ง",
+          "เวลาจัดส่ง", "เวลารับสินค้า", "สถานะจัดส่ง", "ใบส่งของ",
+          "เลขที่ใบขนส่ง", "เส้นทาง", "รอบการจัดส่ง", "จุดรับ", "จุดส่ง",
+          "ค่าน้ำมัน", "ค่าทางด่วน", "ค่าเบี้ยเลี้ยง", "ค่าซ่อมรถ",
+          "ตู้คอนเทนเนอร์", "หมายเลขซีล", "ใบตราส่ง", "ใบกำกับขนส่ง",
+          "ตารางเดินรถ", "แผนการจัดส่ง", "ศูนย์กระจายสินค้า",
+          "จำนวนเที่ยว", "เที่ยวว่าง", "ความจุ", "บรรทุก",
+          "ส่งตรงเวลา", "ส่งล่าช้า", "สินค้าเสียหาย", "สินค้าสูญหาย",
+          "ใบรับสินค้า", "ใบนำส่ง", "รายงานเดินทาง"
+        ],
+        "en": [
+          "shipment", "shipping", "delivery", "carrier", "freight",
+          "tracking", "tracking number", "waybill", "bill of lading",
+          "origin", "destination", "route", "distance", "mileage",
+          "vehicle", "truck", "fleet", "driver", "license plate",
+          "load", "cargo", "weight", "volume", "cbm",
+          "transit time", "lead time", "eta", "etd",
+          "on time", "delayed", "late delivery", "delivery rate",
+          "shipping cost", "freight cost", "cost per km", "cost per delivery",
+          "fuel", "fuel cost", "toll", "maintenance cost",
+          "container", "seal number", "consignment",
+          "dispatch", "pickup", "drop off", "hub", "depot",
+          "distribution center", "last mile", "first mile",
+          "empty trip", "utilization", "capacity",
+          "damaged", "lost", "claim", "pod", "proof of delivery",
+          "total deliveries", "avg delivery days", "delay days",
+          "shipment id", "tracking events", "delivery status"
+        ],
+        "lo": [
+          "ການຂົນສົ່ງ", "ຂົນສົ່ງ", "ລົດຂົນສົ່ງ", "ຄົນຂັບ",
+          "ຕົ້ນທາງ", "ປາຍທາງ", "ເສັ້ນທາງ", "ນ້ຳໜັກ",
+          "ຄ່າຂົນສົ່ງ", "ສົ່ງສິນຄ້າ", "ສະຖານະ"
+        ]
+      },
+      "sheets": [
+        "shipment", "การจัดส่ง", "ขนส่ง", "delivery", "การขนส่ง",
+        "fleet", "เที่ยวรถ", "freight", "ค่าขนส่ง", "tracking",
+        "dispatch", "route", "เส้นทาง", "distribution"
+      ],
+      "weightPerHit": 1.5
+    },
+    "valueShapes": [
+      {
+        "columnLike": "on.time.*delivery|อัตราส่งตรงเวลา|otd|on_time_pct",
+        "type": "percentage",
+        "range": [50, 100],
+        "weight": 3.5,
+        "note": "On-time delivery rate; definitive logistics metric"
+      },
+      {
+        "columnLike": "cost.per.(?:km|delivery|trip)|ค่าขนส่งต่อเที่ยว",
+        "type": "number",
+        "range": [1, 100000],
+        "weight": 2.5,
+        "note": "Unit cost metrics for transportation"
+      },
+      {
+        "columnLike": "transit.time|lead.time|avg.delivery.days|ระยะเวลาจัดส่ง",
+        "type": "number",
+        "range": [0.1, 30],
+        "weight": 2.5,
+        "note": "Transit or delivery time in days"
+      },
+      {
+        "columnLike": "vehicle.utilization|อัตราการใช้รถ|fleet.utilization",
+        "type": "percentage",
+        "range": [30, 100],
+        "weight": 2.5,
+        "note": "Fleet/vehicle utilization percentage"
+      },
+      {
+        "columnLike": "damage.rate|อัตราเสียหาย|claim.rate",
+        "type": "percentage",
+        "range": [0, 10],
+        "weight": 2.0,
+        "note": "Cargo damage/claim rate"
+      },
+      {
+        "columnLike": "distance|ระยะทาง|mileage|km",
+        "type": "number",
+        "range": [1, 5000],
+        "weight": 1.5,
+        "note": "Trip distance in km"
+      }
+    ],
+    "unitPatterns": [
+      "กม.", "km", "ไมล์", "ตัน", "CBM", "คิว",
+      "เที่ยว", "เที่ยว/วัน", "trips/day", "บาท/กม.",
+      "ลิตร", "liters", "คัน", "ตู้"
+    ],
+    "negative": [
+      { "lexicon": ["patient", "ผู้ป่วย", "diagnosis", "โรค"], "weight": -3.0 },
+      { "lexicon": ["ccs", "pol", "brix", "bagasse", "อ้อย"], "weight": -2.0 },
+      { "lexicon": ["oee", "defect rate", "cycle time", "mtbf", "mttr"], "weight": -2.0 },
+      { "lexicon": ["salary", "เงินเดือน", "payroll", "leave", "turnover rate"], "weight": -2.0 },
+      { "lexicon": ["gl", "general ledger", "debit", "credit", "trial balance"], "weight": -2.0 },
+      { "lexicon": ["pipeline", "deal", "opportunity", "win rate", "quota"], "weight": -2.0 },
+      { "lexicon": ["student", "enrollment", "gpa", "semester", "curriculum"], "weight": -3.0 },
+      { "lexicon": ["occupancy", "adr", "revpar", "check_in", "room_type", "guest"], "weight": -2.5 },
+      { "lexicon": ["impression", "ctr", "cpc", "roas", "campaign_id"], "weight": -2.0 },
+      { "lexicon": ["cart", "add_to_cart", "checkout", "browse", "wishlist"], "weight": -2.0 },
+      { "lexicon": ["protocol", "chain", "apy", "staking", "defi", "wallet", "token", "ticker", "open", "high", "low", "close", "market_cap", "symbol"], "weight": -4.0 },
+      { "lexicon": ["goals", "assists", "tackles", "player", "league", "match", "games_played"], "weight": -3.0 },
+      { "lexicon": ["subscriber", "dau", "mau", "mrr", "arr", "arpu"], "weight": -2.5 },
+      { "lexicon": ["doctors", "nurses", "patients_mtd", "infection_rate"], "weight": -3.0 },
+      { "lexicon": ["property", "bedrooms", "monthly_rent", "tenant", "mortgage"], "weight": -2.5 },
+      { "lexicon": ["sprint", "story_points", "epic", "assignee", "task_id"], "weight": -2.0 },
+      { "lexicon": ["menu", "recipe", "prep_time", "ingredient", "food_cost"], "weight": -2.5 },
+      { "lexicon": ["tickets_resolved", "avg_resolution_hr", "first_contact_resolution", "csat_score", "reopen_rate", "handle_time", "quality_score", "agent"], "weight": -3.5 }
+    ]
+  },
+
+  "business": {
+    "processes": [
+      {
+        "id": "order_to_delivery",
+        "stages": ["รับคำสั่ง", "จัดเตรียม", "บรรทุก", "ขนส่ง", "จัดส่งถึงปลายทาง", "ยืนยันรับสินค้า"]
+      },
+      {
+        "id": "fleet_management",
+        "stages": ["วางแผนเที่ยวรถ", "จัดรถ/คนขับ", "ออกเดินทาง", "ติดตาม GPS", "รายงานสถานะ"]
+      },
+      {
+        "id": "reverse_logistics",
+        "stages": ["แจ้งส่งคืน", "รับสินค้าคืน", "ตรวจสอบ", "คืนเข้าคลัง/ทำลาย"]
+      }
+    ],
+    "goals": [
+      "maximize on-time delivery rate",
+      "minimize transportation cost per unit/km",
+      "optimize fleet utilization and reduce empty trips",
+      "minimize cargo damage and loss rate",
+      "reduce average transit time",
+      "ensure driver safety and compliance",
+      "optimize route planning and load consolidation",
+      "maintain vehicle uptime through preventive maintenance"
+    ],
+    "personas": [
+      {
+        "type": "executive",
+        "cares": ["cost per delivery", "OTD rate", "fleet utilization", "total volume"],
+        "cadence": "weekly"
+      },
+      {
+        "type": "logistics_manager",
+        "cares": ["route efficiency", "vehicle assignments", "delay reasons", "damage claims"],
+        "cadence": "daily"
+      },
+      {
+        "type": "dispatcher",
+        "cares": ["today's trips", "driver availability", "vehicle status", "urgent deliveries"],
+        "cadence": "per-shift"
+      }
+    ],
+    "decisionCatalog": [
+      "optimize-route",
+      "allocate-fleet",
+      "investigate-delay",
+      "plan-forecast",
+      "explain-variance",
+      "reduce-cost",
+      "improve-service-level",
+      "schedule-maintenance"
+    ],
+    "seasonality": "Peak shipping seasons (holiday, year-end). Agricultural harvest seasons drive bulk transport. Monsoon season affects road conditions in Southeast Asia."
+  },
+
+  "kpiRefs": [
+    "kpi.log.otd_rate",
+    "kpi.log.cost_per_delivery",
+    "kpi.log.cost_per_km",
+    "kpi.log.fleet_utilization",
+    "kpi.log.avg_transit_days",
+    "kpi.log.damage_rate",
+    "kpi.log.total_deliveries",
+    "kpi.log.empty_trip_pct",
+    "kpi.log.fuel_cost_per_km",
+    "kpi.log.volume_delivered"
+  ],
+
+  "genomeRefs": [
+    "genome.log_delivery_performance_v1",
+    "genome.log_fleet_overview_v1",
+    "genome.log_cost_analysis_v1"
+  ],
+
+  "vizOverrides": [
+    { "rule": "bar chart for OTD rate by route/carrier with target line", "cites": "doc 06 §3" },
+    { "rule": "line chart for delivery volume and cost trend over time", "cites": "doc 06 §3" },
+    { "rule": "donut for cost breakdown (fuel, toll, labor, maintenance)", "cites": "doc 06 §2" },
+    { "rule": "bar chart for delay reasons (Pareto-style)", "cites": "doc 06 §5" }
+  ],
+
+  "fixtures": []
+}

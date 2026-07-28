@@ -1,0 +1,220 @@
+{
+  "id": "education",
+  "version": "1.0.0",
+  "parent": null,
+
+  "identity": {
+    "nameTH": "การศึกษา",
+    "nameEN": "Education",
+    "nameLO": "ການສຶກສາ"
+  },
+
+  "signatures": {
+    "lexicon": {
+      "columns": {
+        "th": [
+          "นักเรียน", "นักศึกษา", "รหัสนักเรียน", "รหัสนักศึกษา",
+          "ชั้น", "ห้อง", "ระดับชั้น", "สาย", "แผนก",
+          "วิชา", "รายวิชา", "รหัสวิชา", "หน่วยกิต",
+          "คะแนน", "เกรด", "GPA", "ผลการเรียน", "ผลสอบ",
+          "ภาคเรียน", "ปีการศึกษา", "เทอม",
+          "อาจารย์", "ครู", "ผู้สอน", "อาจารย์ที่ปรึกษา",
+          "ลงทะเบียน", "สมัครเรียน", "จำนวนผู้เรียน",
+          "ขาดเรียน", "มาเรียน", "ลา", "สาย",
+          "สอบ", "สอบกลางภาค", "สอบปลายภาค", "คะแนนสอบ",
+          "หลักสูตร", "โปรแกรม", "คณะ", "สาขา",
+          "ทุน", "ทุนการศึกษา", "ค่าเทอม", "ค่าลงทะเบียน",
+          "จบการศึกษา", "สำเร็จการศึกษา", "ออกกลางคัน",
+          "กิจกรรม", "ชมรม", "โครงการ",
+          "ห้องเรียน", "ตารางเรียน", "ตารางสอน", "คาบเรียน"
+        ],
+        "en": [
+          "student", "student id", "student name", "student number",
+          "grade", "class", "section", "level", "year",
+          "course", "course code", "course name", "subject",
+          "credit", "credits", "credit hours",
+          "score", "mark", "marks", "gpa", "cgpa", "grade point",
+          "semester", "term", "academic year",
+          "teacher", "instructor", "professor", "faculty",
+          "enrollment", "enrolled", "registration",
+          "attendance", "absent", "present", "tardy",
+          "exam", "midterm", "final exam", "quiz", "test",
+          "curriculum", "program", "major", "minor", "department",
+          "scholarship", "tuition", "fee", "tuition fee",
+          "graduation", "graduated", "dropout", "withdrawn",
+          "assignment", "homework", "project", "thesis",
+          "activity", "club", "extracurricular",
+          "classroom", "schedule", "timetable", "period",
+          "completion rate", "pass rate", "fail rate",
+          "avg grade", "class average", "percentile", "rank"
+        ],
+        "lo": [
+          "ນັກຮຽນ", "ນັກສຶກສາ", "ຫ້ອງ", "ຊັ້ນ",
+          "ວິຊາ", "ຄະແນນ", "ເກຣດ", "ພາກຮຽນ",
+          "ອາຈານ", "ຄູ", "ລົງທະບຽນ", "ຫຼັກສູດ",
+          "ທຶນ", "ສອບ", "ຈົບ"
+        ]
+      },
+      "sheets": [
+        "student", "นักเรียน", "นักศึกษา", "ผลการเรียน",
+        "grade", "เกรด", "enrollment", "ลงทะเบียน",
+        "attendance", "การมาเรียน", "course", "วิชา", "รายวิชา",
+        "exam", "สอบ", "transcript", "schedule", "ตารางเรียน"
+      ],
+      "weightPerHit": 1.8
+    },
+    "valueShapes": [
+      {
+        "columnLike": "gpa|cgpa|เกรดเฉลี่ย|grade.point",
+        "type": "number",
+        "range": [0, 4],
+        "weight": 3.5,
+        "note": "GPA on 4.0 scale; definitive education metric"
+      },
+      {
+        "columnLike": "credits|หน่วยกิต|credit.hours",
+        "type": "number",
+        "range": [1, 24],
+        "weight": 2.5,
+        "note": "Credit hours per course or semester"
+      },
+      {
+        "columnLike": "completion.rate|อัตราจบ|pass.rate|อัตราผ่าน",
+        "type": "percentage",
+        "range": [30, 100],
+        "weight": 3.0,
+        "note": "Course or program completion/pass rate"
+      },
+      {
+        "columnLike": "attendance.rate|อัตราเข้าเรียน",
+        "type": "percentage",
+        "range": [50, 100],
+        "weight": 2.5,
+        "note": "Student attendance rate"
+      },
+      {
+        "columnLike": "dropout|ออกกลางคัน|withdrawn",
+        "type": "percentage",
+        "range": [0, 30],
+        "weight": 2.5,
+        "note": "Dropout/withdrawal rate"
+      },
+      {
+        "columnLike": "exam.score|คะแนนสอบ|test.score|avg.grade",
+        "type": "number",
+        "range": [0, 100],
+        "weight": 2.0,
+        "note": "Exam or test score (0-100)"
+      }
+    ],
+    "unitPatterns": [
+      "คน", "หน่วยกิต", "credits", "คะแนน", "points",
+      "คาบ", "periods", "ชั่วโมง", "บาท/เทอม"
+    ],
+    "negative": [
+      { "lexicon": ["patient", "ผู้ป่วย", "diagnosis", "โรค"], "weight": -3.0 },
+      { "lexicon": ["ccs", "pol", "brix", "bagasse", "อ้อย"], "weight": -2.0 },
+      { "lexicon": ["oee", "defect rate", "cycle time", "mtbf"], "weight": -2.0 },
+      { "lexicon": ["salary", "เงินเดือน", "payroll"], "weight": -2.0 },
+      { "lexicon": ["gl", "general ledger", "debit", "credit", "trial balance"], "weight": -2.0 },
+      { "lexicon": ["pipeline", "deal", "opportunity", "win rate", "quota", "salesperson"], "weight": -2.0 },
+      { "lexicon": ["occupancy", "adr", "revpar", "check_in", "room_type", "guest"], "weight": -2.5 },
+      { "lexicon": ["shipment_id", "carrier", "freight", "tracking_events", "bill of lading"], "weight": -2.0 },
+      { "lexicon": ["impression", "ctr", "cpc", "roas", "campaign_id"], "weight": -2.0 },
+      { "lexicon": ["cart", "add_to_cart", "checkout", "shipping_fee", "marketplace"], "weight": -2.0 },
+      { "lexicon": ["stock", "inventory", "reorder", "warehouse", "bin"], "weight": -2.0 },
+      { "lexicon": ["employee", "headcount", "hire date", "resignation", "provident fund"], "weight": -2.0 },
+      { "lexicon": ["sprint", "story_points", "epic", "assignee", "task_id", "labels", "project_health", "velocity"], "weight": -4.0 },
+      { "lexicon": ["goals", "assists", "tackles", "player", "league", "match", "games_played", "pass_accuracy", "player_id", "market_value_m"], "weight": -4.0 },
+      { "lexicon": ["subscriber", "dau", "mau", "mrr", "arr", "arpu"], "weight": -2.5 },
+      { "lexicon": ["protocol", "chain", "apy", "staking", "defi", "token"], "weight": -2.5 },
+      { "lexicon": ["doctors", "nurses", "patients_mtd", "infection_rate"], "weight": -3.0 },
+      { "lexicon": ["property", "bedrooms", "monthly_rent", "tenant", "mortgage"], "weight": -2.5 },
+      { "lexicon": ["tasks_total", "tasks_done", "tasks_blocked", "tasks_in_progress", "budget_spent", "budget_remaining", "risk_level", "progress_pct"], "weight": -4.0 },
+      { "lexicon": ["tickets_resolved", "avg_resolution_hr", "first_contact_resolution", "csat_score", "reopen_rate", "handle_time", "quality_score", "agent"], "weight": -4.0 }
+    ]
+  },
+
+  "business": {
+    "processes": [
+      {
+        "id": "academic_cycle",
+        "stages": ["ลงทะเบียน", "เรียน", "สอบกลางภาค", "สอบปลายภาค", "ตัดเกรด", "ประกาศผล"]
+      },
+      {
+        "id": "student_lifecycle",
+        "stages": ["สมัครเข้า", "คัดเลือก", "รับเข้า", "เรียน", "ฝึกงาน", "จบการศึกษา"]
+      },
+      {
+        "id": "curriculum_management",
+        "stages": ["ออกแบบหลักสูตร", "อนุมัติ", "จัดตารางสอน", "ดำเนินการสอน", "ประเมินหลักสูตร", "ปรับปรุง"]
+      }
+    ],
+    "goals": [
+      "improve student academic performance and GPA",
+      "increase graduation rate and reduce dropout",
+      "maintain high attendance rates",
+      "ensure curriculum quality and relevance",
+      "manage enrollment and class sizes effectively",
+      "optimize faculty workload and teaching quality",
+      "provide scholarship support where needed",
+      "track and improve student satisfaction"
+    ],
+    "personas": [
+      {
+        "type": "executive",
+        "cares": ["enrollment trends", "graduation rate", "dropout rate", "institutional ranking"],
+        "cadence": "semester"
+      },
+      {
+        "type": "academic_admin",
+        "cares": ["class schedules", "faculty assignments", "enrollment numbers", "grade distribution"],
+        "cadence": "weekly"
+      },
+      {
+        "type": "teacher",
+        "cares": ["my class performance", "attendance", "at-risk students", "grade distribution"],
+        "cadence": "weekly"
+      }
+    ],
+    "decisionCatalog": [
+      "identify-at-risk-students",
+      "plan-curriculum",
+      "explain-variance",
+      "allocate-resources",
+      "improve-teaching",
+      "manage-enrollment",
+      "award-scholarship",
+      "plan-forecast"
+    ],
+    "seasonality": "Academic calendar: semesters (May-Sep, Nov-Mar in Thailand, varies globally). Enrollment peaks at semester start. Exam periods mid-term and end-of-term. Graduation season."
+  },
+
+  "kpiRefs": [
+    "kpi.edu.enrollment_count",
+    "kpi.edu.avg_gpa",
+    "kpi.edu.pass_rate",
+    "kpi.edu.dropout_rate",
+    "kpi.edu.graduation_rate",
+    "kpi.edu.attendance_rate",
+    "kpi.edu.student_teacher_ratio",
+    "kpi.edu.avg_exam_score",
+    "kpi.edu.scholarship_count",
+    "kpi.edu.course_completion_rate"
+  ],
+
+  "genomeRefs": [
+    "genome.edu_academic_performance_v1",
+    "genome.edu_enrollment_overview_v1",
+    "genome.edu_attendance_tracker_v1"
+  ],
+
+  "vizOverrides": [
+    { "rule": "bar chart for GPA distribution or grade distribution by course", "cites": "doc 06 §3" },
+    { "rule": "line chart for enrollment/graduation trend over academic years", "cites": "doc 06 §3" },
+    { "rule": "donut for student distribution by program/faculty", "cites": "doc 06 §2" },
+    { "rule": "heatmap for attendance pattern by day-of-week × week", "cites": "doc 06 §5" }
+  ],
+
+  "fixtures": []
+}

@@ -1,0 +1,200 @@
+/* Request Dashboard — a letter to the Admin, styled in the iDash theme. */
+
+.req-wrap { max-width: 880px; margin: 0 auto; padding: 26px 32px 40px; }
+
+.req-head { margin-bottom: 20px; }
+.req-title {
+  font-size: 24px; font-weight: 800; color: var(--gray-900);
+  letter-spacing: -.02em; display: flex; align-items: center; gap: 10px;
+}
+.req-title svg { width: 24px; height: 24px; color: var(--primary); }
+.req-sub { font-size: 13px; color: var(--gray-500); margin-top: 5px; }
+
+/* The letter sheet */
+.req-letter {
+  background: #fff; border: 1px solid #e8edf5; border-radius: 14px;
+  box-shadow: var(--shadow-sm); overflow: hidden;
+}
+/* A thin ribbon on top so the card reads as an envelope, not a plain form. */
+.req-letter-top {
+  height: 5px;
+  background: linear-gradient(90deg, #2563eb 0%, #3b82f6 40%, #60a5fa 70%, #93c5fd 100%);
+}
+.req-body { padding: 24px 28px 26px; }
+
+.req-field { margin-bottom: 18px; }
+.req-label {
+  display: block; font-size: 12.5px; font-weight: 700; color: var(--gray-700);
+  margin-bottom: 6px;
+}
+.req-label .req-req { color: #dc2626; margin-left: 2px; }
+.req-hint { font-size: 11.5px; color: var(--gray-500); font-weight: 500; margin-left: 6px; }
+
+.req-input, .req-select, .req-textarea {
+  width: 100%; box-sizing: border-box;
+  padding: 10px 12px; font-size: 13.5px; font-family: inherit; color: var(--text);
+  background: #fff; border: 1px solid var(--border); border-radius: var(--radius-sm);
+  transition: border-color .15s, box-shadow .15s;
+}
+.req-input:focus, .req-select:focus, .req-textarea:focus {
+  outline: none; border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, .12);
+}
+.req-textarea { resize: vertical; min-height: 130px; line-height: 1.6; }
+.req-textarea.short { min-height: 84px; }
+.req-select { cursor: pointer; }
+
+/* Recipient is fixed — show it as a locked chip, not an editable field. */
+.req-locked {
+  display: flex; align-items: center; gap: 8px;
+  padding: 10px 12px; border-radius: var(--radius-sm);
+  background: var(--gray-100); border: 1px dashed #cbd5e1;
+  font-size: 13.5px; font-weight: 600; color: var(--gray-700);
+}
+.req-locked svg { width: 14px; height: 14px; color: var(--gray-500); flex-shrink: 0; }
+.req-locked .req-lock-note {
+  margin-left: auto; font-size: 11.5px; font-weight: 500; color: var(--gray-500);
+}
+
+/* Dashboard example picker — only shown for "ขอสร้าง Dashboard ใหม่".
+   A horizontal strip: the 4 in-house designs first, then the 45-template
+   gallery, browsed with the arrow buttons below. */
+.req-picker {
+  display: flex; gap: 10px; overflow-x: auto;
+  scroll-behavior: smooth; scroll-snap-type: x mandatory;
+  padding-bottom: 6px;
+  scrollbar-width: thin; scrollbar-color: #cbd5e1 transparent;
+}
+.req-picker::-webkit-scrollbar { height: 6px; }
+.req-picker::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+.req-pick {
+  position: relative; text-align: left; cursor: pointer;
+  flex: 0 0 190px; scroll-snap-align: start;
+  background: #fff; border: 1.5px solid var(--border); border-radius: var(--radius-sm);
+  padding: 7px 7px 8px; font-family: inherit;
+  transition: border-color .15s, box-shadow .15s, transform .15s;
+}
+.req-pick:hover { border-color: #bcd2f2; transform: translateY(-2px); box-shadow: var(--shadow-sm); }
+.req-pick.on { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(37, 99, 235, .12); }
+.req-pick-thumb {
+  display: block; border-radius: 5px; overflow: hidden; background: var(--gray-100);
+  aspect-ratio: 16 / 10;
+}
+.req-pick-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.req-pick-name {
+  display: block; margin-top: 7px;
+  font-size: 11.5px; font-weight: 700; color: var(--gray-700); line-height: 1.3;
+}
+/* Tick badge appears only once the card is selected */
+.req-pick-tick {
+  position: absolute; top: 12px; right: 12px;
+  width: 20px; height: 20px; border-radius: 50%;
+  background: var(--primary); color: #fff;
+  display: none; align-items: center; justify-content: center;
+}
+.req-pick.on .req-pick-tick { display: flex; }
+.req-pick-tick svg { width: 12px; height: 12px; }
+
+.req-picker-foot {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  margin: 9px 0 11px; font-size: 11.5px; color: var(--gray-500);
+}
+.req-picker-nav { display: flex; gap: 6px; }
+.req-picker-arrow {
+  width: 30px; height: 30px; border-radius: 8px; cursor: pointer;
+  border: 1px solid var(--border); background: #fff; color: var(--gray-600);
+  display: flex; align-items: center; justify-content: center;
+  transition: background .15s, color .15s, border-color .15s;
+}
+.req-picker-arrow:hover { background: var(--gray-100); color: var(--primary); border-color: #bcd2f2; }
+.req-picker-arrow svg { width: 15px; height: 15px; }
+/* Name under a gallery card gets a second, smaller line for the category */
+.req-pick-cat { display: block; font-size: 10px; font-weight: 500; color: var(--gray-500); margin-top: 1px; }
+
+/* Attachments */
+.req-drop {
+  border: 1.5px dashed #cbd5e1; border-radius: var(--radius-sm);
+  padding: 18px; text-align: center; cursor: pointer; background: #fbfdff;
+  transition: border-color .15s, background .15s;
+}
+.req-drop:hover, .req-drop.drag { border-color: var(--primary); background: #f2f7ff; }
+.req-drop svg { width: 22px; height: 22px; color: var(--primary); margin-bottom: 6px; }
+.req-drop-title { font-size: 13px; font-weight: 700; color: var(--gray-700); }
+.req-drop-sub { font-size: 11.5px; color: var(--gray-500); margin-top: 3px; }
+
+.req-files { list-style: none; margin: 10px 0 0; padding: 0; }
+.req-file {
+  display: flex; align-items: center; gap: 9px;
+  padding: 8px 11px; margin-bottom: 6px;
+  background: var(--gray-100); border-radius: var(--radius-sm); font-size: 12.5px;
+}
+.req-file svg.fi { width: 15px; height: 15px; color: var(--gray-500); flex-shrink: 0; }
+.req-file-name {
+  flex: 1; min-width: 0; font-weight: 600; color: var(--gray-800);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.req-file-size { color: var(--gray-500); font-size: 11.5px; flex-shrink: 0; }
+.req-file-x {
+  border: none; background: none; cursor: pointer; padding: 2px;
+  color: var(--gray-400); line-height: 0; flex-shrink: 0;
+}
+.req-file-x:hover { color: #dc2626; }
+.req-file-x svg { width: 14px; height: 14px; }
+
+/* Footer / send bar */
+.req-foot {
+  display: flex; align-items: center; gap: 12px;
+  padding: 16px 28px; border-top: 1px solid var(--border); background: #fbfdff;
+}
+.req-foot-note { font-size: 11.5px; color: var(--gray-500); flex: 1; }
+.req-send {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 10px 22px; border: none; border-radius: var(--radius-sm);
+  background: var(--primary); color: #fff; font-size: 13.5px; font-weight: 700;
+  font-family: inherit; cursor: pointer; transition: background .15s, opacity .15s;
+}
+.req-send:hover:not(:disabled) { background: #1d4ed8; }
+.req-send:disabled { opacity: .6; cursor: not-allowed; }
+.req-send svg { width: 15px; height: 15px; }
+
+/* Inline status message under the send bar */
+.req-status {
+  margin-top: 14px; padding: 12px 14px; border-radius: var(--radius-sm);
+  font-size: 13px; font-weight: 600; display: flex; align-items: flex-start; gap: 9px;
+}
+.req-status svg { width: 16px; height: 16px; flex-shrink: 0; margin-top: 1px; }
+.req-status.ok   { background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; }
+.req-status.err  { background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; }
+.req-status.info { background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; }
+
+.req-err-field { border-color: #dc2626 !important; }
+
+/* Success popup after sending — shown briefly, then back to Home */
+.req-done-overlay {
+  position: fixed; inset: 0; z-index: 1000;
+  background: rgba(15, 23, 42, .45);
+  display: flex; align-items: center; justify-content: center;
+  animation: reqFadeIn .2s ease;
+}
+.req-done-card {
+  background: #fff; border-radius: 16px; padding: 32px 40px 26px;
+  text-align: center; max-width: 380px; box-shadow: 0 20px 60px rgba(0,0,0,.25);
+  animation: reqPopIn .25s ease;
+}
+.req-done-icon {
+  width: 56px; height: 56px; border-radius: 50%; margin: 0 auto 14px;
+  background: linear-gradient(135deg, #4ade80, #16a34a); color: #fff;
+  display: flex; align-items: center; justify-content: center;
+}
+.req-done-icon svg { width: 28px; height: 28px; }
+.req-done-title { font-size: 17px; font-weight: 800; color: var(--gray-900); }
+.req-done-desc { font-size: 12.5px; color: var(--gray-600); line-height: 1.7; margin-top: 8px; }
+.req-done-note { font-size: 11.5px; color: var(--gray-400); margin-top: 14px; }
+@keyframes reqFadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes reqPopIn { from { opacity: 0; transform: scale(.92); } to { opacity: 1; transform: scale(1); } }
+
+@media (max-width: 820px) {
+  .req-wrap { padding: 20px 18px 32px; }
+  .req-body { padding: 20px 18px; }
+  .req-foot { padding: 14px 18px; flex-wrap: wrap; }
+}

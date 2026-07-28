@@ -1,0 +1,199 @@
+[
+  {
+    "id": "kpi.sales.revenue",
+    "version": "1.0.0",
+    "domain": "sales_crm",
+    "name": { "th": "รายได้จากการขาย", "en": "Sales Revenue" },
+    "formula": "sum(revenue)",
+    "inputs": {
+      "revenue": { "role": "measure", "unit": "currency", "synonyms": { "th": ["รายได้", "ยอดขาย", "ยอมขาย", "มูลค่าขาย"], "en": ["revenue", "sales", "sales revenue", "bookings", "net sales"] } }
+    },
+    "aggNature": "extensive",
+    "direction": "higher-better",
+    "format": { "kind": "currency", "decimals": 0 },
+    "target": { "policy": "column", "benchmark": { "good": null, "warn": null } },
+    "grain": ["daily", "weekly", "monthly", "quarterly", "yearly"],
+    "answers": ["What is total sales revenue?", "Are we on track to hit the sales target?"],
+    "variance": true,
+    "forecastCandidate": true,
+    "caveats": ["Distinguish booked vs recognized revenue"]
+  },
+  {
+    "id": "kpi.sales.revenue_growth_pct",
+    "version": "1.0.0",
+    "domain": "sales_crm",
+    "name": { "th": "อัตราเติบโตรายได้", "en": "Revenue Growth %" },
+    "formula": "100 * pct_change(sum(revenue))",
+    "inputs": {
+      "revenue": { "role": "measure", "unit": "currency", "synonyms": { "th": ["รายได้", "ยอดขาย"], "en": ["revenue", "sales", "sales revenue"] } }
+    },
+    "aggNature": "intensive",
+    "direction": "higher-better",
+    "format": { "kind": "percentage", "decimals": 1 },
+    "target": { "policy": "period-median", "benchmark": { "good": null, "warn": null } },
+    "grain": ["monthly", "quarterly", "yearly"],
+    "answers": ["Is revenue growing or shrinking?", "What is the growth rate compared to previous period?"],
+    "variance": false,
+    "forecastCandidate": true,
+    "caveats": ["Requires at least two comparable periods", "Seasonal businesses need YoY not MoM comparison"]
+  },
+  {
+    "id": "kpi.sales.aov",
+    "version": "1.0.0",
+    "domain": "sales_crm",
+    "name": { "th": "มูลค่าเฉลี่ยต่อคำสั่งซื้อ", "en": "Average Order Value (AOV)" },
+    "formula": "sum(revenue) / count(orders)",
+    "inputs": {
+      "revenue": { "role": "measure", "unit": "currency", "synonyms": { "th": ["รายได้", "ยอดขาย", "มูลค่าขาย"], "en": ["revenue", "sales", "order value", "sales amount"] } },
+      "orders": { "role": "measure", "unit": "count", "synonyms": { "th": ["คำสั่งซื้อ", "ออเดอร์", "รายการขาย", "ใบสั่งซื้อ"], "en": ["orders", "transactions", "order count", "number of orders"] } }
+    },
+    "aggNature": "intensive",
+    "direction": "higher-better",
+    "format": { "kind": "currency", "decimals": 0 },
+    "target": { "policy": "period-median", "benchmark": { "good": null, "warn": null } },
+    "grain": ["daily", "weekly", "monthly", "quarterly"],
+    "answers": ["How much does the average customer spend per order?", "Is order size increasing or decreasing?"],
+    "variance": true,
+    "forecastCandidate": true,
+    "caveats": ["Outlier large orders can skew — check median alongside mean"]
+  },
+  {
+    "id": "kpi.sales.win_rate",
+    "version": "1.0.0",
+    "domain": "sales_crm",
+    "name": { "th": "อัตราปิดการขาย", "en": "Win Rate %" },
+    "formula": "100 * count(won_deals) / count(total_deals)",
+    "inputs": {
+      "won_deals": { "role": "measure", "unit": "count", "synonyms": { "th": ["ดีลที่ปิดได้", "ขายสำเร็จ", "ชนะ"], "en": ["won deals", "closed won", "wins", "successful deals"] } },
+      "total_deals": { "role": "measure", "unit": "count", "synonyms": { "th": ["ดีลทั้งหมด", "โอกาสทั้งหมด", "ดีลรวม"], "en": ["total deals", "total opportunities", "all deals", "qualified opportunities"] } }
+    },
+    "aggNature": "intensive",
+    "direction": "higher-better",
+    "format": { "kind": "percentage", "decimals": 1 },
+    "target": { "policy": "domain-benchmark", "benchmark": { "good": 30.0, "warn": 15.0 } },
+    "grain": ["monthly", "quarterly"],
+    "answers": ["What proportion of opportunities are we closing?", "Is the sales team effective at converting leads?"],
+    "variance": true,
+    "forecastCandidate": true,
+    "caveats": ["Denominator definition matters — include only qualified opportunities for meaningful rate"]
+  },
+  {
+    "id": "kpi.sales.pipeline_coverage",
+    "version": "1.0.0",
+    "domain": "sales_crm",
+    "name": { "th": "สัดส่วนไปป์ไลน์ต่อเป้า", "en": "Pipeline Coverage Ratio" },
+    "formula": "sum(pipeline_value) / sum(quota)",
+    "inputs": {
+      "pipeline_value": { "role": "measure", "unit": "currency", "synonyms": { "th": ["มูลค่าไปป์ไลน์", "มูลค่าโอกาส", "ยอดไปป์ไลน์"], "en": ["pipeline value", "pipeline", "opportunity value", "weighted pipeline"] } },
+      "quota": { "role": "measure", "unit": "currency", "synonyms": { "th": ["เป้าขาย", "โควต้า", "เป้ายอดขาย", "เป้าหมาย"], "en": ["quota", "sales target", "sales goal", "booking target"] } }
+    },
+    "aggNature": "intensive",
+    "direction": "higher-better",
+    "format": { "kind": "number", "decimals": 1 },
+    "target": { "policy": "domain-benchmark", "benchmark": { "good": 3.0, "warn": 1.5 } },
+    "grain": ["monthly", "quarterly"],
+    "answers": ["Do we have enough pipeline to hit quota?", "Is pipeline healthy relative to targets?"],
+    "variance": true,
+    "forecastCandidate": true,
+    "caveats": ["Coverage needs depend on win rate — higher win rate needs less coverage", "Use weighted pipeline for accuracy"]
+  },
+  {
+    "id": "kpi.sales.conversion_by_stage",
+    "version": "1.0.0",
+    "domain": "sales_crm",
+    "name": { "th": "อัตราแปลงตามขั้นตอน", "en": "Stage Conversion Rate %" },
+    "formula": "100 * count(deals_advanced) / count(deals_entered)",
+    "inputs": {
+      "deals_advanced": { "role": "measure", "unit": "count", "synonyms": { "th": ["ดีลที่ผ่านขั้นตอน", "ดีลเลื่อนขั้น"], "en": ["deals advanced", "advanced to next stage", "progressed deals"] } },
+      "deals_entered": { "role": "measure", "unit": "count", "synonyms": { "th": ["ดีลเข้าขั้นตอน", "ดีลในขั้นตอน"], "en": ["deals entered", "deals in stage", "stage entries"] } }
+    },
+    "aggNature": "intensive",
+    "direction": "higher-better",
+    "format": { "kind": "percentage", "decimals": 1 },
+    "target": { "policy": "period-median", "benchmark": { "good": null, "warn": null } },
+    "grain": ["monthly", "quarterly"],
+    "answers": ["Where in the sales funnel are deals dropping off?", "Which stage has the worst conversion?"],
+    "variance": true,
+    "forecastCandidate": false,
+    "caveats": ["Stage definitions must be consistent; compare like-for-like stages only"]
+  },
+  {
+    "id": "kpi.sales.top_customer_concentration",
+    "version": "1.0.0",
+    "domain": "sales_crm",
+    "name": { "th": "สัดส่วนรายได้ลูกค้ารายใหญ่", "en": "Top Customer Concentration %" },
+    "formula": "100 * sum(top_customer_revenue) / sum(revenue)",
+    "inputs": {
+      "top_customer_revenue": { "role": "measure", "unit": "currency", "synonyms": { "th": ["รายได้ลูกค้ารายใหญ่", "ยอดขายลูกค้าท็อป", "ยอดลูกค้าหลัก"], "en": ["top customer revenue", "top-N revenue", "key account revenue", "major customer sales"] } },
+      "revenue": { "role": "measure", "unit": "currency", "synonyms": { "th": ["รายได้รวม", "ยอดขายรวม"], "en": ["revenue", "total revenue", "total sales"] } }
+    },
+    "aggNature": "intensive",
+    "direction": "lower-better",
+    "format": { "kind": "percentage", "decimals": 1 },
+    "target": { "policy": "domain-benchmark", "benchmark": { "good": 20.0, "warn": 50.0 } },
+    "grain": ["monthly", "quarterly", "yearly"],
+    "answers": ["How dependent are we on a few large customers?", "Is revenue concentration risk increasing?"],
+    "variance": true,
+    "forecastCandidate": false,
+    "caveats": ["Define 'top' consistently — top 5, top 10, or top 20%"]
+  },
+  {
+    "id": "kpi.sales.channel_mix",
+    "version": "1.0.0",
+    "domain": "sales_crm",
+    "name": { "th": "สัดส่วนช่องทางขาย", "en": "Channel Mix %" },
+    "formula": "100 * sum(channel_revenue) / sum(revenue)",
+    "inputs": {
+      "channel_revenue": { "role": "measure", "unit": "currency", "synonyms": { "th": ["รายได้ตามช่องทาง", "ยอดขายช่องทาง"], "en": ["channel revenue", "channel sales", "sales by channel"] } },
+      "revenue": { "role": "measure", "unit": "currency", "synonyms": { "th": ["รายได้รวม", "ยอดขายรวม"], "en": ["revenue", "total revenue", "total sales"] } }
+    },
+    "aggNature": "intensive",
+    "direction": "target-band",
+    "format": { "kind": "percentage", "decimals": 1 },
+    "target": { "policy": "period-median", "benchmark": { "good": null, "warn": null } },
+    "grain": ["monthly", "quarterly", "yearly"],
+    "answers": ["How is revenue distributed across channels?", "Is channel diversification improving?"],
+    "variance": false,
+    "forecastCandidate": false,
+    "caveats": ["Must be computed per channel — result is a distribution, not a single number"]
+  },
+  {
+    "id": "kpi.sales.return_rate",
+    "version": "1.0.0",
+    "domain": "sales_crm",
+    "name": { "th": "อัตราคืนสินค้า", "en": "Return Rate %" },
+    "formula": "100 * sum(returned_value) / sum(revenue)",
+    "inputs": {
+      "returned_value": { "role": "measure", "unit": "currency", "synonyms": { "th": ["มูลค่าคืนสินค้า", "ยอดคืน", "สินค้าตีกลับ"], "en": ["returned value", "returns", "return amount", "refund amount"] } },
+      "revenue": { "role": "measure", "unit": "currency", "synonyms": { "th": ["รายได้", "ยอดขาย"], "en": ["revenue", "sales", "gross sales"] } }
+    },
+    "aggNature": "intensive",
+    "direction": "lower-better",
+    "format": { "kind": "percentage", "decimals": 1 },
+    "target": { "policy": "domain-benchmark", "benchmark": { "good": 2.0, "warn": 8.0 } },
+    "grain": ["weekly", "monthly", "quarterly"],
+    "answers": ["What proportion of sales is being returned?", "Are returns increasing?"],
+    "variance": true,
+    "forecastCandidate": true,
+    "caveats": ["E-commerce typically has higher return rates than brick-and-mortar"]
+  },
+  {
+    "id": "kpi.sales.customer_count",
+    "version": "1.0.0",
+    "domain": "sales_crm",
+    "name": { "th": "จำนวนลูกค้า", "en": "Active Customer Count" },
+    "formula": "count_distinct(customer_id)",
+    "inputs": {
+      "customer_id": { "role": "dimension", "unit": "id", "synonyms": { "th": ["รหัสลูกค้า", "ลูกค้า", "ชื่อลูกค้า", "ผู้ซื้อ"], "en": ["customer ID", "customer", "account", "buyer", "client", "customer name"] } }
+    },
+    "aggNature": "extensive",
+    "direction": "higher-better",
+    "format": { "kind": "number", "decimals": 0 },
+    "target": { "policy": "period-median", "benchmark": { "good": null, "warn": null } },
+    "grain": ["monthly", "quarterly", "yearly"],
+    "answers": ["How many active customers do we have?", "Is the customer base growing?"],
+    "variance": true,
+    "forecastCandidate": true,
+    "caveats": ["Define 'active' clearly — purchase in last 12 months is common"]
+  }
+]

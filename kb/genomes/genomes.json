@@ -1,0 +1,602 @@
+[
+  {
+    "id": "genome.sugar_daily_production_v1",
+    "version": "1.0.0",
+    "dna": {
+      "industry": "sugar_factory",
+      "process": "milling+crystallization",
+      "audience": ["executive", "operational"],
+      "decisions": ["intervene-in-operations", "explain-variance", "allocate-resources"],
+      "businessQuestions": ["Is extraction on plan?", "Where is loss concentrated?", "Is downtime worsening?"],
+      "kpis": ["kpi.sugar.extraction_pct", "kpi.sugar.ccs", "kpi.sugar.downtime_hr", "kpi.sugar.undetermined_loss", "kpi.sugar.cane_crushed_ton"],
+      "chromosomes": ["chromo.executive_summary", "chromo.process_monitor", "chromo.diagnostic_breakdown", "chromo.data_detail"],
+      "layout": "exec-strip/two-col-diagnostic",
+      "theme": "carbon",
+      "pages": 3,
+      "filters": ["date-range", "shift", "line"],
+      "interactions": ["drill:station→shift"]
+    },
+    "dataShape": { "hasTime": true, "grain": "daily", "dimCards": [2, 8], "measures": [6, 20] },
+    "provenance": { "source": "curated", "author": "iDash-seed", "outcome": { "editDistance": 0, "uses": 0 } }
+  },
+  {
+    "id": "genome.sugar_udl_analysis_v1",
+    "version": "1.0.0",
+    "dna": {
+      "industry": "sugar_factory",
+      "process": "loss_analysis",
+      "audience": ["operational", "analytical"],
+      "decisions": ["explain-variance", "identify-risk", "optimize-cost"],
+      "businessQuestions": ["Where is undetermined loss concentrated?", "Which stations have the highest loss?", "Is UDL trending up or down?"],
+      "kpis": ["kpi.sugar.undetermined_loss", "kpi.sugar.pol_balance", "kpi.sugar.bagasse_pol", "kpi.sugar.molasses_pol", "kpi.sugar.filter_cake_pol"],
+      "chromosomes": ["chromo.executive_summary", "chromo.diagnostic_breakdown", "chromo.trend_context", "chromo.quality_control", "chromo.data_detail"],
+      "layout": "kpi-strip/pareto-diagnostic/trend",
+      "theme": "carbon",
+      "pages": 3,
+      "filters": ["date-range", "station", "shift"],
+      "interactions": ["drill:loss-type→station"]
+    },
+    "dataShape": { "hasTime": true, "grain": "daily", "dimCards": [3, 10], "measures": [8, 25] },
+    "provenance": { "source": "curated", "author": "iDash-seed", "outcome": { "editDistance": 0, "uses": 0 } }
+  },
+  {
+    "id": "genome.sugar_crushing_season_exec_v1",
+    "version": "1.0.0",
+    "dna": {
+      "industry": "sugar_factory",
+      "process": "milling+crystallization+boiling",
+      "audience": ["executive", "strategic"],
+      "decisions": ["monitor-performance", "explain-variance", "plan-forecast"],
+      "businessQuestions": ["How is the crushing season tracking vs plan?", "What is the cumulative recovery?", "Will we hit the season target?"],
+      "kpis": ["kpi.sugar.cane_crushed_ton", "kpi.sugar.sugar_produced_ton", "kpi.sugar.overall_recovery", "kpi.sugar.bhr", "kpi.sugar.season_days"],
+      "chromosomes": ["chromo.executive_summary", "chromo.trend_context", "chromo.forecast_outlook", "chromo.comparison", "chromo.insight_story"],
+      "layout": "exec-kpi/cumulative-trend/forecast",
+      "theme": "carbon",
+      "pages": 3,
+      "filters": ["date-range", "season"],
+      "interactions": ["drill:week→day"]
+    },
+    "dataShape": { "hasTime": true, "grain": "daily", "dimCards": [1, 5], "measures": [8, 20] },
+    "provenance": { "source": "curated", "author": "iDash-seed", "outcome": { "editDistance": 0, "uses": 0 } }
+  },
+  {
+    "id": "genome.sugar_boiling_house_v1",
+    "version": "1.0.0",
+    "dna": {
+      "industry": "sugar_factory",
+      "process": "crystallization+boiling",
+      "audience": ["operational"],
+      "decisions": ["intervene-in-operations", "monitor-performance", "identify-risk"],
+      "businessQuestions": ["Is boiling house recovery on target?", "Are pan temperatures stable?", "Which massecuite grade has the lowest purity?"],
+      "kpis": ["kpi.sugar.bhr", "kpi.sugar.massecuite_purity", "kpi.sugar.pan_temperature", "kpi.sugar.crystal_size"],
+      "chromosomes": ["chromo.process_monitor", "chromo.quality_control", "chromo.alerts_exceptions", "chromo.data_detail"],
+      "layout": "control-charts/quality-grid",
+      "theme": "carbon",
+      "pages": 2,
+      "filters": ["date-range", "shift", "pan-number"],
+      "interactions": ["drill:pan→batch"]
+    },
+    "dataShape": { "hasTime": true, "grain": "shift", "dimCards": [2, 6], "measures": [6, 15] },
+    "provenance": { "source": "curated", "author": "iDash-seed", "outcome": { "editDistance": 0, "uses": 0 } }
+  },
+  {
+    "id": "genome.sugar_cane_quality_v1",
+    "version": "1.0.0",
+    "dna": {
+      "industry": "sugar_factory",
+      "process": "cane_reception",
+      "audience": ["operational", "executive"],
+      "decisions": ["monitor-performance", "identify-risk", "optimize-cost"],
+      "businessQuestions": ["What is the average CCS of incoming cane?", "How much burnt cane is there?", "Which suppliers deliver the best quality?"],
+      "kpis": ["kpi.sugar.ccs", "kpi.sugar.fibre_pct", "kpi.sugar.trash_pct", "kpi.sugar.burnt_pct", "kpi.sugar.pol_in_cane"],
+      "chromosomes": ["chromo.executive_summary", "chromo.trend_context", "chromo.diagnostic_breakdown", "chromo.data_detail"],
+      "layout": "kpi-strip/trend/ranking",
+      "theme": "carbon",
+      "pages": 2,
+      "filters": ["date-range", "supplier", "zone"],
+      "interactions": ["drill:supplier→delivery"]
+    },
+    "dataShape": { "hasTime": true, "grain": "daily", "dimCards": [2, 8], "measures": [5, 15] },
+    "provenance": { "source": "curated", "author": "iDash-seed", "outcome": { "editDistance": 0, "uses": 0 } }
+  },
+  {
+    "id": "genome.manufacturing_oee_v1",
+    "version": "1.0.0",
+    "dna": {
+      "industry": "manufacturing",
+      "process": "production",
+      "audience": ["operational", "executive"],
+      "decisions": ["monitor-performance", "intervene-in-operations", "identify-risk"],
+      "businessQuestions": ["What is the current OEE?", "What is the biggest downtime cause?", "Is availability improving?"],
+      "kpis": ["kpi.mfg.oee", "kpi.mfg.availability", "kpi.mfg.performance_rate", "kpi.mfg.quality_rate", "kpi.mfg.downtime_hr"],
+      "chromosomes": ["chromo.executive_summary", "chromo.process_monitor", "chromo.diagnostic_breakdown", "chromo.trend_context", "chromo.data_detail"],
+      "layout": "exec-kpi/control-chart/pareto",
+      "theme": "industrial",
+      "pages": 3,
+      "filters": ["date-range", "line", "shift"],
+      "interactions": ["drill:line→machine", "drill:downtime-category→event"]
+    },
+    "dataShape": { "hasTime": true, "grain": "daily", "dimCards": [2, 8], "measures": [6, 15] },
+    "provenance": { "source": "curated", "author": "iDash-seed", "outcome": { "editDistance": 0, "uses": 0 } }
+  },
+  {
+    "id": "genome.manufacturing_defect_analysis_v1",
+    "version": "1.0.0",
+    "dna": {
+      "industry": "manufacturing",
+      "process": "quality_control",
+      "audience": ["operational", "analytical"],
+      "decisions": ["identify-risk", "intervene-in-operations", "explain-variance"],
+      "businessQuestions": ["What are the top defect types?", "Is defect rate stable?", "Which line has the highest reject rate?"],
+      "kpis": ["kpi.mfg.defect_rate", "kpi.mfg.reject_count", "kpi.mfg.first_pass_yield", "kpi.mfg.rework_pct"],
+      "chromosomes": ["chromo.quality_control", "chromo.diagnostic_breakdown", "chromo.trend_context", "chromo.data_detail"],
+      "layout": "pareto/control/trend",
+      "theme": "industrial",
+      "pages": 2,
+      "filters": ["date-range", "line", "defect-type"],
+      "interactions": ["drill:defect-type→root-cause"]
+    },
+    "dataShape": { "hasTime": true, "grain": "daily", "dimCards": [2, 10], "measures": [4, 12] },
+    "provenance": { "source": "curated", "author": "iDash-seed", "outcome": { "editDistance": 0, "uses": 0 } }
+  },
+  {
+    "id": "genome.manufacturing_production_output_v1",
+    "version": "1.0.0",
+    "dna": {
+      "industry": "manufacturing",
+      "process": "production",
+      "audience": ["executive", "operational"],
+      "decisions": ["monitor-performance", "explain-variance", "plan-forecast"],
+      "businessQuestions": ["Is production on target?", "Which product lines are underperforming?", "What is the output trend?"],
+      "kpis": ["kpi.mfg.production_qty", "kpi.mfg.production_value", "kpi.mfg.capacity_utilization", "kpi.mfg.yield_pct"],
+      "chromosomes": ["chromo.executive_summary", "chromo.trend_context", "chromo.comparison", "chromo.data_detail"],
+      "layout": "exec-kpi/trend/comparison",
+      "theme": "industrial",
+      "pages": 2,
+      "filters": ["date-range", "product-line", "plant"],
+      "interactions": ["drill:product→sku"]
+    },
+    "dataShape": { "hasTime": true, "grain": "daily", "dimCards": [2, 6], "measures": [4, 12] },
+    "provenance": { "source": "curated", "author": "iDash-seed", "outcome": { "editDistance": 0, "uses": 0 } }
+  },
+  {
+    "id": "genome.finance_pl_v1",
+    "version": "1.0.0",
+    "dna": {
+      "industry": "finance_accounting",
+      "process": "financial_reporting",
+      "audience": ["executive", "strategic"],
+      "decisions": ["monitor-performance", "explain-variance", "close-books"],
+      "businessQuestions": ["Is revenue growing?", "What drove the margin change?", "Are we on budget?"],
+      "kpis": ["kpi.fin.revenue", "kpi.fin.cogs", "kpi.fin.gross_margin_pct", "kpi.fin.opex", "kpi.fin.net_income", "kpi.fin.ebitda"],
+      "chromosomes": ["chromo.executive_summary", "chromo.financial_statement", "chromo.trend_context", "chromo.comparison", "chromo.insight_story"],
+      "layout": "exec-kpi/waterfall/trend/statement",
+      "theme": "executive",
+      "pages": 3,
+      "filters": ["date-range", "business-unit", "cost-center"],
+      "interactions": ["drill:line-item→sub-account"]
+    },
+    "dataShape": { "hasTime": true, "grain": "monthly", "dimCards": [2, 8], "measures": [6, 20] },
+    "provenance": { "source": "curated", "author": "iDash-seed", "outcome": { "editDistance": 0, "uses": 0 } }
+  },
+  {
+    "id": "genome.finance_budget_variance_v1",
+    "version": "1.0.0",
+    "dna": {
+      "industry": "finance_accounting",
+      "process": "budgeting",
+      "audience": ["executive", "operational"],
+      "decisions": ["explain-variance", "allocate-resources", "optimize-cost"],
+      "businessQuestions": ["Which departments are over budget?", "What is the total variance?", "Is the variance improving or worsening?"],
+      "kpis": ["kpi.fin.budget_variance", "kpi.fin.actual_spend", "kpi.fin.budget_amount", "kpi.fin.variance_pct"],
+      "chromosomes": ["chromo.executive_summary", "chromo.diagnostic_breakdown", "chromo.trend_context", "chromo.financial_statement", "chromo.data_detail"],
+      "layout": "kpi-strip/waterfall/variance-bars",
+      "theme": "executive",
+      "pages": 3,
+      "filters": ["date-range", "department", "expense-category"],
+      "interactions": ["drill:department→line-item"]
+    },
+    "dataShape": { "hasTime": true, "grain": "monthly", "dimCards": [2, 10], "measures": [4, 12] },
+    "provenance": { "source": "curated", "author": "iDash-seed", "outcome": { "editDistance": 0, "uses": 0 } }
+  },
+  {
+    "id": "genome.finance_cashflow_v1",
+    "version": "1.0.0",
+    "dna": {
+      "industry": "finance_accounting",
+      "process": "treasury",
+      "audience": ["executive", "strategic"],
+      "decisions": ["monitor-performance", "identify-risk", "plan-forecast"],
+      "businessQuestions": ["Is cash position healthy?", "What is the burn rate?", "When will we need additional funding?"],
+      "kpis": ["kpi.fin.cash_balance", "kpi.fin.cash_inflow", "kpi.fin.cash_outflow", "kpi.fin.net_cashflow", "kpi.fin.runway_months"],
+      "chromosomes": ["chromo.executive_summary", "chromo.trend_context", "chromo.composition", "chromo.forecast_outlook"],
+      "layout": "exec-kpi/trend/waterfall",
+      "theme": "executive",
+      "pages": 2,
+      "filters": ["date-range", "account"],
+      "interactions": ["drill:category→transaction"]
+    },
+    "dataShape": { "hasTime": true, "grain": "monthly", "dimCards": [1, 5], "measures": [4, 10] },
+    "provenance": { "source": "curated", "author": "iDash-seed", "outcome": { "editDistance": 0, "uses": 0 } }
+  },
+  {
+    "id": "genome.inventory_movement_v1",
+    "version": "1.0.0",
+    "dna": {
+      "industry": "inventory_warehouse",
+      "process": "warehouse_management",
+      "audience": ["operational", "executive"],
+      "decisions": ["manage-inventory", "identify-risk", "optimize-cost"],
+      "businessQuestions": ["What is the current stock level?", "Which SKUs are at risk of stockout?", "How is inventory aging?"],
+      "kpis": ["kpi.inv.stock_value", "kpi.inv.turnover_ratio", "kpi.inv.days_on_hand", "kpi.inv.stockout_count", "kpi.inv.overstock_count"],
+      "chromosomes": ["chromo.executive_summary", "chromo.inventory_position", "chromo.alerts_exceptions", "chromo.trend_context", "chromo.data_detail"],
+      "layout": "kpi-strip/aging-bar/movement-trend",
+      "theme": "operational",
+      "pages": 3,
+      "filters": ["date-range", "warehouse", "category", "sku"],
+      "interactions": ["drill:category→sku"]
+    },
+    "dataShape": { "hasTime": true, "grain": "daily", "dimCards": [3, 12], "measures": [5, 15] },
+    "provenance": { "source": "curated", "author": "iDash-seed", "outcome": { "editDistance": 0, "uses": 0 } }
+  },
+  {
+    "id": "genome.inventory_warehouse_ops_v1",
+    "version": "1.0.0",
+    "dna": {
+      "industry": "inventory_warehouse",
+      "process": "warehouse_operations",
+      "audience": ["operational"],
+      "decisions": ["intervene-in-operations", "monitor-performance", "allocate-resources"],
+      "businessQuestions": ["What is today's pick/pack rate?", "Which zones are congested?", "Is receiving on schedule?"],
+      "kpis": ["kpi.inv.picks_per_hour", "kpi.inv.orders_fulfilled", "kpi.inv.dock_to_stock_hr", "kpi.inv.zone_utilization"],
+      "chromosomes": ["chromo.process_monitor", "chromo.diagnostic_breakdown", "chromo.alerts_exceptions", "chromo.data_detail"],
+      "layout": "kpi-strip/heatmap/ranking",
+      "theme": "operational",
+      "pages": 2,
+      "filters": ["date-range", "shift", "zone"],
+      "interactions": ["drill:zone→bay"]
+    },
+    "dataShape": { "hasTime": true, "grain": "hourly", "dimCards": [2, 8], "measures": [4, 10] },
+    "provenance": { "source": "curated", "author": "iDash-seed", "outcome": { "editDistance": 0, "uses": 0 } }
+  },
+  {
+    "id": "genome.sales_pipeline_v1",
+    "version": "1.0.0",
+    "dna": {
+      "industry": "sales_crm",
+      "process": "sales_pipeline",
+      "audience": ["executive", "operational"],
+      "decisions": ["monitor-performance", "find-opportunity", "plan-forecast"],
+      "businessQuestions": ["What is the pipeline value?", "Where are deals stuck?", "Will we hit the quota?"],
+      "kpis": ["kpi.sales.pipeline_value", "kpi.sales.win_rate", "kpi.sales.avg_deal_size", "kpi.sales.cycle_days", "kpi.sales.deals_count"],
+      "chromosomes": ["chromo.executive_summary", "chromo.pipeline_funnel", "chromo.trend_context", "chromo.forecast_outlook", "chromo.data_detail"],
+      "layout": "exec-kpi/funnel/trend/forecast",
+      "theme": "executive",
+      "pages": 3,
+      "filters": ["date-range", "rep", "stage", "product"],
+      "interactions": ["drill:stage→deal"]
+    },
+    "dataShape": { "hasTime": true, "grain": "daily", "dimCards": [3, 10], "measures": [5, 12] },
+    "provenance": { "source": "curated", "author": "iDash-seed", "outcome": { "editDistance": 0, "uses": 0 } }
+  },
+  {
+    "id": "genome.sales_revenue_v1",
+    "version": "1.0.0",
+    "dna": {
+      "industry": "sales_crm",
+      "process": "revenue_analysis",
+      "audience": ["executive", "strategic"],
+      "decisions": ["monitor-performance", "explain-variance", "find-opportunity"],
+      "businessQuestions": ["Is revenue growing?", "Which products drive the most revenue?", "How does this quarter compare to last?"],
+      "kpis": ["kpi.sales.revenue", "kpi.sales.units_sold", "kpi.sales.avg_order_value", "kpi.sales.growth_rate"],
+      "chromosomes": ["chromo.executive_summary", "chromo.trend_context", "chromo.composition", "chromo.comparison", "chromo.insight_story"],
+      "layout": "exec-kpi/trend/composition/comparison",
+      "theme": "executive",
+      "pages": 3,
+      "filters": ["date-range", "product", "region", "channel"],
+      "interactions": ["drill:product→sku", "drill:region→territory"]
+    },
+    "dataShape": { "hasTime": true, "grain": "monthly", "dimCards": [3, 8], "measures": [4, 12] },
+    "provenance": { "source": "curated", "author": "iDash-seed", "outcome": { "editDistance": 0, "uses": 0 } }
+  },
+  {
+    "id": "genome.sales_customer_retention_v1",
+    "version": "1.0.0",
+    "dna": {
+      "industry": "sales_crm",
+      "process": "customer_retention",
+      "audience": ["strategic", "analytical"],
+      "decisions": ["identify-risk", "find-opportunity", "explain-variance"],
+      "businessQuestions": ["Is customer retention improving?", "Which cohorts have the best retention?", "What is the repeat purchase rate?"],
+      "kpis": ["kpi.sales.retention_rate", "kpi.sales.churn_rate", "kpi.sales.repeat_purchase_rate", "kpi.sales.ltv"],
+      "chromosomes": ["chromo.executive_summary", "chromo.trend_context", "chromo.diagnostic_breakdown", "chromo.insight_story"],
+      "layout": "kpi-strip/cohort-heatmap/trend",
+      "theme": "executive",
+      "pages": 2,
+      "filters": ["date-range", "segment", "cohort"],
+      "interactions": ["drill:cohort→customer"]
+    },
+    "dataShape": { "hasTime": true, "grain": "monthly", "dimCards": [2, 6], "measures": [4, 10] },
+    "provenance": { "source": "curated", "author": "iDash-seed", "outcome": { "editDistance": 0, "uses": 0 } }
+  },
+  {
+    "id": "genome.hr_headcount_v1",
+    "version": "1.0.0",
+    "dna": {
+      "industry": "human_resources",
+      "process": "workforce_management",
+      "audience": ["executive", "operational"],
+      "decisions": ["manage-people", "monitor-performance", "plan-forecast"],
+      "businessQuestions": ["What is the current headcount?", "Is turnover increasing?", "Which departments are understaffed?"],
+      "kpis": ["kpi.hr.headcount", "kpi.hr.turnover_rate", "kpi.hr.open_positions", "kpi.hr.time_to_hire", "kpi.hr.cost_per_hire"],
+      "chromosomes": ["chromo.executive_summary", "chromo.workforce", "chromo.trend_context", "chromo.composition", "chromo.data_detail"],
+      "layout": "exec-kpi/composition/trend/table",
+      "theme": "executive",
+      "pages": 3,
+      "filters": ["date-range", "department", "level", "employment-type"],
+      "interactions": ["drill:department→team"]
+    },
+    "dataShape": { "hasTime": true, "grain": "monthly", "dimCards": [3, 10], "measures": [5, 12] },
+    "provenance": { "source": "curated", "author": "iDash-seed", "outcome": { "editDistance": 0, "uses": 0 } }
+  },
+  {
+    "id": "genome.hr_performance_review_v1",
+    "version": "1.0.0",
+    "dna": {
+      "industry": "human_resources",
+      "process": "performance_management",
+      "audience": ["executive", "analytical"],
+      "decisions": ["manage-people", "identify-risk", "find-opportunity"],
+      "businessQuestions": ["What is the performance score distribution?", "Which teams have the most top performers?", "Are scores correlated with tenure?"],
+      "kpis": ["kpi.hr.avg_performance_score", "kpi.hr.top_performer_pct", "kpi.hr.low_performer_pct", "kpi.hr.review_completion_rate"],
+      "chromosomes": ["chromo.executive_summary", "chromo.composition", "chromo.diagnostic_breakdown", "chromo.data_detail"],
+      "layout": "kpi-strip/distribution/composition",
+      "theme": "executive",
+      "pages": 2,
+      "filters": ["date-range", "department", "level"],
+      "interactions": ["drill:department→individual"]
+    },
+    "dataShape": { "hasTime": false, "grain": "snapshot", "dimCards": [3, 8], "measures": [4, 10] },
+    "provenance": { "source": "curated", "author": "iDash-seed", "outcome": { "editDistance": 0, "uses": 0 } }
+  },
+  {
+    "id": "genome.generic_kpi_monitor_v1",
+    "version": "1.0.0",
+    "dna": {
+      "industry": "generic",
+      "process": "generic",
+      "audience": ["executive"],
+      "decisions": ["monitor-performance"],
+      "businessQuestions": ["Are key metrics on track?", "What needs attention?"],
+      "kpis": [],
+      "chromosomes": ["chromo.executive_summary", "chromo.trend_context", "chromo.insight_story"],
+      "layout": "exec-kpi/trend/insight",
+      "theme": "default",
+      "pages": 2,
+      "filters": ["date-range"],
+      "interactions": []
+    },
+    "dataShape": { "hasTime": true, "grain": "any", "dimCards": [0, 5], "measures": [2, 10] },
+    "provenance": { "source": "curated", "author": "iDash-seed", "outcome": { "editDistance": 0, "uses": 0 } }
+  },
+  {
+    "id": "genome.generic_operational_dashboard_v1",
+    "version": "1.0.0",
+    "dna": {
+      "industry": "generic",
+      "process": "generic",
+      "audience": ["operational"],
+      "decisions": ["monitor-performance", "intervene-in-operations"],
+      "businessQuestions": ["What is happening now?", "What needs action?", "Where are the exceptions?"],
+      "kpis": [],
+      "chromosomes": ["chromo.executive_summary", "chromo.process_monitor", "chromo.alerts_exceptions", "chromo.data_detail"],
+      "layout": "kpi-strip/alerts/process-grid/table",
+      "theme": "operational",
+      "pages": 2,
+      "filters": ["date-range", "category"],
+      "interactions": ["cross-filter-on-click"]
+    },
+    "dataShape": { "hasTime": true, "grain": "any", "dimCards": [1, 8], "measures": [3, 15] },
+    "provenance": { "source": "curated", "author": "iDash-seed", "outcome": { "editDistance": 0, "uses": 0 } }
+  },
+  {
+    "id": "genome.generic_diagnostic_v1",
+    "version": "1.0.0",
+    "dna": {
+      "industry": "generic",
+      "process": "generic",
+      "audience": ["operational", "analytical"],
+      "decisions": ["explain-variance", "identify-risk"],
+      "businessQuestions": ["Why did X change?", "What are the top contributors?", "Where is the problem concentrated?"],
+      "kpis": [],
+      "chromosomes": ["chromo.executive_summary", "chromo.diagnostic_breakdown", "chromo.trend_context", "chromo.data_detail"],
+      "layout": "kpi-strip/pareto/trend/table",
+      "theme": "default",
+      "pages": 2,
+      "filters": ["date-range", "category"],
+      "interactions": ["drill:category→sub-category"]
+    },
+    "dataShape": { "hasTime": true, "grain": "any", "dimCards": [1, 10], "measures": [2, 10] },
+    "provenance": { "source": "curated", "author": "iDash-seed", "outcome": { "editDistance": 0, "uses": 0 } }
+  },
+  {
+    "id": "genome.generic_comparison_v1",
+    "version": "1.0.0",
+    "dna": {
+      "industry": "generic",
+      "process": "generic",
+      "audience": ["executive", "analytical"],
+      "decisions": ["monitor-performance", "find-opportunity"],
+      "businessQuestions": ["How do entities compare?", "Who is the leader?", "Is the gap widening?"],
+      "kpis": [],
+      "chromosomes": ["chromo.executive_summary", "chromo.comparison", "chromo.trend_context", "chromo.data_detail"],
+      "layout": "kpi-strip/ranking/comparison/table",
+      "theme": "default",
+      "pages": 2,
+      "filters": ["date-range", "entity"],
+      "interactions": ["cross-filter-on-click"]
+    },
+    "dataShape": { "hasTime": true, "grain": "any", "dimCards": [1, 8], "measures": [2, 10] },
+    "provenance": { "source": "curated", "author": "iDash-seed", "outcome": { "editDistance": 0, "uses": 0 } }
+  },
+  {
+    "id": "genome.generic_composition_v1",
+    "version": "1.0.0",
+    "dna": {
+      "industry": "generic",
+      "process": "generic",
+      "audience": ["executive", "analytical"],
+      "decisions": ["monitor-performance", "explain-variance"],
+      "businessQuestions": ["What is the share of each part?", "How does composition change over time?"],
+      "kpis": [],
+      "chromosomes": ["chromo.executive_summary", "chromo.composition", "chromo.trend_context", "chromo.data_detail"],
+      "layout": "kpi-strip/donut-or-treemap/stacked-area/table",
+      "theme": "default",
+      "pages": 2,
+      "filters": ["date-range", "category"],
+      "interactions": ["cross-filter-on-click"]
+    },
+    "dataShape": { "hasTime": true, "grain": "any", "dimCards": [1, 8], "measures": [1, 6] },
+    "provenance": { "source": "curated", "author": "iDash-seed", "outcome": { "editDistance": 0, "uses": 0 } }
+  },
+  {
+    "id": "genome.generic_forecast_planning_v1",
+    "version": "1.0.0",
+    "dna": {
+      "industry": "generic",
+      "process": "generic",
+      "audience": ["strategic", "executive"],
+      "decisions": ["plan-forecast", "monitor-performance", "identify-risk"],
+      "businessQuestions": ["Will we hit the target?", "What is the projected outcome?", "How confident is the forecast?"],
+      "kpis": [],
+      "chromosomes": ["chromo.executive_summary", "chromo.trend_context", "chromo.forecast_outlook", "chromo.insight_story"],
+      "layout": "kpi-strip/trend/forecast/insight",
+      "theme": "default",
+      "pages": 2,
+      "filters": ["date-range"],
+      "interactions": []
+    },
+    "dataShape": { "hasTime": true, "grain": "any", "dimCards": [0, 5], "measures": [2, 8] },
+    "provenance": { "source": "curated", "author": "iDash-seed", "outcome": { "editDistance": 0, "uses": 0 } }
+  },
+  {
+    "id": "genome.generic_data_exploration_v1",
+    "version": "1.0.0",
+    "dna": {
+      "industry": "generic",
+      "process": "generic",
+      "audience": ["analytical"],
+      "decisions": ["explain-variance", "find-opportunity", "identify-risk"],
+      "businessQuestions": ["What patterns exist in the data?", "Are there outliers?", "What correlates with what?"],
+      "kpis": [],
+      "chromosomes": ["chromo.diagnostic_breakdown", "chromo.composition", "chromo.data_detail", "chromo.insight_story"],
+      "layout": "scatter-histogram/composition/table",
+      "theme": "default",
+      "pages": 2,
+      "filters": ["date-range", "all-dimensions"],
+      "interactions": ["full-cross-filter", "brush-select"]
+    },
+    "dataShape": { "hasTime": false, "grain": "any", "dimCards": [1, 15], "measures": [2, 20] },
+    "provenance": { "source": "curated", "author": "iDash-seed", "outcome": { "editDistance": 0, "uses": 0 } }
+  },
+  {
+    "id": "genome.generic_no_time_v1",
+    "version": "1.0.0",
+    "dna": {
+      "industry": "generic",
+      "process": "generic",
+      "audience": ["executive", "analytical"],
+      "decisions": ["monitor-performance", "explain-variance"],
+      "businessQuestions": ["How do items compare?", "What is the distribution?", "What are the key figures?"],
+      "kpis": [],
+      "chromosomes": ["chromo.executive_summary", "chromo.comparison", "chromo.composition", "chromo.data_detail"],
+      "layout": "kpi-strip/ranking/composition/table",
+      "theme": "default",
+      "pages": 1,
+      "filters": ["category"],
+      "interactions": ["cross-filter-on-click"]
+    },
+    "dataShape": { "hasTime": false, "grain": "snapshot", "dimCards": [1, 10], "measures": [2, 10] },
+    "provenance": { "source": "curated", "author": "iDash-seed", "outcome": { "editDistance": 0, "uses": 0 } }
+  },
+  {
+    "id": "genome.generic_presentation_v1",
+    "version": "1.0.0",
+    "dna": {
+      "industry": "generic",
+      "process": "generic",
+      "audience": ["presentation"],
+      "decisions": ["monitor-performance"],
+      "businessQuestions": ["What is the summary story?", "What are the key takeaways?"],
+      "kpis": [],
+      "chromosomes": ["chromo.executive_summary", "chromo.trend_context", "chromo.insight_story"],
+      "layout": "one-message-per-screen",
+      "theme": "presentation",
+      "pages": 3,
+      "filters": [],
+      "interactions": ["keyboard-page-navigation"]
+    },
+    "dataShape": { "hasTime": true, "grain": "any", "dimCards": [0, 5], "measures": [2, 8] },
+    "provenance": { "source": "curated", "author": "iDash-seed", "outcome": { "editDistance": 0, "uses": 0 } }
+  },
+  {
+    "id": "genome.education_student_performance_v1",
+    "version": "1.0.0",
+    "dna": {
+      "industry": "education",
+      "process": "academic_tracking",
+      "audience": ["executive", "operational"],
+      "decisions": ["monitor-performance", "identify-risk", "explain-variance"],
+      "businessQuestions": ["What is the average score?", "Which subjects need attention?", "Is pass rate improving?"],
+      "kpis": ["kpi.edu.avg_score", "kpi.edu.pass_rate", "kpi.edu.dropout_rate", "kpi.edu.enrollment_count"],
+      "chromosomes": ["chromo.executive_summary", "chromo.trend_context", "chromo.comparison", "chromo.diagnostic_breakdown", "chromo.data_detail"],
+      "layout": "kpi-strip/trend/ranking/table",
+      "theme": "default",
+      "pages": 2,
+      "filters": ["date-range", "department", "program"],
+      "interactions": ["drill:department→course"]
+    },
+    "dataShape": { "hasTime": true, "grain": "semester", "dimCards": [2, 8], "measures": [4, 10] },
+    "provenance": { "source": "curated", "author": "iDash-seed", "outcome": { "editDistance": 0, "uses": 0 } }
+  },
+  {
+    "id": "genome.healthcare_patient_flow_v1",
+    "version": "1.0.0",
+    "dna": {
+      "industry": "healthcare",
+      "process": "patient_management",
+      "audience": ["operational", "executive"],
+      "decisions": ["monitor-performance", "allocate-resources", "identify-risk"],
+      "businessQuestions": ["What is the current bed occupancy?", "What is the average length of stay?", "Which departments are over capacity?"],
+      "kpis": ["kpi.health.bed_occupancy", "kpi.health.avg_los", "kpi.health.admissions", "kpi.health.discharges", "kpi.health.wait_time"],
+      "chromosomes": ["chromo.executive_summary", "chromo.process_monitor", "chromo.trend_context", "chromo.alerts_exceptions", "chromo.data_detail"],
+      "layout": "kpi-strip/process/trend/alerts",
+      "theme": "operational",
+      "pages": 3,
+      "filters": ["date-range", "department", "ward"],
+      "interactions": ["drill:department→ward"]
+    },
+    "dataShape": { "hasTime": true, "grain": "daily", "dimCards": [2, 8], "measures": [5, 12] },
+    "provenance": { "source": "curated", "author": "iDash-seed", "outcome": { "editDistance": 0, "uses": 0 } }
+  },
+  {
+    "id": "genome.logistics_fleet_v1",
+    "version": "1.0.0",
+    "dna": {
+      "industry": "logistics",
+      "process": "fleet_management",
+      "audience": ["operational", "executive"],
+      "decisions": ["monitor-performance", "optimize-cost", "allocate-resources"],
+      "businessQuestions": ["What is the on-time delivery rate?", "Which routes are most costly?", "Is fleet utilization optimal?"],
+      "kpis": ["kpi.log.on_time_rate", "kpi.log.cost_per_km", "kpi.log.fleet_utilization", "kpi.log.deliveries_count"],
+      "chromosomes": ["chromo.executive_summary", "chromo.trend_context", "chromo.diagnostic_breakdown", "chromo.comparison", "chromo.data_detail"],
+      "layout": "kpi-strip/trend/pareto/table",
+      "theme": "operational",
+      "pages": 2,
+      "filters": ["date-range", "route", "vehicle-type"],
+      "interactions": ["drill:route→trip"]
+    },
+    "dataShape": { "hasTime": true, "grain": "daily", "dimCards": [2, 8], "measures": [4, 10] },
+    "provenance": { "source": "curated", "author": "iDash-seed", "outcome": { "editDistance": 0, "uses": 0 } }
+  }
+]

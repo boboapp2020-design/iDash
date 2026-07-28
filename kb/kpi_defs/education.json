@@ -1,0 +1,198 @@
+[
+  {
+    "id": "kpi.edu.enrollment_count",
+    "version": "1.0.0",
+    "domain": "education",
+    "name": { "th": "จำนวนนักเรียน/นักศึกษา", "en": "Enrollment Count" },
+    "formula": "count(students)",
+    "inputs": {
+      "students": { "role": "measure", "unit": "count", "synonyms": { "th": ["นักเรียน", "นักศึกษา", "จำนวนผู้เรียน", "จำนวนนักเรียน"], "en": ["students", "enrolled", "enrollment", "headcount", "learners"] } }
+    },
+    "aggNature": "extensive",
+    "direction": "higher-better",
+    "format": { "kind": "number", "decimals": 0 },
+    "target": { "policy": "column", "benchmark": { "good": null, "warn": null } },
+    "grain": ["semester", "yearly"],
+    "answers": ["How many students are enrolled?"],
+    "variance": true,
+    "forecastCandidate": true,
+    "caveats": ["Distinguish active vs total enrollment"]
+  },
+  {
+    "id": "kpi.edu.avg_gpa",
+    "version": "1.0.0",
+    "domain": "education",
+    "name": { "th": "เกรดเฉลี่ยรวม", "en": "Average GPA" },
+    "formula": "avg(gpa)",
+    "inputs": {
+      "gpa": { "role": "measure", "unit": "gpa", "synonyms": { "th": ["เกรดเฉลี่ย", "GPA", "เกรด", "ผลการเรียน"], "en": ["gpa", "cgpa", "grade point average", "cumulative gpa"] } }
+    },
+    "aggNature": "intensive",
+    "direction": "higher-better",
+    "format": { "kind": "number", "decimals": 2 },
+    "target": { "policy": "fixed", "benchmark": { "good": 3.0, "warn": 2.0 } },
+    "grain": ["semester", "yearly"],
+    "answers": ["What is the average GPA?", "How is academic performance trending?"],
+    "variance": true,
+    "forecastCandidate": false,
+    "caveats": ["GPA scale varies (4.0 vs 5.0); ensure consistency"]
+  },
+  {
+    "id": "kpi.edu.pass_rate",
+    "version": "1.0.0",
+    "domain": "education",
+    "name": { "th": "อัตราผ่าน", "en": "Pass Rate" },
+    "formula": "100 * count(passed) / count(total)",
+    "inputs": {
+      "passed": { "role": "measure", "unit": "count", "synonyms": { "th": ["ผ่าน", "สอบผ่าน"], "en": ["passed", "pass", "completed"] } },
+      "total": { "role": "measure", "unit": "count", "synonyms": { "th": ["ทั้งหมด", "จำนวนทั้งหมด"], "en": ["total", "enrolled", "students"] } }
+    },
+    "aggNature": "intensive",
+    "direction": "higher-better",
+    "format": { "kind": "percentage", "decimals": 1 },
+    "target": { "policy": "fixed", "benchmark": { "good": 85, "warn": 70 } },
+    "grain": ["per-course", "semester"],
+    "answers": ["What percentage of students pass?"],
+    "variance": true,
+    "forecastCandidate": false,
+    "caveats": ["Segment by course difficulty level"]
+  },
+  {
+    "id": "kpi.edu.dropout_rate",
+    "version": "1.0.0",
+    "domain": "education",
+    "name": { "th": "อัตราออกกลางคัน", "en": "Dropout Rate" },
+    "formula": "100 * count(dropouts) / count(enrolled)",
+    "inputs": {
+      "dropouts": { "role": "measure", "unit": "count", "synonyms": { "th": ["ออกกลางคัน", "ลาออก", "ถอน"], "en": ["dropout", "withdrawn", "left", "dropped out"] } },
+      "enrolled": { "role": "measure", "unit": "count", "synonyms": { "th": ["ลงทะเบียน", "นักเรียนทั้งหมด"], "en": ["enrolled", "total students", "registered"] } }
+    },
+    "aggNature": "intensive",
+    "direction": "lower-better",
+    "format": { "kind": "percentage", "decimals": 1 },
+    "target": { "policy": "fixed", "benchmark": { "good": 3, "warn": 10 } },
+    "grain": ["semester", "yearly"],
+    "answers": ["What percentage of students drop out?"],
+    "variance": true,
+    "forecastCandidate": false,
+    "caveats": ["Track by cohort for meaningful trend analysis"]
+  },
+  {
+    "id": "kpi.edu.graduation_rate",
+    "version": "1.0.0",
+    "domain": "education",
+    "name": { "th": "อัตราจบการศึกษา", "en": "Graduation Rate" },
+    "formula": "100 * count(graduated) / count(cohort)",
+    "inputs": {
+      "graduated": { "role": "measure", "unit": "count", "synonyms": { "th": ["จบการศึกษา", "สำเร็จการศึกษา"], "en": ["graduated", "completed program", "degree awarded"] } },
+      "cohort": { "role": "measure", "unit": "count", "synonyms": { "th": ["รุ่น", "ผู้เข้าเรียน"], "en": ["cohort", "admitted", "entering class"] } }
+    },
+    "aggNature": "intensive",
+    "direction": "higher-better",
+    "format": { "kind": "percentage", "decimals": 1 },
+    "target": { "policy": "fixed", "benchmark": { "good": 90, "warn": 75 } },
+    "grain": ["yearly"],
+    "answers": ["What percentage of students graduate on time?"],
+    "variance": true,
+    "forecastCandidate": false,
+    "caveats": ["Graduation within standard timeframe vs total eventual graduation"]
+  },
+  {
+    "id": "kpi.edu.attendance_rate",
+    "version": "1.0.0",
+    "domain": "education",
+    "name": { "th": "อัตราเข้าเรียน", "en": "Attendance Rate" },
+    "formula": "100 * count(present) / count(expected)",
+    "inputs": {
+      "present": { "role": "measure", "unit": "count", "synonyms": { "th": ["มาเรียน", "เข้าเรียน"], "en": ["present", "attended", "attendance"] } },
+      "expected": { "role": "measure", "unit": "count", "synonyms": { "th": ["ควรมา", "ทั้งหมด"], "en": ["expected", "total days", "scheduled"] } }
+    },
+    "aggNature": "intensive",
+    "direction": "higher-better",
+    "format": { "kind": "percentage", "decimals": 1 },
+    "target": { "policy": "fixed", "benchmark": { "good": 90, "warn": 80 } },
+    "grain": ["daily", "weekly", "monthly"],
+    "answers": ["What is the attendance rate?"],
+    "variance": true,
+    "forecastCandidate": false,
+    "caveats": ["Distinguish excused vs unexcused absences"]
+  },
+  {
+    "id": "kpi.edu.student_teacher_ratio",
+    "version": "1.0.0",
+    "domain": "education",
+    "name": { "th": "อัตราส่วนนักเรียนต่อครู", "en": "Student-Teacher Ratio" },
+    "formula": "count(students) / count(teachers)",
+    "inputs": {
+      "students": { "role": "measure", "unit": "count", "synonyms": { "th": ["นักเรียน"], "en": ["students", "enrolled"] } },
+      "teachers": { "role": "measure", "unit": "count", "synonyms": { "th": ["ครู", "อาจารย์", "ผู้สอน"], "en": ["teachers", "instructors", "faculty"] } }
+    },
+    "aggNature": "intensive",
+    "direction": "lower-better",
+    "format": { "kind": "number", "decimals": 0 },
+    "target": { "policy": "fixed", "benchmark": { "good": 20, "warn": 35 } },
+    "grain": ["semester", "yearly"],
+    "answers": ["How many students per teacher?"],
+    "variance": true,
+    "forecastCandidate": false,
+    "caveats": ["Include only FTE teaching staff"]
+  },
+  {
+    "id": "kpi.edu.avg_exam_score",
+    "version": "1.0.0",
+    "domain": "education",
+    "name": { "th": "คะแนนสอบเฉลี่ย", "en": "Average Exam Score" },
+    "formula": "avg(exam_score)",
+    "inputs": {
+      "exam_score": { "role": "measure", "unit": "score", "synonyms": { "th": ["คะแนนสอบ", "คะแนน", "ผลสอบ"], "en": ["exam score", "test score", "score", "marks", "grade"] } }
+    },
+    "aggNature": "intensive",
+    "direction": "higher-better",
+    "format": { "kind": "number", "decimals": 1 },
+    "target": { "policy": "period-median", "benchmark": { "good": null, "warn": null } },
+    "grain": ["per-exam", "semester"],
+    "answers": ["What is the average exam score?"],
+    "variance": true,
+    "forecastCandidate": false,
+    "caveats": ["Normalize if different exams use different scales"]
+  },
+  {
+    "id": "kpi.edu.scholarship_count",
+    "version": "1.0.0",
+    "domain": "education",
+    "name": { "th": "จำนวนผู้รับทุน", "en": "Scholarship Recipients" },
+    "formula": "count(scholarship_students)",
+    "inputs": {
+      "scholarship_students": { "role": "measure", "unit": "count", "synonyms": { "th": ["ผู้รับทุน", "ทุนการศึกษา"], "en": ["scholarship", "scholarship recipients", "funded students"] } }
+    },
+    "aggNature": "extensive",
+    "direction": "higher-better",
+    "format": { "kind": "number", "decimals": 0 },
+    "target": { "policy": "column", "benchmark": { "good": null, "warn": null } },
+    "grain": ["semester", "yearly"],
+    "answers": ["How many students receive scholarships?"],
+    "variance": true,
+    "forecastCandidate": false,
+    "caveats": []
+  },
+  {
+    "id": "kpi.edu.course_completion_rate",
+    "version": "1.0.0",
+    "domain": "education",
+    "name": { "th": "อัตราเรียนจบรายวิชา", "en": "Course Completion Rate" },
+    "formula": "100 * count(completed) / count(registered)",
+    "inputs": {
+      "completed": { "role": "measure", "unit": "count", "synonyms": { "th": ["เรียนจบ", "สำเร็จ"], "en": ["completed", "finished", "passed"] } },
+      "registered": { "role": "measure", "unit": "count", "synonyms": { "th": ["ลงทะเบียน", "สมัครเรียน"], "en": ["registered", "enrolled", "started"] } }
+    },
+    "aggNature": "intensive",
+    "direction": "higher-better",
+    "format": { "kind": "percentage", "decimals": 1 },
+    "target": { "policy": "fixed", "benchmark": { "good": 90, "warn": 75 } },
+    "grain": ["per-course", "semester"],
+    "answers": ["What percentage of registered students complete the course?"],
+    "variance": true,
+    "forecastCandidate": false,
+    "caveats": ["Online courses typically have lower completion rates"]
+  }
+]

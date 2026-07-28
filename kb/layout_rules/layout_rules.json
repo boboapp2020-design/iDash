@@ -1,0 +1,227 @@
+{
+  "version": "1.0.0",
+  "audienceArchetypes": [
+    {
+      "id": "audience.executive",
+      "name": "Executive",
+      "readingContract": "5-second scan, then decide whether to ask questions",
+      "attentionBudget": 8,
+      "densityMode": "spacious",
+      "maxKpiCards": 5,
+      "maxChartsAboveFold": 1,
+      "filters": {
+        "visible": ["date-range"],
+        "placement": "top-right-collapsed",
+        "maxCount": 1
+      },
+      "interactions": ["click-through-to-diagnose"],
+      "pattern": "Z-pattern",
+      "typography": "large",
+      "whitespace": "generous",
+      "constraints": [
+        "one-screen-above-fold",
+        "no-interaction-dependencies",
+        "hero-chart-max-1"
+      ]
+    },
+    {
+      "id": "audience.operational",
+      "name": "Operational",
+      "readingContract": "Working view, revisited hourly or daily",
+      "attentionBudget": 14,
+      "densityMode": "compact",
+      "maxKpiCards": 6,
+      "maxChartsAboveFold": 2,
+      "filters": {
+        "visible": ["shift", "line", "category", "date-range"],
+        "placement": "chips-above-grid",
+        "maxCount": 4
+      },
+      "interactions": ["cross-filter-on-click", "drill-dim-hierarchy"],
+      "pattern": "F-pattern",
+      "typography": "compact",
+      "whitespace": "tight",
+      "constraints": [
+        "exceptions-first",
+        "rankings-welcome",
+        "tables-welcome"
+      ]
+    },
+    {
+      "id": "audience.analytical",
+      "name": "Analytical",
+      "readingContract": "Exploration session with full data access",
+      "attentionBudget": 18,
+      "densityMode": "compact",
+      "maxKpiCards": 8,
+      "maxChartsAboveFold": 2,
+      "filters": {
+        "visible": "all-bindable-dimensions",
+        "placement": "left-panel",
+        "maxCount": 10
+      },
+      "interactions": ["full-cross-filter", "brush-select", "drill-dim-hierarchy"],
+      "pattern": "F-pattern",
+      "typography": "compact",
+      "whitespace": "tight",
+      "constraints": [
+        "distributions-welcome",
+        "scatter-welcome",
+        "column-stats-available"
+      ]
+    },
+    {
+      "id": "audience.strategic",
+      "name": "Strategic",
+      "readingContract": "Monthly or quarterly review with trend and plan context",
+      "attentionBudget": 12,
+      "densityMode": "comfortable",
+      "maxKpiCards": 5,
+      "maxChartsAboveFold": 1,
+      "filters": {
+        "visible": ["date-range", "comparison-period"],
+        "placement": "top-right",
+        "maxCount": 2
+      },
+      "interactions": ["click-through-to-detail"],
+      "pattern": "Z-pattern",
+      "typography": "medium",
+      "whitespace": "moderate",
+      "constraints": [
+        "long-trends-required",
+        "plan-comparison-when-available",
+        "forecast-section-when-available",
+        "narrative-blocks-between-sections"
+      ]
+    },
+    {
+      "id": "audience.presentation",
+      "name": "Presentation",
+      "readingContract": "Projected in a meeting; sequential story, one message per screen",
+      "attentionBudget": 6,
+      "densityMode": "spacious",
+      "maxKpiCards": 3,
+      "maxChartsAboveFold": 1,
+      "filters": {
+        "visible": [],
+        "placement": "none",
+        "maxCount": 0
+      },
+      "interactions": ["keyboard-page-navigation"],
+      "pattern": "Z-pattern",
+      "typography": "oversized",
+      "whitespace": "generous",
+      "constraints": [
+        "one-message-per-screen",
+        "sequential-story-order",
+        "no-interaction-dependencies"
+      ]
+    }
+  ],
+
+  "hierarchyLaws": [
+    {
+      "id": "hierarchy.answer_first",
+      "rule": "The top-left region answers decision rank 1. Reader can stop after one glance and be correctly informed."
+    },
+    {
+      "id": "hierarchy.section_order",
+      "rule": "KPI summary -> trend context -> diagnostic breakdown -> composition -> detail",
+      "order": ["kpi-summary", "trend-context", "diagnostic-breakdown", "composition", "detail"]
+    },
+    {
+      "id": "hierarchy.reading_pattern",
+      "rule": "F-pattern for operational/analytical; Z-pattern for executive/presentation"
+    },
+    {
+      "id": "hierarchy.attention_budget",
+      "rule": "Each page has a budget (exec 8, operational 14, analytical 18). Over budget = cut, never shrink.",
+      "budgets": { "executive": 8, "operational": 14, "analytical": 18, "strategic": 12, "presentation": 6 }
+    },
+    {
+      "id": "hierarchy.above_fold",
+      "rule": "Exec pages fit entirely above fold (1440x900 reference). Others fit KPI row + hero above fold."
+    },
+    {
+      "id": "hierarchy.no_orphans",
+      "rule": "Every widget belongs to a section with a heading that names the question it answers."
+    }
+  ],
+
+  "gridSystem": {
+    "columns": 12,
+    "baseUnit": 8,
+    "widgetSpans": {
+      "kpi-card": 3,
+      "half-chart": 6,
+      "hero-chart": 12,
+      "full-chart": 12,
+      "table": 12,
+      "insight-strip": 12,
+      "alert-strip": 12
+    },
+    "kpiRow": {
+      "cardCount": [3, 5],
+      "span6EmphasisVariant": { "minCards": 2, "maxCards": 2, "notes": "Only with span-6 emphasis variant" }
+    },
+    "densityModes": {
+      "spacious": { "padding": "24px", "chartHeight": "320px", "typeScale": "large" },
+      "comfortable": { "padding": "16px", "chartHeight": "280px", "typeScale": "medium" },
+      "compact": { "padding": "12px", "chartHeight": "240px", "typeScale": "small" }
+    },
+    "responsive": {
+      "breakpoint": 900,
+      "below": "single-column",
+      "sectionOrderPreserved": true,
+      "tablesHorizontalScroll": true,
+      "pageNeverScrollsSideways": true
+    }
+  },
+
+  "pageArchitecture": {
+    "pageContexts": [
+      { "id": "page.monitor", "name": "Monitor", "purpose": "What is happening now" },
+      { "id": "page.diagnose", "name": "Diagnose", "purpose": "Why is it happening" },
+      { "id": "page.plan", "name": "Plan", "purpose": "What to do next: forecast and scenario" },
+      { "id": "page.detail", "name": "Detail", "purpose": "Data, column stats, and quality" }
+    ],
+    "maxPages": 5,
+    "mergeRule": "A cluster with < 2 answerable questions merges into its neighbor",
+    "singlePageRule": "If everything fits one strong page, ship one page — page count is not a quality signal",
+    "everyPageRepeats": ["period-pill", "dataset-identity"],
+    "insightsPage": {
+      "position": "always-last",
+      "alwaysPresent": true,
+      "structure": ["context", "facts", "insights", "recommendations", "next-action"],
+      "notes": "The AI Insights page is the reasoning made visible"
+    }
+  },
+
+  "filterRules": {
+    "candidateSelection": "Dimensions with 2-20 values that appear in >= 2 widgets' bindings",
+    "singleChartToggle": "A filter that affects one chart is a toggle, not a filter — put it on the chart",
+    "archetypeOverrides": {
+      "executive": { "maxFilters": 1, "dateRangeOnly": true },
+      "operational": { "maxFilters": 4, "chipStyle": true },
+      "analytical": { "maxFilters": 10, "panelStyle": true },
+      "presentation": { "maxFilters": 0 }
+    }
+  },
+
+  "emptyStates": {
+    "gapCards": {
+      "maxPerDashboard": 2,
+      "neverAboveFold": true,
+      "content": ["what-is-missing", "why-it-matters", "what-column-unlocks-it"]
+    },
+    "lowConfidence": {
+      "banner": "draft",
+      "confirmationChips": true
+    },
+    "noTimeAxis": {
+      "action": "omit-trend-sections-entirely",
+      "noteOnInsightsPage": true,
+      "neverFakeWithRowOrder": true
+    }
+  }
+}

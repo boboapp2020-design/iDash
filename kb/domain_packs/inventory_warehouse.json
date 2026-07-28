@@ -1,0 +1,205 @@
+{
+  "id": "inventory_warehouse",
+  "version": "1.0.0",
+  "parent": null,
+
+  "identity": {
+    "nameTH": "คลังสินค้าและสินค้าคงคลัง",
+    "nameEN": "Inventory & Warehouse",
+    "nameLO": "ສາງສິນຄ້າ ແລະ ສິນຄ້າຄົງຄັງ"
+  },
+
+  "signatures": {
+    "lexicon": {
+      "columns": {
+        "th": [
+          "สต็อก", "คลัง", "รับ", "จ่าย", "สินค้า", "คงเหลือ",
+          "คลังสินค้า", "คลังพัสดุ", "สินค้าคงคลัง", "พัสดุ",
+          "อะไหล่", "วัสดุ", "รับเข้า", "เบิกใช้", "โอนย้าย",
+          "จุดสั่งซื้อ", "จุดสั่งซื้อขั้นต่ำ", "สต็อกขั้นต่ำ",
+          "ยอดคงเหลือ", "จำนวนคงเหลือ", "มูลค่าคงคลัง",
+          "เลขที่เอกสาร", "ใบรับ", "ใบเบิก", "ใบโอน",
+          "หมวดหมู่", "รหัสพัสดุ", "ชื่อพัสดุ", "คลังจัดเก็บ",
+          "สินค้าสำเร็จรูป", "น้ำหนักคงเหลือ", "หน่วยบรรจุ",
+          "เกรดคุณภาพ", "ประเภทการเคลื่อนไหว",
+          "สินค้าค้างสต็อก", "สินค้าหมดอายุ", "สินค้าเสื่อมสภาพ",
+          "รหัสสินค้า", "บาร์โค้ด", "SKU", "ตำแหน่งจัดเก็บ",
+          "ชั้นวาง", "โซน", "ล็อค", "สต็อกการ์ด"
+        ],
+        "en": [
+          "stock", "inventory", "warehouse", "sku", "barcode",
+          "receive", "issue", "transfer", "on hand", "quantity",
+          "reorder point", "min stock", "max stock", "safety stock",
+          "stock level", "bin", "location", "zone", "rack",
+          "finished goods", "raw material", "spare parts",
+          "stock movement", "goods receipt", "goods issue",
+          "stock card", "stock count", "physical count",
+          "dead stock", "slow moving", "obsolete",
+          "fifo", "lifo", "weighted average",
+          "stock value", "inventory value", "carrying cost",
+          "stock turn", "turnover", "days on hand", "doh",
+          "fill rate", "service level", "stockout",
+          "pick", "pack", "ship", "put away",
+          "inbound", "outbound", "dispatch"
+        ],
+        "lo": [
+          "ສາງ", "ສິນຄ້າ", "ຄົງຄັງ", "ຮັບ", "ຈ່າຍ",
+          "ຄົງເຫຼືອ", "ພັສດຸ", "ອະໄຫຼ່", "ວັດສະດຸ",
+          "ເຄື່ອນໄຫວ", "ໂອນ", "ເບີກ", "ຈຳນວນ"
+        ]
+      },
+      "sheets": [
+        "stock", "inventory", "สต็อก", "คลัง", "คลังสินค้า",
+        "คลังพัสดุ", "สินค้าคงคลัง", "stock movement",
+        "goods receipt", "รับเข้า", "เบิก", "stock card",
+        "warehouse", "bin card"
+      ],
+      "weightPerHit": 1.5
+    },
+    "valueShapes": [
+      {
+        "columnLike": "จำนวนคงเหลือ|on hand|stock level|ยอดคงเหลือ",
+        "type": "number",
+        "range": [0, 1000000],
+        "weight": 2.0,
+        "note": "Current stock quantity; universal inventory signal"
+      },
+      {
+        "columnLike": "จุดสั่งซื้อ|reorder point|min stock|สต็อกขั้นต่ำ",
+        "type": "number",
+        "range": [0, 100000],
+        "weight": 3.0,
+        "note": "Reorder/min stock level; strong inventory management signal"
+      },
+      {
+        "columnLike": "มูลค่าคงคลัง|stock value|inventory value",
+        "type": "number",
+        "range": [0, null],
+        "weight": 2.0,
+        "note": "Monetary value of stock on hand"
+      },
+      {
+        "columnLike": "turnover|stock turn|อัตราหมุนเวียน",
+        "type": "number",
+        "range": [0.5, 365],
+        "weight": 3.0,
+        "note": "Inventory turnover ratio or turns per year"
+      },
+      {
+        "columnLike": "days on hand|doh|วันคงคลัง",
+        "type": "number",
+        "range": [1, 365],
+        "weight": 2.5,
+        "note": "Days of inventory on hand"
+      }
+    ],
+    "unitPatterns": [
+      "ชิ้น", "กล่อง", "ถุง", "ตัน", "กก.", "kg",
+      "หน่วยบรรจุ", "pallet", "carton", "ea", "pcs",
+      "ม้วน", "แกลลอน", "ลิตร", "เมตร"
+    ],
+    "negative": [
+      { "lexicon": ["patient", "ผู้ป่วย", "diagnosis"], "weight": -3.0 },
+      { "lexicon": ["ccs", "pol", "brix", "bagasse"], "weight": -2.0 },
+      { "lexicon": ["pipeline", "win rate", "lead"], "weight": -1.5 },
+      { "lexicon": ["salary", "เงินเดือน", "turnover rate", "attrition"], "weight": -1.5 },
+      { "lexicon": ["blockchain", "token", "wallet", "mining", "staking", "crypto"], "weight": -3.0 },
+      { "lexicon": ["property", "rental", "tenant", "sqft", "lease", "bedrooms"], "weight": -3.0 },
+      { "lexicon": ["player", "match", "goals", "assists", "league"], "weight": -2.0 },
+      { "lexicon": ["shipment_id", "carrier", "freight", "tracking_events", "bill of lading", "cost_per_delivery"], "weight": -1.5 },
+      { "lexicon": ["impression", "ctr", "cpc", "roas", "campaign_id", "ad_group"], "weight": -2.0 },
+      { "lexicon": ["occupancy", "adr", "revpar", "check_in", "room_type", "no_shows"], "weight": -2.0 },
+      { "lexicon": ["student", "enrollment", "gpa", "semester", "curriculum", "tuition"], "weight": -3.0 }
+    ]
+  },
+
+  "business": {
+    "processes": [
+      {
+        "id": "goods_receipt",
+        "stages": ["สั่งซื้อ/ผลิต", "รับสินค้า", "ตรวจสอบ", "บันทึกรับเข้า", "จัดเก็บ"]
+      },
+      {
+        "id": "goods_issue",
+        "stages": ["รับคำขอเบิก", "ตรวจสต็อก", "จัดเตรียม", "เบิกจ่าย", "บันทึกตัดสต็อก"]
+      },
+      {
+        "id": "stock_management",
+        "stages": ["ติดตามยอด", "ตรวจนับ", "ปรับปรุงยอด", "จัดการสินค้าค้าง", "สั่งเติม"]
+      },
+      {
+        "id": "shipping",
+        "stages": ["รับใบสั่ง", "หยิบสินค้า", "ตรวจนับ", "บรรจุ", "จัดส่ง"]
+      }
+    ],
+    "goals": [
+      "maintain optimal stock levels (minimize stockout and overstock)",
+      "maximize inventory turnover",
+      "minimize dead stock and obsolete inventory",
+      "achieve high fill rate and service level",
+      "reduce carrying cost and warehouse operating cost",
+      "ensure stock accuracy (physical vs system)",
+      "optimize warehouse space utilization",
+      "streamline receiving and shipping processes"
+    ],
+    "personas": [
+      {
+        "type": "executive",
+        "cares": ["inventory value", "turnover trend", "dead stock exposure", "service level"],
+        "cadence": "monthly"
+      },
+      {
+        "type": "warehouse_manager",
+        "cares": ["stock levels vs reorder", "stockout alerts", "space utilization", "receiving backlog"],
+        "cadence": "daily"
+      },
+      {
+        "type": "store_keeper",
+        "cares": ["items to receive", "items to issue", "physical count", "bin accuracy"],
+        "cadence": "per-shift"
+      }
+    ],
+    "decisionCatalog": [
+      "manage-inventory",
+      "allocate-stock",
+      "plan-forecast",
+      "investigate-discrepancy",
+      "reorder-decision",
+      "dispose-obsolete",
+      "optimize-layout",
+      "explain-variance"
+    ],
+    "seasonality": "Depends on business: year-end physical counts, seasonal demand peaks, production season buildup. Sugar factory: finished goods peak during/after crushing season (Nov-Apr)."
+  },
+
+  "kpiRefs": [
+    "kpi.inv.stock_on_hand",
+    "kpi.inv.turnover_ratio",
+    "kpi.inv.days_on_hand",
+    "kpi.inv.fill_rate",
+    "kpi.inv.stockout_count",
+    "kpi.inv.dead_stock_pct",
+    "kpi.inv.stock_accuracy",
+    "kpi.inv.carrying_cost",
+    "kpi.inv.stock_value",
+    "kpi.inv.items_below_reorder",
+    "kpi.inv.space_utilization"
+  ],
+
+  "genomeRefs": [
+    "genome.inv_stock_status_v1",
+    "genome.inv_movement_analysis_v1",
+    "genome.inv_aging_report_v1"
+  ],
+
+  "vizOverrides": [
+    { "rule": "scatter plot for ABC analysis (value vs volume) with quadrant labels", "cites": "doc 06 §5" },
+    { "rule": "bar chart with reorder-point reference line for stock level by item", "cites": "doc 06 §3" },
+    { "rule": "stacked bar for stock aging buckets (current, 30, 60, 90+ days)", "cites": "doc 06 §3" },
+    { "rule": "treemap for inventory value distribution by category/warehouse", "cites": "doc 06 §5" }
+  ],
+
+  "fixtures": [
+    "ตัวอย่าง Data/Mock_Dashboard_Data/04_คลังพัสดุและคลังสินค้า/*.json"
+  ]
+}

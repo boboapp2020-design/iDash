@@ -1,0 +1,225 @@
+{
+  "id": "marketing_digital",
+  "version": "1.0.0",
+  "parent": null,
+
+  "identity": {
+    "nameTH": "การตลาดและดิจิทัล",
+    "nameEN": "Marketing & Digital",
+    "nameLO": "ການຕະຫຼາດ ແລະ ດິຈິທັລ"
+  },
+
+  "signatures": {
+    "lexicon": {
+      "columns": {
+        "th": [
+          "แคมเปญ", "โฆษณา", "งบโฆษณา", "ค่าโฆษณา",
+          "การเข้าชม", "ผู้เข้าชม", "เปิดอ่าน", "คลิก",
+          "อัตราการคลิก", "อัตราเปิดอ่าน", "อัตราการยกเลิก",
+          "ช่องทาง", "สื่อ", "แพลตฟอร์ม", "Facebook", "Google",
+          "Line", "Instagram", "TikTok", "YouTube",
+          "กลุ่มเป้าหมาย", "เซ็กเมนต์", "Audience",
+          "คอนเวอร์ชั่น", "ลูกค้าใหม่จากโฆษณา", "ต้นทุนต่อลูกค้า",
+          "ยอดขายจากโฆษณา", "ผลตอบแทนโฆษณา",
+          "โพสต์", "เนื้อหา", "ไลค์", "แชร์", "คอมเมนต์",
+          "ผู้ติดตาม", "reach", "engagement",
+          "อีเมล", "รายชื่อ", "ส่งอีเมล", "bounce",
+          "landing page", "หน้าแลนดิ้ง", "A/B test"
+        ],
+        "en": [
+          "campaign", "campaign name", "campaign id", "ad", "ad group",
+          "impression", "impressions", "reach", "frequency",
+          "click", "clicks", "ctr", "click through rate",
+          "cpc", "cost per click", "cpm", "cost per mille",
+          "cpa", "cost per acquisition", "cpl", "cost per lead",
+          "roas", "return on ad spend", "roi",
+          "conversion", "conversions", "conversion rate", "cvr",
+          "spend", "ad spend", "budget", "cost",
+          "channel", "medium", "source", "platform",
+          "facebook", "google ads", "instagram", "tiktok", "youtube",
+          "email", "open rate", "click rate", "bounce rate",
+          "unsubscribe", "unsubscribe rate", "subscriber",
+          "landing page", "page view", "session", "sessions",
+          "engagement", "engagement rate", "like", "share", "comment",
+          "follower", "followers", "post", "content",
+          "lead", "leads", "mql", "sql",
+          "a/b test", "variant", "control",
+          "utm source", "utm medium", "utm campaign",
+          "organic", "paid", "referral", "social",
+          "seo", "sem", "ppc", "display"
+        ],
+        "lo": [
+          "ແຄມເປນ", "ໂຄສະນາ", "ຄລິກ", "ການເຂົ້າຊົມ",
+          "ຜູ້ຕິດຕາມ", "ໂພສ", "ແຊ", "ໄລ"
+        ]
+      },
+      "sheets": [
+        "campaign", "แคมเปญ", "ads", "โฆษณา",
+        "performance", "social media", "email",
+        "analytics", "traffic", "conversion",
+        "marketing", "การตลาด", "digital", "media spend"
+      ],
+      "weightPerHit": 1.8
+    },
+    "valueShapes": [
+      {
+        "columnLike": "ctr|click.through.rate|อัตราการคลิก",
+        "type": "percentage",
+        "range": [0.1, 30],
+        "weight": 3.5,
+        "note": "Click-through rate; definitive digital marketing metric"
+      },
+      {
+        "columnLike": "roas|return.on.ad.spend|ผลตอบแทนโฆษณา",
+        "type": "number",
+        "range": [0, 50],
+        "weight": 3.5,
+        "note": "Return on Ad Spend (multiplier)"
+      },
+      {
+        "columnLike": "cpc|cost.per.click|ค่าต่อคลิก",
+        "type": "number",
+        "range": [0.01, 500],
+        "weight": 3.0,
+        "note": "Cost per click"
+      },
+      {
+        "columnLike": "conversion.rate|cvr|อัตราคอนเวอร์ชั่น",
+        "type": "percentage",
+        "range": [0.1, 30],
+        "weight": 3.0,
+        "note": "Conversion rate"
+      },
+      {
+        "columnLike": "open.rate|อัตราเปิดอ่าน",
+        "type": "percentage",
+        "range": [5, 80],
+        "weight": 2.5,
+        "note": "Email open rate"
+      },
+      {
+        "columnLike": "engagement.rate|อัตรา engagement",
+        "type": "percentage",
+        "range": [0.5, 20],
+        "weight": 2.5,
+        "note": "Social media engagement rate"
+      },
+      {
+        "columnLike": "impression|impressions",
+        "type": "number",
+        "range": [100, 100000000],
+        "weight": 2.0,
+        "note": "Ad or content impressions"
+      }
+    ],
+    "unitPatterns": [
+      "บาท/คลิก", "THB/click", "USD/click",
+      "ครั้ง", "view", "views", "session",
+      "%CTR", "%CVR", "x ROAS"
+    ],
+    "negative": [
+      { "lexicon": ["patient", "ผู้ป่วย", "diagnosis", "โรค"], "weight": -3.0 },
+      { "lexicon": ["ccs", "pol", "brix", "bagasse", "อ้อย"], "weight": -2.0 },
+      { "lexicon": ["oee", "defect rate", "cycle time", "mtbf"], "weight": -2.0 },
+      { "lexicon": ["salary", "เงินเดือน", "payroll", "turnover rate"], "weight": -2.0 },
+      { "lexicon": ["gl", "general ledger", "debit", "credit", "trial balance"], "weight": -2.0 },
+      { "lexicon": ["student", "enrollment", "gpa", "semester", "curriculum"], "weight": -3.0 },
+      { "lexicon": ["occupancy", "adr", "revpar", "check_in", "room_type", "guest"], "weight": -2.5 },
+      { "lexicon": ["shipment_id", "carrier", "freight", "tracking_events", "bill of lading"], "weight": -2.0 },
+      { "lexicon": ["stock", "inventory", "reorder", "warehouse", "bin", "sku"], "weight": -2.0 },
+      { "lexicon": ["cart", "add_to_cart", "checkout", "product_id", "shipping_fee"], "weight": -1.5 },
+      { "lexicon": ["pipeline", "deal", "opportunity", "quota", "salesperson"], "weight": -1.5 },
+      { "lexicon": ["subscriber", "dau", "mau", "activation", "mrr", "arr", "churn_rate", "arpu", "expansion_mrr", "net_new_mrr"], "weight": -3.5 },
+      { "lexicon": ["tickets_resolved", "avg_resolution_hr", "first_contact_resolution", "csat_score", "reopen_rate", "handle_time", "quality_score"], "weight": -3.5 },
+      { "lexicon": ["goals", "assists", "tackles", "player", "league", "match", "games_played"], "weight": -3.0 },
+      { "lexicon": ["protocol", "chain", "apy", "staking", "defi", "token"], "weight": -2.5 },
+      { "lexicon": ["doctors", "nurses", "patients_mtd", "infection_rate"], "weight": -3.0 },
+      { "lexicon": ["property", "bedrooms", "rent", "tenant", "mortgage"], "weight": -2.5 },
+      { "lexicon": ["sprint", "story_points", "epic", "assignee", "task_id"], "weight": -2.0 }
+    ]
+  },
+
+  "business": {
+    "processes": [
+      {
+        "id": "campaign_lifecycle",
+        "stages": ["วางแผน", "สร้างเนื้อหา", "ตั้งค่าแคมเปญ", "เผยแพร่", "ติดตามผล", "ปรับปรุง", "สรุปผล"]
+      },
+      {
+        "id": "lead_generation",
+        "stages": ["กำหนดเป้าหมาย", "สร้าง landing page", "ยิงโฆษณา", "รวบรวม lead", "ส่งต่อทีมขาย", "วัดผล"]
+      },
+      {
+        "id": "content_marketing",
+        "stages": ["วางแผนเนื้อหา", "ผลิต", "เผยแพร่", "โปรโมต", "วัด engagement", "ทบทวน"]
+      }
+    ],
+    "goals": [
+      "maximize ROAS and marketing ROI",
+      "increase conversion rate across channels",
+      "reduce cost per acquisition (CPA/CPL)",
+      "grow organic reach and engagement",
+      "optimize channel mix and budget allocation",
+      "increase email subscriber list and open rates",
+      "improve brand awareness and reach",
+      "generate quality leads for sales team"
+    ],
+    "personas": [
+      {
+        "type": "executive",
+        "cares": ["marketing ROI", "total spend vs revenue", "brand metrics", "channel performance"],
+        "cadence": "monthly"
+      },
+      {
+        "type": "marketing_manager",
+        "cares": ["campaign performance", "budget utilization", "conversion funnel", "A/B test results"],
+        "cadence": "weekly"
+      },
+      {
+        "type": "digital_specialist",
+        "cares": ["CTR", "CPC", "ad creative performance", "audience segments", "daily spend"],
+        "cadence": "daily"
+      }
+    ],
+    "decisionCatalog": [
+      "allocate-budget",
+      "optimize-campaign",
+      "explain-variance",
+      "select-channel",
+      "test-creative",
+      "plan-forecast",
+      "target-audience",
+      "adjust-bidding"
+    ],
+    "seasonality": "Campaign peaks: holiday seasons (year-end, Songkran, Chinese New Year), 11.11/12.12 for ecommerce tie-ins, back-to-school. Budget cycles typically quarterly with annual planning."
+  },
+
+  "kpiRefs": [
+    "kpi.mkt.roas",
+    "kpi.mkt.cpa",
+    "kpi.mkt.ctr",
+    "kpi.mkt.conversion_rate",
+    "kpi.mkt.total_spend",
+    "kpi.mkt.impressions",
+    "kpi.mkt.reach",
+    "kpi.mkt.engagement_rate",
+    "kpi.mkt.open_rate",
+    "kpi.mkt.leads_generated",
+    "kpi.mkt.cost_per_lead"
+  ],
+
+  "genomeRefs": [
+    "genome.mkt_campaign_performance_v1",
+    "genome.mkt_channel_analysis_v1",
+    "genome.mkt_social_media_v1"
+  ],
+
+  "vizOverrides": [
+    { "rule": "bar chart for campaign performance (spend vs conversions) by campaign", "cites": "doc 06 §3" },
+    { "rule": "donut for budget allocation by channel", "cites": "doc 06 §2" },
+    { "rule": "line chart for CTR/CPC trend over time", "cites": "doc 06 §3" },
+    { "rule": "funnel chart for marketing funnel (impressions → clicks → leads → conversions)", "cites": "doc 06 §5" }
+  ],
+
+  "fixtures": []
+}

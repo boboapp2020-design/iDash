@@ -1,0 +1,198 @@
+[
+  {
+    "id": "kpi.htl.occupancy_rate",
+    "version": "1.0.0",
+    "domain": "hotel_hospitality",
+    "name": { "th": "อัตราเข้าพัก", "en": "Occupancy Rate" },
+    "formula": "100 * count(occupied_rooms) / count(available_rooms)",
+    "inputs": {
+      "occupied_rooms": { "role": "measure", "unit": "count", "synonyms": { "th": ["ห้องที่จอง", "ห้องที่เข้าพัก", "ห้องขาย"], "en": ["occupied rooms", "rooms sold", "occupied"] } },
+      "available_rooms": { "role": "measure", "unit": "count", "synonyms": { "th": ["ห้องว่าง", "ห้องทั้งหมด", "จำนวนห้อง"], "en": ["available rooms", "total rooms", "rooms available"] } }
+    },
+    "aggNature": "intensive",
+    "direction": "higher-better",
+    "format": { "kind": "percentage", "decimals": 1 },
+    "target": { "policy": "fixed", "benchmark": { "good": 75, "warn": 50 } },
+    "grain": ["daily", "weekly", "monthly"],
+    "answers": ["What is the hotel occupancy rate?", "How full is the hotel?"],
+    "variance": true,
+    "forecastCandidate": true,
+    "caveats": ["Exclude out-of-order rooms from available count"]
+  },
+  {
+    "id": "kpi.htl.adr",
+    "version": "1.0.0",
+    "domain": "hotel_hospitality",
+    "name": { "th": "ราคาห้องเฉลี่ย", "en": "Average Daily Rate (ADR)" },
+    "formula": "sum(room_revenue) / count(rooms_sold)",
+    "inputs": {
+      "room_revenue": { "role": "measure", "unit": "currency", "synonyms": { "th": ["รายได้ห้องพัก", "รายได้จากห้อง"], "en": ["room revenue", "room income"] } },
+      "rooms_sold": { "role": "measure", "unit": "count", "synonyms": { "th": ["ห้องที่ขาย", "ห้องที่เข้าพัก"], "en": ["rooms sold", "occupied rooms"] } }
+    },
+    "aggNature": "intensive",
+    "direction": "higher-better",
+    "format": { "kind": "currency", "decimals": 0 },
+    "target": { "policy": "period-median", "benchmark": { "good": null, "warn": null } },
+    "grain": ["daily", "weekly", "monthly"],
+    "answers": ["What is the average room rate?"],
+    "variance": true,
+    "forecastCandidate": true,
+    "caveats": ["ADR excludes complimentary rooms and staff use"]
+  },
+  {
+    "id": "kpi.htl.revpar",
+    "version": "1.0.0",
+    "domain": "hotel_hospitality",
+    "name": { "th": "รายได้ต่อห้องว่าง", "en": "Revenue per Available Room (RevPAR)" },
+    "formula": "sum(room_revenue) / count(available_rooms)",
+    "inputs": {
+      "room_revenue": { "role": "measure", "unit": "currency", "synonyms": { "th": ["รายได้ห้องพัก"], "en": ["room revenue"] } },
+      "available_rooms": { "role": "measure", "unit": "count", "synonyms": { "th": ["ห้องทั้งหมด"], "en": ["available rooms", "total rooms"] } }
+    },
+    "aggNature": "intensive",
+    "direction": "higher-better",
+    "format": { "kind": "currency", "decimals": 0 },
+    "target": { "policy": "period-median", "benchmark": { "good": null, "warn": null } },
+    "grain": ["daily", "weekly", "monthly"],
+    "answers": ["What is RevPAR?", "How well is the hotel monetizing its capacity?"],
+    "variance": true,
+    "forecastCandidate": true,
+    "caveats": ["RevPAR = ADR × Occupancy Rate"]
+  },
+  {
+    "id": "kpi.htl.total_room_revenue",
+    "version": "1.0.0",
+    "domain": "hotel_hospitality",
+    "name": { "th": "รายได้ห้องพักรวม", "en": "Total Room Revenue" },
+    "formula": "sum(room_revenue)",
+    "inputs": {
+      "room_revenue": { "role": "measure", "unit": "currency", "synonyms": { "th": ["รายได้ห้องพัก", "รายได้"], "en": ["room revenue", "revenue", "room income"] } }
+    },
+    "aggNature": "extensive",
+    "direction": "higher-better",
+    "format": { "kind": "currency", "decimals": 0 },
+    "target": { "policy": "column", "benchmark": { "good": null, "warn": null } },
+    "grain": ["daily", "weekly", "monthly"],
+    "answers": ["What is total room revenue?"],
+    "variance": true,
+    "forecastCandidate": true,
+    "caveats": []
+  },
+  {
+    "id": "kpi.htl.no_show_rate",
+    "version": "1.0.0",
+    "domain": "hotel_hospitality",
+    "name": { "th": "อัตรา No-Show", "en": "No-Show Rate" },
+    "formula": "100 * count(no_shows) / count(bookings)",
+    "inputs": {
+      "no_shows": { "role": "measure", "unit": "count", "synonyms": { "th": ["no show", "ไม่มาเข้าพัก"], "en": ["no show", "no_show", "no-show"] } },
+      "bookings": { "role": "measure", "unit": "count", "synonyms": { "th": ["จำนวนจอง", "ยอดจอง"], "en": ["bookings", "reservations"] } }
+    },
+    "aggNature": "intensive",
+    "direction": "lower-better",
+    "format": { "kind": "percentage", "decimals": 1 },
+    "target": { "policy": "fixed", "benchmark": { "good": 3, "warn": 8 } },
+    "grain": ["weekly", "monthly"],
+    "answers": ["What percentage of bookings result in no-shows?"],
+    "variance": true,
+    "forecastCandidate": false,
+    "caveats": ["Distinguish guaranteed vs non-guaranteed reservations"]
+  },
+  {
+    "id": "kpi.htl.cancel_rate",
+    "version": "1.0.0",
+    "domain": "hotel_hospitality",
+    "name": { "th": "อัตรายกเลิก", "en": "Cancellation Rate" },
+    "formula": "100 * count(cancellations) / count(bookings)",
+    "inputs": {
+      "cancellations": { "role": "measure", "unit": "count", "synonyms": { "th": ["ยกเลิกจอง", "ยกเลิก"], "en": ["cancellation", "cancelled", "cancel"] } },
+      "bookings": { "role": "measure", "unit": "count", "synonyms": { "th": ["จำนวนจอง"], "en": ["bookings", "reservations"] } }
+    },
+    "aggNature": "intensive",
+    "direction": "lower-better",
+    "format": { "kind": "percentage", "decimals": 1 },
+    "target": { "policy": "fixed", "benchmark": { "good": 10, "warn": 25 } },
+    "grain": ["weekly", "monthly"],
+    "answers": ["What percentage of bookings are cancelled?"],
+    "variance": true,
+    "forecastCandidate": false,
+    "caveats": []
+  },
+  {
+    "id": "kpi.htl.avg_los",
+    "version": "1.0.0",
+    "domain": "hotel_hospitality",
+    "name": { "th": "ระยะเวลาเข้าพักเฉลี่ย", "en": "Average Length of Stay" },
+    "formula": "avg(nights)",
+    "inputs": {
+      "nights": { "role": "measure", "unit": "nights", "synonyms": { "th": ["คืน", "คืนที่พัก", "จำนวนคืน"], "en": ["nights", "length of stay", "los", "stay duration"] } }
+    },
+    "aggNature": "intensive",
+    "direction": "neutral",
+    "format": { "kind": "number", "decimals": 1 },
+    "target": { "policy": "period-median", "benchmark": { "good": null, "warn": null } },
+    "grain": ["weekly", "monthly"],
+    "answers": ["How long do guests stay on average?"],
+    "variance": true,
+    "forecastCandidate": false,
+    "caveats": ["Segment by guest type (business vs leisure)"]
+  },
+  {
+    "id": "kpi.htl.guest_satisfaction",
+    "version": "1.0.0",
+    "domain": "hotel_hospitality",
+    "name": { "th": "คะแนนความพึงพอใจ", "en": "Guest Satisfaction Score" },
+    "formula": "avg(satisfaction_score)",
+    "inputs": {
+      "satisfaction_score": { "role": "measure", "unit": "score", "synonyms": { "th": ["คะแนนรีวิว", "ความพึงพอใจ", "คะแนน"], "en": ["review score", "rating", "satisfaction", "guest satisfaction"] } }
+    },
+    "aggNature": "intensive",
+    "direction": "higher-better",
+    "format": { "kind": "number", "decimals": 1 },
+    "target": { "policy": "fixed", "benchmark": { "good": 8.5, "warn": 7 } },
+    "grain": ["weekly", "monthly"],
+    "answers": ["How satisfied are guests?", "What is the average review score?"],
+    "variance": true,
+    "forecastCandidate": false,
+    "caveats": ["Normalize scores if aggregating across platforms with different scales"]
+  },
+  {
+    "id": "kpi.htl.direct_booking_pct",
+    "version": "1.0.0",
+    "domain": "hotel_hospitality",
+    "name": { "th": "สัดส่วนจองตรง", "en": "Direct Booking Percentage" },
+    "formula": "100 * count(direct_bookings) / count(total_bookings)",
+    "inputs": {
+      "direct_bookings": { "role": "measure", "unit": "count", "synonyms": { "th": ["จองตรง", "จองผ่านเว็บ"], "en": ["direct booking", "direct", "website booking"] } },
+      "total_bookings": { "role": "measure", "unit": "count", "synonyms": { "th": ["จำนวนจอง", "ยอดจองทั้งหมด"], "en": ["total bookings", "bookings", "reservations"] } }
+    },
+    "aggNature": "intensive",
+    "direction": "higher-better",
+    "format": { "kind": "percentage", "decimals": 1 },
+    "target": { "policy": "fixed", "benchmark": { "good": 40, "warn": 20 } },
+    "grain": ["monthly"],
+    "answers": ["What percentage of bookings come through direct channels?"],
+    "variance": true,
+    "forecastCandidate": false,
+    "caveats": ["Direct bookings have lower commission cost than OTA"]
+  },
+  {
+    "id": "kpi.htl.fb_revenue",
+    "version": "1.0.0",
+    "domain": "hotel_hospitality",
+    "name": { "th": "รายได้อาหารและเครื่องดื่ม", "en": "F&B Revenue" },
+    "formula": "sum(fb_revenue)",
+    "inputs": {
+      "fb_revenue": { "role": "measure", "unit": "currency", "synonyms": { "th": ["รายได้อาหาร", "รายได้ F&B", "ยอดอาหาร"], "en": ["f&b revenue", "food and beverage", "restaurant revenue", "fb income"] } }
+    },
+    "aggNature": "extensive",
+    "direction": "higher-better",
+    "format": { "kind": "currency", "decimals": 0 },
+    "target": { "policy": "column", "benchmark": { "good": null, "warn": null } },
+    "grain": ["daily", "weekly", "monthly"],
+    "answers": ["What is total F&B revenue?"],
+    "variance": true,
+    "forecastCandidate": true,
+    "caveats": ["Include restaurant, room service, minibar, banquet"]
+  }
+]

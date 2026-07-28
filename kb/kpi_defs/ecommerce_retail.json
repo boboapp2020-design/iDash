@@ -1,0 +1,198 @@
+[
+  {
+    "id": "kpi.ecom.gmv",
+    "version": "1.0.0",
+    "domain": "ecommerce_retail",
+    "name": { "th": "ยอดขายรวม", "en": "Gross Merchandise Value (GMV)" },
+    "formula": "sum(order_value)",
+    "inputs": {
+      "order_value": { "role": "measure", "unit": "currency", "synonyms": { "th": ["ยอดขาย", "มูลค่าขาย", "ยอดรวม", "ยอดสุทธิ"], "en": ["gmv", "gross merchandise value", "revenue", "sales", "order value", "total"] } }
+    },
+    "aggNature": "extensive",
+    "direction": "higher-better",
+    "format": { "kind": "currency", "decimals": 0 },
+    "target": { "policy": "column", "benchmark": { "good": null, "warn": null } },
+    "grain": ["daily", "weekly", "monthly"],
+    "answers": ["What is the total gross merchandise value?"],
+    "variance": true,
+    "forecastCandidate": true,
+    "caveats": ["GMV includes returns and cancellations before deduction"]
+  },
+  {
+    "id": "kpi.ecom.order_count",
+    "version": "1.0.0",
+    "domain": "ecommerce_retail",
+    "name": { "th": "จำนวนคำสั่งซื้อ", "en": "Order Count" },
+    "formula": "count(orders)",
+    "inputs": {
+      "orders": { "role": "measure", "unit": "count", "synonyms": { "th": ["คำสั่งซื้อ", "ออเดอร์", "รายการ"], "en": ["orders", "transactions", "order count"] } }
+    },
+    "aggNature": "extensive",
+    "direction": "higher-better",
+    "format": { "kind": "number", "decimals": 0 },
+    "target": { "policy": "column", "benchmark": { "good": null, "warn": null } },
+    "grain": ["daily", "weekly", "monthly"],
+    "answers": ["How many orders were placed?"],
+    "variance": true,
+    "forecastCandidate": true,
+    "caveats": []
+  },
+  {
+    "id": "kpi.ecom.aov",
+    "version": "1.0.0",
+    "domain": "ecommerce_retail",
+    "name": { "th": "มูลค่าเฉลี่ยต่อคำสั่ง", "en": "Average Order Value (AOV)" },
+    "formula": "sum(order_value) / count(orders)",
+    "inputs": {
+      "order_value": { "role": "measure", "unit": "currency", "synonyms": { "th": ["ยอดรวม", "มูลค่า"], "en": ["order value", "total", "subtotal"] } },
+      "orders": { "role": "measure", "unit": "count", "synonyms": { "th": ["คำสั่งซื้อ"], "en": ["orders", "transactions"] } }
+    },
+    "aggNature": "intensive",
+    "direction": "higher-better",
+    "format": { "kind": "currency", "decimals": 0 },
+    "target": { "policy": "period-median", "benchmark": { "good": null, "warn": null } },
+    "grain": ["daily", "weekly", "monthly"],
+    "answers": ["What is the average order value?"],
+    "variance": true,
+    "forecastCandidate": true,
+    "caveats": []
+  },
+  {
+    "id": "kpi.ecom.conversion_rate",
+    "version": "1.0.0",
+    "domain": "ecommerce_retail",
+    "name": { "th": "อัตราคอนเวอร์ชั่น", "en": "Conversion Rate" },
+    "formula": "100 * count(orders) / count(sessions)",
+    "inputs": {
+      "orders": { "role": "measure", "unit": "count", "synonyms": { "th": ["คำสั่งซื้อ"], "en": ["orders", "purchases"] } },
+      "sessions": { "role": "measure", "unit": "count", "synonyms": { "th": ["การเข้าชม", "เซสชั่น"], "en": ["sessions", "visits", "visitors"] } }
+    },
+    "aggNature": "intensive",
+    "direction": "higher-better",
+    "format": { "kind": "percentage", "decimals": 2 },
+    "target": { "policy": "period-median", "benchmark": { "good": null, "warn": null } },
+    "grain": ["daily", "weekly", "monthly"],
+    "answers": ["What percentage of visitors make a purchase?"],
+    "variance": true,
+    "forecastCandidate": true,
+    "caveats": ["Varies by traffic source"]
+  },
+  {
+    "id": "kpi.ecom.cart_abandonment",
+    "version": "1.0.0",
+    "domain": "ecommerce_retail",
+    "name": { "th": "อัตราทิ้งตะกร้า", "en": "Cart Abandonment Rate" },
+    "formula": "100 * (1 - count(completed) / count(carts_created))",
+    "inputs": {
+      "completed": { "role": "measure", "unit": "count", "synonyms": { "th": ["ชำระเงินสำเร็จ"], "en": ["completed", "purchased", "checkout completed"] } },
+      "carts_created": { "role": "measure", "unit": "count", "synonyms": { "th": ["สร้างตะกร้า", "หยิบใส่ตะกร้า"], "en": ["carts created", "add to cart", "cart sessions"] } }
+    },
+    "aggNature": "intensive",
+    "direction": "lower-better",
+    "format": { "kind": "percentage", "decimals": 1 },
+    "target": { "policy": "fixed", "benchmark": { "good": 60, "warn": 80 } },
+    "grain": ["weekly", "monthly"],
+    "answers": ["What percentage of shopping carts are abandoned?"],
+    "variance": true,
+    "forecastCandidate": false,
+    "caveats": ["Industry average is typically 65-75%"]
+  },
+  {
+    "id": "kpi.ecom.return_rate",
+    "version": "1.0.0",
+    "domain": "ecommerce_retail",
+    "name": { "th": "อัตราคืนสินค้า", "en": "Return Rate" },
+    "formula": "100 * count(returns) / count(orders)",
+    "inputs": {
+      "returns": { "role": "measure", "unit": "count", "synonyms": { "th": ["คืนสินค้า", "เปลี่ยนสินค้า", "คืน"], "en": ["returns", "refunds", "exchanges"] } },
+      "orders": { "role": "measure", "unit": "count", "synonyms": { "th": ["คำสั่งซื้อ"], "en": ["orders", "total orders"] } }
+    },
+    "aggNature": "intensive",
+    "direction": "lower-better",
+    "format": { "kind": "percentage", "decimals": 1 },
+    "target": { "policy": "fixed", "benchmark": { "good": 5, "warn": 15 } },
+    "grain": ["weekly", "monthly"],
+    "answers": ["What percentage of orders are returned?"],
+    "variance": true,
+    "forecastCandidate": false,
+    "caveats": ["Fashion/apparel typically has higher return rates"]
+  },
+  {
+    "id": "kpi.ecom.repeat_purchase_rate",
+    "version": "1.0.0",
+    "domain": "ecommerce_retail",
+    "name": { "th": "อัตราซื้อซ้ำ", "en": "Repeat Purchase Rate" },
+    "formula": "100 * count(repeat_customers) / count(total_customers)",
+    "inputs": {
+      "repeat_customers": { "role": "measure", "unit": "count", "synonyms": { "th": ["ลูกค้าซื้อซ้ำ", "ลูกค้าเก่า"], "en": ["repeat customers", "returning customers", "repeat buyers"] } },
+      "total_customers": { "role": "measure", "unit": "count", "synonyms": { "th": ["ลูกค้าทั้งหมด"], "en": ["total customers", "customers", "unique customers"] } }
+    },
+    "aggNature": "intensive",
+    "direction": "higher-better",
+    "format": { "kind": "percentage", "decimals": 1 },
+    "target": { "policy": "period-median", "benchmark": { "good": null, "warn": null } },
+    "grain": ["monthly", "quarterly"],
+    "answers": ["What percentage of customers buy again?"],
+    "variance": true,
+    "forecastCandidate": false,
+    "caveats": ["Depends on product type and purchase cycle"]
+  },
+  {
+    "id": "kpi.ecom.customer_count",
+    "version": "1.0.0",
+    "domain": "ecommerce_retail",
+    "name": { "th": "จำนวนลูกค้า", "en": "Customer Count" },
+    "formula": "count_distinct(customer_id)",
+    "inputs": {
+      "customer_id": { "role": "dimension", "unit": "id", "synonyms": { "th": ["ลูกค้า", "รหัสลูกค้า"], "en": ["customer", "customer id", "buyer"] } }
+    },
+    "aggNature": "extensive",
+    "direction": "higher-better",
+    "format": { "kind": "number", "decimals": 0 },
+    "target": { "policy": "column", "benchmark": { "good": null, "warn": null } },
+    "grain": ["weekly", "monthly"],
+    "answers": ["How many unique customers placed orders?"],
+    "variance": true,
+    "forecastCandidate": true,
+    "caveats": []
+  },
+  {
+    "id": "kpi.ecom.revenue_per_customer",
+    "version": "1.0.0",
+    "domain": "ecommerce_retail",
+    "name": { "th": "รายได้ต่อลูกค้า", "en": "Revenue per Customer" },
+    "formula": "sum(order_value) / count_distinct(customer_id)",
+    "inputs": {
+      "order_value": { "role": "measure", "unit": "currency", "synonyms": { "th": ["ยอดขาย"], "en": ["revenue", "order value", "sales"] } },
+      "customer_id": { "role": "dimension", "unit": "id", "synonyms": { "th": ["ลูกค้า"], "en": ["customer", "customer id"] } }
+    },
+    "aggNature": "intensive",
+    "direction": "higher-better",
+    "format": { "kind": "currency", "decimals": 0 },
+    "target": { "policy": "period-median", "benchmark": { "good": null, "warn": null } },
+    "grain": ["monthly", "quarterly"],
+    "answers": ["How much does each customer spend on average?"],
+    "variance": true,
+    "forecastCandidate": true,
+    "caveats": []
+  },
+  {
+    "id": "kpi.ecom.avg_rating",
+    "version": "1.0.0",
+    "domain": "ecommerce_retail",
+    "name": { "th": "คะแนนรีวิวเฉลี่ย", "en": "Average Product Rating" },
+    "formula": "avg(rating)",
+    "inputs": {
+      "rating": { "role": "measure", "unit": "score", "synonyms": { "th": ["คะแนน", "ดาว", "รีวิว"], "en": ["rating", "stars", "review score", "product rating"] } }
+    },
+    "aggNature": "intensive",
+    "direction": "higher-better",
+    "format": { "kind": "number", "decimals": 1 },
+    "target": { "policy": "fixed", "benchmark": { "good": 4.5, "warn": 3.5 } },
+    "grain": ["weekly", "monthly"],
+    "answers": ["What is the average product rating?"],
+    "variance": true,
+    "forecastCandidate": false,
+    "caveats": ["Weight by review count for fair cross-product comparison"]
+  }
+]

@@ -1,0 +1,87 @@
+{
+  "version": "1.3.0-seed",
+  "date": "2026-07-17",
+  "description": "M1 Knowledge Base seed — curated DNA objects, visualization rules, layout rules, and tuned domain classifier for the iDash AI Brain pipeline",
+  "objects": {
+    "domain_packs": 12,
+    "kpi_defs": 114,
+    "genes": 40,
+    "chromosomes": 15,
+    "genomes": 30,
+    "viz_rules": 24,
+    "layout_rules": 1
+  },
+  "files": {
+    "genes": "genes/genes.json",
+    "chromosomes": "chromosomes/chromosomes.json",
+    "genomes": "genomes/genomes.json",
+    "viz_rules": "viz_rules/viz_rules.json",
+    "layout_rules": "layout_rules/layout_rules.json",
+    "domain_packs": "domain_packs/",
+    "kpi_defs": "kpi_defs/"
+  },
+  "integrity": {
+    "gene_ids_unique": true,
+    "chromosome_slots_reference_valid_genes": true,
+    "genome_chromosomes_reference_valid_chromosomes": true,
+    "viz_rules_reference_valid_genes": true
+  },
+  "classifier": {
+    "engine": "app/js/classifier.js",
+    "eval_harness": "app/eval/index.html",
+    "corpus_size": 98,
+    "accuracy": 1.0,
+    "per_domain": {
+      "finance_accounting": 1.0,
+      "hr_people": 1.0,
+      "inventory_warehouse": 1.0,
+      "manufacturing": 1.0,
+      "sales_crm": 1.0,
+      "sugar_factory": 1.0,
+      "logistics_transport": 1.0,
+      "hotel_hospitality": 1.0,
+      "marketing_digital": 1.0,
+      "ecommerce_retail": 1.0,
+      "education": 1.0,
+      "generic_business": 1.0
+    }
+  },
+  "changelog": [
+    {
+      "version": "1.3.0-seed",
+      "date": "2026-07-17",
+      "changes": [
+        "Added 5 new domain packs: logistics_transport, hotel_hospitality, marketing_digital, ecommerce_retail, education — each with full lexicon (TH/EN/LO), valueShapes, unitPatterns, negative signals, business processes, personas, and decision catalogs",
+        "Added 51 new KPI definitions across the 5 new domains (total 114 KPIs)",
+        "Cross-pack negative signals expanded: all 12 packs now carry negatives for adjacent domains to prevent false positives",
+        "Profiler robustness: multi-sheet parsing (picks sheet with most data), duplicate column name handling, cross-tab/matrix format detection",
+        "Domain pack IDs registered in app.js, theme.js, and eval harness"
+      ]
+    },
+    {
+      "version": "1.2.0-seed",
+      "date": "2026-07-17",
+      "changes": [
+        "Classifier accuracy 85.7% -> 100.0% on the 98-dataset corpus by removing over-generic lexicon terms that caused cross-domain false positives (hr_people: \"review\"/\"rating\"/\"status\"/bare \"performance\" sheet term; sales_crm: bare \"order\"/\"delivery\" sheet term)",
+        "Added negative-signal groups so specific packs correctly defer to generic_business on adjacent-but-uncovered domains: SaaS (arpu/mrr variants), education (tuition/enrolled/instructor/dropout), hospitality (occupancy/adr/revpar), logistics (on_time/damaged/cost_per_delivery), marketing (bounce_rate/conversions/sessions), crypto/DeFi (protocol/chain/apy/staking), environmental AQI (pm25/pollutant), customer support (csat/handle_time)",
+        "sugar_factory: added fertilizer/pesticide/water-usage filename signals to catch agricultural-input tracking sheets that only carry generic column headers",
+        "Net effect: raw ranking now trusts specific-domain wins only when real domain vocabulary is present, and falls back to generic_business on accidental single-keyword overlaps"
+      ]
+    },
+    {
+      "version": "1.1.0-seed",
+      "date": "2026-07-17",
+      "changes": [
+        "Domain packs: added strategic negatives to all 6 specific packs (25+ false-positive domains covered)",
+        "Domain packs: expanded sugar_factory Thai farming lexicon, manufacturing maintenance terms, generic_business universal EN terms",
+        "Classifier: coverage-weighted ranking (rawScore * (0.3 + 0.7 * hitColumns/totalColumns))",
+        "Classifier: word-boundary matching for short ASCII terms to prevent false substring matches",
+        "Classifier: softmax confidence from exp(rawScore) over top-5 packs",
+        "Eval harness: refactored to use official classifier.js instead of inline duplicate",
+        "KPI count corrected from 60 to 63"
+      ]
+    }
+  ],
+  "status": "seed",
+  "provenance": "curated"
+}
