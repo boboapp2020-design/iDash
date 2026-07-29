@@ -835,7 +835,14 @@ function bufToBase64(buf) {
  * report's case — read every sheet in the book. Re-deriving that here from one
  * profiler-chosen sheet would lose data and drift out of sync with the file.
  *
- * entry.inject = { mode:'file', entryFn:'handleFile', hide:[css selectors] }
+ * entry.inject — one of:
+ *   { mode:'file', entryFn:'handleFile', hide:[…] }  call a global handler
+ *   { mode:'file', input:'#file',        hide:[…] }  drive its file input
+ *
+ * The `input` form exists because several dashboards keep their handler inside
+ * a closure — there is nothing global to call. Setting the input's files and
+ * firing `change` runs the same listener a manual pick would, which is closer
+ * to the real path than reaching for internals would be anyway.
  */
 async function prepareTemplateFromFile(entry, dataset) {
   var file = dataset.sourceFile;
@@ -844,10 +851,19 @@ async function prepareTemplateFromFile(entry, dataset) {
   var html = await loadTemplateHtml(entry);
   var inject = entry.inject || {};
   var entryFn = inject.entryFn || 'handleFile';
+  var inputSel = inject.input || null;
   var hide = (inject.hide || []).concat(['.upload-panel', '#emptyState', '#libBanner']);
 
   var b64 = bufToBase64(await file.arrayBuffer());
   var hideCSS = '<style>' + hide.map(function (s) { return s + '{display:none!important}'; }).join('') + '</style>';
+
+  var deliver = inputSel
+    ? ('    var el=document.querySelector(' + JSON.stringify(inputSel) + ');\n' +
+       '    if(!el){console.error("[iDash] input ' + inputSel + ' not found");return;}\n' +
+       '    var dt=new DataTransfer(); dt.items.add(toFile()); el.files=dt.files;\n' +
+       '    el.dispatchEvent(new Event("change",{bubbles:true}));\n')
+    : ('    if(typeof ' + entryFn + '!=="function"){console.error("[iDash] ' + entryFn + ' not found");return;}\n' +
+       '    ' + entryFn + '(toFile());\n');
 
   // Rebuild a File inside the frame and feed it to the template's own handler,
   // so the exact code path a manual upload takes is the one that runs.
@@ -863,8 +879,7 @@ async function prepareTemplateFromFile(entry, dataset) {
     '  }\n' +
     '  function go(){\n' +
     '    try{\n' +
-    '      if(typeof ' + entryFn + '!=="function"){console.error("[iDash] ' + entryFn + ' not found");return;}\n' +
-    '      ' + entryFn + '(toFile());\n' +
+    deliver +
     '    }catch(e){console.error("[iDash] auto-load failed:",e);}\n' +
     '  }\n' +
     '  if(document.readyState==="complete")setTimeout(go,60);\n' +
