@@ -79,12 +79,9 @@ html, body { height: 100%; overflow: hidden; background: #f4f7fd; }
   <span class="chat-bar-sub">ML Expert AI · ผู้ช่วยอัจฉริยะโรงงานน้ำตาล</span>
 </div>
 
-<!-- Stays hidden until the PIN clears, so the lock screen isn't backed by a
-     "loading" message for something that has not started loading. -->
-<div class="chat-loading" id="chatLoading" hidden>กำลังเปิดผู้ช่วย AI…</div>
+<div class="chat-loading" id="chatLoading">กำลังเปิดผู้ช่วย AI…</div>
 <iframe id="chatFrame" title="ML Expert AI"></iframe>
 
-<script src="js/chat_pin.js?v=20260728"></script>
 <script>
 (function () {
   'use strict';
@@ -139,15 +136,7 @@ html, body { height: 100%; overflow: hidden; background: #f4f7fd; }
       });
   }
 
-  // Nothing is fetched until the PIN clears — backing out returns to iDash
-  // rather than leaving an empty shell on screen.
-  window.iDashChatPin.require(
-    function () {
-      loading.hidden = false;
-      if (question) loadWithQuestion(question); else loadPlain();
-    },
-    function () { window.location.href = 'index.html'; }
-  );
+  if (question) loadWithQuestion(question); else loadPlain();
 })();
 </script>
 </body>

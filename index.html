@@ -303,19 +303,9 @@
 
         <!-- The real ML Expert AI, embedded live. At this width the app drops
              to its single-column layout, so the card is a working chat rather
-             than a preview of one. The iframe has no src until the PIN clears —
-             gating only the full-screen link would leave the chat wide open
-             right here on Home. -->
+             than a preview of one. -->
         <div class="home-chat-embed">
-          <iframe id="homeChatFrame" title="AI Chatbot"></iframe>
-          <div class="home-chat-lock" id="homeChatLock">
-            <div class="home-chat-lock-icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
-            </div>
-            <div class="home-chat-lock-title">AI Chatbot ถูกล็อกไว้</div>
-            <div class="home-chat-lock-desc">ใส่รหัส PIN 4 หลักเพื่อเริ่มสนทนา</div>
-            <button type="button" class="home-chat-lock-btn" id="homeChatUnlock">ปลดล็อก</button>
-          </div>
+          <iframe id="homeChatFrame" title="AI Chatbot" src="https://boboapp2020-design.github.io/MLChatbot/"></iframe>
         </div>
       </section>
     </div>
@@ -665,7 +655,6 @@
 <script src="js/ai_providers.js?v=20260729"></script>
 <script src="js/app.js?v=20260729"></script>
 <script src="js/sidebar.js?v=20260722c"></script>
-<script src="js/chat_pin.js?v=20260728"></script>
 <script>
   // Live topbar values: greeting + today's date follow the viewer's real clock.
   (function () {
@@ -682,30 +671,8 @@
     }
     // "เปิดเต็มจอ" hands the chat its own full page (chat.html) instead of the
     // dashboard viewer shell, which would scale the app down into a panel.
-    // chat.html runs the same PIN gate, so it is not a way around this one.
     var chatOpen = document.getElementById('homeChatOpen');
     if (chatOpen) chatOpen.setAttribute('href', 'chat.html');
-
-    // ── AI Chatbot PIN gate ────────────────────────────────────────────────
-    var chatFrame  = document.getElementById('homeChatFrame');
-    var chatLock   = document.getElementById('homeChatLock');
-    var chatUnlock = document.getElementById('homeChatUnlock');
-    var CHATBOT_URL = 'https://boboapp2020-design.github.io/MLChatbot/';
-
-    function revealChat() {
-      if (!chatFrame) return;
-      if (!chatFrame.getAttribute('src')) chatFrame.setAttribute('src', CHATBOT_URL);
-      if (chatLock) chatLock.hidden = true;
-    }
-    if (chatFrame && window.iDashChatPin) {
-      // Already unlocked earlier in this tab session → skip straight to the chat.
-      if (window.iDashChatPin.isUnlocked()) revealChat();
-      else if (chatUnlock) {
-        chatUnlock.addEventListener('click', function () {
-          window.iDashChatPin.require(revealChat);
-        });
-      }
-    }
 
     // Dashboard Center expand/collapse (sub-items are placeholders)
     var toggle = document.getElementById('dashCenterToggle');

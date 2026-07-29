@@ -93,7 +93,10 @@ window.iDashKnownDatasetEntries = [
     },
     themeId: 'forest',
     templateFile: 'land_lease_register.html',
-    inject: { mode: 'file', entryFn: 'handleFile' }
+    // The header's own "อัปโหลดข้อมูล" button re-opens its file picker for a
+    // manual re-upload — redundant here since the file is injected automatically,
+    // and confusing since the panel it would open is hidden.
+    inject: { mode: 'file', entryFn: 'handleFile', hide: ['#headerUploadBtn'] }
   },
 
   // ── BOI — แผนนำเข้าเทียบจริง ──────────────────────────────────────────
