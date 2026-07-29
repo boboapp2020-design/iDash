@@ -192,6 +192,8 @@ body { background: #f6fafd; }
 /* One card per wired-up dashboard, four across. */
 .home-quick-row {
   display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 19px;
+  /* Room for the HOT badge, which sits above the card's top edge. */
+  margin-top: 12px;
 }
 .home-quick {
   background: #fff; border: 2px solid var(--border); border-radius: 12px;
@@ -215,6 +217,39 @@ a.home-quick:hover .chev { color: var(--primary); }
 }
 .home-quick-sub { font-size: 11.5px; color: var(--gray-500); }
 .home-quick svg.chev { width: 15px; height: 15px; color: var(--gray-300); flex-shrink: 0; }
+
+/* ── HOT card ──────────────────────────────────────────────────────────
+   One card in the row is the main destination. It gets a warm border, a
+   faint warm wash and a flame badge — enough to pull the eye first without
+   turning the row into four competing colours. */
+.home-quick.is-hot {
+  position: relative; overflow: visible;
+  border-color: #fcd9b6;
+  background: linear-gradient(135deg, #fffaf4 0%, #fff 58%);
+}
+.home-quick.is-hot:hover { border-color: #f59e0b; }
+
+.home-quick-hot {
+  position: absolute; top: -9px; right: 10px;
+  display: inline-flex; align-items: center; gap: 3px;
+  padding: 3px 9px 3px 6px; border-radius: 20px;
+  background: linear-gradient(135deg, #f97316 0%, #ef4444 100%);
+  color: #fff; font-size: 9.5px; font-weight: 800; letter-spacing: .06em;
+  box-shadow: 0 2px 6px rgba(239, 68, 68, .35);
+  /* Sits above the card's own border, which is 2px and would otherwise clip it */
+  z-index: 1;
+}
+.home-quick-hot svg { width: 11px; height: 11px; flex-shrink: 0; }
+
+/* A slow, low-contrast glow: noticeable in peripheral vision, not distracting
+   while reading. Stops entirely for anyone who asked for reduced motion. */
+@keyframes idashHotGlow {
+  0%, 100% { box-shadow: 0 2px 6px rgba(239, 68, 68, .35); }
+  50%      { box-shadow: 0 2px 14px rgba(239, 68, 68, .62); }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .home-quick-hot { animation: idashHotGlow 2.4s ease-in-out infinite; }
+}
 
 /* ─── BOTTOM GRID ─── */
 /* align-items:start keeps each panel hugging its own content instead of
