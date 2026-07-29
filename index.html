@@ -190,7 +190,7 @@
       <section class="home-autopilot">
         <div class="home-autopilot-head">
           <svg class="bolt" viewBox="0 0 24 24" fill="currentColor"><path d="M13 2L3 14h7l-1 8 10-12h-7l1-8z"/></svg>
-          <span class="home-autopilot-title">AI Autopilot</span>
+          <span class="home-autopilot-title">iDash - สร้างแดชบอร์ดของคุณ</span>
           <span class="home-autopilot-pill">อัตโนมัติ</span>
         </div>
         <div class="home-dropzone mode-card" data-mode="autopilot">
@@ -446,6 +446,96 @@
   </div>
 </div>
 
+<!-- ─── Build-mode chooser: shown right after a file is picked ───
+     Both routes run the same deterministic pipeline ①-⑨ first; they differ
+     only in who draws the final page. -->
+<div class="modal-overlay" id="buildModeModal" hidden>
+  <div class="bm-card">
+    <button class="modal-close" id="bmClose" aria-label="Close">&times;</button>
+    <div class="bm-head">
+      <div class="bm-title">เลือกวิธีสร้าง Dashboard</div>
+      <div class="bm-sub" id="bmFileName">—</div>
+    </div>
+
+    <div class="bm-options">
+      <button type="button" class="bm-opt" data-build-mode="template">
+        <span class="bm-opt-icon tpl">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>
+        </span>
+        <span class="bm-opt-body">
+          <span class="bm-opt-name">สร้างจาก Template</span>
+          <span class="bm-opt-desc">จับคู่ข้อมูลกับเทมเพลตที่เตรียมไว้ ทำงานในเครื่อง 100% ไม่ต้องต่อเน็ต</span>
+          <span class="bm-opt-tag ok">แนะนำ · เร็ว · ฟรี</span>
+        </span>
+        <svg class="bm-opt-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
+
+      <button type="button" class="bm-opt" data-build-mode="ai">
+        <span class="bm-opt-icon ai">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M13 2L3 14h7l-1 8 10-12h-7l1-8z"/></svg>
+        </span>
+        <span class="bm-opt-body">
+          <span class="bm-opt-name">AI Autopilot</span>
+          <span class="bm-opt-desc">ส่งตัวเลขที่คำนวณแล้วให้ AI ออกแบบหน้าใหม่ทั้งหน้า ได้ดีไซน์แปลกใหม่ทุกครั้ง</span>
+          <span class="bm-opt-tag" id="bmAiTag">ต้องมี API key</span>
+        </span>
+        <svg class="bm-opt-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
+    </div>
+
+    <div class="bm-foot">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+      ทั้งสองแบบส่งเฉพาะตัวเลขสรุปที่คำนวณแล้ว — ข้อมูลรายแถวไม่เคยออกจากเครื่องคุณ
+    </div>
+  </div>
+</div>
+
+<!-- ─── AI provider settings ─── -->
+<div class="modal-overlay" id="aiSetupModal" hidden>
+  <div class="bm-card">
+    <button class="modal-close" id="aiSetupClose" aria-label="Close">&times;</button>
+    <div class="bm-head">
+      <div class="bm-title">ตั้งค่า AI</div>
+      <div class="bm-sub">เลือกผู้ให้บริการและใส่ API key ของคุณเอง</div>
+    </div>
+
+    <div class="bm-form">
+      <label class="bm-field">
+        <span class="bm-label">ผู้ให้บริการ</span>
+        <select id="aiProviderSelect"></select>
+      </label>
+
+      <label class="bm-field" id="aiEndpointField" hidden>
+        <span class="bm-label">API URL</span>
+        <input type="url" id="aiEndpointInput" placeholder="https://.../chat/completions" spellcheck="false">
+      </label>
+
+      <label class="bm-field">
+        <span class="bm-label">โมเดล</span>
+        <input type="text" id="aiModelInput" spellcheck="false" autocomplete="off">
+      </label>
+
+      <label class="bm-field">
+        <span class="bm-label">API key</span>
+        <input type="password" id="aiKeyInput" spellcheck="false" autocomplete="off" placeholder="วาง API key ที่นี่">
+        <span class="bm-hint" id="aiKeyHint"></span>
+      </label>
+
+      <div class="bm-warn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12" y2="17"/></svg>
+        <span>key ถูกเก็บไว้ในเบราว์เซอร์เครื่องนี้เท่านั้น และเรียก API ตรงจากเบราว์เซอร์ — ใครเปิดเครื่องนี้ก็อาจเห็น key ได้ อย่าใช้บนเครื่องสาธารณะ</span>
+      </div>
+
+      <div class="bm-msg" id="aiSetupMsg"></div>
+    </div>
+
+    <div class="bm-actions">
+      <button type="button" class="bm-btn" id="aiSetupCancel">ยกเลิก</button>
+      <button type="button" class="bm-btn primary" id="aiSetupSave">บันทึกและสร้าง</button>
+    </div>
+  </div>
+</div>
+
 <!-- AI Autopilot Progress Modal -->
 <div class="modal-overlay" id="aiProgressModal" hidden>
   <div class="ai-progress-card">
@@ -550,7 +640,9 @@
 <script src="js/kb_bundle.js?v=20260724"></script>
 <script src="js/known_dataset_registry.js?v=20260722c"></script>
 <script src="js/interactive_dashboard_generator.js?v=20260722c"></script>
-<script src="js/app.js?v=20260728"></script>
+<script src="js/infographic_ai_composer.js?v=20260729"></script>
+<script src="js/ai_providers.js?v=20260729"></script>
+<script src="js/app.js?v=20260729"></script>
 <script src="js/sidebar.js?v=20260722c"></script>
 <script src="js/home_kpi_live.js?v=20260728"></script>
 <script src="js/chat_pin.js?v=20260728"></script>

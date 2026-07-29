@@ -4,6 +4,8 @@ document.addEventListener('DOMContentLoaded', () => {
   initUploadZone();
   initModuleUploadModal();
   initAiProgressModal();
+  initBuildModeModal();
+  initAiSetupModal();
 });
 
 function initModuleSelector() {
@@ -231,11 +233,14 @@ function initUploadZone() {
 }
 
 /**
- * AI Autopilot entry point (single-module offline pivot, 2026-07-22):
- * resolve the uploaded file to a dataset (handling the multi-sheet picker
- * first if needed) and run the pipeline directly. No template picker — the
- * known-dataset registry matches a curated blueprint automatically, or the
- * stock shape-routed template applies for unknown data.
+ * Upload entry point. Resolve the file to a dataset (handling the multi-sheet
+ * picker first if needed), then let the user pick who draws the dashboard:
+ *
+ *   template → the offline path: known-dataset registry match → curated
+ *              blueprint, or stock shape-routed generation. No network.
+ *   ai       → the deterministic pipeline still computes every number; the
+ *              aggregated facts then go to the user's chosen AI provider,
+ *              which writes the page itself.
  */
 async function startAutopilot(file) {
   let dataset;
@@ -244,7 +249,139 @@ async function startAutopilot(file) {
   } catch (err) {
     return; // user cancelled the sheet picker — quietly back out
   }
-  runAutopilotPipeline(dataset);
+  openBuildModeModal(dataset);
+}
+
+/* ── Build-mode chooser ─────────────────────────────────────────────────── */
+
+let pendingDataset = null;
+
+function openBuildModeModal(dataset) {
+  const modal = document.getElementById('buildModeModal');
+  if (!modal) { runAutopilotPipeline(dataset, null, { mode: 'template' }); return; }
+  pendingDataset = dataset;
+  document.getElementById('bmFileName').textContent = dataset.filename || 'ไฟล์ที่อัปโหลด';
+
+  // Tell the user up front whether the AI route is ready to go.
+  const tag = document.getElementById('bmAiTag');
+  if (tag && window.iDashAIProviders) {
+    const problem = window.iDashAIProviders.configProblem();
+    if (problem) {
+      tag.textContent = 'ต้องตั้งค่า API key ก่อน';
+      tag.className = 'bm-opt-tag';
+    } else {
+      const cfg = window.iDashAIProviders.currentConfig();
+      tag.textContent = 'พร้อมใช้ · ' + cfg.label;
+      tag.className = 'bm-opt-tag ready';
+    }
+  }
+  modal.hidden = false;
+}
+
+function closeBuildModeModal() {
+  const modal = document.getElementById('buildModeModal');
+  if (modal) modal.hidden = true;
+}
+
+function initBuildModeModal() {
+  const modal = document.getElementById('buildModeModal');
+  if (!modal) return;
+
+  modal.querySelectorAll('[data-build-mode]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const mode = btn.dataset.buildMode;
+      const dataset = pendingDataset;
+      closeBuildModeModal();
+      if (!dataset) return;
+      if (mode === 'ai') {
+        // Send them through setup first when the provider isn't usable yet.
+        if (window.iDashAIProviders && window.iDashAIProviders.configProblem()) {
+          openAiSetupModal(() => runAutopilotPipeline(dataset, null, { mode: 'ai' }));
+        } else {
+          runAutopilotPipeline(dataset, null, { mode: 'ai' });
+        }
+      } else {
+        runAutopilotPipeline(dataset, null, { mode: 'template' });
+      }
+    });
+  });
+
+  document.getElementById('bmClose').addEventListener('click', () => { pendingDataset = null; closeBuildModeModal(); });
+  modal.addEventListener('click', (e) => { if (e.target === modal) { pendingDataset = null; closeBuildModeModal(); } });
+}
+
+/* ── AI provider settings ───────────────────────────────────────────────── */
+
+let aiSetupOnSaved = null;
+
+function openAiSetupModal(onSaved) {
+  const modal = document.getElementById('aiSetupModal');
+  if (!modal || !window.iDashAIProviders) return;
+  aiSetupOnSaved = onSaved || null;
+
+  const api = window.iDashAIProviders;
+  const sel = document.getElementById('aiProviderSelect');
+  if (!sel.options.length) {
+    Object.keys(api.PROVIDERS).forEach(id => {
+      const opt = document.createElement('option');
+      opt.value = id;
+      opt.textContent = api.PROVIDERS[id].label;
+      sel.appendChild(opt);
+    });
+  }
+  sel.value = api.loadSettings().providerId;
+  syncAiSetupFields();
+  document.getElementById('aiSetupMsg').textContent = '';
+  modal.hidden = false;
+}
+
+/** Repopulate model/key/endpoint for whichever provider is selected. */
+function syncAiSetupFields() {
+  const api = window.iDashAIProviders;
+  const id = document.getElementById('aiProviderSelect').value;
+  const def = api.PROVIDERS[id];
+  const saved = (api.loadSettings().byProvider || {})[id] || {};
+
+  document.getElementById('aiModelInput').value = saved.model || def.defaultModel || '';
+  document.getElementById('aiKeyInput').value = saved.apiKey || '';
+  document.getElementById('aiKeyHint').textContent =
+    def.keyHint + (def.keyUrl ? ' · ขอ key ได้ที่ ' + def.keyUrl : '');
+
+  // Only the "custom" provider needs its URL typed in.
+  const endpointField = document.getElementById('aiEndpointField');
+  endpointField.hidden = !!def.endpoint;
+  document.getElementById('aiEndpointInput').value = saved.endpoint || def.endpoint || '';
+}
+
+function initAiSetupModal() {
+  const modal = document.getElementById('aiSetupModal');
+  if (!modal) return;
+
+  document.getElementById('aiProviderSelect').addEventListener('change', syncAiSetupFields);
+
+  function close() { modal.hidden = true; aiSetupOnSaved = null; }
+  document.getElementById('aiSetupClose').addEventListener('click', close);
+  document.getElementById('aiSetupCancel').addEventListener('click', close);
+  modal.addEventListener('click', (e) => { if (e.target === modal) close(); });
+
+  document.getElementById('aiSetupSave').addEventListener('click', () => {
+    const api = window.iDashAIProviders;
+    const id = document.getElementById('aiProviderSelect').value;
+    const msg = document.getElementById('aiSetupMsg');
+
+    api.setProviderConfig(id, {
+      model: document.getElementById('aiModelInput').value.trim(),
+      apiKey: document.getElementById('aiKeyInput').value.trim(),
+      endpoint: document.getElementById('aiEndpointInput').value.trim()
+    });
+
+    const problem = api.configProblem();
+    if (problem) { msg.className = 'bm-msg'; msg.textContent = problem; return; }
+
+    const next = aiSetupOnSaved;
+    close();
+    if (next) next();
+  });
 }
 
 function escapeHtml(str) {
@@ -720,7 +857,9 @@ async function ensureEchartsSource() {
   } catch (e) { /* generator falls back to the CDN tag */ }
 }
 
-async function runAutopilotPipeline(fileOrDataset, userModuleId) {
+async function runAutopilotPipeline(fileOrDataset, userModuleId, opts) {
+  opts = opts || {};
+  const buildMode = opts.mode === 'ai' ? 'ai' : 'template';
   // Resolve File → dataset (including the sheet-picker step, if needed)
   // BEFORE opening the progress modal, so the picker never has to appear
   // stacked on top of a spinning progress bar.
@@ -805,6 +944,39 @@ async function runAutopilotPipeline(fileOrDataset, userModuleId) {
     const styleFamily = window.iDashStyleLibrary ? window.iDashStyleLibrary.getFamilyForDomain(winnerPack.id) : null;
     sessionStorage.removeItem('idash.renderMode');
     sessionStorage.removeItem('idash.interactiveHtml');
+    sessionStorage.removeItem('idash.htmlSource');
+    sessionStorage.removeItem('idash.aiDesign');
+
+    // ── AI Autopilot: the numbers above are final; the AI only draws them ──
+    // Fails closed — any API/safety problem stops here with a real message
+    // rather than quietly substituting the template output, which would make
+    // it look like the AI ran when it didn't.
+    if (buildMode === 'ai') {
+      document.getElementById('aiProgressHeaderSub').textContent = 'AI กำลังออกแบบหน้า';
+      document.getElementById('aiProgressDesc').textContent =
+        'ส่งตัวเลขสรุปให้ AI ออกแบบ อาจใช้เวลาสักครู่...';
+
+      const facts = window.iDashAIComposer.buildFactsPayload(dashboardSpec, {
+        filename: dataset.filename,
+        datasetTitle: dataset.datasetName || null,
+        domainId: winnerPack.id,
+        domainNameTH: winnerPack.identity.nameTH
+      });
+      const out = await window.iDashAIProviders.generateDashboard(facts);
+      if (!out.ok) throw new Error('AI Autopilot ไม่สำเร็จ — ' + out.reason);
+
+      try {
+        sessionStorage.setItem('idash.interactiveHtml', out.html);
+        sessionStorage.setItem('idash.renderMode', 'interactive');
+        // Marks the HTML as externally authored so the viewer sandboxes it.
+        sessionStorage.setItem('idash.htmlSource', 'ai');
+        sessionStorage.setItem('idash.aiDesign', JSON.stringify({
+          label: out.label, model: out.model, numbersVerified: out.numbersVerified
+        }));
+      } catch (e) {
+        throw new Error('หน้าที่ AI สร้างมีขนาดใหญ่เกินกว่าจะเก็บในเบราว์เซอร์ได้');
+      }
+    }
 
     // ── Known-dataset matching (single-module offline pivot, 2026-07-22):
     // if the uploaded file's columns fingerprint-match a curated registry
@@ -816,7 +988,9 @@ async function runAutopilotPipeline(fileOrDataset, userModuleId) {
     let blueprint = null;
     let dashTheme = null;
     let templateEntry = null;
-    if (window.iDashKnownDatasets) {
+    // The AI route already produced the page; registry matching would only
+    // overwrite it. Theme still gets picked below for the meta record.
+    if (buildMode !== 'ai' && window.iDashKnownDatasets) {
       const hit = window.iDashKnownDatasets.match(dataset.columns);
       if (hit) {
         matched = { id: hit.entry.id, nameTH: hit.entry.nameTH, score: Math.round(hit.score * 100) };
@@ -839,7 +1013,10 @@ async function runAutopilotPipeline(fileOrDataset, userModuleId) {
     // ── Plan B: curated HTML template ──
     // When a registry entry has templateFile, fetch the pre-made dashboard
     // HTML, inject the user's data via columnMapping, and skip generation.
-    if (templateEntry) {
+    if (buildMode === 'ai') {
+      /* already rendered by the AI above */
+    }
+    else if (templateEntry) {
       const tpl = await prepareTemplateHtml(templateEntry, dataset);
       try {
         sessionStorage.setItem('idash.interactiveHtml', tpl.html);
@@ -912,6 +1089,17 @@ async function runAutopilotPipeline(fileOrDataset, userModuleId) {
     }
     errorEl.textContent = `สร้าง Dashboard ไม่สำเร็จ: ${msg}`;
     errorEl.hidden = false;
+    // Clear the in-progress copy, otherwise "กำลังออกแบบ…" sits above the
+    // failure message and the modal reads as still working.
+    const headerSub = document.getElementById('aiProgressHeaderSub');
+    const desc = document.getElementById('aiProgressDesc');
+    if (headerSub) headerSub.textContent = 'ไม่สำเร็จ';
+    if (desc) desc.textContent = buildMode === 'ai'
+      ? 'ลองตรวจสอบการตั้งค่า AI แล้วลองใหม่อีกครั้ง'
+      : 'ปิดหน้าต่างนี้แล้วลองใหม่อีกครั้ง';
+    document.querySelectorAll('#aiProgressModal .ai-step').forEach(el => {
+      el.classList.remove('active');
+    });
   }
 }
 

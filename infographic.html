@@ -168,6 +168,19 @@
     wrap.innerHTML = '';
     var iframe = document.createElement('iframe');
     iframe.id = 'igFrame';
+
+    // AI-authored pages are untrusted third-party HTML, so they render inside
+    // a fully sandboxed frame (no scripts, no same-origin). That is the real
+    // containment boundary — the pattern screen in ai_providers.js is only
+    // defense in depth. Locally generated dashboards keep doc.write() because
+    // they legitimately run their own ECharts code.
+    if (sessionStorage.getItem('idash.htmlSource') === 'ai') {
+      iframe.setAttribute('sandbox', '');
+      iframe.srcdoc = html;
+      wrap.appendChild(iframe);
+      return;
+    }
+
     wrap.appendChild(iframe);
     var doc = iframe.contentDocument || iframe.contentWindow.document;
     doc.open();
@@ -316,6 +329,21 @@
     }
     document.getElementById('igSubtitle').textContent = sub;
     document.getElementById('igEmpty').style.display = 'none';
+
+    // Name the AI that drew this, and say so when its numbers couldn't be
+    // matched back to the ones we computed — silence would imply "verified".
+    if (sessionStorage.getItem('idash.htmlSource') === 'ai') {
+      var ai = null;
+      try { ai = JSON.parse(sessionStorage.getItem('idash.aiDesign') || 'null'); } catch (e) {}
+      if (ai) {
+        showBadge(
+          ai.numbersVerified
+            ? 'ออกแบบโดย AI · ' + ai.label + ' (' + ai.model + ')'
+            : 'ออกแบบโดย AI · ' + ai.label + ' — ตรวจไม่พบตัวเลขบางส่วน โปรดตรวจทานก่อนใช้',
+          !ai.numbersVerified
+        );
+      }
+    }
 
     renderIframe(interactiveHtml);
     document.getElementById('igFrameWrap').style.display = 'block';
