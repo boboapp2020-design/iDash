@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>เข้าสู่ระบบ — iDash</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect x='2' y='18' width='6' height='12' rx='1' fill='%232563eb'/><rect x='10' y='12' width='6' height='18' rx='1' fill='%233b82f6'/><rect x='18' y='6' width='6' height='24' rx='1' fill='%2360a5fa'/><rect x='26' y='2' width='6' height='28' rx='1' fill='%2393c5fd'/></svg>">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --primary: #2563eb;
+  --primary-dark: #1d4ed8;
+  --ink: #14161c;
+  --ink-2: #475569;
+  --muted: #858b9c;
+  --border: #e3e9f2;
+  --font: 'Inter', 'Noto Sans Thai', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+}
+body {
+  font-family: var(--font); color: var(--ink); background: #fff;
+  min-height: 100vh; display: grid; grid-template-columns: 1fr 1fr;
+}
+
+/* ── Left: brand panel ─────────────────────────────────────────────────
+   The soft blobs and the wave are inline CSS/SVG so the page has no image
+   dependencies and renders identically offline. */
+.brand {
+  position: relative; overflow: hidden;
+  background: linear-gradient(160deg, #f7faff 0%, #eef4fe 55%, #e6eefc 100%);
+  display: flex; flex-direction: column; justify-content: center;
+  padding: 56px clamp(32px, 5vw, 88px);
+}
+.blob { position: absolute; border-radius: 50%; background: #dbe7fb; opacity: .55; pointer-events: none; }
+.blob-1 { width: 190px; height: 190px; top: 9%;  right: 16%; }
+.blob-2 { width: 300px; height: 300px; top: 20%; left: -140px; opacity: .38; }
+.wave { position: absolute; left: 0; right: 0; bottom: 0; width: 100%; pointer-events: none; }
+.brand-inner { position: relative; z-index: 1; max-width: 520px; }
+
+.brand-logo { display: flex; align-items: center; gap: 14px; margin-bottom: 40px; }
+.brand-logo svg { width: 52px; height: 52px; flex-shrink: 0; }
+.brand-name { font-size: 44px; font-weight: 800; letter-spacing: -.02em; line-height: 1; color: #1e40af; }
+.brand-tag { font-size: 12.5px; color: var(--muted); margin-top: 6px; letter-spacing: .01em; }
+
+.brand-head {
+  font-size: clamp(24px, 2.5vw, 33px); font-weight: 800;
+  line-height: 1.42; letter-spacing: -.01em;
+}
+.brand-head b { color: var(--primary); font-weight: 800; }
+.brand-rule { width: 54px; height: 3px; border-radius: 2px; background: var(--primary); margin: 22px 0 20px; }
+.brand-desc { font-size: 13.5px; color: var(--ink-2); line-height: 1.85; }
+
+.features { margin-top: 38px; display: flex; flex-direction: column; gap: 22px; }
+.feature { display: flex; gap: 16px; align-items: flex-start; }
+.feature-icon {
+  width: 56px; height: 56px; border-radius: 15px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+}
+.feature-icon svg { width: 25px; height: 25px; }
+.feature-icon.blue   { background: #e3edfd; color: #2563eb; }
+.feature-icon.green  { background: #e2f5ec; color: #10b981; }
+.feature-icon.purple { background: #ece7fb; color: #7c5cf0; }
+.feature-title { font-size: 14.5px; font-weight: 700; color: var(--ink); }
+.feature-desc { font-size: 12.5px; color: var(--ink-2); line-height: 1.8; margin-top: 4px; }
+
+/* ── Right: sign-in card ─────────────────────────────────────────────── */
+.panel { display: flex; align-items: center; justify-content: center; padding: 40px 32px; }
+.card {
+  width: 100%; max-width: 430px;
+  border: 1px solid #eef1f6; border-radius: 20px; padding: 44px clamp(24px, 4vw, 46px);
+  box-shadow: 0 4px 12px rgba(16,24,40,.05), 0 24px 56px rgba(16,24,40,.07);
+}
+.card-title { font-size: 25px; font-weight: 800; text-align: center; letter-spacing: -.01em; }
+.card-sub { font-size: 13px; color: var(--muted); text-align: center; margin-top: 8px; }
+
+form { margin-top: 32px; }
+.field { margin-bottom: 19px; }
+.field-label { display: block; font-size: 13px; font-weight: 700; margin-bottom: 9px; }
+.input-wrap { position: relative; display: flex; align-items: center; }
+.input-wrap > svg.lead {
+  position: absolute; left: 15px; width: 17px; height: 17px; color: #b6becd; pointer-events: none;
+}
+.input-wrap input {
+  width: 100%; padding: 14px 15px 14px 43px;
+  border: 1px solid var(--border); border-radius: 11px; background: #fff;
+  font-family: inherit; font-size: 14px; color: var(--ink); outline: none;
+  transition: border-color .15s, box-shadow .15s;
+}
+.input-wrap input::placeholder { color: #b6becd; }
+.input-wrap input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(37,99,235,.11); }
+.input-wrap input#password { padding-right: 46px; }
+.peek {
+  position: absolute; right: 8px; width: 32px; height: 32px; border: none; background: none;
+  cursor: pointer; color: #b6becd; display: flex; align-items: center; justify-content: center;
+  border-radius: 8px;
+}
+.peek:hover { color: var(--ink-2); background: #f4f7fb; }
+.peek svg { width: 18px; height: 18px; }
+
+.forgot { text-align: right; margin: -4px 0 20px; }
+.link-muted {
+  font-size: 12.5px; font-weight: 600; color: var(--primary);
+  background: none; border: none; font-family: inherit; padding: 0;
+}
+.submit {
+  width: 100%; padding: 15px 0; border: none; border-radius: 11px;
+  background: var(--primary); color: #fff; font-family: inherit;
+  font-size: 15px; font-weight: 700; cursor: pointer;
+  transition: background .15s, transform .12s;
+}
+.submit:hover { background: var(--primary-dark); }
+.submit:active { transform: translateY(1px); }
+.submit:disabled { opacity: .65; cursor: default; transform: none; }
+
+.msg { min-height: 18px; margin-top: 13px; font-size: 12.5px; font-weight: 600; color: #dc2626; text-align: center; }
+
+.divider { display: flex; align-items: center; gap: 14px; margin: 24px 0; color: var(--muted); font-size: 12.5px; }
+.divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+.google {
+  width: 100%; padding: 13px 0; border: 1px solid var(--border); border-radius: 11px;
+  background: #fff; font-family: inherit; font-size: 13.5px; font-weight: 600; color: var(--ink);
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+}
+.google svg { width: 18px; height: 18px; }
+.signup { text-align: center; margin-top: 24px; font-size: 13px; color: var(--ink-2); }
+
+/* Anything needing a backend is visibly inert rather than a button that
+   silently does nothing when clicked. */
+.not-ready { opacity: .45; cursor: not-allowed; }
+.note {
+  margin-top: 22px; padding: 11px 13px; border-radius: 10px;
+  background: #f7faff; border: 1px solid #e2ebfa;
+  font-size: 11.5px; color: var(--ink-2); line-height: 1.7; text-align: center;
+}
+
+@media (max-width: 900px) {
+  body { grid-template-columns: 1fr; }
+  .brand { display: none; }
+  .panel { min-height: 100vh; }
+}
+</style>
+</head>
+<body>
+
+<!-- ── Brand panel ── -->
+<section class="brand">
+  <span class="blob blob-1"></span>
+  <span class="blob blob-2"></span>
+  <svg class="wave" viewBox="0 0 800 220" preserveAspectRatio="none" aria-hidden="true">
+    <path d="M0 150 Q 200 90 400 140 T 800 120 V220 H0 Z" fill="#dae6fa" opacity=".55"/>
+    <path d="M0 175 Q 220 120 430 165 T 800 150 V220 H0 Z" fill="#cddefa" opacity=".5"/>
+  </svg>
+
+  <div class="brand-inner">
+    <div class="brand-logo">
+      <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <rect x="2" y="18" width="6" height="12" rx="1.5" fill="#1e40af"/>
+        <rect x="10" y="12" width="6" height="18" rx="1.5" fill="#2563eb"/>
+        <rect x="18" y="6" width="6" height="24" rx="1.5" fill="#60a5fa"/>
+        <rect x="26" y="2" width="4" height="28" rx="1.5" fill="#93c5fd"/>
+      </svg>
+      <div>
+        <div class="brand-name">iDash</div>
+        <div class="brand-tag">AI Dashboard Intelligence Platform</div>
+      </div>
+    </div>
+
+    <h1 class="brand-head">เปลี่ยนข้อมูลดิบ<br>ให้เป็น <b>Dashboard</b> อัจฉริยะ</h1>
+    <div class="brand-rule"></div>
+    <p class="brand-desc">iDash คือแพลตฟอร์มที่ช่วยวิเคราะห์ข้อมูล ออกแบบ Dashboard<br>และแนะนำกราฟที่เหมาะสมกับข้อมูลของคุณโดยอัตโนมัติ</p>
+
+    <div class="features">
+      <div class="feature">
+        <div class="feature-icon blue">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 17 9 11 13 15 21 7"/><polyline points="15 7 21 7 21 13"/></svg>
+        </div>
+        <div>
+          <div class="feature-title">แหล่งรวม Dashboard มากมาย</div>
+          <div class="feature-desc">ครอบคลุมทุกมิติของธุรกิจ อาทิ การผลิต การตลาด<br>การเงิน และอื่น ๆ อีกมากมาย</div>
+        </div>
+      </div>
+
+      <div class="feature">
+        <div class="feature-icon green">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="8" width="16" height="12" rx="2.5"/><circle cx="9" cy="14" r="1.3" fill="currentColor"/><circle cx="15" cy="14" r="1.3" fill="currentColor"/><path d="M12 8V4.5"/><circle cx="12" cy="3.2" r="1.3" fill="currentColor"/><path d="M2 13v3M22 13v3"/></svg>
+        </div>
+        <div>
+          <div class="feature-title">AI Chatbot อัจฉริยะ</div>
+          <div class="feature-desc">ถาม-ตอบทุกข้อสงสัยเกี่ยวกับโรงงานของเรา<br>ได้อย่างรวดเร็วและแม่นยำ</div>
+        </div>
+      </div>
+
+      <div class="feature">
+        <div class="feature-icon purple">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.2 15.9A10 10 0 1 1 8.1 2.8"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></svg>
+        </div>
+        <div>
+          <div class="feature-title">วิเคราะห์ลึก เข้าใจง่าย</div>
+          <div class="feature-desc">ช่วยให้คุณมองเห็นภาพรวม ค้นพบ Insight<br>และตัดสินใจได้อย่างมั่นใจ</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Sign-in card ── -->
+<section class="panel">
+  <div class="card">
+    <div class="card-title">เข้าสู่ระบบ</div>
+    <div class="card-sub">เข้าสู่ระบบเพื่อใช้งาน iDash</div>
+
+    <form id="loginForm" novalidate>
+      <div class="field">
+        <label class="field-label" for="username">ชื่อผู้ใช้</label>
+        <div class="input-wrap">
+          <svg class="lead" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          <input type="text" id="username" name="username" placeholder="กรอกชื่อผู้ใช้"
+                 autocomplete="username" spellcheck="false" autocapitalize="off">
+        </div>
+      </div>
+
+      <div class="field">
+        <label class="field-label" for="password">รหัสผ่าน</label>
+        <div class="input-wrap">
+          <svg class="lead" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          <input type="password" id="password" name="password" placeholder="กรอกรหัสผ่านของคุณ" autocomplete="current-password">
+          <button type="button" class="peek" id="peek" aria-label="แสดงรหัสผ่าน">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="forgot">
+        <button type="button" class="link-muted not-ready" disabled title="ยังไม่เปิดใช้งาน">ลืมรหัสผ่าน?</button>
+      </div>
+
+      <button type="submit" class="submit" id="submitBtn">เข้าสู่ระบบ</button>
+      <div class="msg" id="loginMsg"></div>
+    </form>
+
+    <div class="divider">หรือ</div>
+
+    <button type="button" class="google not-ready" disabled title="ยังไม่เปิดใช้งาน">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#4285F4" d="M23 12.3c0-.8-.1-1.6-.2-2.3H12v4.5h6.2a5.3 5.3 0 0 1-2.3 3.5v2.9h3.7c2.2-2 3.4-5 3.4-8.6z"/><path fill="#34A853" d="M12 24c3.1 0 5.7-1 7.6-2.8l-3.7-2.9c-1 .7-2.3 1.1-3.9 1.1-3 0-5.5-2-6.4-4.7H1.8v3C3.7 21.4 7.6 24 12 24z"/><path fill="#FBBC05" d="M5.6 14.7a7.2 7.2 0 0 1 0-4.6v-3H1.8a12 12 0 0 0 0 10.6l3.8-3z"/><path fill="#EA4335" d="M12 4.8c1.7 0 3.2.6 4.4 1.7l3.3-3.3C17.7 1.2 15.1 0 12 0 7.6 0 3.7 2.6 1.8 6.1l3.8 3c.9-2.7 3.4-4.3 6.4-4.3z"/></svg>
+      เข้าสู่ระบบด้วย Google
+    </button>
+
+    <div class="signup">ยังไม่มีบัญชี? <button type="button" class="link-muted not-ready" disabled title="ยังไม่เปิดใช้งาน">สมัครใช้งาน</button></div>
+
+    <div class="note">
+      เข้าสู่ระบบด้วย Google · ลืมรหัสผ่าน · สมัครใช้งาน — ยังไม่เปิดใช้งาน<br>
+      เพราะต้องมีระบบบัญชีผู้ใช้ฝั่งเซิร์ฟเวอร์ก่อน
+    </div>
+  </div>
+</section>
+
+<script src="js/auth.js?v=20260729"></script>
+<script>
+(function () {
+  'use strict';
+
+  var form = document.getElementById('loginForm');
+  var userEl = document.getElementById('username');
+  var passEl = document.getElementById('password');
+  var msg = document.getElementById('loginMsg');
+  var btn = document.getElementById('submitBtn');
+
+  // Already signed in → skip the form.
+  if (window.iDashAuth.isSignedIn()) { window.location.replace(nextPage()); return; }
+
+  // Only ever return a same-directory page name, so a crafted ?next= can't
+  // redirect somewhere else after sign-in.
+  function nextPage() {
+    var raw = new URLSearchParams(window.location.search).get('next') || '';
+    return /^[a-z0-9_-]+\.html$/i.test(raw) ? raw : 'index.html';
+  }
+
+  document.getElementById('peek').addEventListener('click', function () {
+    var show = passEl.type === 'password';
+    passEl.type = show ? 'text' : 'password';
+    this.setAttribute('aria-label', show ? 'ซ่อนรหัสผ่าน' : 'แสดงรหัสผ่าน');
+    passEl.focus();
+  });
+
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    msg.textContent = '';
+
+    if (!userEl.value.trim() || !passEl.value) {
+      msg.textContent = 'กรอกชื่อผู้ใช้และรหัสผ่านให้ครบ';
+      return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = 'กำลังเข้าสู่ระบบ…';
+    window.iDashAuth.signIn(userEl.value, passEl.value).then(function (ok) {
+      if (ok) { window.location.href = nextPage(); return; }
+      btn.disabled = false;
+      btn.textContent = 'เข้าสู่ระบบ';
+      msg.textContent = 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง';
+      passEl.value = '';
+      passEl.focus();
+    });
+  });
+
+  userEl.focus();
+})();
+</script>
+</body>
+</html>

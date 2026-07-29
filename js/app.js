@@ -335,14 +335,44 @@ function openAiSetupModal(onSaved) {
   modal.hidden = false;
 }
 
+const AI_MODEL_CUSTOM = '__custom__';
+
 /** Repopulate model/key/endpoint for whichever provider is selected. */
 function syncAiSetupFields() {
   const api = window.iDashAIProviders;
   const id = document.getElementById('aiProviderSelect').value;
   const def = api.PROVIDERS[id];
   const saved = (api.loadSettings().byProvider || {})[id] || {};
+  const model = saved.model || def.defaultModel || '';
 
-  document.getElementById('aiModelInput').value = saved.model || def.defaultModel || '';
+  // Shortlist grouped free-then-paid, plus an escape hatch so a model that
+  // isn't on the list (or ships after this build) is still reachable.
+  const sel = document.getElementById('aiModelSelect');
+  sel.innerHTML = '';
+  const list = def.models || [];
+  [['ฟรี', 'free'], ['เสียเงิน', 'paid']].forEach(([groupLabel, tier]) => {
+    const inTier = list.filter(m => m.tier === tier);
+    if (!inTier.length) return;
+    const group = document.createElement('optgroup');
+    group.label = groupLabel;
+    inTier.forEach(m => {
+      const opt = document.createElement('option');
+      opt.value = m.id;
+      opt.textContent = m.label;
+      group.appendChild(opt);
+    });
+    sel.appendChild(group);
+  });
+  const customOpt = document.createElement('option');
+  customOpt.value = AI_MODEL_CUSTOM;
+  customOpt.textContent = 'อื่นๆ (พิมพ์ชื่อโมเดลเอง)';
+  sel.appendChild(customOpt);
+
+  const known = list.some(m => m.id === model);
+  sel.value = known ? model : AI_MODEL_CUSTOM;
+  document.getElementById('aiModelInput').value = known ? '' : model;
+  syncAiModelCustomField();
+
   document.getElementById('aiKeyInput').value = saved.apiKey || '';
   document.getElementById('aiKeyHint').textContent =
     def.keyHint + (def.keyUrl ? ' · ขอ key ได้ที่ ' + def.keyUrl : '');
@@ -353,11 +383,25 @@ function syncAiSetupFields() {
   document.getElementById('aiEndpointInput').value = saved.endpoint || def.endpoint || '';
 }
 
+function syncAiModelCustomField() {
+  const isCustom = document.getElementById('aiModelSelect').value === AI_MODEL_CUSTOM;
+  document.getElementById('aiModelCustomField').hidden = !isCustom;
+}
+
+/** The model id to save: the dropdown pick, or the typed one. */
+function resolveAiModel() {
+  const sel = document.getElementById('aiModelSelect');
+  return sel.value === AI_MODEL_CUSTOM
+    ? document.getElementById('aiModelInput').value.trim()
+    : sel.value;
+}
+
 function initAiSetupModal() {
   const modal = document.getElementById('aiSetupModal');
   if (!modal) return;
 
   document.getElementById('aiProviderSelect').addEventListener('change', syncAiSetupFields);
+  document.getElementById('aiModelSelect').addEventListener('change', syncAiModelCustomField);
 
   function close() { modal.hidden = true; aiSetupOnSaved = null; }
   document.getElementById('aiSetupClose').addEventListener('click', close);
@@ -370,7 +414,7 @@ function initAiSetupModal() {
     const msg = document.getElementById('aiSetupMsg');
 
     api.setProviderConfig(id, {
-      model: document.getElementById('aiModelInput').value.trim(),
+      model: resolveAiModel(),
       apiKey: document.getElementById('aiKeyInput').value.trim(),
       endpoint: document.getElementById('aiEndpointInput').value.trim()
     });

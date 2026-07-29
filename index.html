@@ -3,6 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Sign-in gate. Runs before the page renders so protected content never
+       flashes on screen for a signed-out visitor. -->
+  <script src="js/auth.js?v=20260729"></script>
+  <script>if (!window.iDashAuth.requireSignIn()) { document.documentElement.style.display = 'none'; }</script>
   <title>iDash — AI Dashboard Intelligence Platform</title>
   <link rel="stylesheet" href="css/style.css?v=20260728b">
   <link rel="stylesheet" href="css/ai_progress.css?v=20260722c">
@@ -512,7 +516,12 @@
 
       <label class="bm-field">
         <span class="bm-label">โมเดล</span>
-        <input type="text" id="aiModelInput" spellcheck="false" autocomplete="off">
+        <select id="aiModelSelect"></select>
+      </label>
+
+      <label class="bm-field" id="aiModelCustomField" hidden>
+        <span class="bm-label">ชื่อโมเดล</span>
+        <input type="text" id="aiModelInput" spellcheck="false" autocomplete="off" placeholder="เช่น gemini-3.0-pro">
       </label>
 
       <label class="bm-field">

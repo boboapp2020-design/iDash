@@ -420,6 +420,9 @@ a.home-quick:hover .chev { color: var(--primary); }
 /* settings form */
 .bm-form { display: flex; flex-direction: column; gap: 14px; }
 .bm-field { display: flex; flex-direction: column; gap: 6px; }
+/* An author `display` beats the UA sheet's [hidden]{display:none}, so hiding a
+   field via the `hidden` property needs this rule to actually take effect. */
+.bm-field[hidden] { display: none; }
 .bm-label { font-size: 12px; font-weight: 700; color: var(--gray-700); }
 .bm-field select, .bm-field input {
   width: 100%; padding: 10px 12px; border-radius: 9px;

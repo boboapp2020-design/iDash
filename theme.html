@@ -3,6 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Sign-in gate. Runs before the page renders so protected content never
+       flashes on screen for a signed-out visitor. -->
+  <script src="js/auth.js?v=20260729"></script>
+  <script>if (!window.iDashAuth.requireSignIn()) { document.documentElement.style.display = 'none'; }</script>
   <title>เลือกธีมสี — iDash</title>
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/theme.css">

@@ -26,9 +26,12 @@
    *   anthropic → POST /v1/messages
    *   gemini    → POST /v1beta/models/{model}:generateContent
    *   openai    → POST /chat/completions   (Groq, OpenRouter, DeepSeek, custom)
-   * `defaultModel` is only a starting value — the settings form lets the user
-   * type any model id, so a model being renamed upstream never needs a code
-   * change here.
+   * `defaultModel` is only a starting value, and `models` is a convenience
+   * shortlist for the dropdown rather than a constraint — every provider also
+   * offers "พิมพ์เอง", so a model released after this file was written stays
+   * reachable without a code change. `tier` is what the provider's own pricing
+   * page says: 'free' = usable at no cost (often rate-limited), 'paid' =
+   * billed per token.
    */
   var PROVIDERS = {
     anthropic: {
@@ -37,15 +40,30 @@
       endpoint: 'https://api.anthropic.com/v1/messages',
       defaultModel: 'claude-opus-4-8',
       keyHint: 'ขึ้นต้นด้วย sk-ant-',
-      keyUrl: 'console.anthropic.com'
+      keyUrl: 'console.anthropic.com',
+      models: [
+        { id: 'claude-opus-4-8',   label: 'Claude Opus 4.8 — เก่งสุด แนะนำ', tier: 'paid' },
+        { id: 'claude-fable-5',    label: 'Claude Fable 5 — สูงสุด แพงสุด',  tier: 'paid' },
+        { id: 'claude-opus-4-7',   label: 'Claude Opus 4.7',                 tier: 'paid' },
+        { id: 'claude-opus-4-6',   label: 'Claude Opus 4.6',                 tier: 'paid' },
+        { id: 'claude-sonnet-5',   label: 'Claude Sonnet 5 — สมดุล',         tier: 'paid' },
+        { id: 'claude-sonnet-4-6', label: 'Claude Sonnet 4.6',               tier: 'paid' },
+        { id: 'claude-haiku-4-5',  label: 'Claude Haiku 4.5 — เร็ว ถูกสุด',  tier: 'paid' }
+      ]
     },
     gemini: {
       label: 'Google Gemini',
       shape: 'gemini',
       endpoint: 'https://generativelanguage.googleapis.com/v1beta/models/',
-      defaultModel: 'gemini-2.5-pro',
+      defaultModel: 'gemini-2.5-flash',
       keyHint: 'ขึ้นต้นด้วย AIza',
-      keyUrl: 'aistudio.google.com/apikey'
+      keyUrl: 'aistudio.google.com/apikey',
+      models: [
+        { id: 'gemini-2.5-flash',      label: 'Gemini 2.5 Flash — เร็ว โควตาฟรีเยอะ', tier: 'free' },
+        { id: 'gemini-2.5-flash-lite', label: 'Gemini 2.5 Flash Lite — เบาสุด',       tier: 'free' },
+        { id: 'gemini-2.0-flash',      label: 'Gemini 2.0 Flash',                     tier: 'free' },
+        { id: 'gemini-2.5-pro',        label: 'Gemini 2.5 Pro — เก่งสุด',             tier: 'paid' }
+      ]
     },
     groq: {
       label: 'Groq',
@@ -53,15 +71,35 @@
       endpoint: 'https://api.groq.com/openai/v1/chat/completions',
       defaultModel: 'llama-3.3-70b-versatile',
       keyHint: 'ขึ้นต้นด้วย gsk_',
-      keyUrl: 'console.groq.com/keys'
+      keyUrl: 'console.groq.com/keys',
+      models: [
+        { id: 'llama-3.3-70b-versatile',        label: 'Llama 3.3 70B — แนะนำ',   tier: 'free' },
+        { id: 'llama-3.1-8b-instant',           label: 'Llama 3.1 8B — เร็วมาก',  tier: 'free' },
+        { id: 'openai/gpt-oss-120b',            label: 'GPT-OSS 120B',            tier: 'free' },
+        { id: 'openai/gpt-oss-20b',             label: 'GPT-OSS 20B',             tier: 'free' },
+        { id: 'moonshotai/kimi-k2-instruct',    label: 'Kimi K2',                 tier: 'free' },
+        { id: 'qwen/qwen3-32b',                 label: 'Qwen3 32B',               tier: 'free' },
+        { id: 'deepseek-r1-distill-llama-70b',  label: 'DeepSeek R1 Distill 70B', tier: 'free' }
+      ]
     },
     openrouter: {
       label: 'OpenRouter (รวมทุกเจ้า)',
       shape: 'openai',
       endpoint: 'https://openrouter.ai/api/v1/chat/completions',
-      defaultModel: 'anthropic/claude-opus-4-8',
+      defaultModel: 'deepseek/deepseek-chat-v3:free',
       keyHint: 'ขึ้นต้นด้วย sk-or-',
-      keyUrl: 'openrouter.ai/keys'
+      keyUrl: 'openrouter.ai/keys',
+      models: [
+        { id: 'deepseek/deepseek-chat-v3:free',            label: 'DeepSeek V3 (ฟรี)',        tier: 'free' },
+        { id: 'deepseek/deepseek-r1:free',                 label: 'DeepSeek R1 (ฟรี)',        tier: 'free' },
+        { id: 'meta-llama/llama-3.3-70b-instruct:free',    label: 'Llama 3.3 70B (ฟรี)',      tier: 'free' },
+        { id: 'qwen/qwen3-235b-a22b:free',                 label: 'Qwen3 235B (ฟรี)',         tier: 'free' },
+        { id: 'google/gemini-2.0-flash-exp:free',          label: 'Gemini 2.0 Flash (ฟรี)',   tier: 'free' },
+        { id: 'anthropic/claude-opus-4-8',                 label: 'Claude Opus 4.8 — เก่งสุด', tier: 'paid' },
+        { id: 'anthropic/claude-sonnet-5',                 label: 'Claude Sonnet 5',          tier: 'paid' },
+        { id: 'google/gemini-2.5-pro',                     label: 'Gemini 2.5 Pro',           tier: 'paid' },
+        { id: 'openai/gpt-4o',                             label: 'GPT-4o',                   tier: 'paid' }
+      ]
     },
     deepseek: {
       label: 'DeepSeek',
@@ -69,7 +107,11 @@
       endpoint: 'https://api.deepseek.com/chat/completions',
       defaultModel: 'deepseek-chat',
       keyHint: 'ขึ้นต้นด้วย sk-',
-      keyUrl: 'platform.deepseek.com'
+      keyUrl: 'platform.deepseek.com',
+      models: [
+        { id: 'deepseek-chat',     label: 'DeepSeek Chat — แนะนำ',      tier: 'paid' },
+        { id: 'deepseek-reasoner', label: 'DeepSeek Reasoner — คิดลึก', tier: 'paid' }
+      ]
     },
     custom: {
       label: 'อื่นๆ (ระบุ URL เอง)',
@@ -77,7 +119,8 @@
       endpoint: '',
       defaultModel: '',
       keyHint: 'ต้องเป็น API ที่เข้ากันได้กับ OpenAI',
-      keyUrl: ''
+      keyUrl: '',
+      models: []
     }
   };
 

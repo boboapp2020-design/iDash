@@ -56,7 +56,10 @@
           showAppToast('ฟีเจอร์นี้จะเปิดใช้งานเมื่อเชื่อมต่อระบบผู้ใช้ (หลัง Supabase Auth พร้อม)');
         } else if (action === 'logout') {
           clearLocalAppState();
-          window.location.href = 'index.html';
+          // End the session too, otherwise "ออกจากระบบ" just reloaded Home
+          // while the user stayed signed in.
+          if (window.iDashAuth) window.iDashAuth.signOut();
+          else window.location.href = 'landing.html';
         }
       });
     });
