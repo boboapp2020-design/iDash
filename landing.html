@@ -163,18 +163,37 @@ form { margin-top: 32px; }
   .divider { margin: 20px 0; }
 }
 
+/* Short windows kept the logo narrower than the headline's "อัจฉริยะ", which
+   read as a shrunken logo. It stays wide enough to reach that word here; the
+   room comes out of the surrounding spacing, not out of the logo. */
 @media (max-height: 810px) {
-  .brand-logo img { width: clamp(190px, min(76%, 32vh), 420px); }
-  .brand { padding-top: 26px; padding-bottom: 26px; }
-  .features { margin-top: 20px; gap: 13px; }
-  .feature-icon { width: 46px; height: 46px; }
-  .feature-icon svg { width: 21px; height: 21px; }
+  .brand-logo img { width: clamp(285px, min(78%, 38vh), 420px); }
+  .brand { padding-top: 18px; padding-bottom: 18px; }
+  .brand-logo { margin-bottom: 12px; }
+  .brand-head { line-height: 1.3; }
+  .brand-rule { margin: 12px 0 10px; }
+  .brand-desc { line-height: 1.7; }
+  .features { margin-top: 16px; gap: 11px; }
+  .feature-icon { width: 42px; height: 42px; border-radius: 12px; }
+  .feature-icon svg { width: 19px; height: 19px; }
+  .feature-desc { line-height: 1.65; }
   .panel { padding-top: 18px; padding-bottom: 18px; }
   .card { padding-top: 30px; padding-bottom: 30px; }
   form { margin-top: 22px; }
   .field { margin-bottom: 14px; }
   .divider { margin: 16px 0; }
   .note { margin-top: 15px; }
+}
+
+/* Very short windows (≈1600×720). The logo holds its size — the headline and
+   feature block give up the last few pixels instead. */
+@media (max-height: 750px) {
+  .brand { padding-top: 12px; padding-bottom: 12px; }
+  .brand-head { font-size: clamp(22px, 2.1vw, 29px); }
+  .brand-desc { font-size: 12.5px; }
+  .features { margin-top: 13px; gap: 9px; }
+  .feature { gap: 13px; }
+  .feature-desc { font-size: 12px; }
 }
 
 @media (max-width: 900px) {
