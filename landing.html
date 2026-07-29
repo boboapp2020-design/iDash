@@ -305,11 +305,12 @@ form { margin-top: 32px; }
   // Already signed in → skip the form.
   if (window.iDashAuth.isSignedIn()) { window.location.replace(nextPage()); return; }
 
-  // Only ever return a same-directory page name, so a crafted ?next= can't
-  // redirect somewhere else after sign-in.
+  // Only ever return a same-directory page name (a query string is allowed so
+  // dashboard deep links survive sign-in). Anything with a slash, a scheme or a
+  // fragment is rejected, so a crafted ?next= can't redirect off-site.
   function nextPage() {
     var raw = new URLSearchParams(window.location.search).get('next') || '';
-    return /^[a-z0-9_-]+\.html$/i.test(raw) ? raw : 'index.html';
+    return /^[a-z0-9_-]+\.html(\?[^#/\\]*)?$/i.test(raw) ? raw : 'index.html';
   }
 
   document.getElementById('peek').addEventListener('click', function () {

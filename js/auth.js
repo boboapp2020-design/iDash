@@ -59,7 +59,9 @@
    */
   function requireSignIn() {
     if (isSignedIn()) return true;
-    var here = window.location.pathname.split('/').pop() || 'index.html';
+    // Carry the query string too — without it, signing in from a dashboard
+    // deep link lands on the embed page with no dashboard to show.
+    var here = (window.location.pathname.split('/').pop() || 'index.html') + window.location.search;
     window.location.replace(LOGIN_PAGE + '?next=' + encodeURIComponent(here));
     return false;
   }
