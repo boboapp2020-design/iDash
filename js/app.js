@@ -1083,8 +1083,13 @@ async function runAutopilotPipeline(fileOrDataset, userModuleId, opts) {
         throw new Error('Template HTML มีขนาดใหญ่เกินกว่าจะเก็บในเบราว์เซอร์ได้');
       }
     }
-    // ── Plan A: generated dashboard (blueprint or stock inference) ──
-    else if (window.iDashInteractiveDashboard) {
+    // ── Plan A: generated dashboard, ONLY from a curated blueprint ──
+    // Guessing from column shape alone was removed (2026-07-29): with no
+    // curated pairing it summed identifier columns and presented the result as
+    // a KPI — e.g. a soil file showed "F_ID 20.18B" and "farmmer_id 522.5K".
+    // Numbers that mean nothing are worse than no dashboard, so an unmatched
+    // file now says so and offers the learn-packet export instead.
+    else if (blueprint) {
       await echartsReady; // inline local ECharts into the output (offline)
       const ROW_CAPS = [5000, 1500, 500, 150];
       for (let i = 0; i < ROW_CAPS.length; i++) {
@@ -1108,6 +1113,12 @@ async function runAutopilotPipeline(fileOrDataset, userModuleId, opts) {
           }
         }
       }
+    }
+    else {
+      throw new Error(
+        'ยังไม่มี Template สำหรับข้อมูลชุดนี้ — iDash จะสร้าง Dashboard ให้เฉพาะไฟล์ที่จับคู่ Template ไว้แล้วเท่านั้น ' +
+        'เพื่อไม่ให้ได้ตัวเลขที่ไม่มีความหมาย กรุณาส่งไฟล์นี้ให้ Admin เพื่อจัดทำ Template'
+      );
     }
     sessionStorage.setItem('idash.dashboardSpec', JSON.stringify(dashboardSpec));
     sessionStorage.setItem('idash.dashboardMeta', JSON.stringify({
