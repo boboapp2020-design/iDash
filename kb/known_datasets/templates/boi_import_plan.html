@@ -1,0 +1,990 @@
+<!DOCTYPE html>
+<html lang="lo">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>iDash — BOI Utilization Dashboard (Blank Template) | Mitr Lao Sugar</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js" onerror="window.__chartLoadFailed=true"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Lao:wght@300;400;500;600;700;800&family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#f2f5fc;
+    --surface:#ffffff;
+    --surface-alt:#f6f8fd;
+    --ink-900:#101a3d;
+    --ink-700:#33406b;
+    --ink-600:#5c6890;
+    --ink-400:#96a0c2;
+    --line:#e7ebf7;
+    --line-soft:#f0f3fb;
+    --blue-900:#0f2a8f;
+    --blue-700:#1a3fd6;
+    --blue:#2f6bf0;
+    --blue-bg:#e8effe;
+    --blue-light:#5b9bf7;
+    --blue-pale:#9cc4fb;
+    --pale-bg:#eef4ff;
+    --green:#17a673;
+    --green-bg:#e5f8f0;
+    --red:#e6483b;
+    --red-bg:#fdeceb;
+    --amber:#e0a01c;
+    --amber-bg:#fdf1e0;
+    --slate:#64748b;
+    --slate-bg:#eef1f6;
+    --shadow-sm: 0 1px 2px rgba(16,26,61,.05), 0 1px 1px rgba(16,26,61,.03);
+    --shadow: 0 2px 6px rgba(16,26,61,.04), 0 14px 32px -16px rgba(16,26,61,.18);
+    --radius: 18px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:'Noto Sans Lao','Inter',sans-serif;
+    background:
+      radial-gradient(1000px 460px at 90% -10%, rgba(47,107,240,.08), transparent 60%),
+      radial-gradient(900px 420px at 0% 0%, rgba(91,155,247,.10), transparent 55%),
+      var(--bg);
+    color:var(--ink-900);
+    min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+  }
+  ::selection{ background:var(--blue-bg); color:var(--blue-700); }
+  h1,h2,h3{ font-family:'Noto Sans Lao','Inter',sans-serif; font-weight:700; }
+  .mono{ font-family:'IBM Plex Mono',monospace; font-variant-numeric:tabular-nums; }
+  svg{ display:block; }
+  .wrap{ max-width:1440px; margin:0 auto; padding:26px 28px 60px; }
+
+  /* ---------- Topbar ---------- */
+  .topbar{
+    display:flex; justify-content:space-between; align-items:center; gap:16px;
+    margin-bottom:24px; flex-wrap:wrap;
+  }
+  .topbar-left{ display:flex; align-items:center; gap:16px; flex-wrap:wrap; }
+  .brand{ display:flex; align-items:center; gap:10px; }
+  .brand-logo{ width:38px; height:38px; border-radius:11px; background:#fff; box-shadow:var(--shadow-sm); display:flex; align-items:center; justify-content:center; }
+  .brand-name{ font-family:'Inter'; font-weight:800; font-size:19px; color:var(--blue-700); letter-spacing:-.2px; }
+  .divider-dot{ width:5px; height:5px; border-radius:50%; background:var(--ink-400); }
+  .page-title{ display:flex; flex-direction:column; }
+  .page-title h1{ margin:0; font-size:19px; color:var(--blue-700); font-weight:800; letter-spacing:-.2px; }
+  .page-title .sub{ font-size:12px; color:var(--ink-600); margin-top:2px; }
+
+  .topbar-right{ display:flex; align-items:center; gap:10px; }
+  .plan-pill{
+    display:flex; flex-direction:column; gap:2px; background:var(--surface); border:1px solid var(--line);
+    padding:8px 16px; border-radius:14px; font-size:11px; color:var(--ink-600); box-shadow:var(--shadow-sm); line-height:1.5;
+  }
+  .plan-pill b{ color:var(--ink-900); }
+  .icon-btn{
+    width:38px; height:38px; border-radius:12px; background:var(--surface); border:1px solid var(--line);
+    display:flex; align-items:center; justify-content:center; cursor:pointer; color:var(--ink-600);
+    box-shadow:var(--shadow-sm); transition:all .15s;
+  }
+  .icon-btn:hover{ border-color:var(--blue); color:var(--blue); }
+  .analysis-cta{
+    display:flex; align-items:center; gap:9px; background:linear-gradient(135deg,var(--blue-700),var(--blue-light));
+    color:#fff; border:none; padding:10px 18px; border-radius:14px; font-family:'Noto Sans Lao'; font-size:13px;
+    font-weight:700; cursor:pointer; box-shadow:0 8px 20px -8px rgba(26,63,214,.55); transition:all .15s;
+  }
+  .analysis-cta:hover{ filter:brightness(1.06); transform:translateY(-1px); }
+
+  /* ---------- KPI cards ---------- */
+  .kpi-grid{ display:grid; grid-template-columns:repeat(6, minmax(0,1fr)); gap:14px; margin-bottom:18px; }
+  .kpi{
+    background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); padding:17px 17px 15px;
+    box-shadow:var(--shadow-sm); min-width:0; cursor:default; transition:transform .15s, box-shadow .15s;
+  }
+  .kpi:hover{ transform:translateY(-2px); box-shadow:var(--shadow); }
+  .kpi .kicon{ width:36px; height:36px; border-radius:11px; display:flex; align-items:center; justify-content:center; margin-bottom:12px; }
+  .kpi .klabel{ font-size:11px; color:var(--ink-600); font-weight:500; line-height:1.4; margin-bottom:8px; min-height:30px; }
+  .kpi .kval{ font-family:'Inter'; font-size:21px; font-weight:800; color:var(--ink-900); line-height:1; margin-bottom:6px; }
+  .kpi .ksub{ font-size:10.5px; color:var(--ink-400); display:flex; align-items:center; gap:4px; }
+  .kpi .ksub.pos{ color:var(--green); font-weight:600; }
+  .kpi .ksub.neg{ color:var(--red); font-weight:600; }
+  .kpi .kbar{ height:5px; border-radius:4px; background:var(--line-soft); overflow:hidden; margin-top:10px; }
+  .kpi .kbar-fill{ height:100%; border-radius:4px; }
+
+  /* ---------- Panels ---------- */
+  .grid{ display:grid; gap:16px; margin-bottom:16px; }
+  .g-3{ grid-template-columns: minmax(0,1.2fr) minmax(0,1fr) minmax(0,1fr); }
+  .panel{
+    background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); padding:19px 21px 17px;
+    box-shadow:var(--shadow-sm); min-width:0;
+  }
+  .panel h3{ font-size:14px; margin:0 0 3px; color:var(--ink-900); font-weight:700; }
+  .panel .phint{ font-size:11px; color:var(--ink-400); margin-bottom:14px; }
+  .chartwrap{ position:relative; height:230px; }
+  .chartwrap.donut{ height:180px; }
+
+  .donut-wrap{ display:flex; align-items:center; gap:16px; }
+  .donut-box{ position:relative; width:150px; flex:none; }
+  .donut-total{ position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); text-align:center; pointer-events:none; }
+  .donut-total .dt-val{ font-family:'Inter'; font-size:16px; font-weight:800; color:var(--ink-900); line-height:1.15; }
+  .donut-total .dt-label{ font-size:9px; color:var(--ink-400); margin-top:3px; }
+  .donut-legend{ flex:1; display:flex; flex-direction:column; gap:10px; min-width:0; }
+  .dl-row{ display:flex; align-items:center; gap:8px; font-size:12px; }
+  .dl-row .dl-dot{ width:9px; height:9px; border-radius:50%; flex:none; }
+  .dl-row .dl-name{ flex:1; color:var(--ink-700); min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .dl-row .dl-val{ font-family:'IBM Plex Mono'; font-size:11px; color:var(--ink-900); font-weight:600; flex:none; }
+  .dl-row .dl-pct{ font-family:'IBM Plex Mono'; font-size:10px; color:var(--ink-400); width:38px; text-align:right; flex:none; }
+
+  .rank-list{ display:flex; flex-direction:column; gap:0; }
+  .rk-row{ display:flex; align-items:center; gap:10px; padding:9px 0; border-bottom:1px solid var(--line-soft); font-size:12.5px; }
+  .rk-row:last-child{ border-bottom:none; }
+  .rk-badge{ width:22px; height:22px; border-radius:7px; background:var(--slate-bg); color:var(--slate); font-family:'Inter'; font-weight:700; font-size:11px; display:flex; align-items:center; justify-content:center; flex:none; }
+  .rk-badge.r1{ background:var(--blue-bg); color:var(--blue-700); }
+  .rk-badge.r2{ background:#eef4ff; color:var(--blue-light); }
+  .rk-badge.r3{ background:var(--green-bg); color:var(--green); }
+  .rk-name{ flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:var(--ink-900); font-weight:500; }
+  .rk-val{ font-family:'IBM Plex Mono'; font-size:11px; color:var(--ink-600); flex:none; }
+  .rk-tag{ font-size:10px; font-weight:700; padding:2px 8px; border-radius:999px; flex:none; }
+
+  .glist{ display:flex; flex-direction:column; gap:12px; }
+  .gl-top{ display:flex; justify-content:space-between; align-items:center; margin-bottom:5px; font-size:12px; }
+  .gl-name{ color:var(--ink-700); font-weight:500; }
+  .gl-val{ font-family:'IBM Plex Mono'; color:var(--ink-900); font-weight:600; font-size:11px; }
+  .gl-track{ height:7px; border-radius:6px; background:var(--line-soft); overflow:hidden; }
+  .gl-fill{ height:100%; border-radius:6px; }
+
+  .alert-list{ display:flex; flex-direction:column; gap:0; }
+  .al-row{ display:flex; align-items:center; gap:10px; padding:9px 0; border-bottom:1px solid var(--line-soft); font-size:12px; }
+  .al-row:last-child{ border-bottom:none; }
+  .al-icon{ width:26px; height:26px; border-radius:8px; background:var(--red-bg); color:var(--red); display:flex; align-items:center; justify-content:center; flex:none; }
+  .al-text{ flex:1; min-width:0; }
+  .al-text .al-name{ color:var(--ink-900); font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .al-text .al-meta{ color:var(--ink-400); font-size:10.5px; margin-top:1px; }
+  .al-val{ font-family:'IBM Plex Mono'; font-size:11px; color:var(--red); font-weight:700; flex:none; }
+
+  .empty-state{ padding:40px 20px; text-align:center; color:var(--ink-400); font-size:13px; }
+
+  /* ---------- Table section ---------- */
+  .section-title{ display:flex; align-items:center; justify-content:space-between; margin:30px 0 14px; flex-wrap:wrap; gap:12px; }
+  .section-title h2{ margin:0; font-size:16px; color:var(--ink-900); font-weight:700; }
+  .filters{ display:flex; gap:8px; flex-wrap:wrap; }
+  .filters input, .filters select{
+    padding:9px 13px; border-radius:11px; border:1px solid var(--line); background:var(--surface);
+    font-size:12.5px; font-family:inherit; color:var(--ink-900); outline:none; transition:border-color .15s;
+  }
+  .filters input{ min-width:220px; }
+  .filters input:focus, .filters select:focus{ border-color:var(--blue); }
+
+  .tablewrap{ background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow); overflow:hidden; }
+  .table-scroll{ max-height:560px; overflow:auto; }
+  table{ width:100%; border-collapse:collapse; font-size:12px; table-layout:fixed; }
+  thead th{
+    text-align:left; padding:11px 12px; background:var(--surface-alt); color:var(--ink-600); font-weight:700;
+    font-size:10px; text-transform:uppercase; letter-spacing:.3px; border-bottom:1px solid var(--line);
+    position:sticky; top:0; z-index:2; overflow-wrap:break-word;
+  }
+  tbody td{ padding:9px 12px; border-bottom:1px solid var(--line-soft); color:var(--ink-900); vertical-align:top; overflow-wrap:break-word; word-break:break-word; }
+  tbody tr:hover td{ background:var(--surface-alt); }
+  td.mono{ font-family:'IBM Plex Mono'; font-size:11px; color:var(--ink-600); }
+  th:nth-child(1),td:nth-child(1){ width:11%; }
+  th:nth-child(2),td:nth-child(2){ width:10%; }
+  th:nth-child(3),td:nth-child(3){ width:27%; }
+  th:nth-child(4),td:nth-child(4){ width:8%; }
+  th:nth-child(5),td:nth-child(5){ width:11%; }
+  th:nth-child(6),td:nth-child(6){ width:11%; }
+  th:nth-child(7),td:nth-child(7){ width:9%; }
+  th:nth-child(8),td:nth-child(8){ width:6%; }
+  th:nth-child(9),td:nth-child(9){ width:9%; }
+  .status-pill{ font-size:10px; font-weight:700; padding:3px 9px; border-radius:999px; white-space:nowrap; }
+  .status-pill.notstarted{ background:var(--red-bg); color:var(--red); }
+  .status-pill.inprogress{ background:var(--amber-bg); color:var(--amber); }
+  .status-pill.done{ background:var(--green-bg); color:var(--green); }
+
+  .pagectl{ display:flex; justify-content:space-between; align-items:center; padding:13px 20px; border-top:1px solid var(--line); font-size:12px; color:var(--ink-600); }
+  .pagectl button{ border:1px solid var(--line); background:var(--surface); border-radius:9px; padding:6px 13px; cursor:pointer; font-size:12px; color:var(--ink-900); font-family:inherit; transition:all .15s; }
+  .pagectl button:hover:not(:disabled){ border-color:var(--blue); color:var(--blue); }
+  .pagectl button:disabled{ opacity:.4; cursor:not-allowed; }
+  .footnote{ font-size:11px; color:var(--ink-400); padding:14px 20px 4px; line-height:1.6; }
+
+  footer{ margin-top:32px; padding-top:18px; border-top:1px solid var(--line); font-size:11px; color:var(--ink-400); display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px; }
+
+  /* ---------- Analysis modal ---------- */
+  .modal-overlay{
+    position:fixed; inset:0; background:rgba(10,16,42,.55); backdrop-filter:blur(2px);
+    display:flex; align-items:center; justify-content:center; z-index:100; padding:24px;
+  }
+  .modal-box{
+    background:var(--surface); border-radius:20px; width:100%; max-width:780px; max-height:86vh;
+    display:flex; flex-direction:column; box-shadow:0 20px 60px -20px rgba(10,16,42,.5); overflow:hidden;
+  }
+  .modal-head{ display:flex; align-items:center; justify-content:space-between; padding:18px 22px; border-bottom:1px solid var(--line); flex:none; }
+  .modal-head h3{ margin:0; font-size:16px; color:var(--ink-900); display:flex; align-items:center; gap:9px; }
+  .modal-head .mhicon{ width:32px; height:32px; border-radius:9px; background:var(--blue-bg); color:var(--blue-700); display:flex; align-items:center; justify-content:center; flex:none; }
+  .modal-close{ width:32px; height:32px; border-radius:9px; border:1px solid var(--line); background:var(--surface-alt); cursor:pointer; color:var(--ink-600); font-size:15px; display:flex; align-items:center; justify-content:center; }
+  .modal-close:hover{ border-color:var(--red); color:var(--red); }
+  .modal-body{ padding:20px 24px 26px; overflow-y:auto; font-size:13px; line-height:1.85; color:var(--ink-700); }
+  .modal-body h4{ font-size:14px; color:var(--ink-900); margin:20px 0 8px; display:flex; align-items:center; gap:8px; font-weight:700; }
+  .modal-body h4:first-child{ margin-top:0; }
+  .modal-body p{ margin:0 0 10px; }
+  .modal-body ul{ margin:0 0 10px; padding-left:20px; }
+  .modal-body li{ margin-bottom:6px; }
+  .modal-body table{ width:100%; border-collapse:collapse; font-size:12px; margin-bottom:10px; table-layout:auto; }
+  .modal-body th{ text-align:left; padding:7px 10px; background:var(--surface-alt); font-size:10px; text-transform:uppercase; letter-spacing:.3px; color:var(--ink-600); border-bottom:1px solid var(--line); position:static; }
+  .modal-body td{ padding:7px 10px; border-bottom:1px solid var(--line-soft); }
+  .a-tag{ display:inline-block; font-size:10.5px; font-weight:700; padding:2px 8px; border-radius:999px; margin-right:4px; }
+  .a-crit{ background:var(--red-bg); color:var(--red); }
+  .a-warn{ background:var(--amber-bg); color:var(--amber); }
+  .a-ok{ background:var(--green-bg); color:var(--green); }
+  .a-callout{ background:var(--surface-alt); border-left:3px solid var(--blue); border-radius:8px; padding:12px 14px; margin-bottom:12px; }
+
+  @media (max-width:1300px){
+    .kpi-grid{ grid-template-columns:repeat(3,1fr); }
+    .g-3{ grid-template-columns:1fr 1fr; }
+  }
+  @media (max-width:760px){
+    .kpi-grid{ grid-template-columns:repeat(2,1fr); }
+    .g-3{ grid-template-columns:1fr; }
+    .wrap{ padding:18px; }
+  }
+
+  /* ---------- Upload / empty state ---------- */
+  .upload-cta{
+    display:flex; align-items:center; gap:9px; background:var(--surface); color:var(--blue-700);
+    border:1px solid var(--blue-pale); padding:10px 16px; border-radius:14px; font-family:'Noto Sans Lao';
+    font-size:13px; font-weight:700; cursor:pointer; box-shadow:var(--shadow-sm); transition:all .15s;
+  }
+  .upload-cta:hover{ background:var(--blue-bg); border-color:var(--blue); transform:translateY(-1px); }
+  .file-pill{
+    display:flex; align-items:center; gap:8px; background:var(--green-bg); color:var(--green);
+    border:1px solid #bfe9d8; padding:8px 14px; border-radius:12px; font-size:11.5px; font-weight:600;
+  }
+  .file-pill .fp-x{ cursor:pointer; opacity:.6; font-weight:700; }
+  .file-pill .fp-x:hover{ opacity:1; }
+
+  .dropzone{
+    background:var(--surface); border:2px dashed var(--blue-pale); border-radius:var(--radius);
+    padding:44px 28px; text-align:center; margin-bottom:18px; transition:all .18s; cursor:pointer;
+  }
+  .dropzone.drag{ border-color:var(--blue); background:var(--blue-bg); }
+  .dz-icon{
+    width:58px; height:58px; border-radius:18px; background:var(--blue-bg); color:var(--blue-700);
+    display:flex; align-items:center; justify-content:center; margin:0 auto 14px;
+  }
+  .dz-title{ font-size:16px; font-weight:800; color:var(--ink-900); margin-bottom:6px; }
+  .dz-sub{ font-size:12.5px; color:var(--ink-600); line-height:1.75; max-width:640px; margin:0 auto 16px; }
+  .dz-formats{ display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-bottom:16px; }
+  .dz-chip{ font-size:11px; font-weight:600; color:var(--ink-600); background:var(--surface-alt); border:1px solid var(--line); padding:5px 12px; border-radius:20px; }
+  .dz-schema{
+    text-align:left; max-width:820px; margin:18px auto 0; background:var(--surface-alt); border:1px solid var(--line);
+    border-radius:12px; padding:14px 16px; font-size:11.5px; color:var(--ink-600); line-height:1.9;
+  }
+  .dz-schema b{ color:var(--ink-900); }
+  .dz-schema code{ font-family:'IBM Plex Mono',monospace; background:#fff; border:1px solid var(--line); border-radius:5px; padding:1px 6px; font-size:10.5px; color:var(--blue-700); }
+  .dz-err{ color:var(--red); background:var(--red-bg); border:1px solid #f7c9c5; border-radius:10px; padding:10px 14px; font-size:12px; margin:14px auto 0; max-width:640px; }
+
+  .blank-ph{ display:flex; align-items:center; justify-content:center; height:100%; min-height:120px; color:var(--ink-400); font-size:12px; }
+  .is-blank{ opacity:.55; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <div class="topbar-left">
+      <div class="brand">
+        <div class="brand-logo">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+            <rect x="1" y="14" width="4" height="8" rx="1.1" fill="#1a3fd6"/>
+            <rect x="7" y="10" width="4" height="12" rx="1.1" fill="#2f6bf0"/>
+            <rect x="13" y="6" width="4" height="16" rx="1.1" fill="#5b9bf7"/>
+            <rect x="19" y="2" width="4" height="20" rx="1.1" fill="#9cc4fb"/>
+          </svg>
+        </div>
+        <div class="brand-name">iDash</div>
+      </div>
+      <div class="divider-dot"></div>
+      <div class="page-title">
+        <h1>ການໃຊ້ສິດທິ BOI — Mitr Lao Sugar</h1>
+        <div class="sub">ຕິດຕາມແຜນນຳເຂົ້າ BOI ທຽບກັບການນຳເຂົ້າຕົວຈິງ ແບບ Real-time</div>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <div class="plan-pill" title="ຄລິກເພື່ອແກ້ໄຂ">
+        <span>ແຜນຫຼັກ: <b contenteditable="true" spellcheck="false">—</b></span>
+        <span>ແຜນເພີ່ມ: <b contenteditable="true" spellcheck="false">—</b></span>
+      </div>
+      <input type="file" id="fileInput" accept=".xlsx,.xls,.xlsm,.csv" style="display:none">
+      <div id="filePillWrap"></div>
+      <button class="upload-cta" id="uploadBtn" title="ອັບໂຫຼດ Excel / CSV">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        <span>ອັບໂຫຼດໄຟລ໌ Excel / CSV</span>
+      </button>
+      <button class="icon-btn" id="refreshBtn" title="ລ້າງ / ໂຫຼດຄືນ">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+      </button>
+      <button class="analysis-cta" id="analysisBtn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a7 7 0 0 0-7 7c0 2.4 1.2 4 2.5 5.3.6.6 1 1.4 1 2.2V18h7v-1.5c0-.8.4-1.6 1-2.2C17.8 13 19 11.4 19 9a7 7 0 0 0-7-7Z"/><line x1="9" y1="21" x2="15" y2="21"/><line x1="10" y1="18" x2="14" y2="18"/></svg>
+        <span>ບົດວິເຄາະຈາກຜູ້ຊ່ຽວຊານ</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="dropzone" id="dropzone">
+    <div class="dz-icon">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><polyline points="9 15 12 12 15 15"/></svg>
+    </div>
+    <div class="dz-title">ຍັງບໍ່ມີຂໍ້ມູນ — ກະລຸນາອັບໂຫຼດໄຟລ໌ແຜນ BOI</div>
+    <div class="dz-sub">ລາກໄຟລ໌ມາວາງທີ່ນີ້ ຫຼື ຄລິກເພື່ອເລືອກໄຟລ໌ · ຮອງຮັບໄຟລ໌ Excel ໂຄງສ້າງເດີມ (ຊີດ <b>ແຜນ</b> = ແຜນຫຼັກ, ຊີດ <b>ແຜນເພີ່ມ</b> = ແຜນເພີ່ມ) ຫຼື ໄຟລ໌ CSV ທີ່ມີຫົວຄໍລຳ</div>
+    <div class="dz-formats"><span class="dz-chip">.xlsx</span><span class="dz-chip">.xls</span><span class="dz-chip">.xlsm</span><span class="dz-chip">.csv</span></div>
+    <div class="dz-schema">
+      <b>ໂຄງສ້າງຂໍ້ມູນທີ່ຕ້ອງການ</b> (ຫົວຕາຕະລາງແຖວ <code>ລຳດັບແຜນ | ລະຫັດ | ສິນຄ້າ | ຫົວໜ່ວຍ | ແຜນອານຸມັດ | ນຳເຂົ້າຕົວຈິງ | ຍອດເຫລືອ | Dept</code>)<br>
+      ຄໍລຳຍ່ອຍ: ແຜນອານຸມັດ = <code>ຈຳນວນ</code> + <code>ມູນຄ່າໂດລາ (USD)</code> · ນຳເຂົ້າຕົວຈິງ = <code>ຈຳນວນ</code> + <code>ມູນຄ່າບາດ (THB)</code> · ຍອດເຫລືອ = <code>ຈຳນວນ</code><br>
+      ສຳລັບ CSV ຮອງຮັບຫົວຄໍລຳພາສາອັງກິດ: <code>plan, code, item, unit, plan_qty, plan_val_usd, actual_qty, actual_val_thb, remaining_qty, dept</code>
+    </div>
+    <div id="dzError"></div>
+  </div>
+
+  <div class="kpi-grid" id="kpiGrid"></div>
+
+  <section class="grid g-3">
+    <div class="panel">
+      <h3>ອັດຕາການໃຊ້ສິດທິຕາມພະແນກ</h3>
+      <div class="phint">% ໃຊ້ສິດທິ (ຕາມຈຳນວນ) — ຮຽງຕາມມູນຄ່າແຜນອານຸມັດ · ແດງ/ສົ້ມ = ໃຊ້ຕ່ຳ ສ່ຽງໝົດອາຍຸ</div>
+      <div class="chartwrap"><canvas id="deptBarChart"></canvas></div>
+    </div>
+    <div class="panel">
+      <h3>ພາບລວມການໃຊ້ສິດທິ</h3>
+      <div class="phint">Actual Import vs ແຜນອານຸມັດ (ຕາມຈຳນວນ)</div>
+      <div class="donut-wrap">
+        <div class="donut-box">
+          <div class="chartwrap donut"><canvas id="usageDonut"></canvas></div>
+          <div class="donut-total"><div class="dt-val mono" id="usageDonutPct">–</div><div class="dt-label">ໃຊ້ໄປແລ້ວ</div></div>
+        </div>
+        <div class="donut-legend" id="usageDonutLegend"></div>
+      </div>
+    </div>
+    <div class="panel">
+      <h3>ສັດສ່ວນມູນຄ່າຕາມແຜນ</h3>
+      <div class="phint">ແຜນຫຼັກ (N) vs ແຜນເພີ່ມ (X) — ມູນຄ່າອານຸມັດ (USD)</div>
+      <div class="donut-wrap">
+        <div class="donut-box">
+          <div class="chartwrap donut"><canvas id="planDonut"></canvas></div>
+          <div class="donut-total"><div class="dt-val mono" id="planDonutVal">–</div><div class="dt-label">USD ລວມ</div></div>
+        </div>
+        <div class="donut-legend" id="planDonutLegend"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="grid g-3">
+    <div class="panel">
+      <h3>ພະແນກທີ່ມີມູນຄ່າແຜນສູງສຸດ</h3>
+      <div class="phint">ມູນຄ່າອານຸມັດລວມ (USD) ຮຽງຈາກສູງສຸດ</div>
+      <div class="glist" id="deptValueList"></div>
+    </div>
+    <div class="panel">
+      <h3>ລາຍການມູນຄ່ານຳເຂົ້າສູງສຸດ</h3>
+      <div class="phint">Top 8 ລາຍການ ຕາມມູນຄ່ານຳເຂົ້າຕົວຈິງ (USD)</div>
+      <div class="rank-list" id="topImportList"></div>
+    </div>
+    <div class="panel">
+      <h3>⚠ ລາຍການສ່ຽງ — ມູນຄ່າສູງ ຍັງບໍ່ນຳເຂົ້າ</h3>
+      <div class="phint">Top 8 ລາຍການ 0% ໃຊ້ ຮຽງຕາມມູນຄ່າແຜນອານຸມັດ</div>
+      <div class="alert-list" id="riskList"></div>
+    </div>
+  </section>
+
+  <div class="section-title">
+    <h2>ລາຍການທັງໝົດ (Item-level)</h2>
+    <div class="filters">
+      <input id="searchBox" type="text" placeholder="ຄົ້ນຫາຊື່ສິນຄ້າ / ລະຫັດ HS...">
+      <select id="deptFilter"></select>
+      <select id="statusFilter">
+        <option value="">ສະຖານະທັງໝົດ</option>
+        <option value="notstarted">ຍັງບໍ່ໃຊ້ສິດທິ (0%)</option>
+        <option value="inprogress">ໃຊ້ບາງສ່ວນ</option>
+        <option value="done">ໃຊ້ຄົບ/ເກີນແຜນ</option>
+      </select>
+      <select id="planFilter">
+        <option value="">ແຜນທັງໝົດ</option>
+        <option value="N">ແຜນຫຼັກ (059)</option>
+        <option value="X">ແຜນເພີ່ມ (105)</option>
+      </select>
+    </div>
+  </div>
+  <div class="tablewrap">
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th>ພະແນກ</th><th>ລະຫັດ HS</th><th>ສິນຄ້າ</th><th>ຫົວໜ່ວຍ</th>
+            <th>ແຜນອານຸມັດ</th><th>ນຳເຂົ້າຕົວຈິງ</th><th>ຄົງເຫຼືອ</th><th>% ໃຊ້</th><th>ສະຖານະ</th>
+          </tr>
+        </thead>
+        <tbody id="itemsBody"></tbody>
+      </table>
+    </div>
+    <div class="pagectl">
+      <span id="rowInfo"></span>
+      <span>
+        <button id="prevBtn">← ກ່ອນໜ້າ</button>
+        <button id="nextBtn">ຖັດໄປ →</button>
+      </span>
+    </div>
+    <div class="footnote">
+      ຂໍ້ມູນຈາກໄຟລ໌ແຜນ BOI (ຊີດ ແຜນ + ແຜນເພີ່ມ) ລວມ <span id="totalItemsFoot"></span> ລາຍການ ·
+      % ໃຊ້ສິດທິຄຳນວນຈາກຈຳນວນ (qty) ບໍ່ແມ່ນມູນຄ່າ ເນື່ອງຈາກໜ່ວຍນັບແຕກຕ່າງກັນໃນແຕ່ລະລາຍການ
+    </div>
+  </div>
+
+  <footer>
+    <div>ສ້າງໂດຍພະແນກຈັດຊື້ / BOI — Mitr Lao Sugar · ຂໍ້ມູນໃຊ້ເພື່ອການຕິດຕາມພາຍໃນເທົ່ານັ້ນ</div>
+    <div id="footerSummary"></div>
+  </footer>
+
+</div>
+
+<div class="modal-overlay" id="analysisModal" style="display:none;">
+  <div class="modal-box">
+    <div class="modal-head">
+      <h3><span class="mhicon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a7 7 0 0 0-7 7c0 2.4 1.2 4 2.5 5.3.6.6 1 1.4 1 2.2V18h7v-1.5c0-.8.4-1.6 1-2.2C17.8 13 19 11.4 19 9a7 7 0 0 0-7-7Z"/><line x1="9" y1="21" x2="15" y2="21"/><line x1="10" y1="18" x2="14" y2="18"/></svg></span>ບົດວິເຄາະເຊິງເລິກຈາກຜູ້ຊ່ຽວຊານ BOI</h3>
+      <button class="modal-close" id="analysisCloseBtn">✕</button>
+    </div>
+    <div class="modal-body" id="analysisBody"></div>
+  </div>
+</div>
+
+
+
+<script>
+/* =====================================================================
+   iDash — BOI Utilization Dashboard (BLANK TEMPLATE)
+   ໂຄງສ້າງຂໍ້ມູນຄືເດີມ · ບໍ່ມີຂໍ້ມູນຝັງໄວ້ · ໂຫຼດຂໍ້ມູນຜ່ານປຸ່ມອັບໂຫຼດ Excel/CSV
+   ---------------------------------------------------------------------
+   ITEMS row: [plan('N'|'X'), code, item, unit, plan_qty, plan_val_usd,
+               actual_qty, actual_val_thb, remaining_qty, dept]
+   DEPTS row: [dept, plan_qty_N, plan_val_usd_N, act_qty_N, act_val_thb_N,
+               act_val_usd_N, plan_qty_X, plan_val_usd_X, act_qty_X,
+               act_val_thb_X, act_val_usd_X]
+   ===================================================================== */
+
+let ITEMS = [];   // ວ່າງເປົ່າ — ຖ້າມີການອັບໂຫຼດຈຶ່ງຖືກຕື່ມ
+let DEPTS = [];   // ຄຳນວນອັດຕະໂນມັດຈາກ ITEMS
+
+const THB_PER_USD = 32;   // ອັດຕາແລກປ່ຽນທີ່ໃຊ້ໃນໄຟລ໌ຕົ້ນສະບັບ
+
+if (typeof Chart !== 'undefined') {
+  Chart.defaults.font.family = "'Noto Sans Lao', sans-serif";
+  Chart.defaults.color = '#5c6890';
+  Chart.defaults.font.size = 11.5;
+}
+
+/* ---------- helpers ---------- */
+function fmt(n, d = 0) {
+  if (n === null || n === undefined || isNaN(n)) n = 0;
+  return Number(n).toLocaleString('en-US', { maximumFractionDigits: d });
+}
+function pct(a, b) { return b > 0 ? (a / b * 100) : 0; }
+function num(v) {
+  if (v === null || v === undefined || v === '') return 0;
+  if (typeof v === 'number') return isFinite(v) ? v : 0;
+  const s = String(v).replace(/[,  ]/g, '').replace(/[^\d.\-]/g, '');
+  const n = parseFloat(s);
+  return isNaN(n) ? 0 : n;
+}
+function txt(v) { return v === null || v === undefined ? '' : String(v).trim(); }
+const hasData = () => ITEMS.length > 0;
+const dash = v => hasData() ? v : '–';
+
+/* ---------- icons ---------- */
+const iconMoney = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>`;
+const iconBox = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>`;
+const iconPie = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></svg>`;
+const iconCheck = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>`;
+const iconAlert = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`;
+const iconLayers = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>`;
+
+/* =====================================================================
+   1) ຄຳນວນ DEPTS ຈາກ ITEMS  (ໂຄງສ້າງດຽວກັບໄຟລ໌ເດີມ)
+   ===================================================================== */
+function buildDepts(items) {
+  const map = new Map();
+  items.forEach(r => {
+    const d = r[9] || 'Unknown';
+    if (!map.has(d)) map.set(d, [d, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
+    const o = map.get(d);
+    const off = (r[0] === 'X') ? 5 : 0;          // N → index 1..5, X → index 6..10
+    o[1 + off] += num(r[4]);                      // plan qty
+    o[2 + off] += num(r[5]);                      // plan value USD
+    o[3 + off] += num(r[6]);                      // actual qty
+    o[4 + off] += num(r[7]);                      // actual value THB
+    o[5 + off] += num(r[7]) / THB_PER_USD;        // actual value USD
+  });
+  return [...map.values()].sort((a, b) => (b[2] + b[7]) - (a[2] + a[7]));
+}
+
+/* =====================================================================
+   2) ຕົວອ່ານໄຟລ໌ Excel / CSV
+   ===================================================================== */
+const RE = {
+  seq:   /ລຳດັບ|ลำดับ|^no\.?$|^seq/i,
+  code:  /ລະຫັດ|รหัส|^code$|^hs/i,
+  item:  /ສິນຄ້າ|สินค้า|^item|descrip|ລາຍການ/i,
+  unit:  /ຫົວໜ່ວຍ|ຫົວຫນ່ວຍ|หน่วย|^unit/i,
+  plan:  /ແຜນອານຸມັດ|ແຜນອະນຸມັດ|แผนอนุมัติ|approved.*plan|^plan$/i,
+  act:   /ນຳເຂົ້າ|นำเข้า|actual|import/i,
+  rem:   /ຍອດເຫລືອ|ຍອດເຫຼືອ|คงเหลือ|remain|balance/i,
+  dept:  /^dept|ພະແນກ|แผนก|department/i,
+  qty:   /ຈຳນວນ|จำนวน|qty|quant/i
+};
+
+function findIdx(row, re) {
+  for (let i = 0; i < row.length; i++) if (re.test(txt(row[i]))) return i;
+  return -1;
+}
+
+/* --- layout ຕົ້ນສະບັບ: header 2 ຊັ້ນ (merged) --- */
+function parseLaoSheet(aoa, planCode) {
+  let h = -1;
+  for (let i = 0; i < Math.min(aoa.length, 40); i++) {
+    const row = (aoa[i] || []).map(txt);
+    if (row.some(c => RE.item.test(c)) && row.some(c => RE.plan.test(c) || RE.act.test(c))) { h = i; break; }
+  }
+  if (h < 0) return [];
+
+  const head = (aoa[h] || []).map(txt);
+  const sub = (aoa[h + 1] || []).map(txt);
+  const isSub = sub.some(c => RE.qty.test(c));
+
+  const iCode = findIdx(head, RE.code);
+  const iItem = findIdx(head, RE.item);
+  const iUnit = findIdx(head, RE.unit);
+  const gPlan = findIdx(head, RE.plan);
+  const gAct = findIdx(head, RE.act);
+  const gRem = findIdx(head, RE.rem);
+  let iDept = findIdx(sub, RE.dept);
+  if (iDept < 0) iDept = findIdx(head, RE.dept);
+
+  const iPlanQty = gPlan, iPlanUSD = gPlan >= 0 ? gPlan + 1 : -1;
+  const iActQty = gAct, iActTHB = gAct >= 0 ? gAct + 1 : -1;
+  const iRemQty = gRem;
+
+  const out = [];
+  for (let i = h + (isSub ? 2 : 1); i < aoa.length; i++) {
+    const row = aoa[i] || [];
+    const name = txt(row[iItem]);
+    if (!name) continue;
+    if (/^(ລວມ|รวม|total|ສັງລວມ)/i.test(name)) continue;
+    const planQty = iPlanQty >= 0 ? num(row[iPlanQty]) : 0;
+    const actQty = iActQty >= 0 ? num(row[iActQty]) : 0;
+    const planUSD = iPlanUSD >= 0 ? num(row[iPlanUSD]) : 0;
+    const actTHB = iActTHB >= 0 ? num(row[iActTHB]) : 0;
+    if (planQty === 0 && actQty === 0 && planUSD === 0 && actTHB === 0) continue;
+    let remQty = iRemQty >= 0 ? num(row[iRemQty]) : 0;
+    if (!remQty) remQty = Math.max(planQty - actQty, 0);
+    out.push([
+      planCode,
+      txt(row[iCode]),
+      name,
+      txt(row[iUnit]),
+      planQty, planUSD, actQty, actTHB, remQty,
+      txt(row[iDept]) || 'Unknown'
+    ]);
+  }
+  return out;
+}
+
+/* --- layout ງ່າຍ: header ແຖວດຽວ (CSV ພາສາອັງກິດ) --- */
+function parseFlatSheet(aoa, planCode) {
+  let h = -1;
+  for (let i = 0; i < Math.min(aoa.length, 20); i++) {
+    const row = (aoa[i] || []).map(t => txt(t).toLowerCase());
+    if (row.some(c => /item|ສິນຄ້າ|description/.test(c))) { h = i; break; }
+  }
+  if (h < 0) return [];
+  const head = (aoa[h] || []).map(t => txt(t).toLowerCase().replace(/[\s_-]/g, ''));
+  const gi = (...names) => { for (const n of names) { const k = head.indexOf(n); if (k >= 0) return k; } return -1; };
+  const iPlanType = gi('plan', 'plantype', 'ແຜນ');
+  const iCode = gi('code', 'hscode', 'hs');
+  const iItem = gi('item', 'itemname', 'description', 'ສິນຄ້າ');
+  const iUnit = gi('unit', 'uom', 'ຫົວໜ່ວຍ');
+  const iPQ = gi('planqty', 'planquantity', 'plan_qty');
+  const iPU = gi('planvalusd', 'planvalue', 'planvalueusd', 'planusd');
+  const iAQ = gi('actualqty', 'actqty', 'importqty');
+  const iAT = gi('actualvalthb', 'actualvalue', 'actualthb', 'importthb');
+  const iRQ = gi('remainingqty', 'remainqty', 'balanceqty');
+  const iDept = gi('dept', 'department', 'ພະແນກ');
+  if (iItem < 0) return [];
+
+  const out = [];
+  for (let i = h + 1; i < aoa.length; i++) {
+    const row = aoa[i] || [];
+    const name = txt(row[iItem]);
+    if (!name) continue;
+    const planQty = num(row[iPQ]), actQty = num(row[iAQ]);
+    let remQty = iRQ >= 0 ? num(row[iRQ]) : 0;
+    if (!remQty) remQty = Math.max(planQty - actQty, 0);
+    const pt = txt(row[iPlanType]).toUpperCase();
+    out.push([
+      (pt === 'X' || /ເພີ່ມ|เพิ่ม|extra|add/i.test(pt)) ? 'X' : (pt === 'N' ? 'N' : planCode),
+      txt(row[iCode]), name, txt(row[iUnit]),
+      planQty, num(row[iPU]), actQty, num(row[iAT]), remQty,
+      txt(row[iDept]) || 'Unknown'
+    ]);
+  }
+  return out;
+}
+
+function parseWorkbook(wb) {
+  const rows = [];
+  const sheetsUsed = [];
+  wb.SheetNames.forEach(name => {
+    const planCode = /ເພີ່ມ|เพิ่ม|extra|additional|add/i.test(name) ? 'X' : 'N';
+    const aoa = XLSX.utils.sheet_to_json(wb.Sheets[name], { header: 1, raw: true, defval: null, blankrows: true });
+    if (!aoa || !aoa.length) return;
+    let parsed = parseLaoSheet(aoa, planCode);
+    if (!parsed.length) parsed = parseFlatSheet(aoa, planCode);
+    if (parsed.length) { rows.push(...parsed); sheetsUsed.push(`${name} (${parsed.length})`); }
+  });
+  return { rows, sheetsUsed };
+}
+
+/* =====================================================================
+   3) Render — ທຸກສ່ວນ re-render ໄດ້ເມື່ອຂໍ້ມູນປ່ຽນ
+   ===================================================================== */
+let charts = {};
+let deptCalc = [], zeroValueSum = 0;
+let totalPlanUSD = 0, totalActUSD = 0, totalPlanQty = 0, totalActQty = 0, zeroCount = 0, fullCount = 0;
+
+function computeAll() {
+  DEPTS = buildDepts(ITEMS);
+  totalPlanUSD = totalActUSD = totalPlanQty = totalActQty = 0;
+  zeroCount = fullCount = 0;
+  DEPTS.forEach(d => { totalPlanUSD += (d[2] || 0) + (d[7] || 0); totalActUSD += (d[5] || 0) + (d[10] || 0); });
+  ITEMS.forEach(r => {
+    totalPlanQty += r[4] || 0;
+    totalActQty += r[6] || 0;
+    if ((r[6] || 0) === 0) zeroCount++;
+    if (r[4] > 0 && (r[6] || 0) >= r[4]) fullCount++;
+  });
+  zeroValueSum = ITEMS.filter(r => (r[6] || 0) === 0).reduce((s, r) => s + (r[5] || 0), 0);
+  deptCalc = DEPTS.map(d => ({
+    name: d[0],
+    planQty: d[1] + d[6], actQty: d[3] + d[8],
+    planVal: d[2] + d[7], actVal: d[5] + d[10],
+    usagePct: pct(d[3] + d[8], d[1] + d[6])
+  })).sort((a, b) => b.planVal - a.planVal);
+}
+
+function renderKpis() {
+  const overallUsagePct = pct(totalActQty, totalPlanQty);
+  const kpis = [
+    { label: 'ມູນຄ່າແຜນອານຸມັດລວມ (ຫຼັກ+ເພີ່ມ)', val: dash('$' + fmt(totalPlanUSD)), sub: 'ແຜນຫຼັກ (N) + ແຜນເພີ່ມ (X)', icon: iconMoney, bg: 'var(--blue-bg)', color: 'var(--blue-700)' },
+    { label: 'ມູນຄ່ານຳເຂົ້າຈິງສະສົມ', val: dash('$' + fmt(totalActUSD)), sub: dash(fmt(pct(totalActUSD, totalPlanUSD), 1) + '% ຂອງມູນຄ່າອານຸມັດ'), icon: iconBox, bg: 'var(--pale-bg)', color: 'var(--blue)', bar: pct(totalActUSD, totalPlanUSD) },
+    { label: 'ອັດຕາການໃຊ້ສິດທິລວມ (ຕາມຈຳນວນ)', val: dash(fmt(overallUsagePct, 1) + '%'), sub: dash(`ນຳເຂົ້າ ${fmt(totalActQty)} / ແຜນ ${fmt(totalPlanQty)}`), icon: iconPie, bg: 'var(--blue-bg)', color: 'var(--blue-700)', bar: overallUsagePct },
+    { label: 'ລາຍການໃຊ້ຄົບ/ເກີນແຜນແລ້ວ', val: dash(fmt(fullCount)), sub: dash(`ຈາກ ${fmt(ITEMS.length)} ລາຍການ`), icon: iconCheck, bg: 'var(--green-bg)', color: 'var(--green)' },
+    { label: 'ລາຍການຍັງບໍ່ນຳເຂົ້າເລີຍ (0%)', val: dash(fmt(zeroCount)), sub: dash(`ມູນຄ່າສ່ຽງ $${fmt(zeroValueSum)}`), icon: iconAlert, bg: 'var(--red-bg)', color: 'var(--red)' },
+    { label: 'ຈຳນວນລາຍການທັງໝົດ', val: dash(fmt(ITEMS.length)), sub: dash(`${DEPTS.length} ພະແນກ`), icon: iconLayers, bg: 'var(--slate-bg)', color: 'var(--slate)' },
+  ];
+  document.getElementById('kpiGrid').innerHTML = kpis.map(k => `
+    <div class="kpi${hasData() ? '' : ' is-blank'}">
+      <div class="kicon" style="background:${k.bg};color:${k.color}">${k.icon}</div>
+      <div class="klabel">${k.label}</div>
+      <div class="kval mono">${k.val}</div>
+      <div class="ksub">${hasData() ? k.sub : 'ລໍຖ້າຂໍ້ມູນ'}</div>
+      ${k.bar !== undefined ? `<div class="kbar"><div class="kbar-fill" style="width:${hasData() ? Math.min(k.bar, 100) : 0}%;background:${k.color}"></div></div>` : ''}
+    </div>`).join('');
+}
+
+function renderCharts() {
+  Object.values(charts).forEach(c => { try { c.destroy(); } catch (e) { } });
+  charts = {};
+  if (typeof Chart === 'undefined') return;
+
+  const deptColor = p => p >= 50 ? '#17a673' : (p >= 20 ? '#e0a01c' : '#e6483b');
+  charts.dept = new Chart(document.getElementById('deptBarChart').getContext('2d'), {
+    type: 'bar',
+    data: {
+      labels: deptCalc.map(d => d.name),
+      datasets: [{ label: '% ໃຊ້ສິດທິ (qty)', data: deptCalc.map(d => d.usagePct), backgroundColor: deptCalc.map(d => deptColor(d.usagePct)), borderRadius: 5, maxBarThickness: 22 }]
+    },
+    options: {
+      indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => `${c.raw.toFixed(1)}% ໃຊ້ສິດທິ` } } },
+      scales: { x: { max: 100, grid: { color: '#f0f3fb' }, ticks: { callback: v => v + '%' } }, y: { grid: { display: false } } }
+    }
+  });
+
+  const overallUsagePct = pct(totalActQty, totalPlanQty);
+  charts.usage = new Chart(document.getElementById('usageDonut').getContext('2d'), {
+    type: 'doughnut',
+    data: {
+      labels: ['ນຳເຂົ້າແລ້ວ', 'ຄົງເຫຼືອ'],
+      datasets: [{ data: hasData() ? [totalActQty, Math.max(totalPlanQty - totalActQty, 0)] : [0, 1], backgroundColor: ['#1a3fd6', '#e7ebf7'], borderWidth: 3, borderColor: '#fff' }]
+    },
+    options: { responsive: true, maintainAspectRatio: false, cutout: '72%', plugins: { legend: { display: false }, tooltip: { enabled: hasData() } } }
+  });
+  document.getElementById('usageDonutPct').textContent = dash(fmt(overallUsagePct, 1) + '%');
+  document.getElementById('usageDonutLegend').innerHTML = hasData() ? `
+    <div class="dl-row"><span class="dl-dot" style="background:#1a3fd6"></span><span class="dl-name">ນຳເຂົ້າແລ້ວ</span><span class="dl-val mono">${fmt(totalActQty)}</span><span class="dl-pct mono">${fmt(overallUsagePct, 1)}%</span></div>
+    <div class="dl-row"><span class="dl-dot" style="background:#e7ebf7;border:1px solid #d7deee"></span><span class="dl-name">ຄົງເຫຼືອ</span><span class="dl-val mono">${fmt(Math.max(totalPlanQty - totalActQty, 0))}</span><span class="dl-pct mono">${fmt(100 - overallUsagePct, 1)}%</span></div>
+    <div style="font-size:10.5px;color:var(--ink-400);margin-top:2px;">ຈຳນວນລວມ (ທຸກໜ່ວຍນັບລວມກັນ) · ແຜນ ${fmt(totalPlanQty)}</div>`
+    : `<div class="blank-ph">ຍັງບໍ່ມີຂໍ້ມູນ</div>`;
+
+  const planN_USD = DEPTS.reduce((s, d) => s + (d[2] || 0), 0);
+  const planX_USD = DEPTS.reduce((s, d) => s + (d[7] || 0), 0);
+  charts.plan = new Chart(document.getElementById('planDonut').getContext('2d'), {
+    type: 'doughnut',
+    data: {
+      labels: ['ແຜນຫຼັກ (N)', 'ແຜນເພີ່ມ (X)'],
+      datasets: [{ data: hasData() ? [planN_USD, planX_USD] : [0, 1], backgroundColor: ['#2f6bf0', '#9cc4fb'], borderWidth: 3, borderColor: '#fff' }]
+    },
+    options: { responsive: true, maintainAspectRatio: false, cutout: '72%', plugins: { legend: { display: false }, tooltip: { enabled: hasData() } } }
+  });
+  document.getElementById('planDonutVal').textContent = dash('$' + fmt(planN_USD + planX_USD));
+  document.getElementById('planDonutLegend').innerHTML = hasData() ? `
+    <div class="dl-row"><span class="dl-dot" style="background:#2f6bf0"></span><span class="dl-name">ແຜນຫຼັກ (N)</span><span class="dl-val mono">$${fmt(planN_USD)}</span><span class="dl-pct mono">${fmt(pct(planN_USD, planN_USD + planX_USD), 1)}%</span></div>
+    <div class="dl-row"><span class="dl-dot" style="background:#9cc4fb"></span><span class="dl-name">ແຜນເພີ່ມ (X)</span><span class="dl-val mono">$${fmt(planX_USD)}</span><span class="dl-pct mono">${fmt(pct(planX_USD, planN_USD + planX_USD), 1)}%</span></div>`
+    : `<div class="blank-ph">ຍັງບໍ່ມີຂໍ້ມູນ</div>`;
+}
+
+function renderLists() {
+  const empty = '<div class="empty-state">ຍັງບໍ່ມີຂໍ້ມູນ — ກະລຸນາອັບໂຫຼດໄຟລ໌</div>';
+  const maxDeptVal = Math.max(1, ...deptCalc.map(d => d.planVal));
+  document.getElementById('deptValueList').innerHTML = deptCalc.length ? deptCalc.slice(0, 8).map(d => `
+    <div class="glist-row">
+      <div class="gl-top"><span class="gl-name">${d.name}</span><span class="gl-val">$${fmt(d.planVal)}</span></div>
+      <div class="gl-track"><div class="gl-fill" style="width:${(d.planVal / maxDeptVal) * 100}%;background:linear-gradient(90deg,#1a3fd6,#5b9bf7)"></div></div>
+    </div>`).join('') : empty;
+
+  const topImports = ITEMS.filter(r => (r[7] || 0) > 0)
+    .map(r => ({ item: r[2], dept: r[9], valTHB: r[7] }))
+    .sort((a, b) => b.valTHB - a.valTHB).slice(0, 8);
+  document.getElementById('topImportList').innerHTML = topImports.length ? topImports.map((r, i) => {
+    const rankClass = i === 0 ? 'r1' : i === 1 ? 'r2' : i === 2 ? 'r3' : '';
+    return `<div class="rk-row"><div class="rk-badge ${rankClass}">${i + 1}</div><div class="rk-name" title="${r.item}">${r.item}</div><div class="rk-val mono">฿${fmt(r.valTHB)}</div></div>`;
+  }).join('') : empty;
+
+  const riskItems = ITEMS.filter(r => (r[6] || 0) === 0 && r[5] > 0).sort((a, b) => b[5] - a[5]).slice(0, 8);
+  document.getElementById('riskList').innerHTML = riskItems.length ? riskItems.map(r => `
+    <div class="al-row">
+      <div class="al-icon">${iconAlert}</div>
+      <div class="al-text"><div class="al-name" title="${r[2]}">${r[2]}</div><div class="al-meta">${r[9]} · ແຜນ ${fmt(r[4])} ${r[3]}</div></div>
+      <div class="al-val">$${fmt(r[5])}</div>
+    </div>`).join('') : empty;
+}
+
+/* ---------- ຕາຕະລາງ + ຕົວກອງ ---------- */
+const deptFilterEl = document.getElementById('deptFilter');
+let filtered = [];
+let page = 0;
+const PAGE_SIZE = 40;
+
+function statusOf(r) {
+  const planQty = r[4], actQty = r[6] || 0;
+  if (actQty === 0) return 'notstarted';
+  if (planQty > 0 && actQty >= planQty) return 'done';
+  return 'inprogress';
+}
+function statusLabel(s) { return s === 'notstarted' ? 'ຍັງບໍ່ໃຊ້' : (s === 'done' ? 'ຄົບ/ເກີນແຜນ' : 'ໃຊ້ບາງສ່ວນ'); }
+
+function rebuildDeptFilter() {
+  const cur = deptFilterEl.value;
+  const deptNames = [...new Set(ITEMS.map(r => r[9]))].sort();
+  deptFilterEl.innerHTML = '<option value="">ທຸກພະແນກ</option>' + deptNames.map(d => `<option value="${d}">${d}</option>`).join('');
+  if (deptNames.includes(cur)) deptFilterEl.value = cur;
+}
+
+function applyFilters() {
+  const q = document.getElementById('searchBox').value.trim().toLowerCase();
+  const dep = deptFilterEl.value;
+  const st = document.getElementById('statusFilter').value;
+  const pl = document.getElementById('planFilter').value;
+  filtered = ITEMS.filter(r => {
+    if (dep && r[9] !== dep) return false;
+    if (pl && r[0] !== pl) return false;
+    if (st && statusOf(r) !== st) return false;
+    if (q && !(String(r[2]).toLowerCase().includes(q) || String(r[1] || '').toLowerCase().includes(q))) return false;
+    return true;
+  });
+  page = 0;
+  renderTable();
+}
+
+function renderTable() {
+  const start = page * PAGE_SIZE;
+  const rows = filtered.slice(start, start + PAGE_SIZE);
+  document.getElementById('itemsBody').innerHTML = rows.length ? rows.map(r => {
+    const s = statusOf(r);
+    const p = pct(r[6] || 0, r[4] || 0);
+    return `<tr>
+      <td>${r[9]}</td><td class="mono">${r[1] || '-'}</td><td>${r[2]}</td><td>${r[3]}</td>
+      <td class="mono">${fmt(r[4])}</td><td class="mono">${fmt(r[6])}</td><td class="mono">${fmt(r[8])}</td>
+      <td class="mono">${fmt(Math.min(p, 999), 0)}%</td>
+      <td><span class="status-pill ${s}">${statusLabel(s)}</span></td>
+    </tr>`;
+  }).join('') : `<tr><td colspan="9"><div class="empty-state">${hasData() ? 'ບໍ່ພົບລາຍການທີ່ກົງກັບຕົວກອງ' : 'ຍັງບໍ່ມີຂໍ້ມູນ — ກະລຸນາອັບໂຫຼດໄຟລ໌ Excel / CSV'}</div></td></tr>`;
+  const total = filtered.length;
+  document.getElementById('rowInfo').textContent = total === 0 ? (hasData() ? 'ບໍ່ພົບລາຍການ' : 'ຍັງບໍ່ມີຂໍ້ມູນ') :
+    `ສະແດງ ${start + 1}-${Math.min(start + PAGE_SIZE, total)} ຈາກ ${total} ລາຍການ`;
+  document.getElementById('prevBtn').disabled = page === 0;
+  document.getElementById('nextBtn').disabled = start + PAGE_SIZE >= total;
+}
+
+function renderAll() {
+  computeAll();
+  renderKpis();
+  renderCharts();
+  renderLists();
+  rebuildDeptFilter();
+  applyFilters();
+  document.getElementById('totalItemsFoot').textContent = ITEMS.length.toLocaleString('en-US');
+  document.getElementById('footerSummary').textContent =
+    `${DEPTS.length} ພະແນກ · ${ITEMS.length.toLocaleString('en-US')} ລາຍການ · ອັບເດດລ່າສຸດ ${new Date().toLocaleDateString('en-GB')}`;
+  document.getElementById('dropzone').style.display = hasData() ? 'none' : 'block';
+}
+
+/* =====================================================================
+   4) ອັບໂຫຼດໄຟລ໌
+   ===================================================================== */
+const fileInput = document.getElementById('fileInput');
+const dropzone = document.getElementById('dropzone');
+const dzError = document.getElementById('dzError');
+
+function showError(msg) { dzError.innerHTML = `<div class="dz-err">${msg}</div>`; }
+function clearError() { dzError.innerHTML = ''; }
+
+function setFilePill(name, count) {
+  document.getElementById('filePillWrap').innerHTML = name ? `
+    <div class="file-pill" title="${name}">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><polyline points="20 6 9 17 4 12"/></svg>
+      <span>${name.length > 26 ? name.slice(0, 24) + '…' : name} · ${count.toLocaleString('en-US')} ລາຍການ</span>
+      <span class="fp-x" id="clearDataBtn" title="ລ້າງຂໍ້ມູນ">✕</span>
+    </div>` : '';
+  const b = document.getElementById('clearDataBtn');
+  if (b) b.addEventListener('click', clearData);
+}
+
+function clearData() {
+  ITEMS = [];
+  setFilePill('', 0);
+  clearError();
+  fileInput.value = '';
+  renderAll();
+}
+
+function handleFile(file) {
+  if (!file) return;
+  clearError();
+  if (typeof XLSX === 'undefined') { showError('ບໍ່ສາມາດໂຫຼດ library ອ່ານ Excel ໄດ້ (ຕ້ອງມີອິນເຕີເນັດ) — ກະລຸນາລອງໃໝ່'); return; }
+  const isCsv = /\.csv$/i.test(file.name);
+  const reader = new FileReader();
+  reader.onerror = () => showError('ອ່ານໄຟລ໌ບໍ່ສຳເລັດ');
+  reader.onload = e => {
+    try {
+      const wb = isCsv
+        ? XLSX.read(e.target.result, { type: 'string' })
+        : XLSX.read(new Uint8Array(e.target.result), { type: 'array' });
+      const { rows, sheetsUsed } = parseWorkbook(wb);
+      if (!rows.length) {
+        showError('ບໍ່ພົບຂໍ້ມູນທີ່ອ່ານໄດ້ໃນໄຟລ໌ນີ້ — ກະລຸນາກວດໂຄງສ້າງຫົວຕາຕະລາງຕາມທີ່ລະບຸດ້ານລຸ່ມ');
+        return;
+      }
+      ITEMS = rows;
+      renderAll();
+      setFilePill(file.name, rows.length);
+      console.log('[iDash] loaded sheets:', sheetsUsed.join(', '));
+    } catch (err) {
+      showError('ເກີດຂໍ້ຜິດພາດໃນການອ່ານໄຟລ໌: ' + err.message);
+    }
+  };
+  if (isCsv) reader.readAsText(file, 'UTF-8'); else reader.readAsArrayBuffer(file);
+}
+
+document.getElementById('uploadBtn').addEventListener('click', () => fileInput.click());
+dropzone.addEventListener('click', e => { if (!e.target.closest('.dz-schema')) fileInput.click(); });
+fileInput.addEventListener('change', e => handleFile(e.target.files[0]));
+['dragenter', 'dragover'].forEach(ev => dropzone.addEventListener(ev, e => { e.preventDefault(); dropzone.classList.add('drag'); }));
+['dragleave', 'drop'].forEach(ev => dropzone.addEventListener(ev, e => { e.preventDefault(); dropzone.classList.remove('drag'); }));
+dropzone.addEventListener('drop', e => handleFile(e.dataTransfer.files[0]));
+window.addEventListener('dragover', e => e.preventDefault());
+window.addEventListener('drop', e => e.preventDefault());
+
+/* ---------- filter events ---------- */
+document.getElementById('searchBox').addEventListener('input', applyFilters);
+deptFilterEl.addEventListener('change', applyFilters);
+document.getElementById('statusFilter').addEventListener('change', applyFilters);
+document.getElementById('planFilter').addEventListener('change', applyFilters);
+document.getElementById('prevBtn').addEventListener('click', () => { if (page > 0) { page--; renderTable(); } });
+document.getElementById('nextBtn').addEventListener('click', () => { if ((page + 1) * PAGE_SIZE < filtered.length) { page++; renderTable(); } });
+document.getElementById('refreshBtn').addEventListener('click', () => {
+  document.getElementById('searchBox').value = ''; deptFilterEl.value = '';
+  document.getElementById('statusFilter').value = ''; document.getElementById('planFilter').value = '';
+  applyFilters();
+});
+
+/* =====================================================================
+   5) ບົດວິເຄາະຈາກຜູ້ຊ່ຽວຊານ (on-demand)
+   ===================================================================== */
+function buildBoiAnalysis() {
+  if (!hasData()) return '<div class="a-callout">ຍັງບໍ່ມີຂໍ້ມູນ — ກະລຸນາອັບໂຫຼດໄຟລ໌ Excel ຫຼື CSV ກ່ອນ ຈຶ່ງຈະສ້າງບົດວິເຄາະໄດ້</div>';
+
+  const totalItems = ITEMS.length;
+  const zero = ITEMS.filter(r => (r[6] || 0) === 0);
+  const partial = ITEMS.filter(r => { const a = r[6] || 0; return a > 0 && a < (r[4] || 0); });
+
+  function topBy(rows, field, n, valField) {
+    const agg = {};
+    rows.forEach(r => { const k = r[field]; if (!k) return; agg[k] = (agg[k] || 0) + (r[valField] !== undefined ? r[valField] : 1); });
+    return Object.entries(agg).sort((a, b) => b[1] - a[1]).slice(0, n);
+  }
+  const zeroByDept = topBy(zero, 9, 5, 5);
+  const worstUsageDepts = deptCalc.filter(d => d.planVal > 0).sort((a, b) => a.usagePct - b.usagePct).slice(0, 5);
+  const bestUsageDepts = deptCalc.filter(d => d.planVal > 0).sort((a, b) => b.usagePct - a.usagePct).slice(0, 3);
+  const oldestZero = zero.filter(r => r[5] > 0).sort((a, b) => b[5] - a[5]).slice(0, 8);
+
+  const dq = [];
+  const blankDept = ITEMS.filter(r => !r[9] || r[9] === 'Unknown').length;
+  if (blankDept > 0) dq.push(`ມີ <b>${blankDept.toLocaleString('en-US')}</b> ລາຍການທີ່ບໍ່ໄດ້ລະບຸພະແນກ (Dept) — ບໍ່ສາມາດວິເຄາະຕາມພະແນກໄດ້ຄົບຖ້ວນ`);
+  const zeroPlan = ITEMS.filter(r => !(r[4] > 0)).length;
+  if (zeroPlan > 0) dq.push(`ມີ <b>${zeroPlan.toLocaleString('en-US')}</b> ລາຍການທີ່ບໍ່ມີຈຳນວນແຜນອານຸມັດ (plan qty = 0) — % ໃຊ້ສິດທິຄຳນວນບໍ່ໄດ້`);
+  dq.push(`% ໃຊ້ສິດທິຄຳນວນຈາກ <b>ຈຳນວນ (qty)</b> ບໍ່ແມ່ນມູນຄ່າ ເນື່ອງຈາກແຕ່ລະລາຍການໃຊ້ໜ່ວຍນັບຕ່າງກັນ (kg, ຕາ, ຊຸດ, ອັນ ...)`);
+  dq.push(`ຂໍ້ມູນບໍ່ມີວັນທີ່ນຳເຂົ້າແຕ່ລະລາຍການ ຈຶ່ງບໍ່ສາມາດຄຳນວນ lead time ຫຼືແນວໂນ້ມຕາມຊ່ວງເວລາໄດ້ — ຕົວເລກທັງໝົດແມ່ນຍອດສະສົມ`);
+  dq.push(`ມູນຄ່ານຳເຂົ້າ USD ແປງຈາກ THB ດ້ວຍອັດຕາຄົງທີ່ <b>${THB_PER_USD}</b> ບາດ/ໂດລາ`);
+
+  const pctf = (n, d) => d ? ((n / d) * 100).toFixed(1) : '0.0';
+  const rows = arr => arr.map(([k, v]) => `<tr><td>${k}</td><td class="mono">$${fmt(v)}</td></tr>`).join('');
+  const oldestRows = oldestZero.map(r => `<tr><td>${r[2]}</td><td>${r[9]}</td><td class="mono">${r[0] === 'N' ? 'ຫຼັກ' : 'ເພີ່ມ'}</td><td class="mono">$${fmt(r[5])}</td></tr>`).join('');
+  const worstRows = worstUsageDepts.map(d => `<tr><td>${d.name}</td><td class="mono">$${fmt(d.planVal)}</td><td class="mono">${fmt(d.usagePct, 1)}%</td></tr>`).join('');
+
+  let html = '';
+  html += `<div class="a-callout"><b>ສະຫຼຸບສຳລັບຜູ້ບໍລິຫານ:</b> ຈາກ ${totalItems.toLocaleString('en-US')} ລາຍການໃນແຜນ BOI ມີ <b>${zero.length.toLocaleString('en-US')} ລາຍການ (${pctf(zero.length, totalItems)}%)</b> ທີ່ຍັງບໍ່ນຳເຂົ້າເລີຍ ຄິດເປັນມູນຄ່າສິດທິທີ່ຍັງບໍ່ໄດ້ໃຊ້ <b>$${fmt(zeroValueSum)}</b> — ຖ້າແຜນໝົດອາຍຸກ່ອນນຳເຂົ້າ ມູນຄ່ານີ້ຈະຖືກຍົກເລີກສິດທິ (forfeit)</div>`;
+  html += `<h4><span class="a-tag a-crit">ສ່ຽງສູນເສຍສິດທິ</span>ພະແນກທີ່ໃຊ້ສິດທິຕ່ຳສຸດ (Top 5)</h4>`;
+  html += `<table><tr><th>ພະແນກ</th><th>ມູນຄ່າແຜນ (USD)</th><th>% ໃຊ້ສິດທິ</th></tr>${worstRows || '<tr><td colspan="3">ບໍ່ມີຂໍ້ມູນ</td></tr>'}</table>`;
+  html += `<h4>ພະແນກທີ່ໃຊ້ສິດທິດີສຸດ (Top 3, ອ້າງອີງ)</h4>`;
+  html += `<table><tr><th>ພະແນກ</th><th>ມູນຄ່າແຜນ (USD)</th><th>% ໃຊ້ສິດທິ</th></tr>${bestUsageDepts.map(d => `<tr><td>${d.name}</td><td class="mono">$${fmt(d.planVal)}</td><td class="mono">${fmt(d.usagePct, 1)}%</td></tr>`).join('')}</table>`;
+  html += `<h4><span class="a-tag a-warn">ມູນຄ່າສ່ຽງ</span>ພະແນກທີ່ມີລາຍການ 0% ໃຊ້ ລວມມູນຄ່າສູງສຸດ (Top 5)</h4>`;
+  html += `<table><tr><th>ພະແນກ</th><th>ມູນຄ່າສ່ຽງລວມ (USD)</th></tr>${rows(zeroByDept) || '<tr><td colspan="2">ບໍ່ມີຂໍ້ມູນ</td></tr>'}</table>`;
+  html += `<h4><span class="a-tag a-crit">ຕ້ອງເລັ່ງກ່ອນ</span>ລາຍການມູນຄ່າສູງທີ່ຍັງບໍ່ນຳເຂົ້າ (Top 8)</h4>`;
+  html += `<table><tr><th>ສິນຄ້າ</th><th>ພະແນກ</th><th>ແຜນ</th><th>ມູນຄ່າ (USD)</th></tr>${oldestRows || '<tr><td colspan="4">ບໍ່ມີລາຍການ</td></tr>'}</table>`;
+  html += `<h4><span class="a-tag a-warn">ຄຸນນະພາບຂໍ້ມູນ</span>ຂໍ້ຈຳກັດທີ່ພົບ</h4><ul>${dq.map(d => `<li>${d}</li>`).join('')}</ul>`;
+
+  const recs = [];
+  if (worstUsageDepts.length) recs.push(`ເລັ່ງທົບທວນແຜນນຳເຂົ້າຂອງພະແນກ <b>${worstUsageDepts[0].name}</b> ກ່ອນ (ໃຊ້ສິດທິພຽງ ${fmt(worstUsageDepts[0].usagePct, 1)}% ຈາກມູນຄ່າແຜນ $${fmt(worstUsageDepts[0].planVal)}) ເພື່ອບໍ່ໃຫ້ສິດທິໝົດອາຍຸ`);
+  recs.push(`ຈັດລຳດັບຄວາມສຳຄັນອອກ PR/PO ສຳລັບ ${zero.length.toLocaleString('en-US')} ລາຍການ 0% ໂດຍເລີ່ມຈາກລາຍການມູນຄ່າສູງສຸດ`);
+  recs.push(`ຕິດຕາມ ${partial.length.toLocaleString('en-US')} ລາຍການທີ່ໃຊ້ບາງສ່ວນຢ່າງໃກ້ຊິດ ເພື່ອປະເມີນວ່າຈະໃຊ້ຄົບແຜນທັນເວລາຫຼືບໍ່`);
+  recs.push(`ເພີ່ມຄໍລຳ "ວັນທີ່ນຳເຂົ້າ" ຕໍ່ລາຍການໃນໄຟລ໌ຕິດຕາມ ເພື່ອວິເຄາະແນວໂນ້ມ ແລະ ຄາດຄະເນຄວາມສ່ຽງໝົດອາຍຸແຜນລ່ວງໜ້າ`);
+  html += `<h4><span class="a-tag a-ok">Action</span>ຂໍ້ສະເໜີແນະ</h4><ul>${recs.map(r => `<li>${r}</li>`).join('')}</ul>`;
+  html += `<p style="color:var(--ink-400); font-size:11px; margin-top:14px;">ບົດວິເຄາະນີ້ສ້າງຈາກຂໍ້ມູນທີ່ອັບໂຫຼດເຂົ້າມາເທົ່ານັ້ນ</p>`;
+  return html;
+}
+
+document.getElementById('analysisBtn').addEventListener('click', () => {
+  document.getElementById('analysisBody').innerHTML = buildBoiAnalysis();
+  document.getElementById('analysisModal').style.display = 'flex';
+});
+document.getElementById('analysisCloseBtn').addEventListener('click', () => { document.getElementById('analysisModal').style.display = 'none'; });
+document.getElementById('analysisModal').addEventListener('click', e => { if (e.target.id === 'analysisModal') document.getElementById('analysisModal').style.display = 'none'; });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') document.getElementById('analysisModal').style.display = 'none'; });
+
+/* ---------- start (blank) ---------- */
+renderAll();
+
+</script>
+</body>
+</html>

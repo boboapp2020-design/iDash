@@ -249,6 +249,11 @@ async function startAutopilot(file) {
   } catch (err) {
     return; // user cancelled the sheet picker — quietly back out
   }
+  // Keep the original file alongside the parsed rows. Several curated
+  // dashboards parse the workbook themselves — one of them reads all 16 sheets
+  // and finds its own header rows — so handing them the file beats handing them
+  // whatever single sheet our profiler happened to pick.
+  if (file instanceof File) dataset.sourceFile = file;
   openBuildModeModal(dataset);
 }
 
@@ -803,16 +808,82 @@ async function inlineVendorLibs(html) {
   return html;
 }
 
-async function prepareTemplateHtml(entry, dataset) {
-  var html;
+/** Load a curated template's HTML, from the offline bundle or over the wire. */
+async function loadTemplateHtml(entry) {
   var kb = window.__KB_TEMPLATES;
-  if (kb && kb[entry.templateFile]) {
-    html = kb[entry.templateFile];
-  } else {
-    var resp = await fetch('kb/known_datasets/templates/' + entry.templateFile);
-    if (!resp.ok) throw new Error('ไม่พบไฟล์ template: ' + entry.templateFile);
-    html = await resp.text();
+  if (kb && kb[entry.templateFile]) return kb[entry.templateFile];
+  var resp = await fetch('kb/known_datasets/templates/' + entry.templateFile);
+  if (!resp.ok) throw new Error('ไม่พบไฟล์ template: ' + entry.templateFile);
+  return resp.text();
+}
+
+/** ArrayBuffer → base64, chunked so a multi-MB workbook can't blow the stack. */
+function bufToBase64(buf) {
+  var bytes = new Uint8Array(buf), CHUNK = 0x8000, parts = [];
+  for (var i = 0; i < bytes.length; i += CHUNK) {
+    parts.push(String.fromCharCode.apply(null, bytes.subarray(i, i + CHUNK)));
   }
+  return btoa(parts.join(''));
+}
+
+/**
+ * Hand the ORIGINAL workbook to a dashboard that already parses Excel itself,
+ * then call its own file handler and hide its upload UI.
+ *
+ * This is the better integration wherever it applies: these dashboards find
+ * their own header rows, match column names loosely, and — in the packing
+ * report's case — read every sheet in the book. Re-deriving that here from one
+ * profiler-chosen sheet would lose data and drift out of sync with the file.
+ *
+ * entry.inject = { mode:'file', entryFn:'handleFile', hide:[css selectors] }
+ */
+async function prepareTemplateFromFile(entry, dataset) {
+  var file = dataset.sourceFile;
+  if (!file) throw new Error('ไม่พบไฟล์ต้นฉบับสำหรับ template นี้');
+
+  var html = await loadTemplateHtml(entry);
+  var inject = entry.inject || {};
+  var entryFn = inject.entryFn || 'handleFile';
+  var hide = (inject.hide || []).concat(['.upload-panel', '#emptyState', '#libBanner']);
+
+  var b64 = bufToBase64(await file.arrayBuffer());
+  var hideCSS = '<style>' + hide.map(function (s) { return s + '{display:none!important}'; }).join('') + '</style>';
+
+  // Rebuild a File inside the frame and feed it to the template's own handler,
+  // so the exact code path a manual upload takes is the one that runs.
+  var boot =
+    '<scr' + 'ipt>\n' +
+    '(function(){\n' +
+    '  var b64=' + JSON.stringify(b64) + ';\n' +
+    '  var name=' + JSON.stringify(file.name) + ';\n' +
+    '  function toFile(){\n' +
+    '    var bin=atob(b64), n=bin.length, a=new Uint8Array(n);\n' +
+    '    for(var i=0;i<n;i++)a[i]=bin.charCodeAt(i);\n' +
+    '    return new File([a],name,{type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"});\n' +
+    '  }\n' +
+    '  function go(){\n' +
+    '    try{\n' +
+    '      if(typeof ' + entryFn + '!=="function"){console.error("[iDash] ' + entryFn + ' not found");return;}\n' +
+    '      ' + entryFn + '(toFile());\n' +
+    '    }catch(e){console.error("[iDash] auto-load failed:",e);}\n' +
+    '  }\n' +
+    '  if(document.readyState==="complete")setTimeout(go,60);\n' +
+    '  else window.addEventListener("load",function(){setTimeout(go,60);});\n' +
+    '})();\n' +
+    '</' + 'script>';
+
+  var headIdx = html.indexOf('</head>');
+  if (headIdx >= 0) html = html.substring(0, headIdx) + hideCSS + '\n' + html.substring(headIdx);
+  var bodyIdx = html.lastIndexOf('</body>');
+  if (bodyIdx >= 0) html = html.substring(0, bodyIdx) + boot + '\n' + html.substring(bodyIdx);
+  else html += boot;
+
+  html = await inlineVendorLibs(html);
+  return { html: html, rowCount: (dataset.data || []).length };
+}
+
+async function prepareTemplateHtml(entry, dataset) {
+  var html = await loadTemplateHtml(entry);
 
   var mapping = entry.columnMapping;
   var today = new Date();
@@ -1049,14 +1120,16 @@ async function runAutopilotPipeline(fileOrDataset, userModuleId, opts) {
     // The AI route already produced the page; registry matching would only
     // overwrite it. Theme still gets picked below for the meta record.
     if (buildMode !== 'ai' && window.iDashKnownDatasets) {
-      const hit = window.iDashKnownDatasets.match(dataset.columns);
+      const hit = window.iDashKnownDatasets.match(dataset.columns, dataset.sheetNames);
       if (hit) {
         matched = { id: hit.entry.id, nameTH: hit.entry.nameTH, score: Math.round(hit.score * 100) };
         const themes = window.iDashThemes || [];
         dashTheme = themes.find(t => t.id === hit.entry.themeId) || null;
 
-        // Plan B: curated HTML template takes priority over generated dashboard
-        if (hit.entry.templateFile && hit.entry.columnMapping) {
+        // Plan B: curated HTML template takes priority over generated dashboard.
+        // Two flavours: columnMapping (we parse and inject rows) or
+        // inject.mode==='file' (the template parses the workbook itself).
+        if (hit.entry.templateFile && (hit.entry.columnMapping || (hit.entry.inject && hit.entry.inject.mode === 'file'))) {
           templateEntry = hit.entry;
         } else {
           blueprint = window.iDashKnownDatasets.validateBlueprint(hit.entry.blueprint, dataset.columns);
@@ -1075,7 +1148,9 @@ async function runAutopilotPipeline(fileOrDataset, userModuleId, opts) {
       /* already rendered by the AI above */
     }
     else if (templateEntry) {
-      const tpl = await prepareTemplateHtml(templateEntry, dataset);
+      const tpl = (templateEntry.inject && templateEntry.inject.mode === 'file')
+        ? await prepareTemplateFromFile(templateEntry, dataset)
+        : await prepareTemplateHtml(templateEntry, dataset);
       try {
         sessionStorage.setItem('idash.interactiveHtml', tpl.html);
         sessionStorage.setItem('idash.renderMode', 'interactive');

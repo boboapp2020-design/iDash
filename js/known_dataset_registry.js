@@ -29,27 +29,53 @@
 
   /**
    * @param {Array} datasetColumns — dataset.columns (strings or {name})
-   * @returns {{entry: Object, score: number}|null}
+   * @param {Array} [sheetNames] — dataset.sheetNames, for workbooks whose
+   *   identity lives in their tab names rather than one sheet's headers
+   * @returns {{entry: Object, score: number, by: 'columns'|'sheets'}|null}
+   *
+   * A fingerprint may list `columns`, `sheets`, or both. Sheet matching exists
+   * because some curated dashboards read the whole workbook: which sheet the
+   * profiler happened to pick says nothing about the file, but a tab list like
+   * ["รายงานสรุป RE-PACKING", "บรรจุ ย่อย", …] identifies it unambiguously.
    */
-  function match(datasetColumns) {
+  function match(datasetColumns, sheetNames) {
     var entries = window.iDashKnownDatasetEntries || [];
     if (entries.length === 0) return null;
+
     var uploaded = {};
     colNames(datasetColumns).forEach(function (n) { if (n) uploaded[n] = true; });
+    var tabs = {};
+    (sheetNames || []).forEach(function (s) {
+      var n = normalizeCol(s); if (n) tabs[n] = true;
+    });
+
+    function coverageOf(want, haveMap) {
+      if (!want || want.length === 0) return null;
+      var hit = 0;
+      want.forEach(function (w) { if (haveMap[normalizeCol(w)]) hit++; });
+      return hit / want.length;
+    }
 
     var best = null;
     entries.forEach(function (entry) {
       var fp = entry.fingerprint || {};
-      var cols = (fp.columns || []).map(normalizeCol);
-      if (cols.length === 0) return;
-      var hit = 0;
-      cols.forEach(function (c) { if (uploaded[c]) hit++; });
-      var coverage = hit / cols.length;
       var threshold = typeof fp.requiredCoverage === 'number' ? fp.requiredCoverage : 0.85;
-      if (coverage < threshold) return;
-      if (!best || coverage > best.score ||
-          (coverage === best.score && cols.length > (best.entry.fingerprint.columns || []).length)) {
-        best = { entry: entry, score: coverage };
+
+      var byCols = coverageOf(fp.columns, uploaded);
+      var bySheets = coverageOf(fp.sheets, tabs);
+
+      // Take whichever signal is stronger; either alone can qualify.
+      var score = null, by = null;
+      if (bySheets !== null && (byCols === null || bySheets >= byCols)) { score = bySheets; by = 'sheets'; }
+      else if (byCols !== null) { score = byCols; by = 'columns'; }
+      if (score === null || score < threshold) return;
+
+      var size = ((fp.columns || []).length + (fp.sheets || []).length);
+      var bestSize = best
+        ? (((best.entry.fingerprint.columns || []).length) + ((best.entry.fingerprint.sheets || []).length))
+        : -1;
+      if (!best || score > best.score || (score === best.score && size > bestSize)) {
+        best = { entry: entry, score: score, by: by };
       }
     });
     return best;

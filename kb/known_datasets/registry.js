@@ -69,6 +69,76 @@ window.iDashKnownDatasetEntries = [
       warn: 'Delivery date Warning',
       comp: 'Delivery date Complete'
     }
+  },
+
+  // ── นิติกรรม — ทะเบียนพื้นที่เช่า ─────────────────────────────────────
+  // Paired sample: Sample/Lawyer/พื้นที่เช่าลวมเข้าละบบ.xlsx
+  //                (sheet "พื้นที่เช่า", 791 rows).
+  //
+  // The dashboard reads the workbook itself and takes columns POSITIONALLY
+  // (ลำดับ, ชื่อ, เลขแปลง, พื้นที่, จำนวนปี, ตัวหนังสือ, ราคา/ไร่, ค่าเช่า/ปี,
+  // ค่าเช่ารวม, ปีเริ่ม, ปีสิ้นสุด), so there is nothing to map — it just needs
+  // the file.
+  {
+    id: 'land_lease_register',
+    nameTH: 'นิติกรรม — ทะเบียนพื้นที่เช่า',
+    fingerprint: {
+      columns: [
+        'ລໍາດັບ', 'ຊື່ນາມສະກຸນ', 'ເລກແປງ', 'ພື້ນທີ່(ໄຮ່)', 'ຈໍານວນປີ',
+        'ຕົວໜັງສື', 'ລາຄາຕໍ່ໄຮ່', 'ລາຄາເຊົ່າຕໍ່ປີ', 'ຄ່າເຊົ່າທັ້ງໝົດ',
+        'ປີເລິ່ມ', 'ປີສິ້ນສຸດ'
+      ],
+      sheets: ['พื้นที่เช่า'],
+      requiredCoverage: 0.7
+    },
+    themeId: 'forest',
+    templateFile: 'land_lease_register.html',
+    inject: { mode: 'file', entryFn: 'handleFile' }
+  },
+
+  // ── BOI — แผนนำเข้าเทียบจริง ──────────────────────────────────────────
+  // Paired sample: Sample/BOI/BOI ແຜນບໍລິສັດມິດລາວ ML.xlsx
+  //                (sheets "ແຜນ" 1,706 rows + "ແຜນເພີ່ມ" 198 rows).
+  //
+  // Both plan sheets share one shape (ລຳດັບແຜນ / ລະຫັດ / ສິນຄ້າ / ຫົວໜ່ວຍ /
+  // ແຜນອານຸມັດ / ນຳເຂົ້າຕົວຈິງ / ຍອດເຫລືອ); the dashboard picks up what it
+  // needs from the workbook, so it is handed the file rather than one sheet.
+  {
+    id: 'boi_import_plan',
+    nameTH: 'BOI — แผนนำเข้าเทียบจริง',
+    fingerprint: {
+      columns: [
+        'ລຳດັບແຜນ', 'ລະຫັດ', 'ສິນຄ້າ', 'ຫົວໜ່ວຍ',
+        'ແຜນອານຸມັດ', 'ນຳເຂົ້າຕົວຈິງ', 'ຍອດເຫລືອ'
+      ],
+      sheets: ['ແຜນ', 'ແຜນເພີ່ມ'],
+      requiredCoverage: 0.7
+    },
+    themeId: 'sapphire',
+    templateFile: 'boi_import_plan.html',
+    inject: { mode: 'file', entryFn: 'handleFile' }
+  },
+
+  // ── บรรจุ — รายงานบรรจุน้ำตาล ─────────────────────────────────────────
+  // Paired sample: Sample/บรรจุ/รายงานบรรจุน้ำตาล ปี 25-26.xlsx (16 sheets).
+  //
+  // Matched on TAB NAMES, not columns: the dashboard scans every sheet, finds
+  // each header row itself and keeps the ones carrying a Strike plus a pack-size
+  // column. Which single sheet our profiler picked is irrelevant — and varies —
+  // so a column fingerprint would be unreliable here.
+  {
+    id: 'sugar_packing_report',
+    nameTH: 'บรรจุ — รายงานบรรจุน้ำตาล',
+    fingerprint: {
+      sheets: [
+        'รายงานสรุป RE-PACKING', 'บรรจุ ย่อย', 'Total ยอดน้ำตาล-บรรจุ',
+        '1000Kg VHP', '1000Kg DCR', '50kg DCR', 'แผนขาย'
+      ],
+      requiredCoverage: 0.7
+    },
+    themeId: 'amber',
+    templateFile: 'sugar_packing.html',
+    inject: { mode: 'file', entryFn: 'readFile' }
   }
 
 ];
