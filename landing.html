@@ -36,10 +36,17 @@ body {
 .wave { position: absolute; left: 0; right: 0; bottom: 0; width: 100%; pointer-events: none; }
 .brand-inner { position: relative; z-index: 1; max-width: 520px; }
 
-.brand-logo { display: flex; align-items: center; gap: 14px; margin-bottom: 40px; }
-.brand-logo svg { width: 52px; height: 52px; flex-shrink: 0; }
-.brand-name { font-size: 44px; font-weight: 800; letter-spacing: -.02em; line-height: 1; color: #1e40af; }
-.brand-tag { font-size: 12.5px; color: var(--muted); margin-top: 6px; letter-spacing: .01em; }
+/* The real logo lockup (bars + wordmark + tagline) as one artwork, sized off
+   the panel so it stays large on wide screens without overflowing narrow ones.
+   The PNG has a transparent background, so it sits on the gradient cleanly. */
+.brand-logo { margin-bottom: 26px; }
+.brand-logo img {
+  /* Sized against the panel AND the viewport height: the height term is what
+     stops a tall logo from pushing the feature list off a short screen, while
+     still letting it grow on a large monitor. */
+  width: clamp(190px, min(62%, 32vh), 340px);
+  height: auto; display: block;
+}
 
 .brand-head {
   font-size: clamp(24px, 2.5vw, 33px); font-weight: 800;
@@ -69,6 +76,8 @@ body {
   border: 1px solid #eef1f6; border-radius: 20px; padding: 44px clamp(24px, 4vw, 46px);
   box-shadow: 0 4px 12px rgba(16,24,40,.05), 0 24px 56px rgba(16,24,40,.07);
 }
+/* Only shown once the brand panel drops away, so the page is never unbranded. */
+.card-logo { display: none; margin: 0 auto 26px; width: 150px; }
 .card-title { font-size: 25px; font-weight: 800; text-align: center; letter-spacing: -.01em; }
 .card-sub { font-size: 13px; color: var(--muted); text-align: center; margin-top: 8px; }
 
@@ -133,10 +142,29 @@ form { margin-top: 32px; }
   font-size: 11.5px; color: var(--ink-2); line-height: 1.7; text-align: center;
 }
 
+/* Short laptops (1366×768 and similar): tighten the vertical rhythm so the
+   whole panel still lands on one screen instead of forcing a scroll. */
+@media (max-height: 820px) {
+  .brand { padding-top: 32px; padding-bottom: 32px; }
+  .brand-logo { margin-bottom: 18px; }
+  .brand-logo img { width: clamp(180px, min(62%, 28vh), 340px); }
+  .features { margin-top: 26px; gap: 16px; }
+  .feature-icon { width: 48px; height: 48px; border-radius: 13px; }
+  .feature-icon svg { width: 22px; height: 22px; }
+  .brand-rule { margin: 16px 0 14px; }
+  .panel { padding-top: 20px; padding-bottom: 20px; }
+  .card { padding-top: 32px; padding-bottom: 32px; }
+  form { margin-top: 24px; }
+  .field { margin-bottom: 15px; }
+  .divider { margin: 18px 0; }
+  .note { margin-top: 16px; }
+}
+
 @media (max-width: 900px) {
   body { grid-template-columns: 1fr; }
   .brand { display: none; }
   .panel { min-height: 100vh; }
+  .card-logo { display: block; }
 }
 </style>
 </head>
@@ -153,16 +181,7 @@ form { margin-top: 32px; }
 
   <div class="brand-inner">
     <div class="brand-logo">
-      <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-        <rect x="2" y="18" width="6" height="12" rx="1.5" fill="#1e40af"/>
-        <rect x="10" y="12" width="6" height="18" rx="1.5" fill="#2563eb"/>
-        <rect x="18" y="6" width="6" height="24" rx="1.5" fill="#60a5fa"/>
-        <rect x="26" y="2" width="4" height="28" rx="1.5" fill="#93c5fd"/>
-      </svg>
-      <div>
-        <div class="brand-name">iDash</div>
-        <div class="brand-tag">AI Dashboard Intelligence Platform</div>
-      </div>
+      <img src="assets/img/logo_idash.png" alt="iDash — AI Dashboard Intelligence Platform">
     </div>
 
     <h1 class="brand-head">เปลี่ยนข้อมูลดิบ<br>ให้เป็น <b>Dashboard</b> อัจฉริยะ</h1>
@@ -206,6 +225,7 @@ form { margin-top: 32px; }
 <!-- ── Sign-in card ── -->
 <section class="panel">
   <div class="card">
+    <img class="card-logo" src="assets/img/logo_idash.png" alt="iDash">
     <div class="card-title">เข้าสู่ระบบ</div>
     <div class="card-sub">เข้าสู่ระบบเพื่อใช้งาน iDash</div>
 
