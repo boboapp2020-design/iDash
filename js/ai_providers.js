@@ -26,6 +26,9 @@
    *   anthropic → POST /v1/messages
    *   gemini    → POST /v1beta/models/{model}:generateContent
    *   openai    → POST /chat/completions   (Groq, OpenRouter, DeepSeek, custom)
+   *   supabase  → POST the project's llm-gateway Edge Function, which holds the
+   *               provider key server-side. `apiKey` here is the project's anon
+   *               key, which is safe to ship client-side by design.
    * `defaultModel` is only a starting value, and `models` is a convenience
    * shortlist for the dropdown rather than a constraint — every provider also
    * offers "พิมพ์เอง", so a model released after this file was written stays
@@ -34,6 +37,21 @@
    * billed per token.
    */
   var PROVIDERS = {
+    supabase: {
+      label: 'Supabase (llm-gateway ของคุณ)',
+      shape: 'supabase',
+      endpoint: '',
+      defaultModel: 'claude-opus-4-8',
+      keyHint: 'ใส่ anon key ของโปรเจกต์ (ปลอดภัยที่จะอยู่ฝั่งเบราว์เซอร์)',
+      keyUrl: 'supabase.com/dashboard → Settings → API',
+      needsEndpoint: true,
+      endpointHint: 'https://<project>.supabase.co/functions/v1/llm-gateway',
+      models: [
+        { id: 'claude-opus-4-8',  label: 'Claude Opus 4.8 — เก่งสุด แนะนำ', tier: 'paid' },
+        { id: 'claude-sonnet-5',  label: 'Claude Sonnet 5 — สมดุล',         tier: 'paid' },
+        { id: 'claude-haiku-4-5', label: 'Claude Haiku 4.5 — เร็ว ถูกสุด',  tier: 'paid' }
+      ]
+    },
     anthropic: {
       label: 'Anthropic (Claude)',
       shape: 'anthropic',
@@ -113,6 +131,72 @@
         { id: 'deepseek-reasoner', label: 'DeepSeek Reasoner — คิดลึก', tier: 'paid' }
       ]
     },
+    openai: {
+      label: 'OpenAI (GPT)',
+      shape: 'openai',
+      endpoint: 'https://api.openai.com/v1/chat/completions',
+      defaultModel: 'gpt-4o',
+      keyHint: 'ขึ้นต้นด้วย sk-',
+      keyUrl: 'platform.openai.com/api-keys',
+      models: [
+        { id: 'gpt-4o',      label: 'GPT-4o — แนะนำ',   tier: 'paid' },
+        { id: 'gpt-4o-mini', label: 'GPT-4o mini — ถูก', tier: 'paid' },
+        { id: 'gpt-4.1',     label: 'GPT-4.1',           tier: 'paid' },
+        { id: 'o3-mini',     label: 'o3-mini — คิดลึก',  tier: 'paid' }
+      ]
+    },
+    mistral: {
+      label: 'Mistral AI',
+      shape: 'openai',
+      endpoint: 'https://api.mistral.ai/v1/chat/completions',
+      defaultModel: 'mistral-large-latest',
+      keyHint: 'สมัครแล้วมีโควตาฟรีให้ทดลอง',
+      keyUrl: 'console.mistral.ai',
+      models: [
+        { id: 'open-mistral-nemo',    label: 'Mistral Nemo (ฟรี)',      tier: 'free' },
+        { id: 'mistral-small-latest', label: 'Mistral Small (ฟรี)',     tier: 'free' },
+        { id: 'mistral-large-latest', label: 'Mistral Large — เก่งสุด', tier: 'paid' }
+      ]
+    },
+    xai: {
+      label: 'xAI (Grok)',
+      shape: 'openai',
+      endpoint: 'https://api.x.ai/v1/chat/completions',
+      defaultModel: 'grok-4',
+      keyHint: 'ขึ้นต้นด้วย xai-',
+      keyUrl: 'console.x.ai',
+      models: [
+        { id: 'grok-4',      label: 'Grok 4 — เก่งสุด', tier: 'paid' },
+        { id: 'grok-3',      label: 'Grok 3',           tier: 'paid' },
+        { id: 'grok-3-mini', label: 'Grok 3 mini — ถูก', tier: 'paid' }
+      ]
+    },
+    cerebras: {
+      label: 'Cerebras (เร็วมาก)',
+      shape: 'openai',
+      endpoint: 'https://api.cerebras.ai/v1/chat/completions',
+      defaultModel: 'llama-3.3-70b',
+      keyHint: 'ขึ้นต้นด้วย csk-',
+      keyUrl: 'cloud.cerebras.ai',
+      models: [
+        { id: 'llama-3.3-70b',  label: 'Llama 3.3 70B — แนะนำ', tier: 'free' },
+        { id: 'llama3.1-8b',    label: 'Llama 3.1 8B — เร็วสุด', tier: 'free' },
+        { id: 'qwen-3-32b',     label: 'Qwen3 32B',              tier: 'free' }
+      ]
+    },
+    together: {
+      label: 'Together AI',
+      shape: 'openai',
+      endpoint: 'https://api.together.xyz/v1/chat/completions',
+      defaultModel: 'meta-llama/Llama-3.3-70B-Instruct-Turbo',
+      keyHint: 'สมัครแล้วได้เครดิตทดลองใช้',
+      keyUrl: 'api.together.ai/settings/api-keys',
+      models: [
+        { id: 'meta-llama/Llama-3.3-70B-Instruct-Turbo',      label: 'Llama 3.3 70B Turbo — แนะนำ', tier: 'paid' },
+        { id: 'Qwen/Qwen2.5-72B-Instruct-Turbo',              label: 'Qwen2.5 72B Turbo',           tier: 'paid' },
+        { id: 'deepseek-ai/DeepSeek-V3',                      label: 'DeepSeek V3',                 tier: 'paid' }
+      ]
+    },
     custom: {
       label: 'อื่นๆ (ระบุ URL เอง)',
       shape: 'openai',
@@ -120,6 +204,8 @@
       defaultModel: '',
       keyHint: 'ต้องเป็น API ที่เข้ากันได้กับ OpenAI',
       keyUrl: '',
+      needsEndpoint: true,
+      endpointHint: 'https://.../v1/chat/completions',
       models: []
     }
   };
@@ -248,7 +334,26 @@
       };
     }
 
-    // OpenAI-compatible (Groq / OpenRouter / DeepSeek / custom)
+    if (cfg.shape === 'supabase') {
+      // The Edge Function owns the provider key and the prompt budget; we hand
+      // it the same facts and let it call Anthropic server-side.
+      return {
+        url: cfg.endpoint,
+        headers: {
+          'content-type': 'application/json',
+          'Authorization': 'Bearer ' + cfg.apiKey,
+          'apikey': cfg.apiKey
+        },
+        body: {
+          action: 'dashboard-compose',
+          runId: 'ai-page-' + Date.now() + '-' + Math.random().toString(36).slice(2, 8),
+          payload: { model: cfg.model, system: SYSTEM_PROMPT, prompt: userPrompt, facts: facts }
+        }
+      };
+    }
+
+    // OpenAI-compatible (Groq / OpenRouter / DeepSeek / OpenAI / Mistral / xAI /
+    // Cerebras / Together / custom)
     return {
       url: cfg.endpoint,
       headers: { 'content-type': 'application/json', 'Authorization': 'Bearer ' + cfg.apiKey },
@@ -266,6 +371,13 @@
 
   function extractText(cfg, data) {
     if (!data) return '';
+    if (cfg.shape === 'supabase') {
+      // The gateway wraps its answer in { result: ... }; accept either an
+      // {html} envelope or a plain string so a gateway tweak doesn't break us.
+      var r = data.result !== undefined ? data.result : data;
+      if (typeof r === 'string') return r;
+      return (r && (r.html || r.text)) || '';
+    }
     if (cfg.shape === 'anthropic') {
       // Responses can lead with a thinking block, so take the first text block
       // rather than content[0].

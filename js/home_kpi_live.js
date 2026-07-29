@@ -16,15 +16,23 @@
   // ──────────────────────────────────────────────────────────────────────────
   // Alternatively set it without editing this file, from the browser console:
   //   iDashHomeKpi.setUrl('https://script.google.com/macros/s/.../exec')
+  // Most specific wins. The built-in URL was first in this chain, which made
+  // setUrl() below silently do nothing — an override has to outrank the default
+  // or it isn't an override.
   function apiUrl() {
-    return KPI_API_URL ||
-      window.IDASH_KPI_API_URL ||
-      localStorage.getItem('idash.kpiApiUrl') ||
-      '';
+    try {
+      var saved = localStorage.getItem('idash.kpiApiUrl');
+      if (saved) return saved;
+    } catch (e) { /* private mode — fall through */ }
+    return window.IDASH_KPI_API_URL || KPI_API_URL || '';
   }
 
   var CACHE_KEY = 'idash.homeKpiCache';
-  var CACHE_TTL_MS = 5 * 60 * 1000;   // serve cached values for 5 minutes
+  // Stale-while-revalidate: cached numbers are painted immediately no matter
+  // how old, then replaced when the network answers. Apps Script cold starts
+  // take seconds, and showing yesterday's figure for one of them beats showing
+  // "กำลังโหลด…" — the age is stated on screen so nothing is passed off as live.
+  var FRESH_MS = 5 * 60 * 1000;
 
   function fmtNumber(value, decimals) {
     if (value === null || value === undefined || isNaN(value)) return '—';
@@ -125,7 +133,7 @@
     if (sparkEl) sparkEl.innerHTML = buildSpark(kpi.spark, accent, kpi.id);
   }
 
-  function renderAll(payload) {
+  function renderAll(payload, staleAt) {
     var byId = {};
     (payload.kpis || []).forEach(function (k) { byId[k.id] = k; });
 
@@ -135,7 +143,8 @@
 
     var stamp = document.getElementById('homeKpiStamp');
     if (stamp && payload.latestDate) {
-      stamp.textContent = 'ข้อมูลล่าสุด ' + payload.latestDate;
+      stamp.textContent = 'ข้อมูลล่าสุด ' + payload.latestDate +
+        (staleAt ? ' · กำลังอัปเดต…' : '');
       stamp.hidden = false;
     }
   }
@@ -152,13 +161,11 @@
     });
   }
 
+  /** @returns {{payload:Object, at:number}|null} — any age; caller decides. */
   function readCache() {
     try {
-      var raw = localStorage.getItem(CACHE_KEY);
-      if (!raw) return null;
-      var c = JSON.parse(raw);
-      if (!c || !c.at || Date.now() - c.at > CACHE_TTL_MS) return null;
-      return c.payload;
+      var c = JSON.parse(localStorage.getItem(CACHE_KEY) || 'null');
+      return (c && c.at && c.payload) ? c : null;
     } catch (e) { return null; }
   }
 
@@ -168,31 +175,50 @@
     } catch (e) { /* quota — cache is optional */ }
   }
 
-  function load() {
+  // Kick the request off the moment this file runs, before the DOM is ready.
+  // The row can't be painted yet, but the round-trip — which is the slow part —
+  // is already in flight by the time it can be.
+  var inFlight = null;
+  function startFetch() {
     var url = apiUrl();
-    var cached = readCache();
-    if (cached) renderAll(cached);   // paint instantly, then refresh below
-
-    if (!url) {
-      if (!cached) renderUnconfigured('ยังไม่ได้เชื่อมต่อชีต');
-      return;
-    }
-
-    fetch(url, { method: 'GET' })
+    if (!url) return null;
+    return fetch(url, { method: 'GET' })
       .then(function (res) {
         if (!res.ok) throw new Error('HTTP ' + res.status);
         return res.json();
       })
       .then(function (payload) {
         if (payload.error) throw new Error(payload.error);
-        renderAll(payload);
         writeCache(payload);
-      })
-      .catch(function (err) {
-        console.warn('[iDash] KPI fetch failed:', err.message);
-        if (!cached) renderUnconfigured('เชื่อมต่อข้อมูลไม่สำเร็จ');
+        return payload;
       });
   }
+
+  function paint() {
+    var url = apiUrl();
+    var cached = readCache();
+    var stale = cached && (Date.now() - cached.at > FRESH_MS);
+
+    if (cached) renderAll(cached.payload, stale);
+
+    if (!url) {
+      if (!cached) renderUnconfigured('ยังไม่ได้เชื่อมต่อชีต');
+      return;
+    }
+    if (!inFlight) inFlight = startFetch();
+
+    inFlight
+      .then(function (payload) { renderAll(payload); })
+      .catch(function (err) {
+        console.warn('[iDash] KPI fetch failed:', err.message);
+        // With cached numbers on screen, drop the "updating" note rather than
+        // wiping real values off the row.
+        if (cached) renderAll(cached.payload);
+        else renderUnconfigured('เชื่อมต่อข้อมูลไม่สำเร็จ');
+      });
+  }
+
+  function load() { inFlight = null; paint(); }
 
   window.iDashHomeKpi = {
     // Point the row at a deployed Apps Script Web App without editing this file.
@@ -209,9 +235,12 @@
     render: renderAll
   };
 
+  // Network first, DOM second — this file is loaded `async` from <head>, so it
+  // usually runs well before the body exists.
+  inFlight = startFetch();
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', load);
+    document.addEventListener('DOMContentLoaded', paint);
   } else {
-    load();
+    paint();
   }
 })();

@@ -10,7 +10,13 @@
   <title>iDash — AI Dashboard Intelligence Platform</title>
   <link rel="stylesheet" href="css/style.css?v=20260728b">
   <link rel="stylesheet" href="css/ai_progress.css?v=20260722c">
-  <link rel="stylesheet" href="css/home.css?v=20260728m">
+  <link rel="stylesheet" href="css/home.css?v=20260729b">
+  <!-- The KPI row's slowest step is the round-trip to Apps Script, so warm the
+       connection and start the request from <head> instead of waiting behind
+       the ~900KB of vendor scripts at the end of <body>. -->
+  <link rel="preconnect" href="https://script.google.com" crossorigin>
+  <link rel="dns-prefetch" href="https://script.google.com">
+  <script src="js/home_kpi_live.js?v=20260729" async></script>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect x='2' y='18' width='6' height='12' rx='1' fill='%232563eb'/><rect x='10' y='12' width='6' height='18' rx='1' fill='%233b82f6'/><rect x='18' y='6' width='6' height='24' rx='1' fill='%2360a5fa'/><rect x='26' y='2' width='6' height='28' rx='1' fill='%2393c5fd'/></svg>">
 </head>
 <body>
@@ -532,7 +538,7 @@
 
       <div class="bm-warn">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12" y2="17"/></svg>
-        <span>key ถูกเก็บไว้ในเบราว์เซอร์เครื่องนี้เท่านั้น และเรียก API ตรงจากเบราว์เซอร์ — ใครเปิดเครื่องนี้ก็อาจเห็น key ได้ อย่าใช้บนเครื่องสาธารณะ</span>
+        <span id="aiKeyWarnText">key ถูกเก็บไว้ในเบราว์เซอร์เครื่องนี้เท่านั้น และเรียก API ตรงจากเบราว์เซอร์ — ใครเปิดเครื่องนี้ก็อาจเห็น key ได้ อย่าใช้บนเครื่องสาธารณะ</span>
       </div>
 
       <div class="bm-msg" id="aiSetupMsg"></div>
@@ -653,7 +659,6 @@
 <script src="js/ai_providers.js?v=20260729"></script>
 <script src="js/app.js?v=20260729"></script>
 <script src="js/sidebar.js?v=20260722c"></script>
-<script src="js/home_kpi_live.js?v=20260728"></script>
 <script src="js/chat_pin.js?v=20260728"></script>
 <script>
   // Live topbar values: greeting + today's date follow the viewer's real clock.

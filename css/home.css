@@ -440,6 +440,9 @@ a.home-quick:hover .chev { color: var(--primary); }
   font-size: 11.5px; line-height: 1.65;
 }
 .bm-warn svg { width: 15px; height: 15px; flex-shrink: 0; margin-top: 1px; }
+/* Same block, reassuring rather than cautionary — used for the Supabase route,
+   where nothing sensitive reaches the browser. */
+.bm-warn.bm-warn-ok { background: #f0fdf4; border-color: #bbf7d0; color: #166534; }
 
 .bm-msg { font-size: 12px; font-weight: 600; color: #dc2626; min-height: 16px; }
 .bm-msg.ok { color: #15803d; }

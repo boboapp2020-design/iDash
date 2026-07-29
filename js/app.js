@@ -377,10 +377,24 @@ function syncAiSetupFields() {
   document.getElementById('aiKeyHint').textContent =
     def.keyHint + (def.keyUrl ? ' · ขอ key ได้ที่ ' + def.keyUrl : '');
 
-  // Only the "custom" provider needs its URL typed in.
+  // The blanket "anyone on this machine can read your key" warning is wrong for
+  // Supabase — there the browser only ever holds the anon key and the real
+  // provider key stays on the server.
+  const warn = document.getElementById('aiKeyWarnText');
+  if (warn) {
+    warn.textContent = def.shape === 'supabase'
+      ? 'ปลอดภัยกว่า: key ของ AI อยู่ฝั่งเซิร์ฟเวอร์ เบราว์เซอร์เก็บแค่ anon key ซึ่งออกแบบมาให้เปิดเผยได้อยู่แล้ว'
+      : 'key ถูกเก็บไว้ในเบราว์เซอร์เครื่องนี้เท่านั้น และเรียก API ตรงจากเบราว์เซอร์ — ใครเปิดเครื่องนี้ก็อาจเห็น key ได้ อย่าใช้บนเครื่องสาธารณะ';
+    warn.parentElement.classList.toggle('bm-warn-ok', def.shape === 'supabase');
+  }
+
+  // Providers with a fixed public endpoint hide the URL field; Supabase and
+  // "custom" point at the user's own deployment, so they must show it.
   const endpointField = document.getElementById('aiEndpointField');
-  endpointField.hidden = !!def.endpoint;
-  document.getElementById('aiEndpointInput').value = saved.endpoint || def.endpoint || '';
+  endpointField.hidden = !def.needsEndpoint;
+  const endpointInput = document.getElementById('aiEndpointInput');
+  endpointInput.value = saved.endpoint || def.endpoint || '';
+  endpointInput.placeholder = def.endpointHint || 'https://.../chat/completions';
 }
 
 function syncAiModelCustomField() {
