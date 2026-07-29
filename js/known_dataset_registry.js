@@ -62,17 +62,42 @@
    * when non-null, every member of numCols).
    */
   function validateBlueprint(blueprint, datasetColumns) {
-    var have = {};
-    colNames(datasetColumns).forEach(function (n) { if (n) have[n] = true; });
-    function ok(col) { return col == null || have[normalizeCol(col)] === true; }
+    // Map normalized name → the dataset's ACTUAL header. Existence was already
+    // checked case-insensitively; the aggregators downstream look the column up
+    // by exact key, so a blueprint written as 'ccs' against a 'CCS' header used
+    // to pass validation and then silently compute 0. Resolving to the real
+    // header here removes that whole class of mistake for future entries.
+    var actual = {};
+    (datasetColumns || []).forEach(function (c) {
+      var raw = typeof c === 'string' ? c : (c && c.name);
+      var n = normalizeCol(raw);
+      if (n && actual[n] === undefined) actual[n] = raw;
+    });
+    function resolve(col) { return col == null ? col : actual[normalizeCol(col)]; }
+    function ok(col) { return col == null || actual[normalizeCol(col)] !== undefined; }
 
-    var kpis = (blueprint.kpis || []).filter(function (k) { return ok(k.col) && k.col != null; });
+    var kpis = (blueprint.kpis || [])
+      .filter(function (k) { return k.col != null && ok(k.col); })
+      .map(function (k) {
+        var out = {}; for (var p in k) if (Object.prototype.hasOwnProperty.call(k, p)) out[p] = k[p];
+        out.col = resolve(k.col);
+        return out;
+      });
+
     var chartPlan = (blueprint.chartPlan || []).filter(function (p) {
       if (!ok(p.timeCol) || !ok(p.textCol) || !ok(p.numCol)) return false;
       var nc = p.numCols || [];
       for (var i = 0; i < nc.length; i++) { if (!ok(nc[i])) return false; }
       return true;
+    }).map(function (p) {
+      var out = {}; for (var q in p) if (Object.prototype.hasOwnProperty.call(p, q)) out[q] = p[q];
+      if (p.timeCol != null) out.timeCol = resolve(p.timeCol);
+      if (p.textCol != null) out.textCol = resolve(p.textCol);
+      if (p.numCol != null) out.numCol = resolve(p.numCol);
+      if (p.numCols) out.numCols = p.numCols.map(resolve);
+      return out;
     });
+
     return { kpis: kpis, chartPlan: chartPlan, kpiMax: blueprint.kpiMax || (kpis.length || 4) };
   }
 
