@@ -235,6 +235,42 @@
       frame.src = url;
     }
 
+    // Same-origin targets (the Production Dashboard sits on this very host,
+    // just a different path) can be driven directly once loaded.
+    function isSameOrigin(u) {
+      try { return new URL(u, location.href).origin === location.origin; }
+      catch (e) { return false; }
+    }
+
+    // Plain src keeps the browser's HTTP cache in play — the Production
+    // Dashboard's document is ~2MB, and srcdoc bypasses the cache entirely, so
+    // every visit paid the full download again. Load it normally, then reach
+    // into the frame and open the view.
+    function loadWithViewSameOrigin(spec, arg) {
+      frame.removeAttribute('srcdoc');
+      frame.addEventListener('load', function once() {
+        frame.removeEventListener('load', once);
+        try {
+          var win = frame.contentWindow;
+          if (spec.probe === 'goViewDashboard') {
+            if (typeof win.goViewDashboard === 'function') win.goViewDashboard();
+          } else if (spec.probe === 'btnSend' && arg) {
+            var d = win.document;
+            var i = d.getElementById('input'), b = d.getElementById('btnSend');
+            if (i && b) {
+              i.value = arg;
+              i.dispatchEvent(new win.Event('input', { bubbles: true }));
+              setTimeout(function () { b.click(); }, 350);
+            }
+          }
+        } catch (e) {
+          // Hook missing or renamed — the default view is still on screen.
+          console.warn('[iDash] deep link skipped:', e.message);
+        }
+      });
+      frame.src = url;
+    }
+
     function loadWithView(spec, arg) {
       fetch(url, { mode: 'cors' })
         .then(function (res) {
@@ -266,7 +302,9 @@
     }
 
     function loadFrame() {
-      if (viewSpec) loadWithView(viewSpec, viewArg); else loadPlain();
+      if (!viewSpec) { loadPlain(); return; }
+      if (isSameOrigin(url)) loadWithViewSameOrigin(viewSpec, viewArg);
+      else loadWithView(viewSpec, viewArg);
     }
 
     if (url) {
