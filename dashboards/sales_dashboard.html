@@ -325,6 +325,9 @@ details.acc summary{cursor:pointer;font-size:13px;font-weight:700;color:var(--s1
         </div>
         <div style="overflow-x:auto"><table class="edit" id="editTbl"></table></div>
         <p class="msg" id="gridMsg"></p>
+        <!-- Says plainly that a draft is local-only, so nobody assumes typing
+             into the form already updated the Sheet. -->
+        <p class="msg" id="draftMsg" style="margin-top:4px"></p>
       </div>
 
       <div class="card c12" id="syncCard">
@@ -1084,8 +1087,97 @@ function applyBoot(){
     (state.gsTab?` · แท็บ <b>${state.gsTab}</b>`:'');
   buildGrid();render();syncGate();
 }
+/* ── Local autosave ────────────────────────────────────────────────────────
+   Edits used to live only in memory: the numbers recalculated correctly, but a
+   reload threw them away and reverted to the values baked into the file. The
+   only way to keep anything was to remember to press "อัปเดตข้อมูล", which
+   writes to the Sheet.
+
+   The whole `state` object is now mirrored into localStorage on every change,
+   so a reload — or coming back later — restores exactly what was typed. This
+   is a local draft only; the Sheet is still updated solely by that button, so
+   nothing is written to shared data behind the user's back. */
+const LS_KEY='mlSales.draft.v1';
+
+function saveDraft(){
+  try{
+    localStorage.setItem(LS_KEY,JSON.stringify({at:Date.now(),state:state}));
+    markDraft(true);
+  }catch(e){ /* quota or private mode — editing still works, just not persisted */ }
+}
+function clearDraft(){
+  try{localStorage.removeItem(LS_KEY);}catch(e){}
+  markDraft(false);
+}
+function loadDraft(){
+  try{
+    const raw=localStorage.getItem(LS_KEY);
+    if(!raw)return false;
+    const d=JSON.parse(raw);
+    if(!d||!d.state||!Array.isArray(d.state.rows))return false;
+    /* Ignore a draft saved against a different set of products, otherwise the
+       columns and the values would no longer line up. */
+    if(!Array.isArray(d.state.names)||d.state.names.length!==BOOT.names.length)return false;
+    state=d.state;
+    draftAt=d.at||null;
+    return true;
+  }catch(e){ return false; }
+}
+
+let draftAt=null;
+function markDraft(on){
+  const el=document.getElementById('draftMsg');
+  if(!el)return;
+  if(!on){el.textContent='';return;}
+  const t=new Date(draftAt||Date.now());
+  el.innerHTML='💾 บันทึกฉบับร่างไว้ในเครื่องนี้แล้ว ('+
+    t.toLocaleString('th-TH',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})+
+    ') · ยังไม่ได้ส่งขึ้น Sheet <button class="btn ghost sm" id="dropDraft" style="margin-left:6px">ทิ้งฉบับร่าง</button>';
+  const b=document.getElementById('dropDraft');
+  if(b)b.addEventListener('click',()=>{
+    resetToBoot();
+    toast('ทิ้งฉบับร่างแล้ว — กลับไปใช้ข้อมูลตั้งต้น');
+  });
+}
+
+/* Resetting repaints, and a repaint would immediately write the draft back —
+   so autosave is suspended for the duration and the key cleared afterwards. */
+function resetToBoot(){
+  autosaveArmed=false;
+  state=JSON.parse(JSON.stringify(BOOT));
+  applyBoot();
+  clearDraft();
+  autosaveArmed=true;
+}
+
+/* Any edit funnels through refreshCalc() or render(), so wrapping them catches
+   every path — typing, paste, add/remove product, pull-from-Sheet — without
+   having to find and touch each handler. */
+let autosaveArmed=false;   // stays off through the first paint
+(function(){
+  const _refresh=refreshCalc, _render=render;
+  let t=null;
+  const queue=()=>{
+    if(!autosaveArmed)return;   // opening the page is not an edit
+    clearTimeout(t);
+    t=setTimeout(()=>{draftAt=Date.now();saveDraft();},400);
+  };
+  refreshCalc=function(){ _refresh.apply(this,arguments); queue(); };
+  render=function(){ _render.apply(this,arguments); queue(); };
+})();
+
+/* "คืนค่าข้อมูลตั้งต้น" must drop the draft too, otherwise the next reload
+   would bring the discarded numbers straight back. Its own handler already
+   restores BOOT and repaints; this runs after and clears the key the repaint
+   just rewrote. */
+document.getElementById('reDemo').addEventListener('click',()=>setTimeout(clearDraft,500));
+
 window.__test={applyMatrix,parseCSV,toMatrix,derive,state:()=>state};
+
+const hadDraft=loadDraft();
 applyBoot();setupCapture();
+autosaveArmed=true;            // from here on, every change is a real edit
+if(hadDraft){markDraft(true);toast('เรียกข้อมูลที่แก้ไว้ล่าสุดกลับมาแล้ว');}
 </script>
 </body>
 </html>
