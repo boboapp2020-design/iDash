@@ -78,6 +78,47 @@ window.iDashKnownDatasetEntries = [
         { role: 'trend', type: 'line', timeCol: 'created_date', numCols: ['deal_value'], title: 'มูลค่าดีลใหม่ตามช่วงเวลา' }
       ]
     }
+  },
+
+  // ── 4. จัดซื้อ — ติดตาม PR → PO ────────────────────────────────────────
+  // Paired sample: _dev/samples/procurement_po.xlsx (sheet "Data", 494 rows).
+  //
+  // This entry uses the curated-template path (templateFile + columnMapping)
+  // rather than a generated blueprint: the hand-built tracker already knows how
+  // to age a PR, flag a late delivery and drive its own filters, which no
+  // generic chart plan reproduces.
+  //
+  // Header text is matched loosely by prepareTemplateHtml (bracketed notes and
+  // whitespace are normalized away), so the annotated delivery-date column
+  // matches without reproducing its "[ 15 วันหลังออก PO]" suffix exactly.
+  {
+    id: 'procurement_pr_po_tracking',
+    nameTH: 'จัดซื้อ — ติดตาม PR → PO',
+    fingerprint: {
+      columns: [
+        'changed on', 'purchase requisition', 'purchase order', 'release date',
+        'short text', 'quantity requested', 'unit of measure', 'requisitioner',
+        'purchasing group', 'purchaser', 'delivery date warning',
+        'delivery date complete'
+      ],
+      requiredCoverage: 0.75
+    },
+    themeId: 'ocean_blue',
+    templateFile: 'procurement_po_tracking.html',
+    // template field → Excel column header
+    columnMapping: {
+      pr:   'Purchase Requisition',
+      po:   'Purchase order',
+      rel:  'Release Date',
+      item: 'Short Text',
+      qty:  'Quantity requested',
+      uom:  'Unit of Measure',
+      req:  'Requisitioner',
+      grp:  'Purchasing Group',
+      buy:  'Purchaser',
+      warn: 'Delivery date Warning',
+      comp: 'Delivery date Complete'
+    }
   }
 
 ];
