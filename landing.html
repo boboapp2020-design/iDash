@@ -28,23 +28,27 @@ body {
   position: relative; overflow: hidden;
   background: linear-gradient(160deg, #f7faff 0%, #eef4fe 55%, #e6eefc 100%);
   display: flex; flex-direction: column; justify-content: center;
-  padding: 56px clamp(32px, 5vw, 88px);
+  /* 40px rather than 56px: at 1440x900 the taller logo pushed the column past
+     the viewport and put a scrollbar on the whole page. Trimming the padding
+     buys that back without shrinking the logo. */
+  padding: 40px clamp(32px, 5vw, 88px);
 }
-.blob { position: absolute; border-radius: 50%; background: #dbe7fb; opacity: .55; pointer-events: none; }
-.blob-1 { width: 190px; height: 190px; top: 9%;  right: 16%; }
-.blob-2 { width: 300px; height: 300px; top: 20%; left: -140px; opacity: .38; }
+/* Decoration only — kept small and faint so they never compete with the logo. */
+.blob { position: absolute; border-radius: 50%; background: #dbe7fb; opacity: .4; pointer-events: none; }
+.blob-1 { width: 104px; height: 104px; top: 11%; right: 14%; }
+.blob-2 { width: 170px; height: 170px; top: 24%; left: -90px; opacity: .28; }
 .wave { position: absolute; left: 0; right: 0; bottom: 0; width: 100%; pointer-events: none; }
 .brand-inner { position: relative; z-index: 1; max-width: 520px; }
 
 /* The real logo lockup (bars + wordmark + tagline) as one artwork, sized off
    the panel so it stays large on wide screens without overflowing narrow ones.
    The PNG has a transparent background, so it sits on the gradient cleanly. */
-.brand-logo { margin-bottom: 26px; }
+.brand-logo { margin-bottom: 24px; }
 .brand-logo img {
   /* Sized against the panel AND the viewport height: the height term is what
      stops a tall logo from pushing the feature list off a short screen, while
      still letting it grow on a large monitor. */
-  width: clamp(190px, min(62%, 32vh), 340px);
+  width: clamp(210px, min(76%, 40vh), 420px);
   height: auto; display: block;
 }
 
@@ -142,22 +146,35 @@ form { margin-top: 32px; }
   font-size: 11.5px; color: var(--ink-2); line-height: 1.7; text-align: center;
 }
 
-/* Short laptops (1366×768 and similar): tighten the vertical rhythm so the
-   whole panel still lands on one screen instead of forcing a scroll. */
-@media (max-height: 820px) {
-  .brand { padding-top: 32px; padding-bottom: 32px; }
-  .brand-logo { margin-bottom: 18px; }
-  .brand-logo img { width: clamp(180px, min(62%, 28vh), 340px); }
-  .features { margin-top: 26px; gap: 16px; }
-  .feature-icon { width: 48px; height: 48px; border-radius: 13px; }
-  .feature-icon svg { width: 22px; height: 22px; }
+/* A bigger logo only works if the rest of the column gives way on shorter
+   screens. Two tiers, both measured against real viewport sizes: 1440×900
+   desktops, then 1366×768 laptops. Without these the page grows a scrollbar. */
+@media (max-height: 960px) {
+  .brand { padding-top: 24px; padding-bottom: 24px; }
+  .brand-logo { margin-bottom: 16px; }
+  .features { margin-top: 20px; gap: 15px; }
+  .feature-icon { width: 50px; height: 50px; border-radius: 13px; }
+  .feature-icon svg { width: 23px; height: 23px; }
   .brand-rule { margin: 16px 0 14px; }
-  .panel { padding-top: 20px; padding-bottom: 20px; }
-  .card { padding-top: 32px; padding-bottom: 32px; }
-  form { margin-top: 24px; }
-  .field { margin-bottom: 15px; }
-  .divider { margin: 18px 0; }
-  .note { margin-top: 16px; }
+  .panel { padding-top: 24px; padding-bottom: 24px; }
+  .card { padding-top: 34px; padding-bottom: 34px; }
+  form { margin-top: 26px; }
+  .field { margin-bottom: 16px; }
+  .divider { margin: 20px 0; }
+}
+
+@media (max-height: 810px) {
+  .brand-logo img { width: clamp(190px, min(76%, 32vh), 420px); }
+  .brand { padding-top: 26px; padding-bottom: 26px; }
+  .features { margin-top: 20px; gap: 13px; }
+  .feature-icon { width: 46px; height: 46px; }
+  .feature-icon svg { width: 21px; height: 21px; }
+  .panel { padding-top: 18px; padding-bottom: 18px; }
+  .card { padding-top: 30px; padding-bottom: 30px; }
+  form { margin-top: 22px; }
+  .field { margin-bottom: 14px; }
+  .divider { margin: 16px 0; }
+  .note { margin-top: 15px; }
 }
 
 @media (max-width: 900px) {
