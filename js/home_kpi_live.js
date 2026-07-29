@@ -133,7 +133,75 @@
     if (sparkEl) sparkEl.innerHTML = buildSpark(kpi.spark, accent, kpi.id);
   }
 
-  function renderAll(payload, staleAt) {
+  /* ── Payload adapters ───────────────────────────────────────────────────
+   * The endpoint now serves the Production Dashboard's own feed
+   * ({success, daily[], water, stop}) rather than the {latestDate, kpis[]}
+   * shape this row was written against. Nothing errored — `payload.kpis` was
+   * simply undefined, so every refresh painted nothing and the row sat on its
+   * cached values behind a permanent "กำลังอัปเดต…".
+   *
+   * The five headline figures are all present in `daily`, so they are derived
+   * here. The legacy shape is still accepted in case that deployment returns.
+   */
+  var DAILY_KPIS = [
+    { id: 'cane_crushed', field: 'cane_today',    label: 'จำนวนอ้อยเข้าหีบ', unit: 'ตัน',  decimals: 0, todate: 'cane_todate',    target: 'cane_target' },
+    { id: 'ccs_factory',  field: 'ccs_today',     label: 'CCS of Factory',   unit: '',      decimals: 2, todate: 'ccs_todate',     target: 'ccs_target' },
+    // Burnt cane is a defect rate: falling is the good direction.
+    { id: 'burnt_cane',   field: 'burnt_today',   label: '% Burnt Cane',     unit: '%',     decimals: 2, todate: 'burnt_todate',   lowerIsBetter: true },
+    { id: 'cane_as_telq', field: 'pcttelq_today', label: '% Cane as TELQ',   unit: '%',     decimals: 2, todate: 'pcttelq_todate', target: 'pcttelq_target' },
+    { id: 'edl_export',   field: 'edl_today',     label: 'ขายไฟ (EDL)',      unit: 'kWh',   decimals: 0, todate: 'edl_todate',     target: 'edl_target' }
+  ];
+
+  function toNum(v) {
+    if (v === null || v === undefined || v === '') return null;
+    var n = parseFloat(String(v).replace(/[, ]/g, ''));
+    return isNaN(n) ? null : n;
+  }
+
+  function fromDaily(payload) {
+    var rows = (payload.daily || []).filter(function (r) { return r && r.date; });
+    if (rows.length === 0) return null;
+    var last = rows[rows.length - 1];
+    var prev = rows.length > 1 ? rows[rows.length - 2] : null;
+
+    var kpis = DAILY_KPIS.map(function (d) {
+      var today = toNum(last[d.field]);
+      var before = prev ? toNum(prev[d.field]) : null;
+      // A percentage change against zero is undefined, not infinite — leave the
+      // delta out rather than print a meaningless number.
+      var delta = (today !== null && before !== null && before !== 0)
+        ? ((today - before) / Math.abs(before)) * 100
+        : null;
+      var direction = delta === null ? null
+        : ((d.lowerIsBetter ? delta < 0 : delta > 0) ? 'up' : 'down');
+
+      return {
+        id: d.id, nameTH: d.label, unit: d.unit, decimals: d.decimals,
+        today: today,
+        value: today,
+        todate: d.todate ? toNum(last[d.todate]) : null,
+        target: d.target ? toNum(last[d.target]) : null,
+        delta: delta,
+        direction: direction,
+        spark: rows.slice(-14).map(function (r) { return toNum(r[d.field]); })
+                   .filter(function (v) { return v !== null; })
+      };
+    });
+
+    return { latestDate: last.date, kpis: kpis };
+  }
+
+  /** Accept either payload shape; returns the {latestDate, kpis} form. */
+  function normalize(payload) {
+    if (!payload) return null;
+    if (Array.isArray(payload.kpis) && payload.kpis.length) return payload;
+    if (Array.isArray(payload.daily) && payload.daily.length) return fromDaily(payload);
+    return null;
+  }
+
+  function renderAll(rawPayload, staleAt) {
+    var payload = normalize(rawPayload);
+    if (!payload) { renderUnconfigured('รูปแบบข้อมูลจากชีตไม่ตรงกับที่รองรับ'); return; }
     var byId = {};
     (payload.kpis || []).forEach(function (k) { byId[k.id] = k; });
 
@@ -189,8 +257,11 @@
       })
       .then(function (payload) {
         if (payload.error) throw new Error(payload.error);
-        writeCache(payload);
-        return payload;
+        // Cache the five derived figures, not the ~1.2MB raw feed the endpoint
+        // returns — the row only ever needs the small form.
+        var slim = normalize(payload);
+        if (slim) writeCache(slim);
+        return slim || payload;
       });
   }
 
