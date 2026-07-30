@@ -209,13 +209,10 @@ function initUploadZone() {
         openCustomStudioUploadModal();
         return;
       }
-      const input = document.createElement('input');
-      input.type = 'file';
-      input.accept = '.xlsx,.xls,.csv,.json';
-      input.addEventListener('change', (e) => {
-        if (e.target.files.length) startAutopilot(e.target.files[0]);
-      });
-      input.click();
+      // Clicking asks WHO builds the dashboard first — the route changes what
+      // happens to the file (offline match vs. a call out to an AI provider),
+      // so it is fairer to settle that before the file is handed over.
+      openBuildModeModal(null);
     });
 
     card.addEventListener('dragover', (e) => { e.preventDefault(); card.style.borderColor = '#2563eb'; card.style.background = '#eff6ff'; });
@@ -257,15 +254,46 @@ async function startAutopilot(file) {
   openBuildModeModal(dataset);
 }
 
+/**
+ * Second half of the click path: the route is already chosen, so ask for the
+ * file and run straight into that route. Cancelling the file dialog leaves the
+ * page exactly as it was — nothing is remembered.
+ */
+function pickFileThenRun(mode) {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = '.xlsx,.xls,.csv,.json';
+  input.addEventListener('change', async (e) => {
+    if (!e.target.files.length) return;
+    const file = e.target.files[0];
+    let dataset;
+    try {
+      dataset = await resolveDatasetForPipeline(file);
+    } catch (err) {
+      return; // user cancelled the sheet picker — quietly back out
+    }
+    if (file instanceof File) dataset.sourceFile = file;
+    runAutopilotPipeline(dataset, null, { mode: mode });
+  });
+  input.click();
+}
+
 /* ── Build-mode chooser ─────────────────────────────────────────────────── */
 
 let pendingDataset = null;
 
+/**
+ * Opens the route chooser. `dataset` is null on the normal click path — the
+ * route is picked first and the file is asked for afterwards. It is only
+ * non-null when a file was dropped onto the zone, in which case re-asking for
+ * the same file would be rude.
+ */
 function openBuildModeModal(dataset) {
   const modal = document.getElementById('buildModeModal');
-  if (!modal) { runAutopilotPipeline(dataset, null, { mode: 'template' }); return; }
+  if (!modal) { pickFileThenRun('template'); return; }
   pendingDataset = dataset;
-  document.getElementById('bmFileName').textContent = dataset.filename || 'ไฟล์ที่อัปโหลด';
+  document.getElementById('bmFileName').textContent =
+    dataset ? (dataset.filename || 'ไฟล์ที่อัปโหลด') : 'เลือกช่องทางก่อน แล้วจึงอัปโหลดไฟล์';
 
   // Tell the user up front whether the AI route is ready to go.
   const tag = document.getElementById('bmAiTag');
@@ -296,17 +324,19 @@ function initBuildModeModal() {
     btn.addEventListener('click', () => {
       const mode = btn.dataset.buildMode;
       const dataset = pendingDataset;
+      pendingDataset = null;
       closeBuildModeModal();
-      if (!dataset) return;
-      if (mode === 'ai') {
-        // Send them through setup first when the provider isn't usable yet.
-        if (window.iDashAIProviders && window.iDashAIProviders.configProblem()) {
-          openAiSetupModal(() => runAutopilotPipeline(dataset, null, { mode: 'ai' }));
-        } else {
-          runAutopilotPipeline(dataset, null, { mode: 'ai' });
-        }
+
+      // No file yet (the usual path): settle the AI provider first if this
+      // route needs one, then ask for the file.
+      const start = dataset
+        ? () => runAutopilotPipeline(dataset, null, { mode: mode })
+        : () => pickFileThenRun(mode);
+
+      if (mode === 'ai' && window.iDashAIProviders && window.iDashAIProviders.configProblem()) {
+        openAiSetupModal(start);
       } else {
-        runAutopilotPipeline(dataset, null, { mode: 'template' });
+        start();
       }
     });
   });
