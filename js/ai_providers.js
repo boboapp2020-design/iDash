@@ -46,10 +46,21 @@
       keyUrl: 'supabase.com/dashboard → Settings → API',
       needsEndpoint: true,
       endpointHint: 'https://<project>.supabase.co/functions/v1/llm-gateway',
+      // The gateway routes on the model's family prefix (claude-* / gemini-* /
+      // gpt-*|o3*|o4*), so one endpoint reaches all three vendors. A model only
+      // works once its vendor's secret is set on the function; picking one
+      // without the secret returns a message naming the secret to add.
       models: [
-        { id: 'claude-opus-4-8',  label: 'Claude Opus 4.8 — เก่งสุด แนะนำ', tier: 'paid' },
-        { id: 'claude-sonnet-5',  label: 'Claude Sonnet 5 — สมดุล',         tier: 'paid' },
-        { id: 'claude-haiku-4-5', label: 'Claude Haiku 4.5 — เร็ว ถูกสุด',  tier: 'paid' }
+        { id: 'claude-opus-4-8',   label: 'Claude Opus 4.8 — เก่งสุด แนะนำ',     tier: 'paid' },
+        { id: 'claude-sonnet-5',   label: 'Claude Sonnet 5 — สมดุล',             tier: 'paid' },
+        { id: 'claude-haiku-4-5',  label: 'Claude Haiku 4.5 — เร็ว ถูกสุด',      tier: 'paid' },
+        { id: 'gemini-2.5-pro',    label: 'Gemini 2.5 Pro — เก่งสุดของ Google',  tier: 'paid' },
+        { id: 'gemini-2.5-flash',  label: 'Gemini 2.5 Flash — เร็ว โควตาฟรีเยอะ', tier: 'free' },
+        { id: 'gemini-2.0-flash',  label: 'Gemini 2.0 Flash',                    tier: 'free' },
+        { id: 'gpt-4o',            label: 'GPT-4o',                              tier: 'paid' },
+        { id: 'gpt-4o-mini',       label: 'GPT-4o mini — ถูก',                   tier: 'paid' },
+        { id: 'gpt-4.1',           label: 'GPT-4.1',                             tier: 'paid' },
+        { id: 'o3-mini',           label: 'o3-mini — คิดลึก',                    tier: 'paid' }
       ]
     },
     anthropic: {
