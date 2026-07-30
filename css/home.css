@@ -434,9 +434,11 @@ a.home-quick:hover .chev { color: var(--acc); }
 }
 .home-chat-cover[hidden] { display: none; }
 .home-chat-cover.is-going { opacity: 0; pointer-events: none; }
+/* The cutout is portrait (406x640), so size it by HEIGHT — a width clamp would
+   let a tall robot push the button out of the panel. */
 .home-chat-bot {
-  width: clamp(112px, 46%, 178px); height: auto; display: block;
-  margin-bottom: 6px;
+  height: clamp(130px, 48%, 210px); width: auto; max-width: 62%; display: block;
+  flex-shrink: 0; margin-bottom: 8px;
   filter: drop-shadow(0 14px 22px rgba(30, 64, 175, .22));
   transition: transform .22s ease;
 }
