@@ -9,7 +9,18 @@
    sidebar 260 · content pad 32 · content 1212 · columns 688:508 gap 16. */
 :root { --sidebar-w: 260px; }
 
-body { background: #f6fafd; }
+/* A tinted wash rather than a flat panel: three very low-alpha colour pools
+   (the same blue/violet/green the cards use) so the page reads as coloured
+   even where nothing is printed on it. Fixed, so it does not slide under the
+   content while scrolling. */
+body {
+  background:
+    radial-gradient(880px 540px at 10% -10%, rgba(59, 130, 246, .16), transparent 62%),
+    radial-gradient(760px 480px at 96% -2%, rgba(139, 92, 246, .13), transparent 60%),
+    radial-gradient(820px 560px at 74% 104%, rgba(16, 185, 129, .11), transparent 62%),
+    #f3f7fe;
+  background-attachment: fixed;
+}
 .content { padding: 24px 32px 8px; }
 
 /* ─── SIDEBAR extras ─── */
@@ -74,17 +85,30 @@ body { background: #f6fafd; }
 }
 /* Stacked and centred like the reference art: a large icon chip on top, then
    label, value and delta beneath it, with the sparkline bleeding to the edges. */
+/* Each card carries its own hue as --acc/--acc2 (set inline in index.html, and
+   read back by home_kpi_live.js to colour the sparkline) so the card chrome,
+   the icon halo and the line are all the same colour without repeating it. */
 .home-kpi {
+  --acc: #3b82f6; --acc2: #93c5fd;
   position: relative;
-  background: #fff; border: 2px solid var(--border); border-radius: var(--radius);
+  border: 2px solid var(--border); border-radius: var(--radius);
   padding: clamp(16px, 1.5vw, 22px) clamp(10px, 1vw, 16px) 0; box-shadow: var(--shadow-sm);
   display: flex; flex-direction: column; overflow: hidden; min-width: 0;
   transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+  background: #fff;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--acc) 9%, #fff) 0%, #fff 46%);
+  border-color: color-mix(in srgb, var(--acc) 20%, #fff);
+}
+/* The colour band along the top edge — the strongest signal that the five
+   cards are five different measures, readable even at a glance. */
+.home-kpi::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px;
+  background: linear-gradient(90deg, var(--acc) 0%, var(--acc2) 100%);
 }
 .home-kpi:hover {
   transform: translateY(-3px);
   box-shadow: var(--shadow-lg);
-  border-color: #d3e0f7;
+  border-color: color-mix(in srgb, var(--acc) 55%, #fff);
 }
 .home-kpi-top {
   display: flex; flex-direction: column; align-items: center;
@@ -98,6 +122,13 @@ body { background: #f6fafd; }
   /* 46% of the content box ≈ 38% of the full card once padding is accounted for */
   width: clamp(56px, 46%, 104px); aspect-ratio: 1;
   flex-shrink: 0; display: block; object-fit: contain;
+  /* A halo in the card's own hue, so the pale artwork sits on colour instead of
+     on white. Kept behind the glyph — the artwork itself is untouched. */
+  border-radius: 50%;
+  background: radial-gradient(circle at 50% 48%,
+    color-mix(in srgb, var(--acc) 26%, transparent) 0%,
+    color-mix(in srgb, var(--acc) 10%, transparent) 58%,
+    transparent 74%);
 }
 .home-kpi-label {
   font-size: clamp(11px, .9vw, 13px); font-weight: 600; color: var(--gray-600);
@@ -244,6 +275,13 @@ body { background: #f6fafd; }
 /* ─── SECTION HEADINGS ─── */
 .home-sec-head { display: flex; align-items: center; gap: 10px; margin-bottom: 9px; }
 .home-sec-title { font-size: 14.5px; font-weight: 800; color: var(--gray-900); }
+/* A short colour rule in front of every section title, so the headings are part
+   of the palette instead of plain black text on a coloured page. */
+.home-sec-title::before {
+  content: ''; display: inline-block; width: 4px; height: 15px;
+  border-radius: 3px; margin-right: 9px; vertical-align: -2px;
+  background: linear-gradient(180deg, #2563eb 0%, #60a5fa 100%);
+}
 .home-sec-link {
   margin-left: auto; font-size: 12px; font-weight: 600; color: var(--primary);
   text-decoration: none; display: flex; align-items: center; gap: 3px;
@@ -256,21 +294,36 @@ body { background: #f6fafd; }
   /* Room for the HOT badge, which sits above the card's top edge. */
   margin-top: 12px;
 }
+/* Same --acc idea as the KPI row: one hue per destination, set inline, driving
+   the wash, the border and the icon tile together. */
 .home-quick {
-  background: #fff; border: 2px solid var(--border); border-radius: 12px;
+  --acc: #2563eb;
+  background: #fff;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--acc) 12%, #fff) 0%, #fff 62%);
+  border: 2px solid var(--border);
+  border-color: color-mix(in srgb, var(--acc) 24%, #fff);
+  border-radius: 12px;
   padding: 13px 14px; box-shadow: var(--shadow-sm);
   display: flex; align-items: center; gap: 11px;
   text-decoration: none; color: inherit;
   transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
 }
 a.home-quick { cursor: pointer; }
-a.home-quick:hover .chev { color: var(--primary); }
+a.home-quick:hover .chev { color: var(--acc); }
 .home-quick:hover {
   transform: translateY(-3px);
   box-shadow: var(--shadow-lg);
-  border-color: #d3e0f7;
+  border-color: var(--acc);
 }
-.home-quick svg.qi { width: 26px; height: 26px; flex-shrink: 0; }
+/* The bare glyph became a tinted tile — the reference art's strongest colour
+   cue in this row. Padding on the <svg> needs border-box to stay square. */
+.home-quick svg.qi {
+  box-sizing: border-box;
+  width: 40px; height: 40px; flex-shrink: 0;
+  padding: 8px; border-radius: 11px;
+  background: color-mix(in srgb, var(--acc) 16%, #fff);
+  box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--acc) 26%, #fff);
+}
 .home-quick-body { flex: 1; min-width: 0; }
 .home-quick-name {
   font-size: 13px; font-weight: 700; color: var(--gray-900);
@@ -285,10 +338,12 @@ a.home-quick:hover .chev { color: var(--primary); }
    turning the row into four competing colours. */
 .home-quick.is-hot {
   position: relative; overflow: visible;
-  border-color: #fcd9b6;
-  background: linear-gradient(135deg, #fffaf4 0%, #fff 58%);
+  /* Warmer and one step stronger than its three neighbours — this is the card
+     the badge is pointing at, so it carries the row's only hot hue. */
+  background: linear-gradient(135deg, color-mix(in srgb, var(--acc) 20%, #fff) 0%, #fff 60%);
+  border-color: color-mix(in srgb, var(--acc) 40%, #fff);
 }
-.home-quick.is-hot:hover { border-color: #f59e0b; }
+.home-quick.is-hot:hover { border-color: var(--acc); }
 
 .home-quick-hot {
   position: absolute; top: -9px; right: 10px;
@@ -317,14 +372,15 @@ a.home-quick:hover .chev { color: var(--primary); }
    stretching to the tallest column. */
 .home-bottom { display: grid; grid-template-columns: 688fr 508fr; gap: 16px; margin-bottom: 12px; align-items: start; }
 .home-panel {
-  background: #fff; border: 2px solid var(--border); border-radius: var(--radius);
+  background: linear-gradient(180deg, #f4f8ff 0%, #fff 42%);
+  border: 2px solid #e2ebfa; border-radius: var(--radius);
   padding: 13px 16px 15px; box-shadow: var(--shadow-sm);
   transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
 }
 .home-panel:hover {
   transform: translateY(-3px);
   box-shadow: var(--shadow-lg);
-  border-color: #d3e0f7;
+  border-color: #b9d1f6;
 }
 
 /* Recent dashboards — reuses the stock .template-card (with lightbox preview),
@@ -336,6 +392,8 @@ a.home-quick:hover .chev { color: var(--primary); }
    right column, so it stretches to match the Recent Dashboards panel. */
 .home-chat { display: flex; flex-direction: column; align-self: stretch; }
 .home-chat .home-sec-title { display: flex; align-items: center; gap: 8px; }
+/* In the flex title the gap already spaces the rule off the badge. */
+.home-chat .home-sec-title::before { margin-right: 0; }
 .home-chat-badge {
   width: 26px; height: 26px; border-radius: 8px; flex-shrink: 0;
   background: linear-gradient(135deg, #3b82f6, #2563eb);

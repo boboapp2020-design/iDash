@@ -86,7 +86,9 @@
     var valueEl = card.querySelector('[data-kpi-value]');
     var deltaEl = card.querySelector('[data-kpi-delta]');
     var sparkEl = card.querySelector('[data-kpi-spark]');
-    var accent = card.getAttribute('data-accent') || '#3b82f6';
+    // The card's hue lives in the --acc custom property, which also drives its
+    // top band, halo and border in home.css — one declaration, one colour.
+    var accent = (card.style.getPropertyValue('--acc') || '').trim() || '#3b82f6';
 
     // The row is "ภาพรวมการทำงานของโรงงานวันนี้": the headline is the LATEST
     // DAY's figure, not the season total. The API sends both — cumulative stays

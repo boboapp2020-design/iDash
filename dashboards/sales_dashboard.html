@@ -237,7 +237,7 @@ details.acc summary{cursor:pointer;font-size:13px;font-weight:700;color:var(--s1
       <h1 contenteditable="true" id="tTitle">Sales Performance Dashboard — ปี 2026</h1>
       <div class="sub" contenteditable="true" id="tSub">ยอดจ่ายออกสะสม เทียบแผนงบการเงิน 2026 · หน่วย: ตัน</div>
     </div>
-    <div class="chip"><span class="dot"></span><span contenteditable="true" id="tDate">ข้อมูล ณ วันที่ 27 กรกฎาคม 2026</span></div>
+    <div class="chip"><span class="dot"></span><span contenteditable="true" id="tDate">ข้อมูล ณ วันที่ 30 กรกฎาคม 2026</span></div>
     <button class="btn" id="themeBtn">🌙 โหมดมืด</button>
     <button class="btn primary" id="saveAll">🖼 บันทึกทั้งหน้า</button>
   </div>
@@ -384,7 +384,7 @@ details.acc summary{cursor:pointer;font-size:13px;font-weight:700;color:var(--s1
 
 <div id="tip"></div>
 <div class="toast" id="toast"></div>
-<script type="application/json" id="dataStore">{"title": "Sales Performance Dashboard — ปี 2026", "sub": "ยอดจ่ายออกสะสม เทียบแผนงบการเงิน 2026 · หน่วย: ตัน", "asOf": "ข้อมูล ณ วันที่ 27 กรกฎาคม 2026", "unit": "ตัน", "yy": "26", "names": ["DCR", "VHP", "Organic", "White Sugar"], "rows": [{"m": "ม.ค.-26", "v": [1421, null, 170, null], "plan": 1623}, {"m": "ก.พ.-26", "v": [403, 2468, 320, null], "plan": 3172}, {"m": "มี.ค.-26", "v": [1947, 8086, 60, null], "plan": 10136}, {"m": "เม.ย.-26", "v": [1810, 5160, 125, null], "plan": 7100}, {"m": "พ.ค.-26", "v": [1575, 1250, 350, null], "plan": 8500}, {"m": "มิ.ย.-26", "v": [1981, 5934, 80, null], "plan": 11044}, {"m": "ก.ค.-26", "v": [1602, 4865, 345, null], "plan": 10735}, {"m": "ส.ค.-26", "v": [null, null, null, null], "plan": 6914}, {"m": "ก.ย.-26", "v": [null, null, null, null], "plan": 7296}, {"m": "ต.ค.-26", "v": [null, null, null, null], "plan": 8295}, {"m": "พ.ย.-26", "v": [null, null, null, null], "plan": 4451}, {"m": "ธ.ค.-26", "v": [null, null, null, null], "plan": 10783}], "target": [34195, 54216, 1638, null], "gsId": "1lhhOGy9mRxcWSyM70CweoLH6MhSN_qf83tEEFaCpWi0", "gsUrl": "https://docs.google.com/spreadsheets/d/1lhhOGy9mRxcWSyM70CweoLH6MhSN_qf83tEEFaCpWi0/edit", "gsTab": "Sheet1", "gsApi": "https://script.google.com/macros/s/AKfycbwpg3-toLH5AiRGtDFgCdJDxpYJpXkIeSZmfLhn4fOr1J0sbyoTizMq9RjgzpmQISUcnA/exec"}</script>
+<script type="application/json" id="dataStore">{"title": "Sales Performance Dashboard — ปี 2026", "sub": "ยอดจ่ายออกสะสม เทียบแผนงบการเงิน 2026 · หน่วย: ตัน", "asOf": "ข้อมูล ณ วันที่ 30 กรกฎาคม 2026", "unit": "ตัน", "yy": "26", "names": ["DCR", "VHP", "Organic", "White Sugar"], "rows": [{"m": "ม.ค.-26", "v": [1421, null, 170, null], "plan": 1623}, {"m": "ก.พ.-26", "v": [403, 2468, 320, null], "plan": 3172}, {"m": "มี.ค.-26", "v": [1947, 8086, 60, null], "plan": 10136}, {"m": "เม.ย.-26", "v": [1810, 5160, 125, null], "plan": 7100}, {"m": "พ.ค.-26", "v": [1575, 1250, 350, null], "plan": 8500}, {"m": "มิ.ย.-26", "v": [1981, 5934, 80, null], "plan": 11044}, {"m": "ก.ค.-26", "v": [1602, 4865, 345, null], "plan": 10735}, {"m": "ส.ค.-26", "v": [null, null, null, null], "plan": 6914}, {"m": "ก.ย.-26", "v": [null, null, null, null], "plan": 7296}, {"m": "ต.ค.-26", "v": [null, null, null, null], "plan": 8295}, {"m": "พ.ย.-26", "v": [null, null, null, null], "plan": 4451}, {"m": "ธ.ค.-26", "v": [null, null, null, null], "plan": 10783}], "target": [34195, 54216, 1638, null], "gsId": "1lhhOGy9mRxcWSyM70CweoLH6MhSN_qf83tEEFaCpWi0", "gsUrl": "https://docs.google.com/spreadsheets/d/1lhhOGy9mRxcWSyM70CweoLH6MhSN_qf83tEEFaCpWi0/edit", "gsTab": "Sheet1", "gsApi": "https://script.google.com/macros/s/AKfycbwpg3-toLH5AiRGtDFgCdJDxpYJpXkIeSZmfLhn4fOr1J0sbyoTizMq9RjgzpmQISUcnA/exec"}</script>
 <script>/*!
  * html2canvas 1.4.1 <https://html2canvas.hertzen.com>
  * Copyright (c) 2022 Niklas von Hertzen <https://hertzen.com>
@@ -1119,6 +1119,12 @@ function loadDraft(){
        columns and the values would no longer line up. */
     if(!Array.isArray(d.state.names)||d.state.names.length!==BOOT.names.length)return false;
     state=d.state;
+    /* The header stamp belongs to the file, not to the draft. state.asOf is only
+       ever refreshed from the DOM by saveHtml(), so a draft just carries whatever
+       default was current when it was saved — keeping it would mean a new as-of
+       date in this file could never reach anyone who has edited the page before:
+       their stale stamp would restore straight over it on load. */
+    state.asOf=BOOT.asOf;
     draftAt=d.at||null;
     return true;
   }catch(e){ return false; }
