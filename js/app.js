@@ -354,13 +354,56 @@ function openAiSetupModal(onSaved) {
   if (!modal || !window.iDashAIProviders) return;
   aiSetupOnSaved = onSaved || null;
 
+  // Reopen on whichever mode the saved provider belongs to, so the modal shows
+  // the setup that is actually in force rather than a default.
+  const savedId = window.iDashAIProviders.loadSettings().providerId;
+  const mode = savedId === GATEWAY_PROVIDER ? 'gateway' : 'direct';
+  const radio = modal.querySelector('input[name="aiConnMode"][value="' + mode + '"]');
+  if (radio) radio.checked = true;
+  syncAiConnMode(savedId);
+  document.getElementById('aiSetupMsg').textContent = '';
+  modal.hidden = false;
+}
+
+const AI_MODEL_CUSTOM = '__custom__';
+const GATEWAY_PROVIDER = 'supabase';
+
+/** Which connection mode the cards are on right now. */
+function currentAiConnMode() {
+  const picked = document.querySelector('input[name="aiConnMode"]:checked');
+  return picked ? picked.value : 'direct';
+}
+
+/**
+ * Show the fields that belong to the chosen mode.
+ *
+ * Gateway mode has exactly one provider — the user's own Edge Function — so
+ * the provider dropdown is hidden rather than left as a one-item list. Direct
+ * mode lists every provider except that one.
+ *
+ * @param {string} [preferId] provider to select if it fits the mode
+ */
+function syncAiConnMode(preferId) {
   const api = window.iDashAIProviders;
+  const mode = currentAiConnMode();
   const sel = document.getElementById('aiProviderSelect');
-  if (!sel.options.length) {
+  const field = document.getElementById('aiProviderField');
+
+  if (mode === 'gateway') {
+    sel.innerHTML = '';
+    const opt = document.createElement('option');
+    opt.value = GATEWAY_PROVIDER;
+    opt.textContent = api.PROVIDERS[GATEWAY_PROVIDER].label;
+    sel.appendChild(opt);
+    sel.value = GATEWAY_PROVIDER;
+    field.hidden = true;
+  } else {
+    const ids = Object.keys(api.PROVIDERS).filter(id => id !== GATEWAY_PROVIDER);
+    sel.innerHTML = '';
     // Flag the providers that have a no-cost tier, read off the model list
     // itself so the label can never drift from what the dropdown actually
     // offers. Otherwise "is there a free option?" costs a click per provider.
-    Object.keys(api.PROVIDERS).forEach(id => {
+    ids.forEach(id => {
       const p = api.PROVIDERS[id];
       const free = (p.models || []).filter(m => m.tier === 'free').length;
       const paid = (p.models || []).filter(m => m.tier === 'paid').length;
@@ -373,14 +416,11 @@ function openAiSetupModal(onSaved) {
          : '');
       sel.appendChild(opt);
     });
+    sel.value = ids.indexOf(preferId) >= 0 ? preferId : ids[0];
+    field.hidden = false;
   }
-  sel.value = api.loadSettings().providerId;
   syncAiSetupFields();
-  document.getElementById('aiSetupMsg').textContent = '';
-  modal.hidden = false;
 }
-
-const AI_MODEL_CUSTOM = '__custom__';
 
 /** Repopulate model/key/endpoint for whichever provider is selected. */
 function syncAiSetupFields() {
@@ -461,6 +501,11 @@ function initAiSetupModal() {
 
   document.getElementById('aiProviderSelect').addEventListener('change', syncAiSetupFields);
   document.getElementById('aiModelSelect').addEventListener('change', syncAiModelCustomField);
+  modal.querySelectorAll('input[name="aiConnMode"]').forEach(r => {
+    // Each mode remembers its own last provider, so switching back and forth
+    // does not wipe what was already set up on the other side.
+    r.addEventListener('change', () => syncAiConnMode(window.iDashAIProviders.loadSettings().providerId));
+  });
 
   function close() { modal.hidden = true; aiSetupOnSaved = null; }
   document.getElementById('aiSetupClose').addEventListener('click', close);

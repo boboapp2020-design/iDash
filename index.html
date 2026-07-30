@@ -10,7 +10,7 @@
   <title>iDash — AI Dashboard Intelligence Platform</title>
   <link rel="stylesheet" href="css/style.css?v=20260730b">
   <link rel="stylesheet" href="css/ai_progress.css?v=20260722c">
-  <link rel="stylesheet" href="css/home.css?v=20260730c">
+  <link rel="stylesheet" href="css/home.css?v=20260730e">
   <!-- The KPI row's slowest step is the round-trip to Apps Script, so warm the
        connection and start the request from <head> instead of waiting behind
        the ~900KB of vendor scripts at the end of <body>. -->
@@ -510,11 +510,28 @@
     <button class="modal-close" id="aiSetupClose" aria-label="Close">&times;</button>
     <div class="bm-head">
       <div class="bm-title">ตั้งค่า AI</div>
-      <div class="bm-sub">เลือกผู้ให้บริการและใส่ API key ของคุณเอง</div>
+      <div class="bm-sub">เลือกช่องทางเชื่อมต่อ แล้วใส่ API key ของคุณเอง</div>
     </div>
 
     <div class="bm-form">
-      <label class="bm-field">
+      <!-- Two ways to reach a model. They differ in where the key lives, which
+           is the decision worth putting first — everything below it is detail. -->
+      <div class="bm-modes" id="aiModeCards">
+        <label class="bm-mode">
+          <input type="radio" name="aiConnMode" value="direct" checked>
+          <span class="bm-mode-dot" aria-hidden="true"></span>
+          <span class="bm-mode-name">ต่อ AI โดยตรง</span>
+          <span class="bm-mode-desc">เบราว์เซอร์เรียก API ของผู้ให้บริการเอง — เลือกได้ 11 เจ้า มีทั้งแบบฟรีและเสียเงิน</span>
+        </label>
+        <label class="bm-mode">
+          <input type="radio" name="aiConnMode" value="gateway">
+          <span class="bm-mode-dot" aria-hidden="true"></span>
+          <span class="bm-mode-name">Production — ผ่าน Supabase</span>
+          <span class="bm-mode-desc">Edge Function ทำ router ไปยัง Claude / Gemini / GPT · API key อยู่ฝั่งเซิร์ฟเวอร์</span>
+        </label>
+      </div>
+
+      <label class="bm-field" id="aiProviderField">
         <span class="bm-label">ผู้ให้บริการ</span>
         <select id="aiProviderSelect"></select>
       </label>
@@ -661,7 +678,7 @@
 <script src="js/interactive_dashboard_generator.js?v=20260722c"></script>
 <script src="js/infographic_ai_composer.js?v=20260729"></script>
 <script src="js/ai_providers.js?v=20260730d"></script>
-<script src="js/app.js?v=20260730d"></script>
+<script src="js/app.js?v=20260730e"></script>
 <script src="js/sidebar.js?v=20260722c"></script>
 <script>
   // Live topbar values: greeting + today's date follow the viewer's real clock.

@@ -556,6 +556,34 @@ a.home-quick:hover .chev { color: var(--acc); }
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
 
+/* ── Connection-mode cards (AI settings) ───────────────────────────────
+   Where the API key lives is the first decision, so it gets cards rather
+   than another row in the same stack of dropdowns. */
+.bm-modes { display: flex; flex-direction: column; gap: 10px; margin-bottom: 4px; }
+.bm-mode {
+  position: relative; display: block; cursor: pointer;
+  padding: 30px 16px 14px; border-radius: 12px;
+  border: 2px solid var(--border); background: #fbfcfe;
+  transition: border-color .15s, background .15s, box-shadow .15s;
+}
+.bm-mode:hover { border-color: #b9d1f6; }
+.bm-mode input { position: absolute; opacity: 0; pointer-events: none; }
+/* The radio itself is drawn, so the dot can sit centred above the label the
+   way a card header reads rather than beside it. */
+.bm-mode-dot {
+  position: absolute; top: 10px; left: 50%; transform: translateX(-50%);
+  width: 15px; height: 15px; border-radius: 50%;
+  border: 2px solid #b6c2d6; background: #fff;
+}
+.bm-mode input:checked ~ .bm-mode-dot {
+  border-color: var(--primary);
+  box-shadow: inset 0 0 0 3px #fff, inset 0 0 0 9px var(--primary);
+}
+.bm-mode input:focus-visible ~ .bm-mode-dot { outline: 2px solid var(--primary); outline-offset: 2px; }
+.bm-mode:has(input:checked) { border-color: var(--primary); background: #f2f7ff; }
+.bm-mode-name { display: block; font-size: 14px; font-weight: 800; color: var(--gray-900); }
+.bm-mode-desc { display: block; margin-top: 3px; font-size: 12px; line-height: 1.6; color: #3f6bb5; }
+
 .bm-options { display: flex; flex-direction: column; gap: 12px; }
 .bm-opt {
   display: flex; align-items: center; gap: 14px; width: 100%; text-align: left;
