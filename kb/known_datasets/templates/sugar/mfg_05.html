@@ -378,6 +378,86 @@ footer .dot{width:6px;height:6px;border-radius:99px;background:var(--ok)}
   border-top-color:var(--pr);border-radius:99px;animation:sp .7s linear infinite}
 @keyframes sp{to{transform:rotate(360deg)}}
 #dash[hidden]{display:none}
+
+/* ---------- SECTION LABELS (executive rhythm) ---------- */
+.sect{display:flex;align-items:baseline;gap:12px;margin:26px 0 14px}
+.sect .snum{font-size:11px;font-weight:700;color:var(--mu);letter-spacing:1.4px;opacity:.75;
+  font-variant-numeric:tabular-nums}
+.sect .sdot{display:none}
+.sect h2{font-size:16.5px;font-weight:700;margin:0;letter-spacing:-.4px}
+.sect .shint{font-size:11.5px;color:var(--mu);font-weight:500}
+.sect .ln{flex:1;height:1px;background:var(--ln)}
+
+/* ---------- EXECUTIVE SUMMARY ---------- */
+.exec{background:var(--sf);border:1px solid var(--ln);border-radius:var(--r2);
+  box-shadow:var(--sh);overflow:hidden;margin-bottom:var(--gap)}
+.exec-top{display:grid;grid-template-columns:minmax(0,1.45fr) minmax(0,1fr);gap:clamp(18px,2.6vw,38px);
+  padding:clamp(20px,2.6vw,30px);background:linear-gradient(115deg,var(--soft),#fff 62%)}
+@media(max-width:900px){.exec-top{grid-template-columns:1fr}}
+.verdict{display:flex;flex-direction:column;min-width:0}
+.vhead{display:flex;align-items:center;gap:11px;margin-bottom:12px}
+.vpill{display:inline-flex;align-items:center;gap:7px;padding:5px 12px;border-radius:99px;
+  font-size:11px;font-weight:700;letter-spacing:.2px}
+.vpill .vd{width:7px;height:7px;border-radius:99px;background:currentColor}
+.vpill.ok{background:color-mix(in srgb,var(--ok) 12%,transparent);color:var(--ok)}
+.vpill.warn{background:color-mix(in srgb,var(--wn) 17%,transparent);color:#B45309}
+.vpill.bad{background:color-mix(in srgb,var(--bd) 11%,transparent);color:var(--bd)}
+.verdict h2{margin:0;font-size:clamp(19px,2.3vw,27px);font-weight:700;letter-spacing:-.75px;line-height:1.25}
+.vsum{margin:11px 0 0;font-size:13.5px;line-height:1.85;color:var(--mu);max-width:62ch}
+.vsum b{color:var(--tx);font-weight:700}
+.exec-figs{display:flex;flex-direction:column;gap:12px;justify-content:center}
+.efig{display:flex;align-items:baseline;gap:12px;padding-bottom:11px;border-bottom:1px solid var(--ln)}
+.efig:last-child{border-bottom:none;padding-bottom:0}
+.efig .el{font-size:11.5px;color:var(--mu);font-weight:600;flex:1;min-width:0;line-height:1.4}
+.efig .ev{font-size:clamp(19px,2.1vw,25px);font-weight:700;letter-spacing:-.7px;
+  font-variant-numeric:tabular-nums;white-space:nowrap}
+.efig .eu{font-size:11.5px;font-weight:600;color:var(--mu);margin-left:3px}
+.efig .ed{font-size:11.5px;font-weight:700;white-space:nowrap;width:64px;text-align:right}
+.efig .ed.up{color:var(--ok)}.efig .ed.dn{color:var(--bd)}.efig .ed.nu{color:var(--mu)}
+
+.exec-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(258px,1fr));
+  border-top:1px solid var(--ln)}
+.ec{padding:clamp(16px,1.9vw,22px);border-right:1px solid var(--ln);min-width:0}
+.ec:last-child{border-right:none}
+@media(max-width:900px){.ec{border-right:none;border-bottom:1px solid var(--ln)}
+  .ec:last-child{border-bottom:none}}
+.ec .ecl{display:flex;align-items:center;gap:7px;font-size:10.5px;font-weight:700;
+  letter-spacing:.9px;color:var(--mu);margin-bottom:9px}
+.ec .ecl i{width:6px;height:6px;border-radius:99px;background:var(--sc,var(--pr));flex:0 0 6px}
+.ec .ect{font-size:13.5px;font-weight:700;letter-spacing:-.3px;line-height:1.4;margin-bottom:7px}
+.ec .ecd{font-size:12px;line-height:1.75;color:var(--mu)}
+.ec .ecd b{color:var(--tx);font-weight:700}
+.ec .eca{display:flex;gap:7px;align-items:flex-start;margin-top:10px;padding-top:10px;
+  border-top:1px dashed var(--ln);font-size:12px;line-height:1.7;color:var(--tx)}
+.ec .eca span{color:var(--sc,var(--pr));font-weight:700;flex:0 0 auto}
+
+/* ---------- FINDINGS (deep analysis) ---------- */
+.finds{display:flex;flex-direction:column;gap:11px;margin-bottom:var(--gap)}
+.fd{background:var(--sf);border:1px solid var(--ln);border-radius:var(--r);box-shadow:var(--sh);
+  padding:15px var(--pad);display:grid;grid-template-columns:150px minmax(0,1fr);gap:6px 20px;
+  border-left:3px solid var(--sc,var(--pr))}
+@media(max-width:760px){.fd{grid-template-columns:1fr}}
+.fd .fh{display:flex;flex-direction:column;gap:8px}
+.fd .fsev{display:inline-flex;align-items:center;gap:6px;font-size:10.5px;font-weight:700;
+  padding:4px 9px;border-radius:7px;letter-spacing:.3px;align-self:flex-start;
+  background:color-mix(in srgb,var(--sc) 12%,transparent);color:var(--sc)}
+.fd .fno{font-size:10.5px;color:var(--mu);font-weight:600;letter-spacing:1px}
+.fd .fb{display:flex;flex-direction:column;gap:7px;min-width:0}
+.fd .ftt{font-size:13.5px;font-weight:700;letter-spacing:-.3px;line-height:1.4}
+.fd .fr{display:grid;grid-template-columns:74px minmax(0,1fr);gap:12px;font-size:12px;line-height:1.75}
+@media(max-width:520px){.fd .fr{grid-template-columns:1fr;gap:2px}}
+.fd .fk{color:var(--mu);font-weight:700;font-size:11px;padding-top:2px}
+.fd .fv{color:var(--mu)}
+.fd .fv b{color:var(--tx);font-weight:700}
+.fd .fr.act .fv{color:var(--tx)}
+
+@media print{
+  .exec,.fd{box-shadow:none;break-inside:avoid}
+  .exec-top{background:#fff}
+  .sect{margin:18px 0 10px}
+  .verdict h2{font-size:20px}
+  .kpis,.charts{break-inside:avoid}
+}
 </style>
 <script>/*!
  * Chart.js v4.4.1
@@ -413,7 +493,7 @@ footer .dot{width:6px;height:6px;border-radius:99px;background:var(--ok)}
     <button class="btn" id="csv" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg> CSV</button>
     <button class="btn pri" id="prt" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg> พิมพ์</button></div>
 </header>
-<nav class="topnav"><div class="navi on" data-go="kpis"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg> <span>ภาพรวม KPI</span></div><div class="navi " data-go="charts"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l6-6 4 4 8-8"/><path d="M21 7v6h-6"/></svg> <span>กราฟวิเคราะห์</span></div><div class="navi " data-go="insight"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1 .23 2.23 1.5 3.5A4.61 4.61 0 0 1 8.91 14"/></svg> <span>ข้อมูลเชิงลึก</span></div><div class="navi " data-go="table"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18"/></svg> <span>ตารางข้อมูล</span></div></nav>
+<nav class="topnav"><div class="navi on" data-go="summary"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1 .23 2.23 1.5 3.5A4.61 4.61 0 0 1 8.91 14"/></svg> <span>ผลสรุปรายงาน</span></div><div class="navi " data-go="kpis-anchor"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg> <span>ตัวชี้วัด</span></div><div class="navi " data-go="insight"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l6-6 4 4 8-8"/><path d="M21 7v6h-6"/></svg> <span>วิเคราะห์เชิงลึก</span></div><div class="navi " data-go="table"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18"/></svg> <span>ตารางข้อมูล</span></div></nav>
 <section class="uppanel" id="up">
   <div class="up-grid">
     <div>
@@ -446,18 +526,24 @@ footer .dot{width:6px;height:6px;border-radius:99px;background:var(--ok)}
   <div class="lsp"></div><div class="warn" style="display:none"></div></div>
 <div id="dash" hidden>
 <section class="filters"><div class="fgrp"><label>ตั้งแต่วันที่</label><input type="date" data-f="dfrom"></div><div class="fgrp"><label>ถึงวันที่</label><input type="date" data-f="dto"></div><div class="fgrp" style="flex:1;min-width:190px"><label>ค้นหาทั้งตาราง</label><input type="search" data-f="q" placeholder="พิมพ์คำค้น…" style="width:100%"></div><div class="fgrp"><label>&nbsp;</label><button class="btn" id="reset"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg> รีเซ็ต</button></div></section>
-<div class="sect" id="kpis-anchor"><span class="sdot"></span><h2>ตัวชี้วัดสำคัญ</h2><div class="ln"></div>
-  <span class="cnt">7 KPI</span></div>
+<div class="sect" id="summary"><span class="snum">01</span><h2>ผลสรุปรายงาน</h2>
+  <span class="shint">สิ่งที่ผู้บริหารต้องรู้ก่อนดูรายละเอียด</span><div class="ln"></div></div>
+<section class="exec" id="exec"></section>
+<div class="sect" id="kpis-anchor"><span class="snum">02</span><h2>ตัวชี้วัดสำคัญ</h2>
+  <span class="shint">ค่าปัจจุบันและทิศทางเทียบช่วงก่อนหน้า</span><div class="ln"></div>
+  <span class="cnt">7 ตัว</span></div>
 <section class="kpis" id="kpis"></section>
 <section class="alerts" id="alerts"></section>
-<div class="sect"><span class="sdot" style="background:#06B6D4"></span><h2>กราฟวิเคราะห์</h2><div class="ln"></div>
+<div class="sect" id="insight"><span class="snum">03</span><h2>วิเคราะห์เชิงลึก</h2>
+  <span class="shint">ข้อค้นพบ → ความหมาย → สิ่งที่ควรทำ</span><div class="ln"></div>
+  <span class="cnt" id="findcount"></span></div>
+<section class="finds" id="finds"></section>
+<div class="sect"><span class="snum">04</span><h2>กราฟวิเคราะห์</h2>
+  <span class="shint">หลักฐานประกอบข้อค้นพบข้างต้น</span><div class="ln"></div>
   <span class="cnt">10 มุมมอง</span></div>
 <section class="charts" id="charts"></section>
-<section class="insight" id="insight">
-  <div class="ih"><div class="iic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1 .23 2.23 1.5 3.5A4.61 4.61 0 0 1 8.91 14"/></svg></div><b>ข้อมูลเชิงลึกอัตโนมัติ (Auto Insights)</b></div>
-  <div class="ins-grid" id="ins-grid"></div>
-</section>
-<div class="sect" id="table"><span class="sdot" style="background:#14B8A6"></span><h2>ตารางข้อมูล</h2><div class="ln"></div>
+<div class="sect" id="table"><span class="snum">05</span><h2>ตารางข้อมูล</h2>
+  <span class="shint">ข้อมูลดิบสำหรับตรวจสอบย้อนกลับ</span><div class="ln"></div>
   <span class="cnt">12 คอลัมน์</span></div>
 <section class="tbl-card">
   <div class="tbl-top"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18"/></svg><b style="font-size:12.5px">รายละเอียดข้อมูล</b>
@@ -471,7 +557,7 @@ footer .dot{width:6px;height:6px;border-radius:99px;background:var(--ok)}
   <span>·</span> Industrial Operations · Layout E
   <span>·</span> ออกแบบสำหรับ Desktop / Tablet / Mobile</footer>
 </div></div>
-<script>const SCHEMA=[{"n":"วันที่","k":"date","f":"txt","u":""},{"n":"Milling_Extraction_%","k":"num","f":"pct","u":"%"},{"n":"Reduced_Extraction_%","k":"num","f":"pct","u":"%"},{"n":"Imbibition_%fiber","k":"num","f":"pct","u":"%"},{"n":"Pol_Bagasse","k":"num","f":"num","u":""},{"n":"Moisture_Bagasse_%","k":"num","f":"pct","u":"%"},{"n":"Fiber_Bagasse_%","k":"num","f":"pct","u":"%"},{"n":"Bagasse_ตัน","k":"num","f":"wt","u":"ตัน"},{"n":"Pol_น้ำอ้อยรวม","k":"num","f":"num","u":""},{"n":"Brix_น้ำอ้อยรวม","k":"num","f":"num","u":""},{"n":"Mill_1_RPM","k":"num","f":"num","u":""},{"n":"Mill_2_RPM","k":"num","f":"num","u":""},{"n":"Mill_3_RPM","k":"num","f":"num","u":""},{"n":"Mill_4_RPM","k":"num","f":"num","u":""},{"n":"Hydraulic_Pressure_psi","k":"num","f":"num","u":""}];const SPEC={"name":"05_ประสิทธิภาพลูกหีบ","series":["#3B82F6","#06B6D4","#14B8A6","#F59E0B","#8B5CF6","#F43F5E","#22C55E","#94A3B8"],"kpis":[{"c":7,"a":"sum","l":"Bagasse ตัน","f":"wt","u":"ตัน","i":"box","hero":true,"inv":false,"sub":"ผลรวม"},{"c":1,"a":"avg","l":"Milling Extraction %","f":"pct","u":"%","i":"gauge","hero":false,"inv":false,"sub":"ค่าเฉลี่ย"},{"c":2,"a":"avg","l":"Reduced Extraction %","f":"pct","u":"%","i":"gauge","hero":false,"inv":false,"sub":"ค่าเฉลี่ย"},{"c":3,"a":"avg","l":"Imbibition %fiber","f":"pct","u":"%","i":"gauge","hero":false,"inv":false,"sub":"ค่าเฉลี่ย"},{"c":4,"a":"avg","l":"Pol Bagasse","f":"num","u":"","i":"layers","hero":false,"inv":false,"sub":"ค่าเฉลี่ย"},{"c":8,"a":"avg","l":"Pol น้ำอ้อยรวม","f":"num","u":"","i":"layers","hero":false,"inv":false,"sub":"ค่าเฉลี่ย"},{"c":0,"a":"count","l":"จำนวนรายการบันทึก","f":"int","u":"รายการ","i":"grid","hero":false,"inv":false,"sub":"ตามตัวกรองปัจจุบัน"}],"charts":[{"k":"area","t":"แนวโน้มหลักตามช่วงเวลา","sb":"รวมค่าตามวันที่","badge":"trend","dim":{"c":0,"b":"raw","t":"date"},"mes":[{"c":7,"a":"sum","l":"Bagasse ตัน","y2":false,"f":"wt"},{"c":4,"a":"avg","l":"Pol Bagasse","y2":true,"f":"num"}],"co":0,"id":"c0","s":6,"h":250},{"k":"spc","t":"SPC Control Chart — Pol Bagasse","sb":"เส้นควบคุม ±3σ จากค่าเฉลี่ย","badge":"SPC","dim":{"c":0,"b":"raw","t":"date"},"mes":[{"c":4,"a":"avg","l":"Pol Bagasse","y2":false,"f":"num"}],"co":3,"id":"c1","s":6,"h":250},{"k":"gauge","t":"เกจวัดประสิทธิภาพ","sb":"Milling Extraction %","badge":"gauge","mes":[{"c":1,"a":"avg","l":"Milling Extraction %","y2":false,"f":"pct"}],"max":100,"good":85,"mid":65,"u":"%","id":"c2","s":4,"h":210},{"k":"radar","t":"เรดาร์ตัวชี้วัดหลายมิติ","sb":"ค่าเฉลี่ยของตัวชี้วัด %","badge":"radar","mes":[{"c":1,"a":"avg","l":"Milling Extraction %","y2":false,"f":"pct"},{"c":2,"a":"avg","l":"Reduced Extraction %","y2":false,"f":"pct"},{"c":3,"a":"avg","l":"Imbibition %fiber","y2":false,"f":"pct"},{"c":5,"a":"avg","l":"Moisture Bagasse %","y2":false,"f":"pct"},{"c":6,"a":"avg","l":"Fiber Bagasse %","y2":false,"f":"pct"}],"id":"c3","s":4,"h":250},{"k":"scatter","t":"ความสัมพันธ์ Milling Extraction % × Moisture Bagasse %","sb":"สหสัมพันธ์ r = -0.18","badge":"scatter","x":1,"y":5,"xl":"Milling Extraction %","yl":"Moisture Bagasse %","co":4,"id":"c4","s":12,"h":280},{"k":"line","t":"ตัวชี้วัดกลุ่มรอง","sb":"Bagasse ตัน · Imbibition %fiber · Moisture Bagasse %","badge":"multi-metric","dim":{"c":0,"b":"raw","t":"date"},"mes":[{"c":7,"a":"sum","l":"Bagasse ตัน","y2":false,"f":"wt"},{"c":3,"a":"avg","l":"Imbibition %fiber","y2":false,"f":"pct"},{"c":5,"a":"avg","l":"Moisture Bagasse %","y2":false,"f":"pct"}],"co":2,"id":"c5","s":6,"h":250},{"k":"line","t":"ตัวชี้วัดกลุ่มที่สาม","sb":"Fiber Bagasse % · Pol Bagasse · Pol น้ำอ้อยรวม","badge":"multi-metric","dim":{"c":0,"b":"raw","t":"date"},"mes":[{"c":6,"a":"avg","l":"Fiber Bagasse %","y2":false,"f":"pct"},{"c":4,"a":"avg","l":"Pol Bagasse","y2":false,"f":"num"},{"c":8,"a":"avg","l":"Pol น้ำอ้อยรวม","y2":false,"f":"num"}],"co":4,"id":"c6","s":6,"h":250},{"k":"bar","t":"สรุปรายเดือน","sb":"Milling Extraction %","badge":"monthly","dim":{"c":0,"b":"month","t":"date"},"mes":[{"c":1,"a":"avg","l":"Milling Extraction %","y2":false,"f":"pct"}],"co":1,"id":"c7","s":6,"h":250},{"k":"hbar","t":"10 ช่วงเวลาที่สูงที่สุด","sb":"Bagasse ตัน","badge":"top-10","dim":{"c":0,"b":"raw","t":"cat"},"mes":[{"c":7,"a":"sum","l":"Bagasse ตัน","y2":false,"f":"wt"}],"limit":10,"co":3,"id":"c8","s":6,"h":250},{"k":"hist","t":"การกระจายตัวของ Milling Extraction %","sb":"ฮิสโตแกรมความถี่ (แท่งเน้น = ช่วงค่าเฉลี่ย)","badge":"histogram","c":1,"bins":14,"f":"pct","co":0,"id":"c9","s":8,"h":260}],"dateCol":0,"bucket":"raw","topDim":null,"statusCol":null,"badVals":[],"goodVals":[],"tableCols":[0,1,2,3,4,5,6,7,8,9,10,11],"thresholds":[{"c":1,"l":"Milling Extraction %","v":94,"dir":"min","f":"pct","u":"%"},{"c":2,"l":"Reduced Extraction %","v":94,"dir":"min","f":"pct","u":"%"}],"notes":[],"filters":[],"expect":{"file":"05_ประสิทธิภาพลูกหีบ.xlsx","sheet":"Data","rows":136}};</script>
+<script>const SCHEMA=[{"n":"วันที่","k":"date","f":"txt","u":""},{"n":"Milling_Extraction_%","k":"num","f":"pct","u":"%"},{"n":"Reduced_Extraction_%","k":"num","f":"pct","u":"%"},{"n":"Imbibition_%fiber","k":"num","f":"pct","u":"%"},{"n":"Pol_Bagasse","k":"num","f":"num","u":""},{"n":"Moisture_Bagasse_%","k":"num","f":"pct","u":"%"},{"n":"Fiber_Bagasse_%","k":"num","f":"pct","u":"%"},{"n":"Bagasse_ตัน","k":"num","f":"wt","u":"ตัน"},{"n":"Pol_น้ำอ้อยรวม","k":"num","f":"num","u":""},{"n":"Brix_น้ำอ้อยรวม","k":"num","f":"num","u":""},{"n":"Mill_1_RPM","k":"num","f":"num","u":""},{"n":"Mill_2_RPM","k":"num","f":"num","u":""},{"n":"Mill_3_RPM","k":"num","f":"num","u":""},{"n":"Mill_4_RPM","k":"num","f":"num","u":""},{"n":"Hydraulic_Pressure_psi","k":"num","f":"num","u":""}];const SPEC={"name":"05_ประสิทธิภาพลูกหีบ","series":["#3B82F6","#06B6D4","#14B8A6","#F59E0B","#8B5CF6","#F43F5E","#22C55E","#94A3B8"],"kpis":[{"c":7,"a":"sum","l":"Bagasse ตัน","f":"wt","u":"ตัน","i":"box","hero":true,"inv":false,"sub":"ผลรวม"},{"c":1,"a":"avg","l":"Milling Extraction %","f":"pct","u":"%","i":"gauge","hero":false,"inv":false,"sub":"ค่าเฉลี่ย"},{"c":2,"a":"avg","l":"Reduced Extraction %","f":"pct","u":"%","i":"gauge","hero":false,"inv":false,"sub":"ค่าเฉลี่ย"},{"c":3,"a":"avg","l":"Imbibition %fiber","f":"pct","u":"%","i":"gauge","hero":false,"inv":false,"sub":"ค่าเฉลี่ย"},{"c":4,"a":"avg","l":"Pol Bagasse","f":"num","u":"","i":"layers","hero":false,"inv":false,"sub":"ค่าเฉลี่ย"},{"c":8,"a":"avg","l":"Pol น้ำอ้อยรวม","f":"num","u":"","i":"layers","hero":false,"inv":false,"sub":"ค่าเฉลี่ย"},{"c":0,"a":"count","l":"จำนวนรายการบันทึก","f":"int","u":"รายการ","i":"grid","hero":false,"inv":false,"sub":"ตามตัวกรองปัจจุบัน"}],"charts":[{"k":"area","t":"แนวโน้มหลักตามช่วงเวลา","sb":"รวมค่าตามวันที่","badge":"trend","dim":{"c":0,"b":"raw","t":"date"},"mes":[{"c":7,"a":"sum","l":"Bagasse ตัน","y2":false,"f":"wt"},{"c":4,"a":"avg","l":"Pol Bagasse","y2":true,"f":"num"}],"co":0,"id":"c0","s":6,"h":250},{"k":"spc","t":"SPC Control Chart — Pol Bagasse","sb":"เส้นควบคุม ±3σ จากค่าเฉลี่ย","badge":"SPC","dim":{"c":0,"b":"raw","t":"date"},"mes":[{"c":4,"a":"avg","l":"Pol Bagasse","y2":false,"f":"num"}],"co":3,"id":"c1","s":6,"h":250},{"k":"gauge","t":"เกจวัดประสิทธิภาพ","sb":"Milling Extraction %","badge":"gauge","mes":[{"c":1,"a":"avg","l":"Milling Extraction %","y2":false,"f":"pct"}],"max":100,"good":85,"mid":65,"u":"%","id":"c2","s":4,"h":210},{"k":"radar","t":"เรดาร์ตัวชี้วัดหลายมิติ","sb":"ค่าเฉลี่ยของตัวชี้วัด %","badge":"radar","mes":[{"c":1,"a":"avg","l":"Milling Extraction %","y2":false,"f":"pct"},{"c":2,"a":"avg","l":"Reduced Extraction %","y2":false,"f":"pct"},{"c":3,"a":"avg","l":"Imbibition %fiber","y2":false,"f":"pct"},{"c":5,"a":"avg","l":"Moisture Bagasse %","y2":false,"f":"pct"},{"c":6,"a":"avg","l":"Fiber Bagasse %","y2":false,"f":"pct"}],"id":"c3","s":4,"h":250},{"k":"scatter","t":"ความสัมพันธ์ Milling Extraction % × Moisture Bagasse %","sb":"สหสัมพันธ์ r = -0.18","badge":"scatter","x":1,"y":5,"xl":"Milling Extraction %","yl":"Moisture Bagasse %","co":4,"id":"c4","s":12,"h":280},{"k":"line","t":"ตัวชี้วัดกลุ่มรอง","sb":"Bagasse ตัน · Imbibition %fiber · Moisture Bagasse %","badge":"multi-metric","dim":{"c":0,"b":"raw","t":"date"},"mes":[{"c":7,"a":"sum","l":"Bagasse ตัน","y2":false,"f":"wt"},{"c":3,"a":"avg","l":"Imbibition %fiber","y2":false,"f":"pct"},{"c":5,"a":"avg","l":"Moisture Bagasse %","y2":false,"f":"pct"}],"co":2,"id":"c5","s":6,"h":250},{"k":"line","t":"ตัวชี้วัดกลุ่มที่สาม","sb":"Fiber Bagasse % · Pol Bagasse · Pol น้ำอ้อยรวม","badge":"multi-metric","dim":{"c":0,"b":"raw","t":"date"},"mes":[{"c":6,"a":"avg","l":"Fiber Bagasse %","y2":false,"f":"pct"},{"c":4,"a":"avg","l":"Pol Bagasse","y2":false,"f":"num"},{"c":8,"a":"avg","l":"Pol น้ำอ้อยรวม","y2":false,"f":"num"}],"co":4,"id":"c6","s":6,"h":250},{"k":"bar","t":"สรุปรายเดือน","sb":"Milling Extraction %","badge":"monthly","dim":{"c":0,"b":"month","t":"date"},"mes":[{"c":1,"a":"avg","l":"Milling Extraction %","y2":false,"f":"pct"}],"co":1,"id":"c7","s":6,"h":250},{"k":"hbar","t":"10 ช่วงเวลาที่สูงที่สุด","sb":"Bagasse ตัน","badge":"top-10","dim":{"c":0,"b":"raw","t":"cat"},"mes":[{"c":7,"a":"sum","l":"Bagasse ตัน","y2":false,"f":"wt"}],"limit":10,"co":3,"id":"c8","s":6,"h":250},{"k":"hist","t":"การกระจายตัวของ Milling Extraction %","sb":"ฮิสโตแกรมความถี่ (แท่งเน้น = ช่วงค่าเฉลี่ย)","badge":"histogram","c":1,"bins":14,"f":"pct","co":0,"id":"c9","s":8,"h":260}],"dateCol":0,"bucket":"raw","topDim":null,"concDim":null,"concDims":[],"allDims":[],"statusCol":null,"badVals":[],"goodVals":[],"tableCols":[0,1,2,3,4,5,6,7,8,9,10,11],"thresholds":[{"c":1,"l":"Milling Extraction %","v":94,"dir":"min","f":"pct","u":"%"},{"c":2,"l":"Reduced Extraction %","v":94,"dir":"min","f":"pct","u":"%"}],"notes":[],"filters":[],"expect":{"file":"05_ประสิทธิภาพลูกหีบ.xlsx","sheet":"Data","rows":136},"pairs":[]};</script>
 <script>
 /* ============ minimal offline .xlsx reader (ZIP + SpreadsheetML) ============ */
 const XL = (function(){
@@ -1434,7 +1520,8 @@ function refresh(){
   if(RAF)cancelAnimationFrame(RAF);
   RAF=requestAnimationFrame(()=>{
     const rows=activeRows();
-    renderKPIs(rows);renderAlerts(rows);renderCharts(rows);renderInsights(rows);
+    if(typeof renderExec==='function')renderExec(rows);
+    renderKPIs(rows);renderAlerts(rows);renderCharts(rows);
     TPAGE=1;renderTable(rows);
     const b=document.getElementById('rowcount');if(b)b.textContent=NF(0).format(rows.length)+' แถว';
   });
@@ -1493,6 +1580,343 @@ function applyData(payload,report,fileName){
   window.scrollTo({top:0,behavior:'smooth'});
 }
 window.__applyData=applyData;
+
+const aggregate = agg;
+
+/* ============================ INSIGHT ENGINE ============================ */
+function pct(a,b){ return (b&&isFinite(b))?((a-b)/Math.abs(b)*100):null }
+function fmtSigned(v,d){ if(v===null||!isFinite(v))return '—';
+  return (v>=0?'+':'−')+Math.abs(v).toFixed(d===undefined?1:d) }
+
+function primaryKpi(){ return S.kpis.find(k=>k.a!=='count') || null }
+
+function seriesOverTime(rows,col,agg){
+  if(S.dateCol===null||S.dateCol===undefined)return null;
+  const a=aggregate(rows,{c:S.dateCol,b:S.bucket,t:'date'},[{c:col,a:agg}]);
+  const lab=[],val=[];
+  a.labels.forEach((l,i)=>{ if(a.series[0][i]!==null){lab.push(l);val.push(a.series[0][i])} });
+  return val.length?{labels:lab,values:val}:null;
+}
+
+function analyze(rows){
+  const F=[], head=[];
+  const pk=primaryKpi();
+  const N=rows.length;
+
+  /* ---- headline figures ---- */
+  function figure(k){
+    if(!k)return null;
+    let v;
+    if(k.a==='count') v=N;
+    else{ const vv=colVals(rows,k.c); if(!vv.length)return null;
+      v = k.a==='sum'?sum(vv) : k.a==='avg'?avg(vv) : k.a==='max'?Math.max.apply(null,vv):Math.min.apply(null,vv) }
+    let d=null;
+    if(k.a!=='count'){
+      const st=seriesOverTime(rows,k.c,k.a==='sum'?'sum':'avg');
+      if(st&&st.values.length>3){
+        const h=Math.floor(st.values.length/2);
+        d=pct(avg(st.values.slice(h)),avg(st.values.slice(0,h)));
+      }
+    }
+    return {l:k.l,v:v,f:k.f,u:k.u,d:d,inv:k.inv};
+  }
+  S.kpis.slice(0,4).forEach(k=>{ const f=figure(k); if(f&&head.length<3)head.push(f) });
+  if(head.length<3){ const c=S.kpis.find(k=>k.a==='count'); if(c)head.push(figure(c)) }
+
+  /* ---- 1. trend on the primary measure ---- */
+  if(pk){
+    const st=seriesOverTime(rows,pk.c,pk.a==='sum'?'sum':'avg');
+    if(st&&st.values.length>3){
+      const h=Math.floor(st.values.length/2);
+      const p1=avg(st.values.slice(0,h)), p2=avg(st.values.slice(h));
+      const ch=pct(p2,p1);
+      if(ch!==null){
+        const good = pk.inv ? ch<0 : ch>0;
+        const mag=Math.abs(ch);
+        const sev = mag>=15 ? (good?'low':'high') : mag>=6 ? (good?'low':'mid') : 'low';
+        F.push({sev:sev,score:mag*(good?0.4:1.6),k:'trend',
+          t:(good?'แนวโน้ม'+esc(pk.l)+'ดีขึ้น':'แนวโน้ม'+esc(pk.l)+(pk.inv?'สูงขึ้น':'ลดลง')),
+          fact:'ช่วงหลังเฉลี่ย <b>'+fmt(p2,pk.f)+' '+esc(pk.u||'')+'</b> เทียบช่วงแรก '+fmt(p1,pk.f)+
+               ' คิดเป็น <b>'+fmtSigned(ch)+'%</b> จาก '+st.values.length+' ช่วงเวลา',
+          mean: good ? 'ทิศทางเป็นไปตามที่ต้องการ ควรถอดบทเรียนว่าอะไรทำให้ดีขึ้นเพื่อรักษาระดับไว้'
+                     : 'หากยังเป็นทิศทางนี้ต่อไปอีก 1 ช่วง จะกระทบเป้าทั้งงวด ต้องหาสาเหตุก่อนที่ตัวเลขจะสะสม',
+          act: good ? 'บันทึกปัจจัยที่ทำให้ดีขึ้น แล้วกำหนดเป็นมาตรฐานการทำงาน'
+                    : 'เจาะดูช่วงที่ต่ำสุดในกราฟแนวโน้ม แล้วเทียบกับตัวกรองรายหมวดเพื่อระบุจุดที่ฉุดค่าลง'});
+        const bi=st.values.indexOf(Math.max.apply(null,st.values));
+        const wi=st.values.indexOf(Math.min.apply(null,st.values));
+        F.push({sev:'low',score:3,k:'range',t:'ช่วงที่ดีที่สุดและแย่ที่สุด',
+          fact:'สูงสุด <b>'+esc(st.labels[bi])+'</b> ('+fmt(st.values[bi],pk.f)+') · ต่ำสุด <b>'+
+               esc(st.labels[wi])+'</b> ('+fmt(st.values[wi],pk.f)+') ต่างกัน '+
+               fmt(st.values[bi]-st.values[wi],pk.f),
+          mean:'ส่วนต่างระหว่างช่วงดีที่สุดกับแย่ที่สุดคือช่องว่างที่ยกขึ้นได้จริง โดยไม่ต้องลงทุนเพิ่ม',
+          act:'เทียบเงื่อนไขการทำงานของสองช่วงนี้ทีละตัวแปร แล้วทำซ้ำเงื่อนไขของช่วงที่ดีที่สุด'});
+      }
+    }
+  }
+
+  /* ---- 2. concentration on the main dimension ---- */
+  let CD=null, a=null;
+  if(pk&&pk.a==='sum'){
+    for(const d of (S.concDims||[])){
+      const t=aggregate(rows,{c:d,b:'raw',t:'cat'},[{c:pk.c,a:'sum'}]);
+      if(t.labels.length>2){ CD=d; a=t; break }
+    }
+  }
+  if(pk&&CD!==null){
+    const tot=sum(a.series[0].filter(v=>v!==null));
+    if(tot>0){
+      const s1=a.series[0][0]/tot*100;
+      const s3=sum(a.series[0].slice(0,3))/tot*100;
+      const sev = s1>=45?'mid': s1>=30?'mid':'low';
+      F.push({sev:sev,score:s1*0.9,k:'conc',t:'การกระจุกตัวของ'+esc(D.cols[CD].n.replace(/_/g,' ')),
+        fact:'<b>'+esc(a.labels[0])+'</b> คิดเป็น <b>'+s1.toFixed(1)+'%</b> ของยอดรวม และ 3 อันดับแรกรวมกัน '+
+             s3.toFixed(1)+'% จากทั้งหมด '+a.labels.length+' รายการ',
+        mean: s1>=30 ? 'พึ่งพารายการเดียวสูง หากรายการนี้สะดุด ยอดรวมจะกระทบทันทีในสัดส่วนเดียวกัน'
+                     : 'การกระจายค่อนข้างสมดุล ความเสี่ยงจากการพึ่งพารายการเดียวอยู่ในระดับต่ำ',
+        act: s1>=30 ? 'ทำแผนสำรองสำหรับ '+esc(a.labels[0])+' และตั้งเป้าเพิ่มสัดส่วนของอันดับ 4 ลงไป'
+                    : 'คงการกระจายนี้ไว้ และเฝ้าดูว่าอันดับ 1 ไม่ไต่ขึ้นเกิน 30%'});
+    }
+  }
+
+  /* ---- 3. variability ---- */
+  if(pk&&pk.a!=='count'){
+    /* CV is only a stability statement when measured along time */
+    const stv=seriesOverTime(rows,pk.c,pk.a==='sum'?'sum':'avg');
+    const v=stv?stv.values:[];
+    if(v.length>8){
+      const m=avg(v), s=sd(v), cv=m?Math.abs(s/m*100):0;
+      const out=v.filter(x=>Math.abs(x-m)>2*s).length;
+      const sev = cv>=30?'high': cv>=18?'mid':'low';
+      F.push({sev:sev,score:cv*1.1,k:'cv',t:'ความสม่ำเสมอของ'+esc(pk.l)+'ตามช่วงเวลา',
+        fact:'ค่าเฉลี่ยต่อช่วงเวลา <b>'+fmt(m,pk.f)+'</b> ส่วนเบี่ยงเบน '+fmt(s,pk.f)+' → CV = <b>'+
+             cv.toFixed(1)+'%</b> มีช่วงที่หลุดกรอบ ±2σ จำนวน <b>'+out+'</b> จาก '+v.length+' ช่วง',
+        mean: cv>=18 ? 'ความผันผวนระดับนี้ทำให้ค่าเฉลี่ยใช้พยากรณ์ไม่ได้ ต้นเหตุมักมาจากวิธีทำงานที่ไม่เป็นมาตรฐานเดียวกัน'
+                     : 'กระบวนการนิ่งพอที่จะใช้ค่าเฉลี่ยวางแผนและตั้งเป้าได้',
+        act: cv>=18 ? 'ดูกราฟ SPC และ Histogram หาว่าค่าหลุดกรอบเกิดกับหมวดใดซ้ำ ๆ แล้วล็อกวิธีทำงานให้เป็นมาตรฐาน'
+                    : 'ตั้งค่าเฉลี่ยนี้เป็นฐานเป้าหมาย และใช้กรอบ ±2σ เป็นเกณฑ์เตือน'});
+    }
+  }
+
+  /* ---- 4. target vs actual ---- */
+  (S.pairs||[]).forEach(p=>{
+    const ratios=[]; let below=0;
+    for(const r of rows){
+      const t=r[p.t], a=r[p.a];
+      if(t===null||a===null||t===undefined||a===undefined||Number.isNaN(t)||Number.isNaN(a)||t===0)continue;
+      const q=a/t; ratios.push(q); if(p.inv ? q>1 : q<1) below++;
+    }
+    if(ratios.length<2)return;
+    const ach=avg(ratios)*100;
+    const inv=!!p.inv;
+    const good = inv ? ach<=100 : ach>=100;
+    const sev = good?'low':(Math.abs(ach-100)>=10?'high':'mid');
+    F.push({sev:sev,score:Math.abs(ach-100)*(good?0.5:2.0),k:'target',t:'ผลงานเทียบเป้าหมาย',
+      fact:'บรรลุเป้าเฉลี่ย <b>'+ach.toFixed(1)+'%</b> จาก '+NF(0).format(ratios.length)+' รายการ · '+
+           (inv?'ใช้เกินกรอบ ':'ต่ำกว่าเป้า ')+'<b>'+NF(0).format(below)+'</b> รายการ ('+
+           (below/ratios.length*100).toFixed(0)+'%) — เทียบ '+esc(p.al)+' กับ '+esc(p.tl),
+      mean: good ? 'อยู่ในกรอบที่วางไว้ เป้าที่ตั้งไว้ยังสมเหตุสมผลกับกำลังที่มี'
+                 : (inv?'ใช้เกินกรอบที่วางไว้ ต้องหาว่ารายการใดทำให้บานปลาย'
+                       :'ยังไม่ถึงเป้า ช่องว่างนี้ต้องถูกชดเชยในงวดถัดไปหรือทบทวนเป้า'),
+      act: good ? 'คงแนวทางเดิม และทบทวนว่าเป้าควรถูกยกขึ้นในงวดหน้าหรือไม่'
+                : 'เปิดกราฟ Bullet เพื่อดูว่ารายการใดต่ำกว่าเป้ามากที่สุด แล้วแก้ 2 อันดับแรกก่อน'});
+  });
+
+  /* ---- 5. status quality ---- */
+  if(S.statusCol!==null&&S.statusCol!==undefined&&S.badVals.length){
+    const a=aggregate(rows,{c:S.statusCol,b:'raw',t:'cat'},[{c:0,a:'count'}]);
+    const tot=sum(a.series[0]);
+    let bad=0; const worst=[];
+    a.labels.forEach((l,i)=>{ if(S.badVals.indexOf(l)>=0){bad+=a.series[0][i];worst.push([l,a.series[0][i]])} });
+    worst.sort((x,y)=>y[1]-x[1]);
+    /* a single-valued status column is an event log, not a quality signal */
+    if(tot&&bad&&a.labels.length>1&&bad<tot){
+      const sh=bad/tot*100;
+      const sev = sh>=15?'high': sh>=5?'mid':'low';
+      F.push({sev:sev,score:sh*1.5,k:'status',t:'คุณภาพงานตามสถานะ',
+        fact:'<b>'+NF(0).format(bad)+'</b> รายการ ('+sh.toFixed(1)+'%) อยู่ในสถานะที่ต้องจัดการ '+
+             'มากสุดคือ <b>'+esc(worst[0][0])+'</b> '+NF(0).format(worst[0][1])+' รายการ',
+        mean: sh>=5 ? 'สัดส่วนนี้คือปริมาณงานค้างจริงที่รออยู่ในระบบ และจะกลายเป็นต้นทุนแฝงถ้าปล่อยไว้'
+                    : 'สัดส่วนงานที่ต้องจัดการอยู่ในระดับที่ควบคุมได้',
+        act:'กรองตารางด้วยสถานะ "'+esc(worst[0][0])+'" แล้วเคลียร์รายการที่ค้างนานที่สุดก่อน'});
+    }
+  }
+
+  /* ---- 6. threshold breaches ---- */
+  (S.thresholds||[]).forEach(th=>{
+    const v=avg(colVals(rows,th.c));
+    if(v===null)return;
+    const bad = th.dir==='min' ? v<th.v : v>th.v;
+    const gap = th.dir==='min' ? th.v-v : v-th.v;
+    F.push({sev:bad?'high':'low',score:bad?60:2,k:'thr',
+      t:(bad?'ไม่ผ่านเกณฑ์ ':'ผ่านเกณฑ์ ')+esc(th.l),
+      fact:'ค่าเฉลี่ย <b>'+fmt(v,th.f)+' '+esc(th.u||'')+'</b> เทียบเกณฑ์ '+
+           (th.dir==='min'?'ไม่ต่ำกว่า ':'ไม่เกิน ')+fmt(th.v,th.f)+
+           (bad?' → ห่างจากเกณฑ์ <b>'+fmt(Math.abs(gap),th.f)+'</b>':' → มีระยะห่างเผื่อไว้ '+fmt(Math.abs(gap),th.f)),
+      mean: bad ? 'ตัวชี้วัดหลักหลุดเกณฑ์ที่ยอมรับได้ ถือเป็นประเด็นที่ต้องรายงานและติดตามรายสัปดาห์'
+                : 'ยังอยู่ในเกณฑ์ ไม่ต้องดำเนินการเพิ่มในรอบนี้',
+      act: bad ? 'ตั้งเจ้าภาพและกำหนดวันปิดประเด็น พร้อมวัดผลซ้ำในรอบถัดไป'
+               : 'ติดตามตามรอบปกติ'});
+  });
+
+  /* ---- 7. strongest relationship ---- */
+  const sc=(S.charts||[]).find(c=>c.k==='scatter');
+  if(sc){
+    let sx=0,sy=0,sxx=0,syy=0,sxy=0,n=0;
+    for(const r of rows){const x=r[sc.x],y=r[sc.y];
+      if(x===null||y===null||x===undefined||y===undefined||Number.isNaN(x)||Number.isNaN(y))continue;
+      sx+=x;sy+=y;sxx+=x*x;syy+=y*y;sxy+=x*y;n++}
+    if(n>10){
+      const den=Math.sqrt((n*sxx-sx*sx)*(n*syy-sy*sy));
+      const r=den?(n*sxy-sx*sy)/den:0;
+      if(Math.abs(r)>=0.5){
+        F.push({sev:'mid',score:Math.abs(r)*30,k:'corr',t:'ตัวแปรที่ขยับตามกัน',
+          fact:'<b>'+esc(sc.xl)+'</b> กับ <b>'+esc(sc.yl)+'</b> มีสหสัมพันธ์ r = <b>'+r.toFixed(2)+
+               '</b> ('+(r>0?'ไปทางเดียวกัน':'ไปทางตรงข้าม')+') จาก '+NF(0).format(n)+' คู่ข้อมูล',
+          mean:'ความสัมพันธ์ระดับนี้ทำให้ '+esc(sc.xl)+' เป็นตัวแปรที่น่าจะปรับได้ผลเร็วที่สุด — แต่ยังไม่ยืนยันว่าเป็นเหตุเป็นผล',
+          act:'ทดลองปรับ '+esc(sc.xl)+' แบบคุมตัวแปรอื่น 1 รอบ แล้ววัดว่า '+esc(sc.yl)+' ขยับตามจริงหรือไม่'});
+      }
+    }
+  }
+
+  /* ---- 8. data quality ---- */
+  let miss=0, cells=0;
+  const keyCols=S.kpis.filter(k=>k.a!=='count').map(k=>k.c);
+  for(const r of rows) keyCols.forEach(c=>{ cells++; if(r[c]===null||r[c]===undefined)miss++ });
+  if(cells){
+    const mp=miss/cells*100;
+    if(mp>=2){
+      F.push({sev:mp>=10?'mid':'low',score:mp*1.2,k:'dq',t:'ความครบถ้วนของข้อมูล',
+        fact:'ช่องว่างในคอลัมน์ตัวชี้วัดหลัก <b>'+mp.toFixed(1)+'%</b> ('+NF(0).format(miss)+' จาก '+
+             NF(0).format(cells)+' ค่า)',
+        mean:'ยิ่งข้อมูลไม่ครบ ค่าเฉลี่ยและผลรวมยิ่งเบี่ยง ตัวเลขในรายงานนี้จึงต้องอ่านพร้อมข้อจำกัดนี้',
+        act:'ตามเก็บค่าที่ขาดในคอลัมน์ที่ว่างมากที่สุด ก่อนใช้ตัวเลขชุดนี้ตัดสินใจ'});
+    }
+  }
+
+  /* ---- 9. gap between best and worst group (works without a date column) ---- */
+  if(pk){
+    for(const d of (S.allDims||[])){
+      const g=aggregate(rows,{c:d,b:'raw',t:'cat'},[{c:pk.c,a:pk.a==='sum'?'sum':'avg'}]);
+      const vv=g.series[0].filter(v=>v!==null);
+      if(g.labels.length<3||vv.length<3)continue;
+      const hi=g.series[0][0], lo=g.series[0][g.series[0].length-1];
+      if(hi===null||lo===null||!lo)continue;
+      const ratio=hi/lo;
+      const nm=esc(D.cols[d].n.replace(/_/g,' '));
+      F.push({sev:ratio>=3?'mid':'low',score:Math.min(45,ratio*6),k:'gap',
+        t:'ช่องว่างระหว่าง'+nm+'ที่สูงสุดและต่ำสุด',
+        fact:'สูงสุด <b>'+esc(g.labels[0])+'</b> '+fmt(hi,pk.f)+' · ต่ำสุด <b>'+
+             esc(g.labels[g.labels.length-1])+'</b> '+fmt(lo,pk.f)+' → ต่างกัน <b>'+
+             ratio.toFixed(1)+' เท่า</b> จาก '+g.labels.length+' กลุ่ม',
+        mean: ratio>=3 ? 'ความต่างระดับนี้มักไม่ใช่ธรรมชาติของงาน แต่มาจากวิธีทำงานหรือเงื่อนไขที่ไม่เท่ากัน'
+                       : 'ทุกกลุ่มทำได้ใกล้เคียงกัน ยังไม่มีกลุ่มที่หลุดจากแถวอย่างมีนัยสำคัญ',
+        act: ratio>=3 ? 'สัมภาษณ์ผู้รับผิดชอบกลุ่มสูงสุดและต่ำสุด แล้วยกวิธีของกลุ่มสูงสุดไปใช้กับกลุ่มที่ตามหลัง'
+                      : 'ใช้ค่ากลางของกลุ่มเป็นเกณฑ์ และเฝ้าดูกลุ่มที่เริ่มถอยห่าง'});
+      break;
+    }
+  }
+
+  /* ---- 10. distribution shape (always available) ---- */
+  if(F.length<3&&pk&&pk.a!=='count'){
+    const v=colVals(rows,pk.c).slice().sort((x,y)=>x-y);
+    if(v.length>=5){
+      const med=v[Math.floor(v.length/2)], m=avg(v);
+      const skew = med?((m-med)/Math.abs(med)*100):0;
+      F.push({sev:'low',score:2,k:'dist',t:'การกระจายตัวของ'+esc(pk.l),
+        fact:'ต่ำสุด '+fmt(v[0],pk.f)+' · มัธยฐาน <b>'+fmt(med,pk.f)+'</b> · เฉลี่ย '+fmt(m,pk.f)+
+             ' · สูงสุด '+fmt(v[v.length-1],pk.f)+' จาก '+NF(0).format(v.length)+' ค่า',
+        mean: Math.abs(skew)>=12
+          ? 'ค่าเฉลี่ยเบนจากมัธยฐาน '+Math.abs(skew).toFixed(0)+'% แสดงว่ามีค่าสุดขั้วไม่กี่ค่าดึงค่าเฉลี่ยไป ควรอ่านมัธยฐานเป็นหลัก'
+          : 'การกระจายค่อนข้างสมมาตร ค่าเฉลี่ยใช้แทนภาพรวมได้',
+        act: Math.abs(skew)>=12 ? 'เรียงตารางจากค่ามากไปน้อย ตรวจ 5 รายการบนสุดว่าเป็นของจริงหรือข้อมูลผิด'
+                                : 'ใช้ค่าเฉลี่ยนี้เป็นฐานตั้งเป้าในงวดถัดไป'});
+    }
+  }
+
+  const order={high:0,mid:1,low:2};
+  F.sort((a,b)=>(order[a.sev]-order[b.sev])||(b.score-a.score));
+  const nHigh=F.filter(f=>f.sev==='high').length, nMid=F.filter(f=>f.sev==='mid').length;
+  return {figs:head, finds:F, nHigh:nHigh, nMid:nMid, rows:N};
+}
+
+/* ============================ EXECUTIVE RENDER ============================ */
+const SEVC={high:'var(--bd)',mid:'var(--wn)',low:'var(--ok)'};
+const SEVT={high:'ต้องแก้ไข',mid:'เฝ้าระวัง',low:'ข้อสังเกต'};
+const SEVN={high:'ประเด็นที่',mid:'ประเด็นที่',low:'ลำดับ'};
+
+function renderExec(rows){
+  const host=document.getElementById('exec'); if(!host)return;
+  const A=analyze(rows);
+  window.__analysis=A;
+
+  const cls = A.nHigh?'bad':(A.nMid?'warn':'ok');
+  const head = A.nHigh ? 'มี '+A.nHigh+' ประเด็นที่ต้องแก้ไขก่อน'
+             : A.nMid ? 'ภาพรวมใช้ได้ แต่มี '+A.nMid+' ประเด็นที่ต้องเฝ้าระวัง'
+                      : 'ภาพรวมอยู่ในเกณฑ์ปกติทั้งหมด';
+  const pill = A.nHigh?'ต้องดำเนินการ':(A.nMid?'เฝ้าระวัง':'ปกติ');
+
+  /* summary paragraph — facts first, then the single most important consequence */
+  const bits=[];
+  bits.push('ข้อมูลชุดนี้ <b>'+NF(0).format(A.rows)+'</b> รายการ'+
+    (S.notes&&S.notes.length?(' · '+S.notes[0].replace(/<b>/g,'<b>')):''));
+  const f0=A.figs[0];
+  if(f0){
+    bits.push(esc(f0.l)+' อยู่ที่ <b>'+fmt(f0.v,f0.f)+' '+esc(f0.u||'')+'</b>'+
+      (f0.d!==null&&isFinite(f0.d)&&Math.abs(f0.d)>=0.05
+        ? (' ('+fmtSigned(f0.d)+'% เทียบช่วงก่อนหน้า)') : ''));
+  }
+  const top=A.finds.filter(f=>f.sev!=='low').slice(0,2);
+  if(top.length) bits.push('ประเด็นที่ต้องดู: '+top.map(f=>'<b>'+f.t+'</b>').join(' และ '));
+  else bits.push('ไม่พบประเด็นที่เกินเกณฑ์เฝ้าระวังในรอบนี้');
+
+  let figs='';
+  A.figs.forEach(f=>{
+    let d='<span class="ed nu">—</span>';
+    if(f.d!==null&&isFinite(f.d)){
+      if(Math.abs(f.d)<0.05){ d='<span class="ed nu">คงที่</span>' }
+      else{
+        const good=f.inv?f.d<0:f.d>0;
+        d='<span class="ed '+(good?'up':'dn')+'">'+(f.d>=0?'↑':'↓')+' '+Math.abs(f.d).toFixed(1)+'%</span>';
+      }
+    }
+    figs+='<div class="efig"><span class="el">'+esc(f.l)+'</span>'+
+      '<span class="ev">'+fmt(f.v,f.f)+'<span class="eu">'+esc(f.u||'')+'</span></span>'+d+'</div>';
+  });
+
+  const show=A.finds.slice(0,3);
+  let cards='';
+  show.forEach((f,i)=>{
+    cards+='<div class="ec" style="--sc:'+SEVC[f.sev]+'">'+
+      '<div class="ecl"><i></i>'+SEVT[f.sev]+' · '+SEVN[f.sev]+' '+(i+1)+'</div>'+
+      '<div class="ect">'+f.t+'</div>'+
+      '<div class="ecd">'+f.fact+'</div>'+
+      '<div class="eca"><span>ทำ →</span><div>'+f.act+'</div></div></div>';
+  });
+
+  host.innerHTML=
+    '<div class="exec-top"><div class="verdict">'+
+      '<div class="vhead"><span class="vpill '+cls+'"><i class="vd"></i>'+pill+'</span>'+
+      '<span style="font-size:11.5px;color:var(--mu);font-weight:600">อ่าน 30 วินาที</span></div>'+
+      '<h2>'+head+'</h2><p class="vsum">'+bits.join(' · ')+'</p></div>'+
+      '<div class="exec-figs">'+figs+'</div></div>'+
+    '<div class="exec-cards">'+cards+'</div>';
+
+  /* deep findings */
+  const fh=document.getElementById('finds');
+  if(fh){
+    fh.innerHTML=A.finds.slice(0,6).map((f,i)=>
+      '<div class="fd" style="--sc:'+SEVC[f.sev]+';animation-delay:'+(i*45)+'ms">'+
+        '<div class="fh"><span class="fsev">'+SEVT[f.sev]+'</span>'+
+        '<span class="fno">ข้อ '+String(i+1).padStart(2,'0')+'</span></div>'+
+        '<div class="fb"><div class="ftt">'+f.t+'</div>'+
+        '<div class="fr"><div class="fk">ข้อค้นพบ</div><div class="fv">'+f.fact+'</div></div>'+
+        '<div class="fr"><div class="fk">ความหมาย</div><div class="fv">'+f.mean+'</div></div>'+
+        '<div class="fr act"><div class="fk">สิ่งที่ควรทำ</div><div class="fv">'+f.act+'</div></div>'+
+        '</div></div>').join('');
+    const c=document.getElementById('findcount');
+    if(c)c.textContent=Math.min(6,A.finds.length)+' ข้อค้นพบ';
+  }
+}
 
 /* ---------- init ---------- */
 function init(){
