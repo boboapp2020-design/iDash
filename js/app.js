@@ -357,10 +357,20 @@ function openAiSetupModal(onSaved) {
   const api = window.iDashAIProviders;
   const sel = document.getElementById('aiProviderSelect');
   if (!sel.options.length) {
+    // Flag the providers that have a no-cost tier, read off the model list
+    // itself so the label can never drift from what the dropdown actually
+    // offers. Otherwise "is there a free option?" costs a click per provider.
     Object.keys(api.PROVIDERS).forEach(id => {
+      const p = api.PROVIDERS[id];
+      const free = (p.models || []).filter(m => m.tier === 'free').length;
+      const paid = (p.models || []).filter(m => m.tier === 'paid').length;
       const opt = document.createElement('option');
       opt.value = id;
-      opt.textContent = api.PROVIDERS[id].label;
+      opt.textContent = p.label +
+        (free && paid ? '  · มีรุ่นฟรีและรุ่นเสียเงิน'
+         : free       ? '  · ฟรีทุกรุ่น'
+         : paid       ? '  · เสียเงิน'
+         : '');
       sel.appendChild(opt);
     });
   }
