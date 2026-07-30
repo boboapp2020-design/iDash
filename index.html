@@ -8,9 +8,9 @@
   <script src="js/auth.js?v=20260729b"></script>
   <script>if (!window.iDashAuth.requireSignIn()) { document.documentElement.style.display = 'none'; }</script>
   <title>iDash — AI Dashboard Intelligence Platform</title>
-  <link rel="stylesheet" href="css/style.css?v=20260730a">
+  <link rel="stylesheet" href="css/style.css?v=20260730b">
   <link rel="stylesheet" href="css/ai_progress.css?v=20260722c">
-  <link rel="stylesheet" href="css/home.css?v=20260730a">
+  <link rel="stylesheet" href="css/home.css?v=20260730b">
   <!-- The KPI row's slowest step is the round-trip to Apps Script, so warm the
        connection and start the request from <head> instead of waiting behind
        the ~900KB of vendor scripts at the end of <body>. -->
@@ -305,7 +305,15 @@
              to its single-column layout, so the card is a working chat rather
              than a preview of one. -->
         <div class="home-chat-embed">
-          <iframe id="homeChatFrame" title="AI Chatbot" src="https://boboapp2020-design.github.io/MLChatbot/"></iframe>
+          <iframe id="homeChatFrame" title="AI Chatbot" data-src="https://boboapp2020-design.github.io/MLChatbot/"></iframe>
+
+          <!-- Cover screen. The chat app only loads once this is clicked, so
+               the home page never pays for a cross-origin app nobody opened. -->
+          <button type="button" class="home-chat-cover" id="homeChatCover">
+            <img class="home-chat-bot" src="assets/img/chatbot_mascot.png" alt="iDash Chatbot">
+            <span class="home-chat-cta">คลิก เพื่อคุยกับ Chat bot</span>
+            <span class="home-chat-cta-sub">ML Expert AI · ผู้ช่วยอัจฉริยะโรงงานน้ำตาล</span>
+          </button>
         </div>
       </section>
     </div>
@@ -673,6 +681,20 @@
     // dashboard viewer shell, which would scale the app down into a panel.
     var chatOpen = document.getElementById('homeChatOpen');
     if (chatOpen) chatOpen.setAttribute('href', 'chat.html');
+
+    // The chat app is only fetched when the cover is clicked — one click swaps
+    // the greeting for the live chatbot, and the cover never comes back.
+    var chatCover = document.getElementById('homeChatCover');
+    var chatFrame = document.getElementById('homeChatFrame');
+    if (chatCover && chatFrame) {
+      chatCover.addEventListener('click', function () {
+        if (chatFrame.src) return;
+        chatFrame.src = chatFrame.getAttribute('data-src');
+        chatCover.classList.add('is-going');
+        // Let the fade finish before the node leaves the flow.
+        setTimeout(function () { chatCover.hidden = true; }, 300);
+      });
+    }
 
     // Dashboard Center expand/collapse (sub-items are placeholders)
     var toggle = document.getElementById('dashCenterToggle');
