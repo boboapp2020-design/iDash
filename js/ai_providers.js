@@ -398,7 +398,11 @@
       (data.detail && (data.detail.message || data.detail))
     );
     if (typeof msg === 'object') msg = JSON.stringify(msg);
-    return msg ? String(msg) : ('HTTP ' + status);
+    // Keep the status alongside the text. explainError classifies on both, and
+    // a message like "Invalid JWT" carries no code of its own — without this
+    // the 401 that identifies it is thrown away before anyone can use it.
+    if (msg) return 'HTTP ' + status + ': ' + String(msg);
+    return 'HTTP ' + status;
   }
 
   /* ── Output handling ────────────────────────────────────────────────── */
@@ -471,31 +475,62 @@
     var m = String(message || '');
     var viaGateway = cfg.shape === 'supabase';
 
-    if (/invalid x-api-key|authentication_error|invalid_api_key|incorrect api key|401/i.test(m)) {
-      return viaGateway
+    // ORDER MATTERS. Supabase answers a rejected anon key with 401 "Invalid
+    // JWT", and Anthropic answers a bad API key with 401 too. Testing for a
+    // bare 401 first would blame the Edge Function's Anthropic secret for
+    // what is actually a browser-side anon-key problem — the two keys the
+    // user is already struggling to tell apart. JWT is the specific case, so
+    // it is checked first.
+    if (viaGateway && /invalid jwt|\bjwt\b|missing authorization/i.test(m)) {
+      return 'Supabase ปฏิเสธ anon key ในหน้านี้ (ไม่เกี่ยวกับ ANTHROPIC_API_KEY) — ' +
+             'ปิดสวิตช์ "Verify JWT" ที่ Edge Function หรือใช้ legacy anon key (ขึ้นต้น eyJ) แทน' + rawHint(m);
+    }
+    if (/invalid x-api-key|authentication_error|invalid_api_key|incorrect api key|\b401\b/i.test(m)) {
+      return (viaGateway
         ? 'Supabase เรียก Anthropic ไม่ผ่าน เพราะ ANTHROPIC_API_KEY บนฝั่ง Edge Function ไม่ถูกต้อง ' +
           '(ไม่ใช่ anon key ในหน้านี้) → แก้ที่ Supabase → Edge Functions → Secrets ' +
           'ใส่ค่าที่ขึ้นต้นด้วย sk-ant- จาก console.anthropic.com'
         : 'API key ของ ' + cfg.label + ' ไม่ถูกต้อง — ตรวจว่าคัดลอกมาครบและยังไม่ถูกเพิกถอน ' +
           '(ของ Anthropic ต้องขึ้นต้น sk-ant- และมาจาก console.anthropic.com เท่านั้น ' +
-          'สมาชิก claude.ai ใช้กับ API ไม่ได้)';
+          'สมาชิก claude.ai ใช้กับ API ไม่ได้)') + rawHint(m);
     }
     if (/credit balance|insufficient|quota|billing/i.test(m)) {
-      return viaGateway
+      return (viaGateway
         ? 'บัญชี Anthropic ที่ผูกกับ Edge Function ยังไม่มีเครดิต — เติมที่ console.anthropic.com → Billing'
-        : 'บัญชี ' + cfg.label + ' ยังไม่มีเครดิตพอ — เติมเงินก่อนใช้งาน';
+        : 'บัญชี ' + cfg.label + ' ยังไม่มีเครดิตพอ — เติมเงินก่อนใช้งาน') + rawHint(m);
     }
-    if (/invalid jwt|jwt|not authorized|403/i.test(m) && viaGateway) {
-      return 'Supabase ปฏิเสธ anon key ในหน้านี้ — ปิดสวิตช์ "Verify JWT" ที่ Edge Function ' +
-             'หรือใช้ legacy anon key (ขึ้นต้น eyJ) แทน';
-    }
-    if (/rate|429|overloaded/i.test(m)) {
-      return 'ผู้ให้บริการกำลังรับงานหนัก (rate limit) — รออีกสักครู่แล้วลองใหม่';
+    // "rate" as a bare substring matched inside gene*rate*d, ope*rate*,
+    // sepa*rate* — any upstream sentence containing one of those was reported
+    // as a rate limit. Match the actual phrases instead.
+    if (/rate[ _-]?limit|429|overloaded|too many requests/i.test(m)) {
+      return 'ผู้ให้บริการกำลังรับงานหนัก (rate limit) — รออีกสักครู่แล้วลองใหม่' + rawHint(m);
     }
     if (/not set on this function|ANTHROPIC_API_KEY/i.test(m)) {
-      return 'Edge Function ยังไม่มี ANTHROPIC_API_KEY — เพิ่มที่ Supabase → Edge Functions → Secrets';
+      return 'Edge Function ยังไม่มี ANTHROPIC_API_KEY — เพิ่มที่ Supabase → Edge Functions → Secrets' + rawHint(m);
+    }
+    if (viaGateway && /404|not found|BOOT_ERROR|failed to load|worker/i.test(m)) {
+      return 'เรียก Edge Function ตาม URL นี้ไม่เจอ หรือ Function บูตไม่ขึ้น — ' +
+             'ตรวจว่าชื่อ Function ท้าย URL ตรงกับที่ deploy ไว้จริง และโค้ด deploy สำเร็จ' + rawHint(m);
+    }
+    if (viaGateway && /unsupported action|payload\.prompt/i.test(m)) {
+      return 'Edge Function ที่ URL นี้ไม่ใช่ llm-gateway ของ iDash (มันไม่รู้จักคำสั่ง dashboard-compose) — ' +
+             'วางโค้ดจาก _dev/supabase/functions/llm-gateway/index.ts ทับแล้ว Deploy ใหม่' + rawHint(m);
     }
     return m;
+  }
+
+  /**
+   * Keeps the provider's own words visible after our interpretation. When the
+   * classification above is wrong — and a substring match on someone else's
+   * error text will sometimes be wrong — the untranslated message is the only
+   * thing that lets anyone see what really happened instead of debugging our
+   * guess about it.
+   */
+  function rawHint(m) {
+    var s = String(m || '').trim();
+    if (!s) return '';
+    if (s.length > 160) s = s.slice(0, 160) + '…';
+    return '  [ข้อความจากปลายทาง: ' + s + ']';
   }
 
   function generateDashboard(facts) {
