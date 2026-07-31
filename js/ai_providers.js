@@ -42,7 +42,7 @@
       label: 'Supabase (llm-gateway ของคุณ)',
       shape: 'supabase',
       endpoint: '',
-      defaultModel: 'claude-opus-4-8',
+      defaultModel: 'claude-sonnet-5',   // heaviest model is the one that hits Supabase's ceiling
       keyHint: 'ใส่ anon key ของโปรเจกต์ (ปลอดภัยที่จะอยู่ฝั่งเบราว์เซอร์)',
       keyUrl: 'supabase.com/dashboard → Settings → API',
       needsEndpoint: true,
@@ -51,10 +51,14 @@
       // single-vendor means one secret to manage (ANTHROPIC_API_KEY) and one
       // upstream to keep working. If you need Gemini or GPT, "ต่อ AI โดยตรง"
       // already covers them without the extra hop.
+      // An Edge Function holds the connection open for the whole generation,
+      // so the heaviest model is also the one most likely to hit Supabase's
+      // compute ceiling (HTTP 546). Say which is which at the point of choice
+      // rather than after a failure.
       models: [
-        { id: 'claude-opus-4-8',   label: 'Claude Opus 4.8 — เก่งสุด แนะนำ', tier: 'paid' },
-        { id: 'claude-sonnet-5',   label: 'Claude Sonnet 5 — สมดุล',         tier: 'paid' },
-        { id: 'claude-haiku-4-5',  label: 'Claude Haiku 4.5 — เร็ว ถูกสุด',  tier: 'paid' }
+        { id: 'claude-sonnet-5',   label: 'Claude Sonnet 5 — แนะนำสำหรับ Supabase (เร็ว เสถียร)', tier: 'paid' },
+        { id: 'claude-haiku-4-5',  label: 'Claude Haiku 4.5 — เบาสุด ถูกสุด',                    tier: 'paid' },
+        { id: 'claude-opus-4-8',   label: 'Claude Opus 4.8 — สวยสุด แต่หนัก อาจติดลิมิต Supabase', tier: 'paid' }
       ]
     },
     anthropic: {
@@ -507,6 +511,18 @@
     }
     if (/not set on this function|ANTHROPIC_API_KEY/i.test(m)) {
       return 'Edge Function ยังไม่มี ANTHROPIC_API_KEY — เพิ่มที่ Supabase → Edge Functions → Secrets' + rawHint(m);
+    }
+    // Supabase's own code for "the worker was killed for using too much".
+    // Nothing about the user's keys is wrong here, so say so plainly rather
+    // than sending them back to re-check credentials that are already fine.
+    if (/\b546\b|not having enough compute|compute resources|WORKER_LIMIT|resource limit/i.test(m)) {
+      return 'Supabase Edge Function ใช้ทรัพยากรเกินโควตาระหว่างสร้างหน้า (ไม่ใช่ปัญหาของ key) — ' +
+             'ให้ deploy gateway ตัวล่าสุด (ลด max_tokens เหลือ 16000) หรือเลือกโมเดลที่เบากว่า ' +
+             'เช่น Claude Sonnet 5 / Haiku 4.5 · หรือใช้โหมด "ต่อ AI โดยตรง" ซึ่งไม่ผ่าน Edge Function' + rawHint(m);
+    }
+    if (viaGateway && /504|timed out|timeout/i.test(m)) {
+      return 'Edge Function รอ Anthropic นานเกินกำหนด — ลองโมเดลที่เร็วกว่า (Sonnet 5 / Haiku 4.5) ' +
+             'หรือใช้โหมด "ต่อ AI โดยตรง"' + rawHint(m);
     }
     if (viaGateway && /404|not found|BOOT_ERROR|failed to load|worker/i.test(m)) {
       return 'เรียก Edge Function ตาม URL นี้ไม่เจอ หรือ Function บูตไม่ขึ้น — ' +
