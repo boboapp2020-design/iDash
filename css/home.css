@@ -631,6 +631,8 @@ a.home-quick:hover .chev { color: var(--acc); }
 }
 .bm-field select:focus, .bm-field input:focus { border-color: var(--primary); }
 .bm-hint { font-size: 11px; color: var(--gray-500); }
+.bm-hint a { color: var(--primary); font-weight: 600; text-decoration: none; }
+.bm-hint a:hover { text-decoration: underline; }
 
 .bm-warn {
   display: flex; align-items: flex-start; gap: 8px;

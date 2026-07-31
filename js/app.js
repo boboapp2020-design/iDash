@@ -463,8 +463,7 @@ function syncAiSetupFields() {
   syncAiModelCustomField();
 
   document.getElementById('aiKeyInput').value = saved.apiKey || '';
-  document.getElementById('aiKeyHint').textContent =
-    def.keyHint + (def.keyUrl ? ' · ขอ key ได้ที่ ' + def.keyUrl : '');
+  renderAiKeyHint(def);
 
   // The blanket "anyone on this machine can read your key" warning is wrong for
   // Supabase — there the browser only ever holds the anon key and the real
@@ -484,6 +483,31 @@ function syncAiSetupFields() {
   const endpointInput = document.getElementById('aiEndpointInput');
   endpointInput.value = saved.endpoint || def.endpoint || '';
   endpointInput.placeholder = def.endpointHint || 'https://.../chat/completions';
+}
+
+/**
+ * The "ขอ key ได้ที่ …" hint is a real clickable link when keyUrl is a bare
+ * domain (Anthropic/Gemini/OpenAI all are) so getting a key is one click, not
+ * a copy-paste into a new tab. Supabase's keyUrl is a click-path through its
+ * own dashboard ("… → Settings → API"), not a URL, so that one stays plain
+ * text — linkifying it would point nowhere real.
+ */
+function renderAiKeyHint(def) {
+  const el = document.getElementById('aiKeyHint');
+  el.textContent = def.keyHint;
+  if (!def.keyUrl) return;
+  el.appendChild(document.createTextNode(' · ขอ key ได้ที่ '));
+  const isBareUrl = /^[a-z0-9.-]+\.[a-z]{2,}(\/[^\s]*)?$/i.test(def.keyUrl);
+  if (isBareUrl) {
+    const a = document.createElement('a');
+    a.href = 'https://' + def.keyUrl;
+    a.target = '_blank';
+    a.rel = 'noopener noreferrer';
+    a.textContent = def.keyUrl;
+    el.appendChild(a);
+  } else {
+    el.appendChild(document.createTextNode(def.keyUrl));
+  }
 }
 
 function syncAiModelCustomField() {

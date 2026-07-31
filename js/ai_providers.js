@@ -25,7 +25,8 @@
    * `shape` picks the request/response adapter:
    *   anthropic → POST /v1/messages
    *   gemini    → POST /v1beta/models/{model}:generateContent
-   *   openai    → POST /chat/completions   (Groq, OpenRouter, DeepSeek, custom)
+   *   openai    → POST /chat/completions   ("custom" reuses this shape — any
+   *               OpenAI-compatible endpoint the user points it at)
    *   supabase  → POST the project's llm-gateway Edge Function, which holds the
    *               provider key server-side. `apiKey` here is the project's anon
    *               key, which is safe to ship client-side by design.
@@ -94,54 +95,6 @@
         { id: 'gemini-2.5-pro',        label: 'Gemini 2.5 Pro — เก่งสุด',             tier: 'paid' }
       ]
     },
-    groq: {
-      label: 'Groq',
-      shape: 'openai',
-      endpoint: 'https://api.groq.com/openai/v1/chat/completions',
-      defaultModel: 'llama-3.3-70b-versatile',
-      keyHint: 'ขึ้นต้นด้วย gsk_',
-      keyUrl: 'console.groq.com/keys',
-      models: [
-        { id: 'llama-3.3-70b-versatile',        label: 'Llama 3.3 70B — แนะนำ',   tier: 'free' },
-        { id: 'llama-3.1-8b-instant',           label: 'Llama 3.1 8B — เร็วมาก',  tier: 'free' },
-        { id: 'openai/gpt-oss-120b',            label: 'GPT-OSS 120B',            tier: 'free' },
-        { id: 'openai/gpt-oss-20b',             label: 'GPT-OSS 20B',             tier: 'free' },
-        { id: 'moonshotai/kimi-k2-instruct',    label: 'Kimi K2',                 tier: 'free' },
-        { id: 'qwen/qwen3-32b',                 label: 'Qwen3 32B',               tier: 'free' },
-        { id: 'deepseek-r1-distill-llama-70b',  label: 'DeepSeek R1 Distill 70B', tier: 'free' }
-      ]
-    },
-    openrouter: {
-      label: 'OpenRouter (รวมทุกเจ้า)',
-      shape: 'openai',
-      endpoint: 'https://openrouter.ai/api/v1/chat/completions',
-      defaultModel: 'deepseek/deepseek-chat-v3:free',
-      keyHint: 'ขึ้นต้นด้วย sk-or-',
-      keyUrl: 'openrouter.ai/keys',
-      models: [
-        { id: 'deepseek/deepseek-chat-v3:free',            label: 'DeepSeek V3 (ฟรี)',        tier: 'free' },
-        { id: 'deepseek/deepseek-r1:free',                 label: 'DeepSeek R1 (ฟรี)',        tier: 'free' },
-        { id: 'meta-llama/llama-3.3-70b-instruct:free',    label: 'Llama 3.3 70B (ฟรี)',      tier: 'free' },
-        { id: 'qwen/qwen3-235b-a22b:free',                 label: 'Qwen3 235B (ฟรี)',         tier: 'free' },
-        { id: 'google/gemini-2.0-flash-exp:free',          label: 'Gemini 2.0 Flash (ฟรี)',   tier: 'free' },
-        { id: 'anthropic/claude-opus-4-8',                 label: 'Claude Opus 4.8 — เก่งสุด', tier: 'paid' },
-        { id: 'anthropic/claude-sonnet-5',                 label: 'Claude Sonnet 5',          tier: 'paid' },
-        { id: 'google/gemini-2.5-pro',                     label: 'Gemini 2.5 Pro',           tier: 'paid' },
-        { id: 'openai/gpt-4o',                             label: 'GPT-4o',                   tier: 'paid' }
-      ]
-    },
-    deepseek: {
-      label: 'DeepSeek',
-      shape: 'openai',
-      endpoint: 'https://api.deepseek.com/chat/completions',
-      defaultModel: 'deepseek-chat',
-      keyHint: 'ขึ้นต้นด้วย sk-',
-      keyUrl: 'platform.deepseek.com',
-      models: [
-        { id: 'deepseek-chat',     label: 'DeepSeek Chat — แนะนำ',      tier: 'paid' },
-        { id: 'deepseek-reasoner', label: 'DeepSeek Reasoner — คิดลึก', tier: 'paid' }
-      ]
-    },
     openai: {
       label: 'OpenAI (GPT)',
       shape: 'openai',
@@ -154,58 +107,6 @@
         { id: 'gpt-4o-mini', label: 'GPT-4o mini — ถูก', tier: 'paid' },
         { id: 'gpt-4.1',     label: 'GPT-4.1',           tier: 'paid' },
         { id: 'o3-mini',     label: 'o3-mini — คิดลึก',  tier: 'paid' }
-      ]
-    },
-    mistral: {
-      label: 'Mistral AI',
-      shape: 'openai',
-      endpoint: 'https://api.mistral.ai/v1/chat/completions',
-      defaultModel: 'mistral-large-latest',
-      keyHint: 'สมัครแล้วมีโควตาฟรีให้ทดลอง',
-      keyUrl: 'console.mistral.ai',
-      models: [
-        { id: 'open-mistral-nemo',    label: 'Mistral Nemo (ฟรี)',      tier: 'free' },
-        { id: 'mistral-small-latest', label: 'Mistral Small (ฟรี)',     tier: 'free' },
-        { id: 'mistral-large-latest', label: 'Mistral Large — เก่งสุด', tier: 'paid' }
-      ]
-    },
-    xai: {
-      label: 'xAI (Grok)',
-      shape: 'openai',
-      endpoint: 'https://api.x.ai/v1/chat/completions',
-      defaultModel: 'grok-4',
-      keyHint: 'ขึ้นต้นด้วย xai-',
-      keyUrl: 'console.x.ai',
-      models: [
-        { id: 'grok-4',      label: 'Grok 4 — เก่งสุด', tier: 'paid' },
-        { id: 'grok-3',      label: 'Grok 3',           tier: 'paid' },
-        { id: 'grok-3-mini', label: 'Grok 3 mini — ถูก', tier: 'paid' }
-      ]
-    },
-    cerebras: {
-      label: 'Cerebras (เร็วมาก)',
-      shape: 'openai',
-      endpoint: 'https://api.cerebras.ai/v1/chat/completions',
-      defaultModel: 'llama-3.3-70b',
-      keyHint: 'ขึ้นต้นด้วย csk-',
-      keyUrl: 'cloud.cerebras.ai',
-      models: [
-        { id: 'llama-3.3-70b',  label: 'Llama 3.3 70B — แนะนำ', tier: 'free' },
-        { id: 'llama3.1-8b',    label: 'Llama 3.1 8B — เร็วสุด', tier: 'free' },
-        { id: 'qwen-3-32b',     label: 'Qwen3 32B',              tier: 'free' }
-      ]
-    },
-    together: {
-      label: 'Together AI',
-      shape: 'openai',
-      endpoint: 'https://api.together.xyz/v1/chat/completions',
-      defaultModel: 'meta-llama/Llama-3.3-70B-Instruct-Turbo',
-      keyHint: 'สมัครแล้วได้เครดิตทดลองใช้',
-      keyUrl: 'api.together.ai/settings/api-keys',
-      models: [
-        { id: 'meta-llama/Llama-3.3-70B-Instruct-Turbo',      label: 'Llama 3.3 70B Turbo — แนะนำ', tier: 'paid' },
-        { id: 'Qwen/Qwen2.5-72B-Instruct-Turbo',              label: 'Qwen2.5 72B Turbo',           tier: 'paid' },
-        { id: 'deepseek-ai/DeepSeek-V3',                      label: 'DeepSeek V3',                 tier: 'paid' }
       ]
     },
     custom: {
