@@ -230,9 +230,23 @@
       return JSON.stringify(String(s)).replace(/</g, '\\u003c');
     }
 
+    // GitHub Pages serves every file with Cache-Control: max-age=600, and a
+    // plain iframe src is a normal cached fetch — so a page like Sale
+    // Dashboard, which the user edits and reloads through repeatedly in one
+    // sitting, can keep showing a snapshot from before their last save for up
+    // to ten minutes. Busting only OUR relative dashboards/*.html pages (never
+    // an absolute https:// URL) keeps the deliberate cache reuse below for the
+    // 2MB external Production Dashboard intact — that one changes rarely and
+    // is worth the bandwidth savings; ours changes every time the user edits.
+    function isOwnRelativePage(u) { return !/^https?:\/\//i.test(u); }
+    function freshUrl(u) {
+      if (!isOwnRelativePage(u)) return u;
+      return u + (u.indexOf('?') === -1 ? '?' : '&') + '_fresh=' + Date.now();
+    }
+
     function loadPlain() {
       frame.removeAttribute('srcdoc');
-      frame.src = url;
+      frame.src = freshUrl(url);
     }
 
     // Same-origin targets (the Production Dashboard sits on this very host,
