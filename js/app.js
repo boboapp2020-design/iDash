@@ -333,7 +333,11 @@ function initBuildModeModal() {
         ? () => runAutopilotPipeline(dataset, null, { mode: mode })
         : () => pickFileThenRun(mode);
 
-      if (mode === 'ai' && window.iDashAIProviders && window.iDashAIProviders.configProblem()) {
+      // AI Autopilot always re-opens the setup modal, even when a provider is
+      // already configured — it's the one route that sends data to a third
+      // party, so which key/provider is about to be used should be a visible
+      // choice each time, not something remembered silently from last time.
+      if (mode === 'ai') {
         openAiSetupModal(start);
       } else {
         start();
@@ -611,11 +615,16 @@ function pickRandomTheme() {
   return palette[Math.floor(Math.random() * palette.length)];
 }
 
-function openAiProgressModal() {
+function openAiProgressModal(buildMode) {
   const modal = document.getElementById('aiProgressModal');
   if (!modal) return;
   document.getElementById('aiProgressError').hidden = true;
-  document.getElementById('aiProgressHeaderSub').textContent = 'กำลังวิเคราะห์ข้อมูลของคุณ';
+  // Template mode names what it's actually doing (matching the upload against
+  // the curated library) rather than the generic "analyzing" text, so it
+  // reads as a different, faster route than AI Autopilot rather than the same
+  // wording at two different speeds.
+  document.getElementById('aiProgressHeaderSub').textContent =
+    buildMode === 'template' ? 'กำลังหา Template ที่เหมาะกับคุณ' : 'กำลังวิเคราะห์ข้อมูลของคุณ';
   document.getElementById('aiProgressDesc').textContent = 'กำลังวิเคราะห์ไฟล์และสร้างข้อมูลเชิงลึกที่เหมาะสมที่สุด...';
   setAiProgress(0);
   AI_PROGRESS_STEP_ORDER.forEach(key => setAiStepStatus(key, 'pending'));
@@ -1071,8 +1080,16 @@ async function prepareTemplateHtml(entry, dataset) {
 // tens of milliseconds, which reads as "nothing happened" — a short visible
 // pacing (~2.5-4s total across the run) lets each progress step register.
 // Cosmetic only: it never changes any output (P5-safe).
-function aiPause(minMs, maxMs) {
-  var ms = minMs + Math.random() * (maxMs - minMs);
+//
+// AI Autopilot runs 3x slower than Template mode by the same mechanism: its
+// real network call can take much longer than these fixed pauses, so a bar
+// that raced through the DET steps at template speed and then stalled for
+// several seconds on the actual AI call would read as frozen. Stretching the
+// pacing here keeps the whole bar moving at a rate consistent with what's
+// coming next.
+function aiPause(minMs, maxMs, buildMode) {
+  var mult = buildMode === 'ai' ? 3 : 1;
+  var ms = (minMs + Math.random() * (maxMs - minMs)) * mult;
   return new Promise(function (res) { setTimeout(res, ms); });
 }
 
@@ -1103,7 +1120,7 @@ async function runAutopilotPipeline(fileOrDataset, userModuleId, opts) {
     dataset = fileOrDataset;
   }
 
-  openAiProgressModal();
+  openAiProgressModal(buildMode);
   const runId = crypto.randomUUID ? crypto.randomUUID() : Date.now().toString();
 
   // Offline pivot (user directive 2026-07-22, "ไม่ต้องเชื่อม API"): no
@@ -1116,7 +1133,7 @@ async function runAutopilotPipeline(fileOrDataset, userModuleId, opts) {
     const echartsReady = ensureEchartsSource();
 
     setAiStepStatus('upload', 'done');
-    await aiPause(400, 700);
+    await aiPause(400, 700, buildMode);
 
     setAiStepStatus('understand', 'active');
     const packs = await loadDomainPacks();
@@ -1134,7 +1151,7 @@ async function runAutopilotPipeline(fileOrDataset, userModuleId, opts) {
       winnerPack = packById[userPackId];
       classificationSource = 'user-module';
     }
-    await aiPause(600, 1100);
+    await aiPause(600, 1100, buildMode);
     setAiStepStatus('understand', 'done');
 
     setAiStepStatus('analyze', 'active');
@@ -1147,7 +1164,7 @@ async function runAutopilotPipeline(fileOrDataset, userModuleId, opts) {
     const kpiDefById = {};
     kpiDefs.forEach(d => { kpiDefById[d.id] = d; });
     const decisionSpec = window.iDashDecisionEngine.buildDecisionSpec(bindings, kpiDefs, winnerPack);
-    await aiPause(700, 1200);
+    await aiPause(700, 1200, buildMode);
     setAiStepStatus('analyze', 'done');
 
     setAiStepStatus('build', 'active');
@@ -1164,7 +1181,7 @@ async function runAutopilotPipeline(fileOrDataset, userModuleId, opts) {
       const domainContext = { id: winnerPack.id, nameTH: winnerPack.identity.nameTH };
       insightStory = await window.iDashInsightEngine.generateInsights(bindings, dataset, kpiDefById, domainContext, dashboardSpec, { runId });
     }
-    await aiPause(800, 1400);
+    await aiPause(800, 1400, buildMode);
     setAiStepStatus('build', 'done');
 
     document.getElementById('aiProgressHeaderSub').textContent = 'เสร็จสิ้น';
