@@ -773,6 +773,25 @@ async function resolveDatasetForPipeline(file) {
     if (wasLocked) downloadUnlockedCsv(dataset, file.name);
     return dataset;
   }
+
+  // Don't ask a question whose answer is ignored. Dashboards registered with
+  // inject.mode === 'file' are handed the whole workbook and choose their own
+  // sheet from it — stoptime looks for /stop/i, daily for /daily/i, water for
+  // /น้ำ|water/i, soil for "ข้อมูลผลการวิเคราะห์รวม". Whatever the user picks
+  // here changes nothing about what they get, so asking only adds a step and
+  // implies an influence that doesn't exist.
+  //
+  // Matching on the pre-merge dataset is safe: it already carries the full
+  // workbook sheet list and the best sheet's columns, which is exactly what
+  // the matcher reads.
+  if (window.iDashKnownDatasets) {
+    var early = window.iDashKnownDatasets.match(dataset.columns, dataset.sheetNames);
+    if (early && early.entry.inject && early.entry.inject.mode === 'file') {
+      if (wasLocked) downloadUnlockedCsv(dataset, file.name);
+      return dataset;
+    }
+  }
+
   return new Promise((resolve, reject) => {
     openSheetPickerModal(dataset, (selectedNames) => {
       const merged = window.iDashProfiler.mergeSheets(dataset.allSheets, selectedNames);
