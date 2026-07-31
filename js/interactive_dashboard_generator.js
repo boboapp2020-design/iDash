@@ -131,6 +131,8 @@
       '.kpi-delta{font-size:11px;font-weight:700;white-space:nowrap;padding:2px 8px;border-radius:999px}',
       '.kpi-delta.up{color:var(--positive);background:color-mix(in srgb,var(--positive) 10%,transparent)}',
       '.kpi-delta.down{color:var(--negative);background:color-mix(in srgb,var(--negative) 10%,transparent)}',
+      '.kpi-delta-wrap{display:flex;flex-direction:column;align-items:flex-end;gap:2px;flex-shrink:0}',
+      '.kpi-baseline{font-size:9px;color:var(--text-secondary);opacity:.75;white-space:nowrap}',
       // ─── Chart zone: 12-col grid — hero 2/3 + side 1/3 first row (the
       // asymmetric split every reference screenshot uses), then 6/6 pairs.
       '.chart-grid{display:grid;grid-template-columns:repeat(12,1fr);gap:16px;margin-bottom:20px}',
@@ -230,11 +232,61 @@
     return v.toLocaleString();
   }
 
+  /**
+   * Statistical identifier screen (dashboard-architect rule: ตัวเลขที่ไม่มี
+   * ความหมายแย่กว่าไม่มี dashboard). The name-regex screens miss columns like
+   * "F_ID" and "farmmer_id" — underscore is a word character, so \bid\b never
+   * fires inside them — and summing those produced KPI garbage like
+   * "F_ID 20.18B", which is why unmatched files used to be refused outright.
+   * This screen doesn't trust the name at all: a numeric column whose values
+   * are (a) almost all integers and (b) almost all distinct is a label for
+   * rows, not a measure of anything, whatever it is called.
+   */
+  function detectIdLikeCols(dataset, numCols) {
+    var data = dataset.data || [];
+    var sample = data.length > 800 ? data.slice(0, 800) : data;
+    var out = [];
+    numCols.forEach(function (col) {
+      var seen = {}, vals = [], ints = 0, n = 0;
+      sample.forEach(function (row) {
+        var v = Number(row[col]);
+        if (isNaN(v)) return;
+        n++;
+        if (v === Math.floor(v)) ints++;
+        var k = String(v);
+        if (!seen[k]) { seen[k] = 1; vals.push(v); }
+      });
+      if (n < 8 || ints / n < 0.98 || vals.length / n < 0.85) return;
+      // Near-unique integers alone is NOT enough — kpi_engine learned that the
+      // hard way (random-valued budget columns are near-unique too). The extra
+      // tell of a real identifier is that its distinct values sit in a dense
+      // run: sorted, the median gap between neighbours is tiny. Measures with
+      // near-unique values scatter across a wide range instead.
+      vals.sort(function (a, b) { return a - b; });
+      var gaps = [];
+      for (var i = 1; i < vals.length; i++) gaps.push(vals[i] - vals[i - 1]);
+      if (!gaps.length) return;
+      gaps.sort(function (a, b) { return a - b; });
+      var medianGap = gaps[Math.floor(gaps.length / 2)];
+      if (medianGap <= 2) out.push(col);
+    });
+    return out;
+  }
+
   function generate(spec, meta, theme, dataset, opts) {
     var maxRows = (opts && opts.maxRows) || 5000;
     var title = resolveTitle(meta);
     var columns = getColNames(dataset);
     var classified = classifyColumns(dataset);
+    // Strip identifier-shaped columns from the numeric set before ANY use —
+    // chart plan, KPI cards, and the table footer sums all read numCols, and
+    // an ID is meaningless in every one of those places (comma-formatting an
+    // ID number in the table is wrong too, so text treatment suits it better).
+    var idLikeCols = detectIdLikeCols(dataset, classified.numCols);
+    if (idLikeCols.length) {
+      classified.numCols = classified.numCols.filter(function (c) { return idLikeCols.indexOf(c) < 0; });
+      classified.textCols = classified.textCols.concat(idLikeCols);
+    }
     var themes = buildThemeLibrary();
 
     // Match by id — accent hex is reused across many themes with different
@@ -286,6 +338,36 @@
       }
     });
 
+    // ─── Period + as-of chips (dashboard-architect §9.2: every page needs a
+    // period label and a "ข้อมูล ณ" timestamp — a number without a time
+    // context is a number that gets read in the wrong era). The period comes
+    // from the data itself (min-max of the detected time column); the as-of
+    // stamp is the generation moment, which for an upload-and-render flow is
+    // exactly when the numbers were last true. Gregorian year on purpose —
+    // th-TH locale would print 2569 and disagree with the data's own dates.
+    var TH_M = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
+    function fmtThDate(d) { return d.getDate() + ' ' + TH_M[d.getMonth()] + ' ' + d.getFullYear(); }
+    var periodChip = '';
+    var timeColForPeriod = detectTimeCol(classified, dataset);
+    if (timeColForPeriod) {
+      var tMin = null, tMax = null;
+      (dataset.data || []).forEach(function (row) {
+        var d = new Date(row[timeColForPeriod]);
+        if (isNaN(d.getTime())) return;
+        if (!tMin || d < tMin) tMin = d;
+        if (!tMax || d > tMax) tMax = d;
+      });
+      if (tMin && tMax) {
+        periodChip = ' <span class="topbar-chip">ช่วงข้อมูล ' + fmtThDate(tMin) + ' – ' + fmtThDate(tMax) + '</span>';
+      }
+    }
+    var asOfChip = ' <span class="topbar-chip">ข้อมูล ณ ' + fmtThDate(new Date()) + '</span>';
+    // Honesty badge: an inferred layout must not pass itself off as a curated
+    // one — the reader should know these bindings came from column-shape
+    // analysis, not from a human who understood the file.
+    var inferredChip = (!blueprint && !blankTemplate)
+      ? ' <span class="topbar-chip">วิเคราะห์อัตโนมัติจากโครงสร้างข้อมูล</span>' : '';
+
     var html = [
       '<!DOCTYPE html>',
       '<html lang="th">',
@@ -303,7 +385,7 @@
       '<div class="topbar-brand"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M5 20V12M12 20V4M19 20v-6"/></svg></div>',
       '<div class="topbar-titles">',
       '<h1 class="editable-title" contenteditable="true" spellcheck="false" data-placeholder="ชื่อ Dashboard">' + escHtml(title) + '</h1>',
-      '<div class="topbar-sub">' + escHtml(meta.domainNameTH || '') + (blankTemplate ? ' <span class="topbar-chip">' + escHtml(blankTemplate.nameTH) + '</span>' : '') + ' <span>' + escHtml(meta.filename || '') + '</span></div>',
+      '<div class="topbar-sub">' + escHtml(meta.domainNameTH || '') + (blankTemplate ? ' <span class="topbar-chip">' + escHtml(blankTemplate.nameTH) + '</span>' : '') + ' <span>' + escHtml(meta.filename || '') + '</span>' + periodChip + asOfChip + inferredChip + '</div>',
       '</div>',
       '<div class="topbar-right">',
       '<span class="topbar-pill"><span id="totalRows">' + (dataset.data || []).length + '</span> แถว</span>',
@@ -470,7 +552,9 @@
 
   function buildChartPlan(classified, dataset) {
     var plan = [];
-    var idPattern = /รหัส|code|\bid\b|cct|gl$|เลขที่|ทะเบียน|revision|รุ่น|version/i;
+    // _id\b / \bid_ cover snake_case names (F_ID, farmmer_id) that \bid\b
+    // misses because underscore is a word character.
+    var idPattern = /รหัส|code|\bid\b|_id\b|\bid_|cct|gl$|เลขที่|ทะเบียน|revision|รุ่น|version/i;
     var goodNums = classified.numCols.filter(function(c) { return !idPattern.test(c); });
     if (goodNums.length === 0) return plan;
 
@@ -527,10 +611,13 @@
       usedTextCols[textCol] = true;
 
       var numForChart = sumCols.length > 0 ? sumCols[0] : goodNums[0];
-      if (!plan.some(function(p) { return p.type === 'donut'; }) && order.length <= 8) {
+      // Donut only for 2-3 parts (dashboard-architect §9.8: part-to-whole with
+      // ≥4 categories reads better as a ranked bar — humans can't compare 4+
+      // arc sizes, and the bar branch already sorts descending with อื่นๆ).
+      if (!plan.some(function(p) { return p.type === 'donut'; }) && order.length <= 3) {
         plan.push({ role: 'composition', type: 'donut', textCol: textCol, numCol: numForChart, title: 'สัดส่วน — ' + textCol });
       } else {
-        plan.push({ role: 'breakdown', type: 'bar', textCol: textCol, numCol: numForChart, title: 'เปรียบเทียบ — ' + textCol });
+        plan.push({ role: 'breakdown', type: 'bar', textCol: textCol, numCol: numForChart, title: 'อันดับ — ' + textCol + ' (เรียงมากไปน้อย)' });
       }
     });
 
@@ -718,7 +805,9 @@
     lines.push('    var goodDirection = LOWER_BETTER_PATTERN.test(col) ? !rising : rising;');
     lines.push('    var cls = goodDirection ? "up" : "down";');
     lines.push('    var arrow = rising ? "\\u2191" : "\\u2193";');
-    lines.push('    delta = \'<span class="kpi-delta \'+cls+\'" title="เทียบค่าเฉลี่ยครึ่งหลังกับครึ่งแรกของข้อมูล">\'+arrow+\' \'+Math.abs(pct).toFixed(1)+\'%</span>\';');
+    // Baseline printed visibly, not tucked in a tooltip — a delta that
+    // doesn't say what it's compared against reads as noise (§9.3).
+    lines.push('    delta = \'<span class="kpi-delta-wrap"><span class="kpi-delta \'+cls+\'" title="เทียบค่าเฉลี่ยครึ่งหลังกับครึ่งแรกของข้อมูล">\'+arrow+\' \'+Math.abs(pct).toFixed(1)+\'%</span><span class="kpi-baseline">ครึ่งหลัง vs ครึ่งแรก</span></span>\';');
     lines.push('  }');
     lines.push('  var min = Math.min.apply(null, values), max = Math.max.apply(null, values);');
     lines.push('  var range = (max - min) || 1;');
@@ -780,14 +869,14 @@
     lines.push('    return;');
     lines.push('  }');
     lines.push('  if (NUM_COLS.length === 0) { el.innerHTML = ""; return; }');
-    lines.push('  var idPattern = /รหัส|code|\\bid\\b|cct|gl$|^id$|เลขที่|ทะเบียน|วันที่|date|เดือน|month|ปี$|^year$|revision|รุ่น|version/i;');
+    lines.push('  var idPattern = /รหัส|code|\\bid\\b|_id\\b|\\bid_|cct|gl$|^id$|เลขที่|ทะเบียน|วันที่|date|เดือน|month|ปี$|^year$|revision|รุ่น|version/i;');
     lines.push('  var kpiCols = NUM_COLS.filter(function(c){ return !idPattern.test(c); }).slice(0, KPI_MAX);');
     // Budget-style files name their real measures "เดือน 1..12" / "รวมทั้งปี",
     // which the date-ish exclusions above wipe out entirely — leaving an
     // empty KPI row. When the strict filter removes EVERYTHING, relax to
     // excluding only true identifier columns so the row always has content.
     lines.push('  if (kpiCols.length === 0) {');
-    lines.push('    var hardIdPattern = /รหัส|code|\\bid\\b|cct|gl$|^id$|เลขที่|ทะเบียน|revision|รุ่น|version/i;');
+    lines.push('    var hardIdPattern = /รหัส|code|\\bid\\b|_id\\b|\\bid_|cct|gl$|^id$|เลขที่|ทะเบียน|revision|รุ่น|version/i;');
     lines.push('    kpiCols = NUM_COLS.filter(function(c){ return !hardIdPattern.test(c); }).slice(0, KPI_MAX);');
     lines.push('  }');
     lines.push('  var noFilterActive = filteredData.length === ALL_DATA.length;');

@@ -1301,13 +1301,19 @@ async function runAutopilotPipeline(fileOrDataset, userModuleId, opts) {
         throw new Error('Template HTML มีขนาดใหญ่เกินกว่าจะเก็บในเบราว์เซอร์ได้');
       }
     }
-    // ── Plan A: generated dashboard, ONLY from a curated blueprint ──
-    // Guessing from column shape alone was removed (2026-07-29): with no
-    // curated pairing it summed identifier columns and presented the result as
-    // a KPI — e.g. a soil file showed "F_ID 20.18B" and "farmmer_id 522.5K".
-    // Numbers that mean nothing are worse than no dashboard, so an unmatched
-    // file now says so and offers the learn-packet export instead.
-    else if (blueprint) {
+    // ── Plan A: generated dashboard — curated blueprint, or inference ──
+    // Inference for unmatched files was removed 2026-07-29 because it summed
+    // identifier columns into garbage KPIs ("F_ID 20.18B"), and re-enabled
+    // 2026-07-31 (user directive, dashboard-architect skill as the guide)
+    // after fixing that failure at its source: the generator now runs a
+    // statistical identifier screen (near-unique integer columns are labels,
+    // not measures, whatever their name) on top of the name-pattern screen,
+    // so the garbage class that justified the refusal can no longer render.
+    // Inferred output also self-identifies with a "วิเคราะห์อัตโนมัติ" chip
+    // and carries period + as-of stamps, and the "เรียนรู้ข้อมูลชุดนี้"
+    // learn-packet button still appears so the file can graduate to a
+    // curated template.
+    else {
       await echartsReady; // inline local ECharts into the output (offline)
       const ROW_CAPS = [5000, 1500, 500, 150];
       for (let i = 0; i < ROW_CAPS.length; i++) {
@@ -1331,12 +1337,6 @@ async function runAutopilotPipeline(fileOrDataset, userModuleId, opts) {
           }
         }
       }
-    }
-    else {
-      throw new Error(
-        'ยังไม่มี Template สำหรับข้อมูลชุดนี้ — iDash จะสร้าง Dashboard ให้เฉพาะไฟล์ที่จับคู่ Template ไว้แล้วเท่านั้น ' +
-        'เพื่อไม่ให้ได้ตัวเลขที่ไม่มีความหมาย กรุณาส่งไฟล์นี้ให้ Admin เพื่อจัดทำ Template'
-      );
     }
     sessionStorage.setItem('idash.dashboardSpec', JSON.stringify(dashboardSpec));
     sessionStorage.setItem('idash.dashboardMeta', JSON.stringify({
