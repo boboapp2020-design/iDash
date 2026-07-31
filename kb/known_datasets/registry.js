@@ -145,6 +145,85 @@ window.iDashKnownDatasetEntries = [
   },
 
   // ══════════════════════════════════════════════════════════════════════
+  //  Daily operations pack — paired from Sample/ (2026-07-31)
+  //
+  //  The first three are formatted mill reports: a title block, merged cells
+  //  and the real labels sitting in an ITEM column rather than a header row.
+  //  Our profiler cannot produce a stable column list from that shape, and a
+  //  column fingerprint built on whatever it happened to pick would break the
+  //  first time a report's layout shifted a row. Each workbook does have one
+  //  distinctive sheet name, so that is what they match on — the same reason
+  //  the packing entry above matches on tabs.
+  //
+  //  All four dashboards read the workbook themselves and swap their own
+  //  upload screen for the dashboard once loaded, so iDash only has to put the
+  //  file into their file input and fire change.
+  // ══════════════════════════════════════════════════════════════════════
+
+  // ── Breakdown — เวลาหยุดเครื่อง ───────────────────────────────────────
+  // Paired sample: Sample/Breakdown Report/Stoptime 251214.xlsx
+  {
+    id: 'mill_stoptime_report',
+    nameTH: 'ผลิต — รายงานเวลาหยุดเครื่อง (Stop Time)',
+    fingerprint: { sheets: ['Stop (Gen.)'], requiredCoverage: 1 },
+    themeId: 'crimson',
+    templateFile: 'stoptime_report.html',
+    inject: { mode: 'file', input: '#file' }
+  },
+
+  // ── Daily — รายงานการผลิตประจำวัน ─────────────────────────────────────
+  // Paired sample: Sample/Daily Report/Daily Report 260325.xlsx
+  {
+    id: 'mill_daily_processing_report',
+    nameTH: 'ผลิต — รายงานการผลิตประจำวัน (Daily Processing)',
+    fingerprint: { sheets: ['Daily (General)'], requiredCoverage: 1 },
+    themeId: 'ocean_blue',
+    templateFile: 'daily_processing_report.html',
+    inject: { mode: 'file', input: '#file' }
+  },
+
+  // ── Water — ระบบไอน้ำและน้ำ ───────────────────────────────────────────
+  // Paired sample: Sample/Water Report/Water 251219.xlsx
+  {
+    id: 'mill_water_steam_report',
+    nameTH: 'ผลิต — รายงานระบบไอน้ำและน้ำ',
+    fingerprint: { sheets: ['ระบบน้ำ'], requiredCoverage: 1 },
+    themeId: 'teal',
+    templateFile: 'water_steam_report.html',
+    inject: { mode: 'file', input: '#file' }
+  },
+
+  // ── เกษตร — คุณภาพดิน ─────────────────────────────────────────────────
+  // Paired sample: Sample/คุณภาพดิน/ผลการวิเคราะห์ดิน_ค่าแนะนำ.xlsx
+  //
+  // This one is a genuine table, so it gets a column fingerprint as well as
+  // the sheet list — the soil chemistry columns (pH / EC / OM / P / K with
+  // their level bands) are what the dashboard actually charts, and no other
+  // registered file carries them. Its file input is #fileInput, not #file.
+  {
+    id: 'agri_soil_quality',
+    nameTH: 'เกษตร — ผลวิเคราะห์คุณภาพดิน',
+    fingerprint: {
+      columns: [
+        'pH', 'pH level', 'EC', 'Percent_OM', 'OM level',
+        'Available P', 'P level', 'Extractable K', 'K level',
+        'CROP_YEAR', 'RAI', 'ZONE_ID'
+      ],
+      sheets: ['วิเคราะห์ดิน', 'ค่าเฉลี่ยรายเขต', 'ข้อมูลผลการวิเคราะห์รวม'],
+      requiredCoverage: 0.7
+    },
+    themeId: 'forest',
+    templateFile: 'soil_quality.html',
+    // This dashboard adds a `hidden` class to #uploadOverlay after loading,
+    // but its own `.upload-overlay{display:flex}` rule is declared later and
+    // wins, so the upload screen stays on top of the finished dashboard. The
+    // data is all there underneath — verified 188 rows and 12 charts — the
+    // user just lands on an upload prompt. An ID selector with !important
+    // settles it without editing the template's CSS.
+    inject: { mode: 'file', input: '#fileInput', hide: ['#uploadOverlay'] }
+  },
+
+  // ══════════════════════════════════════════════════════════════════════
   //  Sugar factory pack — 38 blank dashboards, each bound to one workbook
   //  (source: sugar-data/, paired 1:1 by filename).
   //
