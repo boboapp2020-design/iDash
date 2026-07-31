@@ -20,10 +20,18 @@ body{font-family:"Segoe UI",-apple-system,BlinkMacSystemFont,"Noto Sans Thai",Ro
              radial-gradient(900px 520px at 96% -6%,rgba(124,58,237,.06),transparent 55%),var(--bg);
   color:var(--tx);line-height:1.5;padding:18px;min-height:100vh;font-variant-numeric:tabular-nums}
 .wrap{max-width:1560px;margin:0 auto}
-header{background:#fff;box-shadow:0 1px 3px rgba(15,27,45,.06);border:1px solid var(--line);
+/* Header identity — crimson, so this report is never mistaken at a glance for
+   the water/steam one, which ships the same layout and the same blue palette.
+   Deliberately scoped to the header: --acc still drives every chart, so the
+   data keeps its established colours and only the masthead changes.
+   Crimson also happens to suit the subject — this dashboard is about stoppages. */
+header{--hd-accent:#c8102e;--hd-accent-2:#e8a33d;
+  background:linear-gradient(120deg,#fff6f6 0%,#fff 46%);
+  box-shadow:0 1px 3px rgba(15,27,45,.06);border:1px solid #f0d9dc;
   border-radius:var(--r);padding:20px 24px;margin-bottom:var(--gap);display:flex;
   justify-content:space-between;align-items:flex-end;gap:20px;flex-wrap:wrap;position:relative;overflow:hidden}
-header:before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:linear-gradient(180deg,var(--acc),var(--c2))}
+header:before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:linear-gradient(180deg,var(--hd-accent),var(--hd-accent-2))}
+header .brand{color:var(--hd-accent)}
 .hd{display:flex;align-items:center;gap:18px}
 .logo{height:56px;width:auto;flex:none;image-rendering:-webkit-optimize-contrast}
 .brand{font-size:11px;letter-spacing:2.5px;color:var(--acc);font-weight:700;text-transform:uppercase}
