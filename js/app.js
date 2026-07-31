@@ -1107,14 +1107,14 @@ async function prepareTemplateHtml(entry, dataset) {
 // pacing (~2.5-4s total across the run) lets each progress step register.
 // Cosmetic only: it never changes any output (P5-safe).
 //
-// AI Autopilot runs 3x slower than Template mode by the same mechanism: its
-// real network call can take much longer than these fixed pauses, so a bar
-// that raced through the DET steps at template speed and then stalled for
-// several seconds on the actual AI call would read as frozen. Stretching the
-// pacing here keeps the whole bar moving at a rate consistent with what's
-// coming next.
+// AI Autopilot runs slower than Template mode by the same mechanism: its real
+// network call can take much longer than these fixed pauses, so a bar that
+// raced through the DET steps at template speed and then stalled for several
+// seconds on the actual AI call would read as frozen. Stretching the pacing
+// here keeps the whole bar moving at a rate consistent with what's coming next.
+var AI_PACE_MULTIPLIER = 6; // ~15-26s across the run, vs ~2.5-4.4s for template
 function aiPause(minMs, maxMs, buildMode) {
-  var mult = buildMode === 'ai' ? 3 : 1;
+  var mult = buildMode === 'ai' ? AI_PACE_MULTIPLIER : 1;
   var ms = (minMs + Math.random() * (maxMs - minMs)) * mult;
   return new Promise(function (res) { setTimeout(res, ms); });
 }
