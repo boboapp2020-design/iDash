@@ -334,9 +334,15 @@
     document.getElementById('igSubtitle').textContent = sub;
     document.getElementById('igEmpty').style.display = 'none';
 
+    // AI Autopilot was requested but couldn't deliver, so this page is the
+    // deterministic render. Say so plainly — a page that stayed silent here
+    // would be read as the AI's work.
+    if (meta.aiFallbackReason) {
+      showBadge('AI ออกแบบไม่สำเร็จ — นี่คือ Dashboard ที่ระบบคำนวณให้ · ' + meta.aiFallbackReason, true);
+    }
     // Name the AI that drew this, and say so when its numbers couldn't be
     // matched back to the ones we computed — silence would imply "verified".
-    if (sessionStorage.getItem('idash.htmlSource') === 'ai') {
+    else if (sessionStorage.getItem('idash.htmlSource') === 'ai') {
       var ai = null;
       try { ai = JSON.parse(sessionStorage.getItem('idash.aiDesign') || 'null'); } catch (e) {}
       if (ai) {

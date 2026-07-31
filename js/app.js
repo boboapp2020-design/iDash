@@ -1292,9 +1292,13 @@ async function runAutopilotPipeline(fileOrDataset, userModuleId, opts) {
     sessionStorage.removeItem('idash.aiDesign');
 
     // ── AI Autopilot: the numbers above are final; the AI only draws them ──
-    // Fails closed — any API/safety problem stops here with a real message
-    // rather than quietly substituting the template output, which would make
-    // it look like the AI ran when it didn't.
+    // When the AI can't deliver, the run does NOT end in a red box with
+    // nothing to show. The deterministic dashboard is already computed at this
+    // point and is a real, usable page, so it renders instead — labelled, with
+    // the AI's failure reason attached. Silently passing template output off as
+    // AI work would be dishonest; leaving someone who uploaded a file with no
+    // dashboard at all is just unhelpful. Saying which one they got is both.
+    let aiFailureReason = null;
     if (buildMode === 'ai') {
       document.getElementById('aiProgressHeaderSub').textContent = 'AI กำลังออกแบบหน้า';
       document.getElementById('aiProgressDesc').textContent =
@@ -1329,23 +1333,33 @@ async function runAutopilotPipeline(fileOrDataset, userModuleId, opts) {
       } finally {
         stopAiCallProgress();
       }
-      if (!out.ok) throw new Error('AI Autopilot ไม่สำเร็จ — ' + out.reason);
-
-      try {
-        sessionStorage.setItem('idash.interactiveHtml', out.html);
-        sessionStorage.setItem('idash.renderMode', 'interactive');
-        // Marks the HTML as externally authored so the viewer sandboxes it.
-        sessionStorage.setItem('idash.htmlSource', 'ai');
-        sessionStorage.setItem('idash.aiDesign', JSON.stringify({
-          label: out.label, model: out.model, numbersVerified: out.numbersVerified
-        }));
-      } catch (e) {
-        throw new Error('หน้าที่ AI สร้างมีขนาดใหญ่เกินกว่าจะเก็บในเบราว์เซอร์ได้');
+      if (!out.ok) {
+        // Record it and carry on to the deterministic render below.
+        aiFailureReason = out.reason;
+      } else {
+        try {
+          sessionStorage.setItem('idash.interactiveHtml', out.html);
+          sessionStorage.setItem('idash.renderMode', 'interactive');
+          // Marks the HTML as externally authored so the viewer sandboxes it.
+          sessionStorage.setItem('idash.htmlSource', 'ai');
+          sessionStorage.setItem('idash.aiDesign', JSON.stringify({
+            label: out.label, model: out.model, numbersVerified: out.numbersVerified
+          }));
+        } catch (e) {
+          aiFailureReason = 'หน้าที่ AI สร้างมีขนาดใหญ่เกินกว่าจะเก็บในเบราว์เซอร์ได้';
+        }
       }
-      // The page exists now — this is the first honest moment for 100%.
-      setAiProgress(100);
-      document.getElementById('aiProgressHeaderSub').textContent = 'เสร็จสิ้น';
-      document.getElementById('aiProgressDesc').textContent = 'AI ออกแบบเสร็จแล้ว กำลังเปิด...';
+
+      if (aiFailureReason) {
+        document.getElementById('aiProgressHeaderSub').textContent = 'AI ไม่สำเร็จ — ใช้เวอร์ชันที่ระบบสร้าง';
+        document.getElementById('aiProgressDesc').textContent =
+          'กำลังสร้าง Dashboard จากตัวเลขที่คำนวณไว้แล้วแทน...';
+      } else {
+        // The page exists now — this is the first honest moment for 100%.
+        setAiProgress(100);
+        document.getElementById('aiProgressHeaderSub').textContent = 'เสร็จสิ้น';
+        document.getElementById('aiProgressDesc').textContent = 'AI ออกแบบเสร็จแล้ว กำลังเปิด...';
+      }
     }
 
     // ── Known-dataset matching (single-module offline pivot, 2026-07-22):
@@ -1358,9 +1372,10 @@ async function runAutopilotPipeline(fileOrDataset, userModuleId, opts) {
     let blueprint = null;
     let dashTheme = null;
     let templateEntry = null;
-    // The AI route already produced the page; registry matching would only
-    // overwrite it. Theme still gets picked below for the meta record.
-    if (buildMode !== 'ai' && window.iDashKnownDatasets) {
+    // A successful AI route already produced the page; registry matching would
+    // only overwrite it. When the AI failed we DO want the match, because the
+    // curated template is the best fallback available for this file.
+    if ((buildMode !== 'ai' || aiFailureReason) && window.iDashKnownDatasets) {
       const hit = window.iDashKnownDatasets.match(dataset.columns, dataset.sheetNames);
       if (hit) {
         matched = { id: hit.entry.id, nameTH: hit.entry.nameTH, score: Math.round(hit.score * 100) };
@@ -1385,7 +1400,7 @@ async function runAutopilotPipeline(fileOrDataset, userModuleId, opts) {
     // ── Plan B: curated HTML template ──
     // When a registry entry has templateFile, fetch the pre-made dashboard
     // HTML, inject the user's data via columnMapping, and skip generation.
-    if (buildMode === 'ai') {
+    if (buildMode === 'ai' && !aiFailureReason) {
       /* already rendered by the AI above */
     }
     else if (templateEntry) {
@@ -1451,6 +1466,9 @@ async function runAutopilotPipeline(fileOrDataset, userModuleId, opts) {
       theme: dashTheme,
       matchedDataset: matched,          // registry hit → header chip
       unknownDataset: !matched,         // → "เรียนรู้ข้อมูลชุดนี้" button
+      // Set only when AI Autopilot was asked for and couldn't deliver. The
+      // viewer shows this so the page never passes itself off as AI-designed.
+      aiFallbackReason: aiFailureReason,
       businessFrame,
       insightStory,
       runId,
