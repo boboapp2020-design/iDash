@@ -559,7 +559,8 @@ function initAiSetupModal() {
     api.testConnection().then(res => {
       if (res.ok) {
         msg.className = 'bm-msg ok';
-        msg.textContent = '✅ เชื่อมต่อสำเร็จ — ' + res.label + ' · ' + res.model + ' พร้อมใช้งาน';
+        msg.textContent = '✅ เชื่อมต่อสำเร็จ — ' + res.label + ' · ' + res.model + ' พร้อมใช้งาน' +
+          (res.note ? ' (' + res.note + ')' : '');
       } else {
         msg.className = 'bm-msg err';
         msg.textContent = '❌ ' + res.reason;

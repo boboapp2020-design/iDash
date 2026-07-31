@@ -627,7 +627,20 @@
         return resp.text().then(function (raw) {
           var data = null;
           try { data = JSON.parse(raw); } catch (e) {}
-          if (!resp.ok) throw new Error(extractError(data, resp.status));
+          if (!resp.ok) {
+            var msg = extractError(data, resp.status);
+            // The gateway only speaks dashboard-compose and validates its
+            // output as a full HTML page, so a 16-token probe reply is
+            // legitimately "too short to be a page". Reaching that check is
+            // itself the proof this test wants: the anon key was accepted, the
+            // function was found, ANTHROPIC_API_KEY was read, and Anthropic
+            // answered. Failing the connection test on it would report a
+            // working setup as broken — which it did.
+            if (cfg.shape === 'supabase' && /generated page rejected|too short to be a page|model returned no text/i.test(msg)) {
+              return { ok: true, label: cfg.label, model: cfg.model, note: 'ครบทั้งเส้นทาง: Supabase → Anthropic' };
+            }
+            throw new Error(msg);
+          }
           return { ok: true, label: cfg.label, model: cfg.model };
         });
       })
