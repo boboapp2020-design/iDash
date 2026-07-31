@@ -727,6 +727,7 @@ function onEdit(e){
   if(d.v!=null){const[r,i]=d.v.split('_').map(Number);state.rows[r].v[i]=num(e.target.value);}
   if(d.p!=null)state.rows[+d.p].plan=num(e.target.value);
   if(d.t!=null)state.target[+d.t]=num(e.target.value);
+  stampAsOfToday();
   refreshCalc();render();
 }
 function onPaste(e){
@@ -746,6 +747,7 @@ function onPaste(e){
       if(c===-1)state.rows[r].m=cell.trim();
       else if(c<state.names.length)state.rows[r].v[c]=num(cell);
       else if(c===state.names.length)state.rows[r].plan=num(cell);});});
+  stampAsOfToday();
   buildGrid();render();toast('วางข้อมูลจากตารางแล้ว');
 }
 function refreshCalc(){
@@ -802,6 +804,28 @@ function monthIdx(s){s=(s||'').replace(/\s/g,'');if(!s)return -1;
 const norm=s=>(s||'').toString().toLowerCase().replace(/[\s_().]/g,'');
 
 /* map a matrix of cells onto state */
+/* The header stamp says when the numbers were last refreshed, so it has to be
+   driven by the numbers changing — not left as whatever was typed into the file
+   by hand. Every path that actually alters a value calls this: pulling from the
+   Sheet, pasting a table, and editing a cell.
+
+   Note the year is deliberately Gregorian (2026, matching the rest of this
+   dashboard). toLocaleDateString('th-TH') would render 2569 and silently
+   disagree with every other date on the page. */
+const TH_MONTHS_FULL=['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน',
+                      'กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
+function stampAsOfToday(){
+  const d=new Date();
+  const txt=`ข้อมูล ณ วันที่ ${d.getDate()} ${TH_MONTHS_FULL[d.getMonth()]} ${d.getFullYear()}`;
+  state.asOf=txt;
+  /* Marks the stamp as machine-set. loadDraft() uses this to tell a draft whose
+     date came from a real data edit (keep it) from one that merely carried the
+     file's baked default (take the file's, which may be newer). */
+  state.asOfAuto=true;
+  const el=document.getElementById('tDate');
+  if(el)el.textContent=txt;
+}
+
 function applyMatrix(m){
   if(!m.length)throw new Error('ไม่มีข้อมูลในตาราง');
   /* find header row = the row just above the first month row, else the first row */
@@ -842,6 +866,7 @@ function applyMatrix(m){
   if(!got)throw new Error('อ่านแถวเดือนไม่ได้');
   state.rows=rows;
   if(tgt&&tgt.some(x=>x!=null))state.target=tgt;
+  stampAsOfToday();
   buildGrid();render();
   return {months:got,tgt:!!tgt,named};
 }
@@ -1119,12 +1144,14 @@ function loadDraft(){
        columns and the values would no longer line up. */
     if(!Array.isArray(d.state.names)||d.state.names.length!==BOOT.names.length)return false;
     state=d.state;
-    /* The header stamp belongs to the file, not to the draft. state.asOf is only
-       ever refreshed from the DOM by saveHtml(), so a draft just carries whatever
-       default was current when it was saved — keeping it would mean a new as-of
-       date in this file could never reach anyone who has edited the page before:
-       their stale stamp would restore straight over it on load. */
-    state.asOf=BOOT.asOf;
+    /* A draft that was never data-edited just carries whatever default was
+       current when it was saved, and keeping that would mean a new as-of date
+       in this file could never reach anyone who has edited the page before —
+       their stale stamp would restore straight over it on load. So the file
+       wins by default. The exception is a draft whose stamp was set by
+       stampAsOfToday(): that one records a real data change and is the more
+       accurate of the two, so it survives alongside the numbers it describes. */
+    if(!d.state.asOfAuto)state.asOf=BOOT.asOf;
     draftAt=d.at||null;
     return true;
   }catch(e){ return false; }

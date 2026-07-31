@@ -46,9 +46,21 @@ body {
 .home-greet { font-size: 24px; font-weight: 800; color: var(--gray-900); letter-spacing: -.01em; }
 .home-greet .wave { font-size: 22px; }
 .home-subgreet { font-size: 13px; color: var(--text-secondary); margin-top: 3px; }
+/* How current the KPI row is — the one thing on this line worth reading twice,
+   since every number beside it is only as good as this date. Sized and coloured
+   to be read at a glance rather than to sit quietly beside the subtitle. */
 .home-demo-pill {
-  display: inline-block; margin-left: 6px; padding: 1px 8px; border-radius: 20px;
-  background: #eef2ff; color: #6366f1; font-size: 10px; font-weight: 700; vertical-align: 1px;
+  display: inline-flex; align-items: center; gap: 5px;
+  margin-left: 9px; padding: 3px 11px 3px 9px; border-radius: 20px;
+  background: linear-gradient(135deg, #dbeafe 0%, #e0e7ff 100%);
+  color: #1d4ed8; font-size: 12px; font-weight: 800; letter-spacing: .01em;
+  vertical-align: 1px; box-shadow: inset 0 0 0 1px #bfd4fb;
+}
+/* A live dot, so "latest data" reads as a status rather than a label. */
+.home-demo-pill::before {
+  content: ''; width: 6px; height: 6px; border-radius: 50%;
+  background: #22c55e; box-shadow: 0 0 0 3px rgba(34, 197, 94, .18);
+  flex-shrink: 0;
 }
 .home-topbar-right { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
 .home-search {
@@ -64,19 +76,6 @@ body {
 .home-search input::placeholder { color: var(--gray-400); }
 .home-date { width: auto; min-width: 230px; justify-content: center; }
 .home-date span { font-size: 13px; font-weight: 600; color: var(--gray-600); white-space: nowrap; }
-.home-bell {
-  position: relative; width: 40px; height: 40px; border-radius: 10px;
-  background: #fff; border: 1px solid #e3e9f2; box-shadow: var(--shadow-sm);
-  display: flex; align-items: center; justify-content: center; color: var(--gray-500);
-}
-.home-bell svg { width: 18px; height: 18px; }
-.home-bell-badge {
-  position: absolute; top: -5px; right: -5px; min-width: 18px; height: 18px; padding: 0 5px;
-  border-radius: 9px; background: #ef4444; color: #fff;
-  font-size: 10px; font-weight: 700; display: flex; align-items: center; justify-content: center;
-  border: 2px solid #f4f7fb;
-}
-
 /* ─── KPI ROW ─── */
 /* Always 5-up on desktop — cards shrink fluidly instead of wrapping. */
 .home-kpi-row {

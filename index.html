@@ -9,11 +9,11 @@
   <script>if (!window.iDashAuth.requireSignIn()) { document.documentElement.style.display = 'none'; }</script>
   <!-- Reloads once when a new build is deployed. The ?v= strings below can't
        protect this file itself, which GitHub Pages caches for 10 minutes. -->
-  <script src="js/build_guard.js?v=20260731b" async></script>
+  <script src="js/build_guard.js?v=20260731c" async></script>
   <title>iDash — AI Dashboard Intelligence Platform</title>
   <link rel="stylesheet" href="css/style.css?v=20260730b">
   <link rel="stylesheet" href="css/ai_progress.css?v=20260730a">
-  <link rel="stylesheet" href="css/home.css?v=20260730f">
+  <link rel="stylesheet" href="css/home.css?v=20260731a">
   <!-- The KPI row's slowest step is the round-trip to Apps Script, so warm the
        connection and start the request from <head> instead of waiting behind
        the ~900KB of vendor scripts at the end of <body>. -->
@@ -118,10 +118,6 @@
         <div class="home-search home-date">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
           <span id="homeDateText"></span>
-        </div>
-        <div class="home-bell is-mock" title="ยังไม่เปิดใช้งาน">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
-          <span class="home-bell-badge">3</span>
         </div>
       </div>
     </div>
