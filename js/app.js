@@ -1276,6 +1276,22 @@ async function runAutopilotPipeline(fileOrDataset, userModuleId, opts) {
         domainId: winnerPack.id,
         domainNameTH: winnerPack.identity.nameTH
       });
+
+      // Applies to BOTH provider modes — direct API and the Supabase gateway
+      // run through this same block, so the check belongs here rather than in
+      // either provider adapter. buildFactsPayload has already dropped the
+      // placeholder-named KPIs and numeric-labelled dimensions; if what's left
+      // can't make a dashboard worth looking at, don't spend a call finding
+      // that out. Naming the real cause beats a beautiful page about nothing.
+      if (!window.iDashAIComposer.factsAreSubstantial(facts)) {
+        throw new Error(
+          'ข้อมูลในไฟล์นี้ยังไม่พอให้ AI ออกแบบได้ — หัวตารางบางคอลัมน์ว่าง ' +
+          'หรือยังไม่พบคอลัมน์หมวดหมู่ที่ใช้จัดกลุ่มได้ ' +
+          'กรุณาเปิดไฟล์แล้วใส่ชื่อหัวตารางให้ครบทุกคอลัมน์ แล้วลองใหม่ ' +
+          '(ระหว่างนี้เลือก "สร้างจาก Template" จะได้ Dashboard จากตัวเลขจริงทันที)'
+        );
+      }
+
       // The bar now advances because the model is working, not on a timer
       // that guesses. It creeps toward 92% and stops there until real HTML
       // arrives — so it can never claim done before there is a page.

@@ -388,6 +388,11 @@
   window.iDashAIComposer = {
     configure: configure,
     buildFactsPayload: buildFactsPayload,
+    // The main AI Autopilot path in app.js builds facts and calls the provider
+    // itself rather than going through composeWithAI, so it needs this guard
+    // exported — otherwise the "don't pay for a call about nothing" check only
+    // protected the one path that no longer runs.
+    factsAreSubstantial: factsAreSubstantial,
     composeWithAI: composeWithAI,
     fetchDesignTokens: fetchDesignTokens,
     // exposed for testing
