@@ -455,6 +455,49 @@
    * @returns {Promise<{ok:true, html, providerId, label, model, numbersVerified}
    *                  |{ok:false, reason}>}
    */
+  /**
+   * Turn a provider's raw error into one that says which key is wrong and
+   * where to fix it.
+   *
+   * "invalid x-api-key" is Anthropic's wording and it arrives identically in
+   * two completely different situations: the key typed into this browser is
+   * bad (direct mode), or the ANTHROPIC_API_KEY secret on the Edge Function is
+   * bad (gateway mode — our gateway relays Anthropic's message verbatim). The
+   * user cannot tell those apart, so they end up guessing which of two keys to
+   * re-check. Only this function knows which mode is in play, so it is the
+   * only place that can say.
+   */
+  function explainError(cfg, message) {
+    var m = String(message || '');
+    var viaGateway = cfg.shape === 'supabase';
+
+    if (/invalid x-api-key|authentication_error|invalid_api_key|incorrect api key|401/i.test(m)) {
+      return viaGateway
+        ? 'Supabase เรียก Anthropic ไม่ผ่าน เพราะ ANTHROPIC_API_KEY บนฝั่ง Edge Function ไม่ถูกต้อง ' +
+          '(ไม่ใช่ anon key ในหน้านี้) → แก้ที่ Supabase → Edge Functions → Secrets ' +
+          'ใส่ค่าที่ขึ้นต้นด้วย sk-ant- จาก console.anthropic.com'
+        : 'API key ของ ' + cfg.label + ' ไม่ถูกต้อง — ตรวจว่าคัดลอกมาครบและยังไม่ถูกเพิกถอน ' +
+          '(ของ Anthropic ต้องขึ้นต้น sk-ant- และมาจาก console.anthropic.com เท่านั้น ' +
+          'สมาชิก claude.ai ใช้กับ API ไม่ได้)';
+    }
+    if (/credit balance|insufficient|quota|billing/i.test(m)) {
+      return viaGateway
+        ? 'บัญชี Anthropic ที่ผูกกับ Edge Function ยังไม่มีเครดิต — เติมที่ console.anthropic.com → Billing'
+        : 'บัญชี ' + cfg.label + ' ยังไม่มีเครดิตพอ — เติมเงินก่อนใช้งาน';
+    }
+    if (/invalid jwt|jwt|not authorized|403/i.test(m) && viaGateway) {
+      return 'Supabase ปฏิเสธ anon key ในหน้านี้ — ปิดสวิตช์ "Verify JWT" ที่ Edge Function ' +
+             'หรือใช้ legacy anon key (ขึ้นต้น eyJ) แทน';
+    }
+    if (/rate|429|overloaded/i.test(m)) {
+      return 'ผู้ให้บริการกำลังรับงานหนัก (rate limit) — รออีกสักครู่แล้วลองใหม่';
+    }
+    if (/not set on this function|ANTHROPIC_API_KEY/i.test(m)) {
+      return 'Edge Function ยังไม่มี ANTHROPIC_API_KEY — เพิ่มที่ Supabase → Edge Functions → Secrets';
+    }
+    return m;
+  }
+
   function generateDashboard(facts) {
     var problem = configProblem();
     if (problem) return Promise.resolve({ ok: false, reason: problem });
@@ -505,7 +548,59 @@
             reason: 'เชื่อมต่อ API ไม่สำเร็จ — ผู้ให้บริการรายนี้อาจไม่อนุญาตให้เรียกตรงจากเบราว์เซอร์ (CORS) หรือไม่มีอินเทอร์เน็ต'
           };
         }
-        return { ok: false, reason: err.message || 'เรียก API ไม่สำเร็จ' };
+        return { ok: false, reason: explainError(cfg, err.message) || 'เรียก API ไม่สำเร็จ' };
+      })
+      .finally(function () { if (timer) clearTimeout(timer); });
+  }
+
+  /**
+   * Cheap round-trip that answers "is this configuration usable?" in a couple
+   * of seconds. Uploading a file, waiting through the whole pipeline and
+   * reading a failure at the end is a terrible way to learn that a key is
+   * wrong — especially when the same message can mean two different keys.
+   * Asks for 16 tokens, so a successful test costs a fraction of a satang.
+   */
+  function testConnection() {
+    var problem = configProblem();
+    if (problem) return Promise.resolve({ ok: false, reason: problem });
+
+    var cfg = currentConfig();
+    var req = buildRequest(cfg, { probe: true });
+    // Replace the full dashboard request with a minimal one.
+    if (cfg.shape === 'anthropic') {
+      req.body = { model: cfg.model, max_tokens: 16, messages: [{ role: 'user', content: 'ping' }] };
+    } else if (cfg.shape === 'gemini') {
+      req.body = { contents: [{ role: 'user', parts: [{ text: 'ping' }] }], generationConfig: { maxOutputTokens: 16 } };
+    } else if (cfg.shape === 'supabase') {
+      req.body = {
+        action: 'dashboard-compose',
+        runId: 'probe-' + Date.now(),
+        payload: { model: cfg.model, system: 'reply with the single word: pong', prompt: 'ping', facts: { probe: true } }
+      };
+    } else {
+      req.body = { model: cfg.model, max_tokens: 16, messages: [{ role: 'user', content: 'ping' }] };
+    }
+
+    var controller = (typeof AbortController !== 'undefined') ? new AbortController() : null;
+    var timer = controller ? setTimeout(function () { controller.abort(); }, 45000) : null;
+
+    return fetch(req.url, {
+      method: 'POST', headers: req.headers, body: JSON.stringify(req.body),
+      signal: controller ? controller.signal : undefined
+    })
+      .then(function (resp) {
+        return resp.text().then(function (raw) {
+          var data = null;
+          try { data = JSON.parse(raw); } catch (e) {}
+          if (!resp.ok) throw new Error(extractError(data, resp.status));
+          return { ok: true, label: cfg.label, model: cfg.model };
+        });
+      })
+      .catch(function (err) {
+        if (err instanceof TypeError) {
+          return { ok: false, reason: 'ติดต่อปลายทางไม่ได้ — ตรวจ API URL และการเชื่อมต่ออินเทอร์เน็ต' };
+        }
+        return { ok: false, reason: explainError(cfg, err.message) };
       })
       .finally(function () { if (timer) clearTimeout(timer); });
   }
@@ -517,6 +612,7 @@
     setProviderConfig: setProviderConfig,
     configProblem: configProblem,
     generateDashboard: generateDashboard,
+    testConnection: testConnection,
     // exposed for testing
     _isDocumentSafe: isDocumentSafe,
     _stripFences: stripFences

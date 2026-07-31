@@ -644,8 +644,11 @@ a.home-quick:hover .chev { color: var(--acc); }
    where nothing sensitive reaches the browser. */
 .bm-warn.bm-warn-ok { background: #f0fdf4; border-color: #bbf7d0; color: #166534; }
 
-.bm-msg { font-size: 12px; font-weight: 600; color: #dc2626; min-height: 16px; }
+/* Diagnostics land here, and a key-setup explanation runs to a few lines —
+   line-height and wrapping matter more than the single-line default did. */
+.bm-msg { font-size: 12px; font-weight: 600; color: var(--gray-600); min-height: 16px; line-height: 1.65; }
 .bm-msg.ok { color: #15803d; }
+.bm-msg.err { color: #dc2626; }
 
 .bm-actions { display: flex; gap: 10px; margin-top: 18px; }
 .bm-btn {

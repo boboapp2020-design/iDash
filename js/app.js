@@ -540,6 +540,33 @@ function initAiSetupModal() {
   document.getElementById('aiSetupCancel').addEventListener('click', close);
   modal.addEventListener('click', (e) => { if (e.target === modal) close(); });
 
+  // Save what's on screen, then probe it. Saving first means the test checks
+  // exactly what the user just typed rather than the previous values.
+  document.getElementById('aiSetupTest').addEventListener('click', () => {
+    const api = window.iDashAIProviders;
+    const btn = document.getElementById('aiSetupTest');
+    const msg = document.getElementById('aiSetupMsg');
+    api.setProviderConfig(document.getElementById('aiProviderSelect').value, {
+      model: resolveAiModel(),
+      apiKey: document.getElementById('aiKeyInput').value.trim(),
+      endpoint: document.getElementById('aiEndpointInput').value.trim()
+    });
+    btn.disabled = true;
+    const original = btn.textContent;
+    btn.textContent = 'กำลังทดสอบ…';
+    msg.className = 'bm-msg';
+    msg.textContent = 'กำลังติดต่อผู้ให้บริการ…';
+    api.testConnection().then(res => {
+      if (res.ok) {
+        msg.className = 'bm-msg ok';
+        msg.textContent = '✅ เชื่อมต่อสำเร็จ — ' + res.label + ' · ' + res.model + ' พร้อมใช้งาน';
+      } else {
+        msg.className = 'bm-msg err';
+        msg.textContent = '❌ ' + res.reason;
+      }
+    }).finally(() => { btn.disabled = false; btn.textContent = original; });
+  });
+
   document.getElementById('aiSetupSave').addEventListener('click', () => {
     const api = window.iDashAIProviders;
     const id = document.getElementById('aiProviderSelect').value;
@@ -552,7 +579,7 @@ function initAiSetupModal() {
     });
 
     const problem = api.configProblem();
-    if (problem) { msg.className = 'bm-msg'; msg.textContent = problem; return; }
+    if (problem) { msg.className = 'bm-msg err'; msg.textContent = problem; return; }
 
     const next = aiSetupOnSaved;
     close();
@@ -648,6 +675,8 @@ function openAiProgressModal(buildMode) {
   const modal = document.getElementById('aiProgressModal');
   if (!modal) return;
   document.getElementById('aiProgressError').hidden = true;
+  const fixBtn = document.getElementById('aiProgressFix');
+  if (fixBtn) fixBtn.hidden = true;
   // Template mode names what it's actually doing (matching the upload against
   // the curated library) rather than carrying AI Autopilot's branding, so it
   // reads as a different, faster route than AI Autopilot rather than the same
@@ -1447,6 +1476,10 @@ async function runAutopilotPipeline(fileOrDataset, userModuleId, opts) {
     }
     errorEl.textContent = `สร้าง Dashboard ไม่สำเร็จ: ${msg}`;
     errorEl.hidden = false;
+    // A key/config failure is fixable right here — offer the settings dialog
+    // (which now has a connection test) instead of making them find it.
+    const fixBtn = document.getElementById('aiProgressFix');
+    if (fixBtn) fixBtn.hidden = !(buildMode === 'ai' && /key|Secret|JWT|เครดิต|ANTHROPIC/i.test(msg));
     // Clear the in-progress copy, otherwise "กำลังออกแบบ…" sits above the
     // failure message and the modal reads as still working.
     const headerSub = document.getElementById('aiProgressHeaderSub');
@@ -1665,6 +1698,12 @@ function initAiProgressModal() {
   if (!modal) return;
   document.getElementById('aiProgressClose').addEventListener('click', closeAiProgressModal);
   modal.addEventListener('click', e => { if (e.target === modal) closeAiProgressModal(); });
+
+  const fixBtn = document.getElementById('aiProgressFix');
+  if (fixBtn) fixBtn.addEventListener('click', () => {
+    closeAiProgressModal();
+    openAiSetupModal(null);   // no callback: fix the key, test it, then retry
+  });
 }
 
 function formatSize(bytes) {
