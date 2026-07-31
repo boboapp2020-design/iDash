@@ -824,6 +824,11 @@ function stampAsOfToday(){
   state.asOfAuto=true;
   const el=document.getElementById('tDate');
   if(el)el.textContent=txt;
+  /* Persist right away. Autosave only fires from refreshCalc/render, and the
+     "อัปเดตข้อมูล" success path calls neither — without this, the new stamp
+     would be gone on the next reload. Wrapped in try because saveDraft can be
+     undefined during the very first paint. */
+  try{ if(typeof saveDraft==='function')saveDraft(); }catch(e){}
 }
 
 function applyMatrix(m){
@@ -944,6 +949,10 @@ async function updateSheet(){
       const t=new Date();
       gsMsg(`✅ บันทึกลง Google Sheet แล้ว ${matrix.length-1} แถว · ${t.toLocaleString('th-TH')}`,'ok');
       toast('อัปเดตข้อมูลลง Google Sheet เรียบร้อย');
+      /* This is the button the user thinks of as "อัปเดตข้อมูล" — the moment
+         they treat the numbers as current. The header stamp needs to reflect
+         that, otherwise it keeps claiming an older date after every submit. */
+      stampAsOfToday();
       return;
     }catch(e){
       gsMsg('❌ บันทึกผ่าน Apps Script ไม่สำเร็จ: '+e.message+' — สลับไปใช้วิธีคัดลอกให้แทน','err');
@@ -954,6 +963,7 @@ async function updateSheet(){
   if(u)window.open(u,'_blank','noopener');
   gsMsg('📋 คัดลอกข้อมูลทั้งตารางไว้ในคลิปบอร์ดแล้ว — ไปที่ Google Sheet คลิกช่อง <b>A1</b> แล้วกด Ctrl+V ทับได้เลย'+
         '<br>อยากให้ปุ่มนี้บันทึกเองโดยไม่ต้องวาง ให้ตั้ง Apps Script หนึ่งครั้งที่ปุ่ม ⚙','ok');
+  stampAsOfToday();
 }
 async function clip(text,okMsg){
   try{await navigator.clipboard.writeText(text);toast(okMsg);}
