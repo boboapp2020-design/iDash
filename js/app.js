@@ -644,9 +644,11 @@ function openAiProgressModal(buildMode) {
   if (!modal) return;
   document.getElementById('aiProgressError').hidden = true;
   // Template mode names what it's actually doing (matching the upload against
-  // the curated library) rather than the generic "analyzing" text, so it
+  // the curated library) rather than carrying AI Autopilot's branding, so it
   // reads as a different, faster route than AI Autopilot rather than the same
   // wording at two different speeds.
+  document.getElementById('aiProgressHeaderTitle').textContent =
+    buildMode === 'template' ? 'กำลังหา Dashboard ที่เหมาะสมกับคุณ' : 'AI Autopilot';
   document.getElementById('aiProgressHeaderSub').textContent =
     buildMode === 'template' ? 'กำลังหา Template ที่เหมาะกับคุณ' : 'กำลังวิเคราะห์ข้อมูลของคุณ';
   document.getElementById('aiProgressDesc').textContent = 'กำลังวิเคราะห์ไฟล์และสร้างข้อมูลเชิงลึกที่เหมาะสมที่สุด...';
