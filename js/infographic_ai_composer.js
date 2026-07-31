@@ -65,6 +65,47 @@
   // ── Extract P6-safe facts from the already-computed dashboardSpec ──
   // Mirrors infographic_renderer.js's gene-collection logic but keeps only
   // aggregated values — no per-row detail table is ever included here.
+  /* ── Data-quality gate ────────────────────────────────────────────────
+   * The AI renders faithfully whatever facts it is handed, so anything
+   * meaningless that reaches it comes back rendered beautifully and
+   * meaninglessly. Two junk shapes actually shipped to users:
+   *
+   *   "ผลรวม — column_12"   profiler names a blank header cell column_N;
+   *                          summing it produces a number about nothing.
+   *   bar labels "1275.2346861714814", "0", "-"
+   *                          a numeric column used as a grouping dimension —
+   *                          those are measurements, not categories.
+   *
+   * Both are filtered here rather than in the prompt: a prompt asks the model
+   * to please ignore bad input, a gate means the bad input never arrives.
+   */
+  var PLACEHOLDER_NAME = /^(column_\d+|col_?\d+|unnamed[:_ ]?\d*|field_?\d+|_\d+)$/i;
+
+  function isMeaningfulName(name) {
+    var s = String(name == null ? '' : name).trim();
+    if (!s) return false;
+    if (PLACEHOLDER_NAME.test(s)) return false;
+    // "ผลรวม — column_12" / "จำนวน — Unnamed: 3": the junk hides behind a
+    // generated prefix, so test the part after the separator too.
+    var tail = s.split(/[—–-]\s*/).pop().trim();
+    if (tail && PLACEHOLDER_NAME.test(tail)) return false;
+    return true;
+  }
+
+  /** A dimension whose labels are numbers isn't a dimension. */
+  function looksLikeRealCategories(groups) {
+    if (!groups || groups.length === 0) return false;
+    var numericLabels = 0, usable = 0;
+    groups.forEach(function (g) {
+      var label = String(g.name == null ? '' : g.name).trim();
+      if (!label || label === '-' || label === '0') return;
+      usable++;
+      if (!isNaN(Number(label.replace(/,/g, '')))) numericLabels++;
+    });
+    if (usable < 2) return false;
+    return numericLabels / usable < 0.5;
+  }
+
   function buildFactsPayload(spec, meta) {
     var kpis = [];
     var trend = null;
@@ -116,6 +157,16 @@
       ? window.iDashInfographic.resolveDashboardTitle(meta, domainName)
       : ((meta && meta.filename) || domainName);
 
+    // Apply the gate to everything before it leaves the browser.
+    kpis = kpis.filter(function (k) { return isMeaningfulName(k.name) && k.value != null; });
+    statusRows = statusRows.filter(function (r) { return isMeaningfulName(r.name); });
+    if (donut && !looksLikeRealCategories(donut.groups)) donut = null;
+    if (ranked && !looksLikeRealCategories(ranked.groups)) ranked = null;
+    if (trend && !isMeaningfulName(trend.title)) {
+      trend.series = (trend.series || []).filter(function (s) { return isMeaningfulName(s.name); });
+      if (trend.series.length === 0) trend = null;
+    }
+
     return {
       dashboardTitle: dashboardTitle,
       domainNameTH: domainName,
@@ -127,6 +178,17 @@
       statusRows: statusRows.slice(0, 6),
       alerts: alerts.slice(0, 4)
     };
+  }
+
+  /**
+   * Is there enough here to be worth an AI call? Sending a payload with one
+   * unnamed number produces a confident-looking page about nothing and bills
+   * the user for it — better to say so and let the deterministic renderer,
+   * which shows its own data-gap notes honestly, handle the file.
+   */
+  function factsAreSubstantial(facts) {
+    var visuals = (facts.trend ? 1 : 0) + (facts.donut ? 1 : 0) + (facts.ranked ? 1 : 0);
+    return facts.kpis.length >= 2 || (facts.kpis.length >= 1 && visuals >= 1) || visuals >= 2;
   }
 
   // ── Post-generation safety check — independent of the gateway's own ──
@@ -197,6 +259,15 @@
     var styleTokens = lib.getStyleTokens(styleId);
     var moduleCtx = lib.getModuleContext(domainId);
     var facts = buildFactsPayload(spec, meta);
+    if (!factsAreSubstantial(facts)) {
+      return Promise.resolve({
+        ok: false,
+        reason: 'ข้อมูลในไฟล์นี้ยังไม่พอให้ AI ออกแบบได้ — หัวตารางบางคอลัมน์ว่าง ' +
+                'หรือยังไม่พบคอลัมน์หมวดหมู่ที่ใช้จัดกลุ่มได้ ' +
+                'กรุณาตรวจว่าแถวหัวตารางมีชื่อครบทุกคอลัมน์ แล้วลองใหม่ ' +
+                '(ระหว่างนี้เลือก "สร้างจาก Template" จะได้ Dashboard จากตัวเลขจริงทันที)'
+      });
+    }
 
     var referenceTemplate = opts.referenceTemplate || (meta && meta.referenceTemplate) || null;
 

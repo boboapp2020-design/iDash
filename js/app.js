@@ -626,6 +626,11 @@ async function loadKpiDefsChain(winnerPack) {
 
 const AI_PROGRESS_STEP_ORDER = ['upload', 'understand', 'analyze', 'build'];
 const AI_PROGRESS_STEP_PCT = { upload: 10, understand: 40, analyze: 75, build: 100 };
+// AI mode: the same four DET steps are real work but a small fraction of the
+// wait, so they only claim the first third of the bar. The remaining 65% is
+// the model writing the page — driven by startAiCallProgress, not by these.
+const AI_PROGRESS_STEP_PCT_AI = { upload: 8, understand: 18, analyze: 28, build: 35 };
+let aiProgressScale = AI_PROGRESS_STEP_PCT;
 const DEFAULT_AUTOPILOT_THEME = { id: 'ocean_blue', name: 'Ocean Blue', accent: '#2563eb', dark: false };
 
 /**
@@ -652,6 +657,8 @@ function openAiProgressModal(buildMode) {
   document.getElementById('aiProgressHeaderSub').textContent =
     buildMode === 'template' ? 'กำลังหา Template ที่เหมาะกับคุณ' : 'กำลังวิเคราะห์ข้อมูลของคุณ';
   document.getElementById('aiProgressDesc').textContent = 'กำลังวิเคราะห์ไฟล์และสร้างข้อมูลเชิงลึกที่เหมาะสมที่สุด...';
+  aiProgressScale = buildMode === 'ai' ? AI_PROGRESS_STEP_PCT_AI : AI_PROGRESS_STEP_PCT;
+  stopAiCallProgress();
   setAiProgress(0);
   AI_PROGRESS_STEP_ORDER.forEach(key => setAiStepStatus(key, 'pending'));
   modal.hidden = false;
@@ -682,10 +689,15 @@ function setAiStepStatus(stepKey, status) {
     iconEl.innerHTML = '';
     statusEl.textContent = 'รออยู่';
   }
+  // Halfway to the step's finish line while it runs, so an active step still
+  // shows movement without overshooting what has actually completed.
+  var target = aiProgressScale[stepKey];
+  var prevKeys = AI_PROGRESS_STEP_ORDER.slice(0, AI_PROGRESS_STEP_ORDER.indexOf(stepKey));
+  var floor = prevKeys.length ? aiProgressScale[prevKeys[prevKeys.length - 1]] : 0;
   if (status === 'active') {
-    setAiProgress(AI_PROGRESS_STEP_PCT[stepKey] - 15 > 0 ? AI_PROGRESS_STEP_PCT[stepKey] - 15 : 5);
+    setAiProgress(Math.round(floor + (target - floor) * 0.5));
   } else if (status === 'done') {
-    setAiProgress(AI_PROGRESS_STEP_PCT[stepKey]);
+    setAiProgress(target);
   }
 }
 
@@ -1107,16 +1119,42 @@ async function prepareTemplateHtml(entry, dataset) {
 // pacing (~2.5-4s total across the run) lets each progress step register.
 // Cosmetic only: it never changes any output (P5-safe).
 //
-// AI Autopilot runs slower than Template mode by the same mechanism: its real
-// network call can take much longer than these fixed pauses, so a bar that
-// raced through the DET steps at template speed and then stalled for several
-// seconds on the actual AI call would read as frozen. Stretching the pacing
-// here keeps the whole bar moving at a rate consistent with what's coming next.
-var AI_PACE_MULTIPLIER = 6; // ~15-26s across the run, vs ~2.5-4.4s for template
-function aiPause(minMs, maxMs, buildMode) {
-  var mult = buildMode === 'ai' ? AI_PACE_MULTIPLIER : 1;
-  var ms = (minMs + Math.random() * (maxMs - minMs)) * mult;
+// AI mode used to stretch these pauses 6x to disguise the fact that the bar
+// hit 100% and then sat there through the whole network call. That is fixed
+// properly now — the DET steps only claim the first third of the bar and the
+// AI call drives the rest (see startAiCallProgress) — so the padding is gone
+// and both modes pace the same. The bar now moves because work is happening.
+function aiPause(minMs, maxMs) {
+  var ms = minMs + Math.random() * (maxMs - minMs);
   return new Promise(function (res) { setTimeout(res, ms); });
+}
+
+/**
+ * Progress during the AI call — the one step whose duration we genuinely
+ * cannot know in advance.
+ *
+ * The DET pipeline is fast and bounded, so in AI mode it is scaled to occupy only
+ * 0-35% of the bar; this drives 35% → 92% while the model writes the page.
+ * The curve is asymptotic: it approaches 92% without ever arriving, so it
+ * keeps visibly moving on a slow generation and never claims to be finished
+ * before the HTML is actually in hand. 100% is set once, by the caller, when
+ * the document really exists.
+ */
+var aiCallProgressTimer = null;
+function startAiCallProgress(fromPct, toPct) {
+  stopAiCallProgress();
+  var start = Date.now();
+  // Half-life chosen from observed generations: ~35-60s for a full page on
+  // Opus, so the bar covers most of its span in that window without stalling.
+  var HALF_LIFE_MS = 22000;
+  aiCallProgressTimer = setInterval(function () {
+    var elapsed = Date.now() - start;
+    var progressed = 1 - Math.pow(0.5, elapsed / HALF_LIFE_MS);
+    setAiProgress(Math.min(toPct - 1, Math.round(fromPct + (toPct - fromPct) * progressed)));
+  }, 400);
+}
+function stopAiCallProgress() {
+  if (aiCallProgressTimer) { clearInterval(aiCallProgressTimer); aiCallProgressTimer = null; }
 }
 
 // Pre-fetch the local ECharts bundle so the generator can inline it into the
@@ -1159,7 +1197,7 @@ async function runAutopilotPipeline(fileOrDataset, userModuleId, opts) {
     const echartsReady = ensureEchartsSource();
 
     setAiStepStatus('upload', 'done');
-    await aiPause(400, 700, buildMode);
+    await aiPause(400, 700);
 
     setAiStepStatus('understand', 'active');
     const packs = await loadDomainPacks();
@@ -1177,7 +1215,7 @@ async function runAutopilotPipeline(fileOrDataset, userModuleId, opts) {
       winnerPack = packById[userPackId];
       classificationSource = 'user-module';
     }
-    await aiPause(600, 1100, buildMode);
+    await aiPause(600, 1100);
     setAiStepStatus('understand', 'done');
 
     setAiStepStatus('analyze', 'active');
@@ -1190,7 +1228,7 @@ async function runAutopilotPipeline(fileOrDataset, userModuleId, opts) {
     const kpiDefById = {};
     kpiDefs.forEach(d => { kpiDefById[d.id] = d; });
     const decisionSpec = window.iDashDecisionEngine.buildDecisionSpec(bindings, kpiDefs, winnerPack);
-    await aiPause(700, 1200, buildMode);
+    await aiPause(700, 1200);
     setAiStepStatus('analyze', 'done');
 
     setAiStepStatus('build', 'active');
@@ -1207,11 +1245,15 @@ async function runAutopilotPipeline(fileOrDataset, userModuleId, opts) {
       const domainContext = { id: winnerPack.id, nameTH: winnerPack.identity.nameTH };
       insightStory = await window.iDashInsightEngine.generateInsights(bindings, dataset, kpiDefById, domainContext, dashboardSpec, { runId });
     }
-    await aiPause(800, 1400, buildMode);
+    await aiPause(800, 1400);
     setAiStepStatus('build', 'done');
 
-    document.getElementById('aiProgressHeaderSub').textContent = 'เสร็จสิ้น';
-    document.getElementById('aiProgressDesc').textContent = 'สร้าง Dashboard เรียบร้อยแล้ว กำลังเปิด...';
+    // In AI mode the work is not finished here — the model hasn't drawn
+    // anything yet — so don't say "เสร็จสิ้น" until it has.
+    if (buildMode !== 'ai') {
+      document.getElementById('aiProgressHeaderSub').textContent = 'เสร็จสิ้น';
+      document.getElementById('aiProgressDesc').textContent = 'สร้าง Dashboard เรียบร้อยแล้ว กำลังเปิด...';
+    }
 
     const styleFamily = window.iDashStyleLibrary ? window.iDashStyleLibrary.getFamilyForDomain(winnerPack.id) : null;
     sessionStorage.removeItem('idash.renderMode');
@@ -1234,7 +1276,16 @@ async function runAutopilotPipeline(fileOrDataset, userModuleId, opts) {
         domainId: winnerPack.id,
         domainNameTH: winnerPack.identity.nameTH
       });
-      const out = await window.iDashAIProviders.generateDashboard(facts);
+      // The bar now advances because the model is working, not on a timer
+      // that guesses. It creeps toward 92% and stops there until real HTML
+      // arrives — so it can never claim done before there is a page.
+      startAiCallProgress(aiProgressScale.build, 92);
+      let out;
+      try {
+        out = await window.iDashAIProviders.generateDashboard(facts);
+      } finally {
+        stopAiCallProgress();
+      }
       if (!out.ok) throw new Error('AI Autopilot ไม่สำเร็จ — ' + out.reason);
 
       try {
@@ -1248,6 +1299,10 @@ async function runAutopilotPipeline(fileOrDataset, userModuleId, opts) {
       } catch (e) {
         throw new Error('หน้าที่ AI สร้างมีขนาดใหญ่เกินกว่าจะเก็บในเบราว์เซอร์ได้');
       }
+      // The page exists now — this is the first honest moment for 100%.
+      setAiProgress(100);
+      document.getElementById('aiProgressHeaderSub').textContent = 'เสร็จสิ้น';
+      document.getElementById('aiProgressDesc').textContent = 'AI ออกแบบเสร็จแล้ว กำลังเปิด...';
     }
 
     // ── Known-dataset matching (single-module offline pivot, 2026-07-22):
@@ -1369,6 +1424,9 @@ async function runAutopilotPipeline(fileOrDataset, userModuleId, opts) {
 
     setTimeout(() => { window.location.href = 'infographic.html'; }, 500);
   } catch (err) {
+    // A failure anywhere must not leave the creep timer ticking the bar
+    // forward underneath an error message.
+    stopAiCallProgress();
     const errorEl = document.getElementById('aiProgressError');
     let msg = err.message;
     if (msg === 'Failed to fetch' || msg.includes('NetworkError')) {

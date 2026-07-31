@@ -221,14 +221,33 @@
     '  and if none are supplied, omit that section entirely rather than inventing one.',
     '- Footer: "สร้างโดย iDash · ตัวเลขทั้งหมดคำนวณจากไฟล์ของผู้ใช้" plus the as-of line.',
     '',
-    'DESIGN BRIEF:',
+    'DESIGN BRIEF — this is a flagship product surface, not a report printout.',
+    'Spend the effort. A plain page with three boxes is a failure even if every',
+    'number on it is correct.',
     '- Thai-language UI. Keep every label exactly as supplied in the facts.',
-    '- Modern business-dashboard look; give each KPI card its own hue via a coloured',
-    '  icon badge. Colour carries meaning, never decoration alone.',
-    '- System font stack only. Responsive with CSS grid/flex; nothing may overflow',
-    '  horizontally on a 1280px-wide viewport.',
-    '- Aim for a page that looks designed, not generated: consistent spacing scale,',
-    '  restrained borders, generous whitespace.'
+    '- Build a real visual system first, then apply it: a background treatment',
+    '  (soft gradient mesh / layered tints — not flat white), an elevation scale,',
+    '  a radius scale, and a spacing scale used consistently across every card.',
+    '- KPI cards: coloured icon badge per card, large tabular-figure value, unit,',
+    '  delta with its baseline, and an inline SVG sparkline when a series exists.',
+    '  Give the cards depth — subtle gradient fill, hairline border, soft shadow.',
+    '- Charts as polished inline SVG: rounded bar caps, gradient fills under area',
+    '  and line charts, gridlines at ~8% opacity, direct value labels on bars,',
+    '  a donut with the total in the centre. Add a legend only when 2+ series.',
+    '- Compose an asymmetric layout — a wide hero chart beside a narrower',
+    '  companion, not a uniform grid of equal boxes.',
+    '- Type: one system font stack, but a deliberate hierarchy — oversized bold',
+    '  KPI values, small uppercase-tracked section labels, quiet secondary text.',
+    '- Colour: pick ONE accent hue and build tints of it for chart series; reserve',
+    '  green/amber/red strictly for good/warning/bad. Never a rainbow of series.',
+    '- Include a header band with the dashboard title, filename and as-of line,',
+    '  and a closing footer line.',
+    '- Responsive with CSS grid/flex; nothing may overflow horizontally at 1280px.',
+    '- Dense but breathable: generous whitespace, restrained borders, nothing',
+    '  cramped and nothing floating alone in a big empty card.',
+    '',
+    'Do not cut the page short to save output length — finish every section you',
+    'start, and close every tag.'
   ].join('\n');
 
   function buildUserPrompt(facts) {
@@ -259,7 +278,7 @@
         },
         body: {
           model: cfg.model,
-          max_tokens: 16000,
+          max_tokens: 32000,
           system: SYSTEM_PROMPT,
           messages: [{ role: 'user', content: userPrompt }]
         }
@@ -275,7 +294,7 @@
         body: {
           systemInstruction: { parts: [{ text: SYSTEM_PROMPT }] },
           contents: [{ role: 'user', parts: [{ text: userPrompt }] }],
-          generationConfig: { maxOutputTokens: 16000, temperature: 0.6 }
+          generationConfig: { maxOutputTokens: 32000, temperature: 0.6 }
         }
       };
     }
@@ -305,7 +324,7 @@
       headers: { 'content-type': 'application/json', 'Authorization': 'Bearer ' + cfg.apiKey },
       body: {
         model: cfg.model,
-        max_tokens: 16000,
+        max_tokens: 32000,
         temperature: 0.6,
         messages: [
           { role: 'system', content: SYSTEM_PROMPT },
