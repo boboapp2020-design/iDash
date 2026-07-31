@@ -106,6 +106,133 @@
     return numericLabels / usable < 0.5;
   }
 
+  /* ── Data profile for the AI ──────────────────────────────────────────
+   * The facts below are what the deterministic pipeline managed to bind into
+   * widgets. That is a narrow view: anything the composer couldn't interpret
+   * arrives as "column_12" or not at all, and the model has no way to do
+   * better because it never sees the data — only our digest of it.
+   *
+   * This sends the shape of the actual table instead: every column, what kind
+   * of values it holds, its range and totals, and its top category labels.
+   * The model can then decide for itself what deserves to be a KPI and what
+   * groups a chart — which is the whole reason pasting a file into Claude
+   * directly produces a better dashboard than this pipeline did.
+   *
+   * P6 holds: no raw rows. Column names, computed statistics and at most 12
+   * category labels per column — exactly the categories the rule permits.
+   */
+  var MAX_LABELS_PER_COL = 12;
+  var MAX_PROFILED_COLS = 40;
+
+  function isNumericVal(v) {
+    if (typeof v === 'number') return isFinite(v);
+    if (typeof v !== 'string') return false;
+    var s = v.replace(/,/g, '').trim();
+    return s !== '' && !isNaN(Number(s));
+  }
+
+  function isDateVal(v) {
+    if (v instanceof Date) return !isNaN(v.getTime());
+    if (typeof v !== 'string') return false;
+    if (!/\d{4}|\d{1,2}[\/-]\d{1,2}/.test(v)) return false;
+    return !isNaN(new Date(v).getTime());
+  }
+
+  function buildDataProfile(dataset) {
+    if (!dataset || !dataset.data || !dataset.data.length) return null;
+    var rows = dataset.data;
+    var names = dataset.columns
+      ? dataset.columns.map(function (c) { return typeof c === 'string' ? c : (c && c.name); })
+      : Object.keys(rows[0] || {});
+    names = names.filter(Boolean).slice(0, MAX_PROFILED_COLS);
+    var sample = rows.length > 1000 ? rows.slice(0, 1000) : rows;
+
+    var cols = names.map(function (name) {
+      var nums = [], dates = 0, blanks = 0, seen = {}, labels = [], distinct = 0;
+      sample.forEach(function (r) {
+        var v = r[name];
+        if (v == null || v === '') { blanks++; return; }
+        if (isNumericVal(v)) nums.push(Number(String(v).replace(/,/g, '')));
+        else if (isDateVal(v)) dates++;
+        var k = String(v);
+        if (seen[k] === undefined) { seen[k] = 0; distinct++; if (labels.length < MAX_LABELS_PER_COL) labels.push(k); }
+        seen[k]++;
+      });
+      var filled = sample.length - blanks;
+      var out = {
+        name: name,
+        distinct: distinct,
+        blankPct: sample.length ? Math.round(blanks / sample.length * 100) : 0
+      };
+      var trimmed = String(name).trim();
+      if (PLACEHOLDER_NAME.test(trimmed)) {
+        // Say so rather than hiding it — the model can judge from the values
+        // whether the column is worth using, and can label it honestly.
+        out.note = 'หัวตารางในไฟล์ว่าง — ชื่อนี้ระบบตั้งให้อัตโนมัติ';
+      } else if (trimmed && !isNaN(Number(trimmed.replace(/,/g, '')))) {
+        // Marked here, judged after the loop — see the numeric-name pass below.
+        out._numericName = true;
+      }
+      if (filled > 0 && nums.length / filled >= 0.7) {
+        out.type = 'number';
+        var sum = 0, min = Infinity, max = -Infinity;
+        nums.forEach(function (n) { sum += n; if (n < min) min = n; if (n > max) max = n; });
+        out.stats = {
+          sum: Math.round(sum * 100) / 100,
+          avg: Math.round(sum / nums.length * 100) / 100,
+          min: min, max: max, count: nums.length
+        };
+        // Near-unique dense integers are row labels, not measurements. Flag
+        // rather than drop: the model may still want it as an axis or a key.
+        //
+        // The density test is essential, not decoration — near-uniqueness
+        // alone flags legitimate integer measures (money, counts) whose values
+        // happen not to repeat. An identifier's distinct values sit in a tight
+        // run; a measure's scatter. Same lesson the generator's own screen
+        // learned, applied with the same threshold.
+        var allInt = nums.every(function (n) { return n === Math.floor(n); });
+        if (allInt && distinct / filled >= 0.85 && nums.length > 3) {
+          var uniq = Object.keys(seen).map(Number).filter(function (n) { return !isNaN(n); })
+            .sort(function (a, b) { return a - b; });
+          var gaps = [];
+          for (var gi = 1; gi < uniq.length; gi++) gaps.push(uniq[gi] - uniq[gi - 1]);
+          gaps.sort(function (a, b) { return a - b; });
+          if (gaps.length && gaps[Math.floor(gaps.length / 2)] <= 2) out.likelyIdentifier = true;
+        }
+      } else if (filled > 0 && dates / filled >= 0.5) {
+        out.type = 'date';
+        var ds = sample.map(function (r) { return r[name]; })
+          .filter(function (v) { return v != null && v !== '' && isDateVal(v); })
+          .map(function (v) { return new Date(v); })
+          .sort(function (a, b) { return a - b; });
+        if (ds.length) { out.min = ds[0].toISOString().slice(0, 10); out.max = ds[ds.length - 1].toISOString().slice(0, 10); }
+      } else {
+        out.type = 'category';
+        out.topValues = labels;
+      }
+      return out;
+    });
+
+    /* Numeric column names mean one of two very different things, and the
+     * difference is only visible across the whole table:
+     *   most names numeric  → the file had no header row and a data row was
+     *                         read as one; the names are meaningless.
+     *   a few names numeric → ordinary year/period columns in a budget-style
+     *                         sheet ("2025", "2026"); those names are correct
+     *                         and telling the model to rename or skip them
+     *                         would throw away real data.
+     * Only the first case gets a warning. */
+    var numericNamed = cols.filter(function (c) { return c._numericName; });
+    if (numericNamed.length > cols.length * 0.6) {
+      numericNamed.forEach(function (c) {
+        c.note = 'ชื่อคอลัมน์เป็นตัวเลข — ไฟล์อาจไม่มีแถวหัวตาราง ควรตั้งชื่อจากค่าที่เห็น';
+      });
+    }
+    cols.forEach(function (c) { delete c._numericName; });
+
+    return { rowCount: rows.length, sampledRows: sample.length, columns: cols };
+  }
+
   function buildFactsPayload(spec, meta) {
     var kpis = [];
     var trend = null;
@@ -157,7 +284,11 @@
       ? window.iDashInfographic.resolveDashboardTitle(meta, domainName)
       : ((meta && meta.filename) || domainName);
 
-    // Apply the gate to everything before it leaves the browser.
+    // Strip only what is actively misleading. These widgets are a suggested
+    // starting point, not the whole brief — the model also gets dataProfile
+    // below and can build past anything dropped here. Removing a KPI called
+    // "ผลรวม — column_12" costs nothing, because the same column still
+    // appears in the profile with its statistics and an honest note.
     kpis = kpis.filter(function (k) { return isMeaningfulName(k.name) && k.value != null; });
     statusRows = statusRows.filter(function (r) { return isMeaningfulName(r.name); });
     if (donut && !looksLikeRealCategories(donut.groups)) donut = null;
@@ -176,19 +307,28 @@
       donut: donut,
       ranked: ranked,
       statusRows: statusRows.slice(0, 6),
-      alerts: alerts.slice(0, 4)
+      alerts: alerts.slice(0, 4),
+      // The table's own shape. When the pipeline understood the file this
+      // agrees with the widgets above; when it didn't, this is what lets the
+      // model build something anyway instead of us refusing the file.
+      dataProfile: (meta && meta.dataset) ? buildDataProfile(meta.dataset) : null
     };
   }
 
   /**
-   * Is there enough here to be worth an AI call? Sending a payload with one
-   * unnamed number produces a confident-looking page about nothing and bills
-   * the user for it — better to say so and let the deterministic renderer,
-   * which shows its own data-gap notes honestly, handle the file.
+   * Can we attempt a dashboard at all? Deliberately generous: the model gets
+   * the full column profile, so it can work from raw column statistics even
+   * when the deterministic pipeline bound nothing. The only true blocker is
+   * an empty table — there is no design to make from zero rows.
+   *
+   * (This used to demand pre-bound widgets and refused files the model could
+   * have handled perfectly well. Refusing to try is worse than trying.)
    */
   function factsAreSubstantial(facts) {
+    if (facts.dataProfile && facts.dataProfile.rowCount > 0 &&
+        facts.dataProfile.columns && facts.dataProfile.columns.length > 0) return true;
     var visuals = (facts.trend ? 1 : 0) + (facts.donut ? 1 : 0) + (facts.ranked ? 1 : 0);
-    return facts.kpis.length >= 2 || (facts.kpis.length >= 1 && visuals >= 1) || visuals >= 2;
+    return facts.kpis.length >= 1 || visuals >= 1;
   }
 
   // ── Post-generation safety check — independent of the gateway's own ──

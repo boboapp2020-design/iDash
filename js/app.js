@@ -1270,26 +1270,23 @@ async function runAutopilotPipeline(fileOrDataset, userModuleId, opts) {
       document.getElementById('aiProgressDesc').textContent =
         'ส่งตัวเลขสรุปให้ AI ออกแบบ อาจใช้เวลาสักครู่...';
 
+      // The dataset goes in so buildFactsPayload can profile the real table.
+      // Without it the model only ever sees widgets the pipeline managed to
+      // bind, and any file the pipeline didn't understand looks empty to it.
       const facts = window.iDashAIComposer.buildFactsPayload(dashboardSpec, {
         filename: dataset.filename,
         datasetTitle: dataset.datasetName || null,
         domainId: winnerPack.id,
-        domainNameTH: winnerPack.identity.nameTH
+        domainNameTH: winnerPack.identity.nameTH,
+        dataset: dataset
       });
 
       // Applies to BOTH provider modes — direct API and the Supabase gateway
-      // run through this same block, so the check belongs here rather than in
-      // either provider adapter. buildFactsPayload has already dropped the
-      // placeholder-named KPIs and numeric-labelled dimensions; if what's left
-      // can't make a dashboard worth looking at, don't spend a call finding
-      // that out. Naming the real cause beats a beautiful page about nothing.
+      // share this block. Now only an empty table stops here: with the column
+      // profile in hand the model can design from the data itself, so the file
+      // no longer has to survive our pipeline's interpretation to be usable.
       if (!window.iDashAIComposer.factsAreSubstantial(facts)) {
-        throw new Error(
-          'ข้อมูลในไฟล์นี้ยังไม่พอให้ AI ออกแบบได้ — หัวตารางบางคอลัมน์ว่าง ' +
-          'หรือยังไม่พบคอลัมน์หมวดหมู่ที่ใช้จัดกลุ่มได้ ' +
-          'กรุณาเปิดไฟล์แล้วใส่ชื่อหัวตารางให้ครบทุกคอลัมน์ แล้วลองใหม่ ' +
-          '(ระหว่างนี้เลือก "สร้างจาก Template" จะได้ Dashboard จากตัวเลขจริงทันที)'
-        );
+        throw new Error('ไฟล์นี้ไม่มีข้อมูลให้วิเคราะห์ — ตรวจว่าชีตที่เลือกมีแถวข้อมูลอยู่จริง');
       }
 
       // The bar now advances because the model is working, not on a timer

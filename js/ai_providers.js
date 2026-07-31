@@ -179,9 +179,14 @@
     '3. NO external resources. No CDN links, no <link>, no @import, no web fonts,',
     '   no remote images, no http:// or https:// anywhere in the document.',
     '4. Draw every chart as INLINE SVG that you compute by hand from the numbers given.',
-    '5. Use ONLY numbers present in the supplied facts. Never invent, extrapolate,',
-    '   round differently, or add a metric that was not provided. If a fact is',
+    '5. Use ONLY numbers present in the supplied payload — including the computed',
+    '   statistics in dataProfile.columns[].stats. Never invent, extrapolate,',
+    '   round differently, or derive a figure that was not given. If a fact is',
     '   missing, leave that element out entirely rather than filling it in.',
+    '6. Every file must produce a usable dashboard. The pre-bound widgets',
+    '   (kpis/trend/donut/ranked) are a suggestion the pipeline made; when they',
+    '   are thin or empty, design from dataProfile instead — it describes the',
+    '   real table. Never return an "insufficient data" page.',
     '',
     'GOAL — the 30-second test: a manager opening this page must be able to answer',
     '"what is unusual, how severe, what to look at next" within 30 seconds. Order',
@@ -251,10 +256,34 @@
   ].join('\n');
 
   function buildUserPrompt(facts) {
+    var hasProfile = facts && facts.dataProfile && facts.dataProfile.columns &&
+                     facts.dataProfile.columns.length > 0;
     return [
-      'สร้างหน้า Dashboard จากข้อมูลจริงชุดนี้ (ตัวเลขทั้งหมดคำนวณมาแล้ว ห้ามแก้ค่า):',
+      'ออกแบบหน้า Dashboard จากข้อมูลชุดนี้',
       '',
       JSON.stringify(facts, null, 2),
+      '',
+      'วิธีอ่าน payload:',
+      '- dataProfile = โครงสร้างจริงของตารางที่ผู้ใช้อัปโหลด — ทุกคอลัมน์ ชนิดข้อมูล',
+      '  ค่าสถิติที่คำนวณแล้ว (sum/avg/min/max/count) ช่วงวันที่ และตัวอย่างค่าหมวดหมู่',
+      '  ใช้ส่วนนี้เป็นหลักในการตัดสินใจว่าอะไรควรเป็น KPI และอะไรควรเป็นกราฟ',
+      '- kpis / trend / donut / ranked / statusRows / alerts = ข้อเสนอเบื้องต้น',
+      '  จากระบบ ใช้ได้เลยถ้าเหมาะ แต่ไม่ต้องยึดติด ถ้าเห็นจาก dataProfile ว่ามีอย่างอื่น',
+      '  ที่สำคัญกว่า ให้เลือกอย่างนั้นแทน',
+      '',
+      'กติกาการเลือกตัวเลข:',
+      '- ใช้ได้เฉพาะตัวเลขที่ปรากฏใน payload นี้ (รวมค่าใน dataProfile.columns[].stats)',
+      '  ห้ามคำนวณค่าใหม่ที่ไม่มีให้ ห้ามเดา ห้ามประมาณ',
+      '- คอลัมน์ที่มี likelyIdentifier = true คือรหัส/เลขที่เอกสาร ไม่ใช่ค่าที่วัดได้',
+      '  ห้ามเอามาทำ KPI แบบผลรวม (ถ้าจะใช้ ให้ใช้เป็นจำนวนรายการเท่านั้น)',
+      '- คอลัมน์ที่มีฟิลด์ note: ชื่อคอลัมน์ในไฟล์ไม่น่าเชื่อถือ ให้ตั้งชื่อที่สื่อ',
+      '  ความหมายเองจากค่าที่เห็น หรือถ้าเดาไม่ได้ให้ข้ามคอลัมน์นั้นไป',
+      '  ห้ามแสดงชื่ออย่าง "column_12" หรือชื่อที่เป็นตัวเลขล้วนบนหน้าจอเด็ดขาด',
+      '- คอลัมน์ type=category ใช้เป็นแกนจัดกลุ่ม · type=number ใช้เป็นค่าที่วัด',
+      '  · type=date ใช้เป็นแกนเวลา',
+      hasProfile
+        ? '- ถ้า kpis/trend/donut ว่างเปล่า ให้สร้าง Dashboard จาก dataProfile เอง — ทุกไฟล์ต้องได้หน้าที่ใช้งานได้'
+        : '- ถ้าข้อมูลบางส่วนขาด ให้ตัดส่วนนั้นออก อย่าเติมตัวเลขเอง',
       '',
       'ตอบกลับเป็นเอกสาร HTML สมบูรณ์เพียงอย่างเดียว เริ่มด้วย <!DOCTYPE html> และจบด้วย </html>'
     ].join('\n');
