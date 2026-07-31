@@ -237,7 +237,12 @@ details.acc summary{cursor:pointer;font-size:13px;font-weight:700;color:var(--s1
       <h1 contenteditable="true" id="tTitle">Sales Performance Dashboard — ปี 2026</h1>
       <div class="sub" contenteditable="true" id="tSub">ยอดจ่ายออกสะสม เทียบแผนงบการเงิน 2026 · หน่วย: ตัน</div>
     </div>
-    <div class="chip"><span class="dot"></span><span contenteditable="true" id="tDate">ข้อมูล ณ วันที่ 30 กรกฎาคม 2026</span></div>
+    <!-- The as-of chip was removed at the user's request after multiple
+         attempts to keep it in sync with the data failed to convince. The
+         Sheet already carries its own "last edited" timestamp; that is the
+         one to trust. #tDate is kept below (display:none) so saveHtml() and
+         other code that reads it can't NPE. -->
+    <span id="tDate" hidden></span>
     <button class="btn" id="themeBtn">🌙 โหมดมืด</button>
     <button class="btn primary" id="saveAll">🖼 บันทึกทั้งหน้า</button>
   </div>
