@@ -42,7 +42,7 @@
       label: 'Supabase (llm-gateway ของคุณ)',
       shape: 'supabase',
       endpoint: '',
-      defaultModel: 'claude-sonnet-5',   // heaviest model is the one that hits Supabase's ceiling
+      defaultModel: 'claude-haiku-4-5',  // measured: the only one that finishes inside the Edge Function
       keyHint: 'ใส่ anon key ของโปรเจกต์ (ปลอดภัยที่จะอยู่ฝั่งเบราว์เซอร์)',
       keyUrl: 'supabase.com/dashboard → Settings → API',
       needsEndpoint: true,
@@ -51,14 +51,19 @@
       // single-vendor means one secret to manage (ANTHROPIC_API_KEY) and one
       // upstream to keep working. If you need Gemini or GPT, "ต่อ AI โดยตรง"
       // already covers them without the extra hop.
-      // An Edge Function holds the connection open for the whole generation,
-      // so the heaviest model is also the one most likely to hit Supabase's
-      // compute ceiling (HTTP 546). Say which is which at the point of choice
-      // rather than after a failure.
+      // Ordered by what was actually measured against a live Edge Function
+      // with a full-size dashboard request, not by model quality:
+      //   Haiku 4.5   32s → HTTP 200, 21KB page with every figure present
+      //   Sonnet 5   >120s → worker killed (HTTP 546)
+      //   Opus 4.8   slower still
+      // The function holds the connection open for the whole generation, so
+      // speed is the binding constraint here, and the fastest model is the
+      // only one that finishes. Anyone wanting Opus should use "ต่อ AI
+      // โดยตรง", which has no such middleman.
       models: [
-        { id: 'claude-sonnet-5',   label: 'Claude Sonnet 5 — แนะนำสำหรับ Supabase (เร็ว เสถียร)', tier: 'paid' },
-        { id: 'claude-haiku-4-5',  label: 'Claude Haiku 4.5 — เบาสุด ถูกสุด',                    tier: 'paid' },
-        { id: 'claude-opus-4-8',   label: 'Claude Opus 4.8 — สวยสุด แต่หนัก อาจติดลิมิต Supabase', tier: 'paid' }
+        { id: 'claude-haiku-4-5',  label: 'Claude Haiku 4.5 — ใช้ได้จริงกับ Supabase (~32 วิ)',   tier: 'paid' },
+        { id: 'claude-sonnet-5',   label: 'Claude Sonnet 5 — ช้าเกินลิมิต Supabase (มักไม่สำเร็จ)', tier: 'paid' },
+        { id: 'claude-opus-4-8',   label: 'Claude Opus 4.8 — สวยสุด แต่ต้องใช้โหมดต่อตรงเท่านั้น',  tier: 'paid' }
       ]
     },
     anthropic: {
