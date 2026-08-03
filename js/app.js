@@ -429,7 +429,7 @@ async function runManualPipeline(dataset, widgetIds) {
     let stored = false;
     for (let i = 0; i < ROW_CAPS.length; i++) {
       const gen = window.iDashInteractiveDashboard.generate(
-        {}, meta, lightTheme, dataset, { maxRows: ROW_CAPS[i], blueprint: blueprint });
+        {}, meta, lightTheme, dataset, { maxRows: ROW_CAPS[i], blueprint: blueprint, lightOnly: true });
       try {
         sessionStorage.setItem('idash.interactiveHtml', gen.html);
         sessionStorage.setItem('idash.renderMode', 'interactive');
@@ -870,6 +870,20 @@ function pickRandomTheme() {
   const palette = window.iDashThemes;
   if (!palette || palette.length === 0) return DEFAULT_AUTOPILOT_THEME;
   return palette[Math.floor(Math.random() * palette.length)];
+}
+
+/**
+ * Same free pick, restricted to light themes — used for files the registry has
+ * never seen (user directive 2026-08-03). Variety still comes from the accent
+ * hue; only the dark skins are off the table. Checks `dark` rather than the
+ * 'light' category name so pastel/colorful light themes stay eligible and a
+ * future category can't silently smuggle a dark background back in.
+ */
+function pickLightTheme() {
+  const palette = window.iDashThemes;
+  const light = (palette || []).filter(t => !t.dark);
+  if (!light.length) return DEFAULT_AUTOPILOT_THEME;
+  return light[Math.floor(Math.random() * light.length)];
 }
 
 function openAiProgressModal(buildMode) {
@@ -1763,7 +1777,12 @@ async function runAutopilotPipeline(fileOrDataset, userModuleId, opts) {
         }
       }
     }
-    if (!dashTheme) dashTheme = pickRandomTheme();
+    // A curated entry brings its own theme (dark included — that's the design
+    // someone chose for that specific dashboard). A file the registry has
+    // never seen gets a LIGHT theme only, by directive: the generated page is
+    // the user's first look at their own data, and it should not arrive in a
+    // dark skin they didn't ask for.
+    if (!dashTheme) dashTheme = matched ? pickRandomTheme() : pickLightTheme();
 
     // ── Plan B: curated HTML template ──
     // When a registry entry has templateFile, fetch the pre-made dashboard
@@ -1807,7 +1826,7 @@ async function runAutopilotPipeline(fileOrDataset, userModuleId, opts) {
           templateName: null,
           theme: dashTheme,
           insightStory: insightStory
-        }, dashTheme, dataset, { maxRows: ROW_CAPS[i], blueprint: blueprint });
+        }, dashTheme, dataset, { maxRows: ROW_CAPS[i], blueprint: blueprint, lightOnly: !matched });
         try {
           sessionStorage.setItem('idash.interactiveHtml', gen.html);
           sessionStorage.setItem('idash.renderMode', 'interactive');

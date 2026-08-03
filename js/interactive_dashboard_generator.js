@@ -288,6 +288,16 @@
       classified.textCols = classified.textCols.concat(idLikeCols);
     }
     var themes = buildThemeLibrary();
+    // opts.lightOnly: files the registry has never seen ship light-only (user
+    // directive 2026-08-03). Filtering the library here — not just the initial
+    // pick — is what makes "light only" true of the page rather than of its
+    // first paint: the in-page theme picker cannot offer a dark skin either.
+    // Curated dashboards are unaffected; their chosen theme, dark included, is
+    // a design decision someone made for that specific dashboard.
+    if (opts && opts.lightOnly) {
+      var lightThemes = themes.filter(function (t) { return !t.dark; });
+      if (lightThemes.length) themes = lightThemes;
+    }
 
     // Match by id — accent hex is reused across many themes with different
     // backgrounds (e.g. ocean_blue / bg_royal_blue / dark_navy all use blue),
@@ -505,7 +515,12 @@
     var lightCount = themes.filter(function(t){return !t.dark}).length;
     var darkCount = themes.filter(function(t){return t.dark}).length;
     html += '<div class="theme-tab" onclick="filterThemes(\'light\',this)">Light (' + lightCount + ')</div>';
-    html += '<div class="theme-tab" onclick="filterThemes(\'dark\',this)">Dark (' + darkCount + ')</div>';
+    // A "Dark (0)" tab that filters to an empty grid reads as a broken filter
+    // rather than a deliberate restriction, so it is omitted entirely when the
+    // page ships light-only.
+    if (darkCount > 0) {
+      html += '<div class="theme-tab" onclick="filterThemes(\'dark\',this)">Dark (' + darkCount + ')</div>';
+    }
     html += '</div>';
     html += '<div class="theme-grid" id="themeGrid">';
     themes.forEach(function(t) {
