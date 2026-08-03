@@ -1332,8 +1332,11 @@ function buildInsightPanelHtml(insightStory, domainNameTH) {
   // Self-contained styles: this is appended into templates with unrelated CSS,
   // so every rule is prefixed and nothing inherits from the host page.
   return '\n<style>\n' +
+    // width:100% keeps the panel inside whatever container it ends up in;
+    // max-width only caps it on a full-bleed page. Without the explicit width
+    // a flex parent sizes it to its content instead of the column.
     '.idi-wrap{font-family:system-ui,-apple-system,"Segoe UI","Noto Sans Thai",sans-serif;' +
-    'max-width:1400px;margin:22px auto 30px;padding:0 18px;box-sizing:border-box}\n' +
+    'width:100%;max-width:1400px;margin:22px auto 30px;padding:0 18px;box-sizing:border-box}\n' +
     '.idi-card{background:#fff;border:1px solid #e4e9f0;border-radius:14px;padding:20px 24px;' +
     'box-shadow:0 1px 3px rgba(15,27,45,.06);position:relative;overflow:hidden}\n' +
     '.idi-card:before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;' +
@@ -1357,11 +1360,77 @@ function buildInsightPanelHtml(insightStory, domainNameTH) {
     '.idi-why{font-size:12px;color:#51617a;margin-top:2px}\n' +
     '@media print{.idi-card{break-inside:avoid}}\n' +
     '</style>\n' +
-    '<div class="idi-wrap"><div class="idi-card">' +
+    '<div class="idi-wrap" id="idashInsightPanel" style="display:none"><div class="idi-card">' +
     '<div class="idi-title">🔎 วิเคราะห์เชิงลึก' + (domainNameTH ? ' — ' + esc(domainNameTH) : '') + '</div>' +
     '<div class="idi-src">' + esc(src) + '</div>' + rows +
-    '</div></div>\n';
+    '</div></div>\n' +
+    INSIGHT_PLACEMENT_SCRIPT;
 }
+
+/**
+ * Puts the panel inside the page's content column instead of at the end of
+ * <body>, then reveals it.
+ *
+ * Several curated dashboards lay their page out with `body{display:flex}` and
+ * a fixed-width sidebar. Appending before </body> made the panel a THIRD flex
+ * item on those pages: it took a column of its own beside the content, the
+ * main column lost that width, and its inner grids collapsed — one card ended
+ * up so narrow its title wrapped one character per line. On pages that are not
+ * flex the panel still ignored the page's own gutters and ran edge to edge.
+ *
+ * Placement has to happen at runtime because the templates share no common
+ * markup — some have <main>, some a sidebar + unnamed div, some neither. The
+ * panel starts hidden so the broken arrangement is never painted, and is
+ * revealed even when no host is found, so a page can lose the alignment but
+ * never the analysis.
+ */
+var INSIGHT_PLACEMENT_SCRIPT =
+  '<script>(function(){\n' +
+  '  function place(){\n' +
+  '    var p=document.getElementById("idashInsightPanel");\n' +
+  '    if(!p||!document.body){return;}\n' +
+  '    try{\n' +
+  // Deliberately narrow. A broader list (#app, .content) matched wrappers that
+  // are hidden or zero-width until the workbook loads, and the panel inherited
+  // that — measured 0px wide inside water_steam_report's #app. Anything not on
+  // this list is reached through the widest-child search below, which can only
+  // pick something that is actually visible and wide.
+  '      var host=document.querySelector("main,#main");\n' +
+  '      if(!host){\n' +
+  '        var d=getComputedStyle(document.body).display;\n' +
+  '        if(d==="flex"||d==="grid"){\n' +
+  // The content column is the widest body child that isn't the panel itself,
+  // a script/style node, or a fixed overlay (banners, upload screens).
+  '          var best=null,bw=0,kids=document.body.children;\n' +
+  '          for(var i=0;i<kids.length;i++){\n' +
+  '            var c=kids[i];\n' +
+  '            if(c===p||c.tagName==="SCRIPT"||c.tagName==="STYLE")continue;\n' +
+  '            var cs=getComputedStyle(c);\n' +
+  '            if(cs.position==="fixed"||cs.display==="none")continue;\n' +
+  '            var w=c.getBoundingClientRect().width;\n' +
+  '            if(w>bw){bw=w;best=c;}\n' +
+  '          }\n' +
+  '          host=best;\n' +
+  '        }\n' +
+  '      }\n' +
+  '      if(host&&host!==p.parentNode&&!host.contains(p)){\n' +
+  '        var prev=p.parentNode;\n' +
+  '        host.appendChild(p);\n' +
+  // Trust the measurement, not the selector: if the chosen host turns out to
+  // give the panel no width (hidden or collapsed container), put it back.
+  // Being merely misaligned at the end of <body> beats being invisible.
+  '        p.style.display="";\n' +
+  '        if(p.getBoundingClientRect().width<100&&prev)prev.appendChild(p);\n' +
+  '      }\n' +
+  '    }catch(e){}\n' +
+  '    p.style.display="";\n' +
+  '  }\n' +
+  '  if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",place);}\n' +
+  '  else{place();}\n' +
+  // The templates build their layout from the workbook after load, so a
+  // sidebar or main column may not exist yet at DOMContentLoaded.
+  '  window.addEventListener("load",place);\n' +
+  '})();</scr' + 'ipt>\n';
 
 /**
  * Does this template already compute its own insight section?
