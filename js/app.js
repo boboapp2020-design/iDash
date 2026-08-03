@@ -1487,7 +1487,17 @@ async function runAutopilotPipeline(fileOrDataset, userModuleId, opts) {
       startAiCallProgress(aiProgressScale.build, 92);
       let out;
       try {
-        out = await window.iDashAIProviders.generateDashboard(facts);
+        // Gateway mode writes the page in parallel sections and reports each
+        // one as it lands, so the bar can move on real completed work instead
+        // of a decay curve guessing at it. Direct mode never calls back.
+        out = await window.iDashAIProviders.generateDashboard(facts, (done, total) => {
+          stopAiCallProgress();
+          const span = 92 - aiProgressScale.build;
+          setAiProgress(Math.round(aiProgressScale.build + span * (done / total)));
+          document.getElementById('aiProgressDesc').textContent =
+            'AI กำลังออกแบบหน้า — เสร็จแล้ว ' + done + '/' + total + ' ส่วน...';
+          if (done < total) startAiCallProgress(Math.round(aiProgressScale.build + span * (done / total)), 92);
+        });
       } finally {
         stopAiCallProgress();
       }

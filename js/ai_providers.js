@@ -42,7 +42,7 @@
       label: 'Supabase (llm-gateway ของคุณ)',
       shape: 'supabase',
       endpoint: '',
-      defaultModel: 'claude-haiku-4-5',  // measured: the only one that finishes inside the Edge Function
+      defaultModel: 'claude-sonnet-5',
       keyHint: 'ใส่ anon key ของโปรเจกต์ (ปลอดภัยที่จะอยู่ฝั่งเบราว์เซอร์)',
       keyUrl: 'supabase.com/dashboard → Settings → API',
       needsEndpoint: true,
@@ -51,19 +51,17 @@
       // single-vendor means one secret to manage (ANTHROPIC_API_KEY) and one
       // upstream to keep working. If you need Gemini or GPT, "ต่อ AI โดยตรง"
       // already covers them without the extra hop.
-      // Ordered by what was actually measured against a live Edge Function
-      // with a full-size dashboard request, not by model quality:
-      //   Haiku 4.5   32s → HTTP 200, 21KB page with every figure present
-      //   Sonnet 5   >120s → worker killed (HTTP 546)
-      //   Opus 4.8   slower still
-      // The function holds the connection open for the whole generation, so
-      // speed is the binding constraint here, and the fastest model is the
-      // only one that finishes. Anyone wanting Opus should use "ต่อ AI
-      // โดยตรง", which has no such middleman.
+      // Every model is usable here now. The old ranking (Haiku only; Sonnet
+      // and Opus killed at HTTP 546) measured a design where one worker had to
+      // write the entire page in one invocation — Sonnet needed >120s for that
+      // and got killed. generateSectioned replaced it: the page is written as
+      // several short sections in parallel, so no single worker runs long
+      // enough to be killed and the slower, better models are back on the
+      // table. Speed now only affects how long the whole batch takes.
       models: [
-        { id: 'claude-haiku-4-5',  label: 'Claude Haiku 4.5 — ใช้ได้จริงกับ Supabase (~32 วิ)',   tier: 'paid' },
-        { id: 'claude-sonnet-5',   label: 'Claude Sonnet 5 — ช้าเกินลิมิต Supabase (มักไม่สำเร็จ)', tier: 'paid' },
-        { id: 'claude-opus-4-8',   label: 'Claude Opus 4.8 — สวยสุด แต่ต้องใช้โหมดต่อตรงเท่านั้น',  tier: 'paid' }
+        { id: 'claude-opus-4-8',   label: 'Claude Opus 4.8 — สวยที่สุด (ช้าสุด ~2-3 นาที)',  tier: 'paid' },
+        { id: 'claude-sonnet-5',   label: 'Claude Sonnet 5 — สวยมาก สมดุลที่สุด (แนะนำ)',    tier: 'paid' },
+        { id: 'claude-haiku-4-5',  label: 'Claude Haiku 4.5 — เร็วที่สุด (~40 วิ) งานเรียบง่ายกว่า', tier: 'paid' }
       ]
     },
     anthropic: {
@@ -298,6 +296,364 @@
     ].join('\n');
   }
 
+  /* ── Sectioned composition (gateway mode) ───────────────────────────── */
+
+  /**
+   * A Supabase Edge Function holds the connection open for the whole
+   * generation and the worker is killed (HTTP 546) if that takes too long.
+   * That ceiling used to be paid for by shrinking the page — 8000 tokens,
+   * Haiku only — which is exactly the wrong trade: it made the one mode that
+   * keeps the Anthropic key off the browser also the mode that produces the
+   * worst-looking dashboard.
+   *
+   * The ceiling is per invocation, not per dashboard. So the page is written
+   * as five sections in five parallel invocations. No single worker runs long
+   * enough to be killed, every model becomes usable again, and the total
+   * budget (5 x 9000) is larger than the 32000 the direct-API mode gets in one
+   * shot. Sections are independent requests, so one failing costs that band,
+   * not the page.
+   *
+   * Consistency across parallel writers comes from DESIGN_TOKENS below: the
+   * stylesheet is ours, fixed before any call goes out, and every section is
+   * told to use those classes and variables. Left to agree among themselves,
+   * five independent calls would produce five different-looking strips.
+   */
+  var SECTION_TOKENS = 9000;
+
+  var SECTIONS = [
+    {
+      id: 'header',
+      label: 'ส่วนหัว + KPI',
+      brief: [
+        'เขียนเฉพาะ (ก) แถบหัวเรื่อง และ (ข) แถว KPI',
+        '- แถบหัว: ชื่อ Dashboard, ชื่อไฟล์ต้นทาง, บรรทัด "ข้อมูล ณ ..." (ใช้วันที่จาก facts เท่านั้น',
+        '  ถ้าไม่มีให้เขียน "ข้อมูลจากไฟล์ <filename>") และถ้ามีช่วงเวลาใน trend ให้ระบุช่วงนั้น',
+        '- แถว KPI: การ์ดไม่เกิน 6 ใบ จาก facts.kpis (ถ้าว่างให้เลือกเองจาก dataProfile)',
+        '  แต่ละใบ: ไอคอนวงกลมมีสี, ป้ายชื่อ, ค่าตัวใหญ่พร้อมหน่วย, delta พร้อมชื่อฐานเปรียบเทียบ',
+        '  และ sparkline เป็น inline SVG เมื่อมี series ให้',
+        'ห้ามเขียนกราฟใหญ่ ตาราง หรือ footer ในส่วนนี้'
+      ].join('\n')
+    },
+    {
+      id: 'hero',
+      label: 'กราฟหลัก',
+      brief: [
+        'เขียนเฉพาะแถวกราฟหลัก: กราฟเส้น/พื้นที่ตามเวลา (กว้างประมาณ 60%)',
+        'วางคู่กับกราฟสัดส่วนหรือกราฟจัดอันดับ (กว้างประมาณ 40%) ในแถวเดียวกัน',
+        'ใช้ facts.trend / facts.donut / facts.ranked เป็นหลัก',
+        'ถ้าไม่มีแกนเวลาเลย ให้ใช้กราฟแท่งเรียงจากมากไปน้อยเป็นกราฟหลักแทน',
+        'ทุกแกนต้องมีหน่วยกำกับ · ใต้กราฟเส้นต้องบอกช่วงเวลาที่ครอบคลุม',
+        'ห้ามทำ KPI card ซ้ำ ห้ามทำตาราง'
+      ].join('\n')
+    },
+    {
+      id: 'breakdown',
+      label: 'กราฟแยกย่อย',
+      brief: [
+        'เขียนเฉพาะกราฟรอง 2-3 ชิ้นที่อธิบายกราฟหลักให้ลึกขึ้น',
+        'เลือกจากสิ่งที่ facts และ dataProfile มีจริง เช่น การกระจายตัว (histogram),',
+        'เปรียบเทียบข้ามหมวดหมู่ (แท่งเรียงลำดับ), หรือสัดส่วนสะสม',
+        'ถ้ามีข้อมูลพอทำได้แค่ชิ้นเดียว ให้ทำชิ้นเดียว อย่าเติมกราฟที่ไม่มีข้อมูลรองรับ',
+        'ห้ามทำซ้ำกราฟที่อยู่ในแถวกราฟหลักแล้ว ห้ามทำ KPI card ห้ามทำ footer'
+      ].join('\n')
+    },
+    {
+      id: 'insight',
+      label: 'พาเนลวิเคราะห์',
+      brief: [
+        'เขียนเฉพาะพาเนลวิเคราะห์: สถานะ/การแจ้งเตือน/ข้อค้นพบ',
+        'ใช้ facts.alerts และ facts.statusRows เท่านั้น แสดงระดับความรุนแรงด้วยสีคู่กับข้อความเสมอ',
+        'จัดชั้นให้ชัด: ข้อเท็จจริง → สิ่งที่ผิดปกติ → สิ่งที่ควรทำต่อ',
+        'ถ้า facts.alerts และ facts.statusRows ว่างทั้งคู่ ให้ตอบกลับเป็น',
+        'ความว่างเปล่า ไม่ต้องแต่งเนื้อหาขึ้นเอง (ตอบ <!--skip--> อย่างเดียว)',
+        'ห้ามทำกราฟ ห้ามทำ KPI card'
+      ].join('\n')
+    },
+    {
+      id: 'detail',
+      label: 'ตาราง + ท้ายหน้า',
+      brief: [
+        'เขียนเฉพาะ (ก) ตารางรายละเอียด และ (ข) footer',
+        '- ตาราง: จาก facts.statusRows หรือ facts.ranked หัวตารางติดอยู่กับที่ แถวสลับสี',
+        '  ค่าตัวเลขชิดขวาและใช้ตัวเลขความกว้างเท่ากัน สถานะแสดงเป็น pill มีสี',
+        '  ถ้าไม่มีข้อมูลตารางจริง ให้ข้ามตารางไป',
+        '- footer: "สร้างโดย iDash · ตัวเลขทั้งหมดคำนวณจากไฟล์ของผู้ใช้" ตามด้วยบรรทัด ข้อมูล ณ ...',
+        'ห้ามทำกราฟ ห้ามทำ KPI card'
+      ].join('\n')
+    }
+  ];
+
+  /**
+   * The page's visual system, decided here rather than by the model. Five
+   * parallel writers cannot agree on a palette between themselves, so they are
+   * handed one. It also means the accent follows the dashboard's own theme
+   * instead of whatever hue the model felt like.
+   */
+  // Deep, professional hues only — each one still leaves green/amber/red free
+  // to mean good/warning/bad, which a lighter or warmer accent would muddy.
+  var ACCENTS = ['#2563eb', '#0f766e', '#7c3aed', '#0369a1', '#b45309', '#be123c', '#15803d', '#4338ca'];
+
+  function designTokens(facts) {
+    var accent;
+    if (facts && facts.theme && /^#[0-9a-f]{6}$/i.test(facts.theme.accent)) {
+      accent = facts.theme.accent;
+    } else {
+      // Keyed on the business domain, not on chance: the same kind of data
+      // wears the same colour every time (P5 — no random design choices), and
+      // two different domains do not both come out generic blue.
+      var seed = String((facts && facts.domainNameTH) || '') + '|' +
+                 String((facts && facts.dashboardTitle) || '');
+      var h = 0;
+      for (var i = 0; i < seed.length; i++) h = (h * 31 + seed.charCodeAt(i)) % 100000;
+      accent = ACCENTS[h % ACCENTS.length];
+    }
+    return {
+      accent: accent,
+      css: [
+        ':root{',
+        '  --accent:' + accent + ';',
+        '  --ink:#0f1b2d; --ink-2:#42536b; --ink-3:#7c8ba1;',
+        '  --bg:#eef2f9; --card:#ffffff; --line:#e3eaf6;',
+        '  --good:#12a86a; --warn:#f0a91c; --bad:#e5484d;',
+        '  --r-sm:10px; --r-md:14px; --r-lg:20px;',
+        '  --sh-1:0 1px 2px rgba(16,40,90,.05),0 6px 20px -6px rgba(16,40,90,.10);',
+        '  --sh-2:0 2px 6px rgba(16,40,90,.07),0 18px 40px -14px rgba(16,40,90,.18);',
+        '  --s-1:6px; --s-2:12px; --s-3:20px; --s-4:32px;',
+        '}',
+        '*{box-sizing:border-box}',
+        'body{margin:0;background:',
+        '  radial-gradient(1100px 520px at 12% -8%,color-mix(in srgb,var(--accent) 14%,transparent),transparent 60%),',
+        '  radial-gradient(900px 460px at 88% 0%,color-mix(in srgb,var(--accent) 8%,transparent),transparent 55%),',
+        '  var(--bg);',
+        '  color:var(--ink);font-family:"IBM Plex Sans Thai",Inter,system-ui,-apple-system,"Segoe UI",sans-serif;',
+        '  font-size:14px;line-height:1.55;-webkit-font-smoothing:antialiased}',
+        '.wrap{max-width:1280px;margin:0 auto;padding:var(--s-4) var(--s-3) var(--s-4)}',
+        '.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r-md);',
+        '  box-shadow:var(--sh-1);padding:var(--s-3);overflow:hidden}',
+        '.card-hd{font-size:12px;font-weight:800;letter-spacing:.10em;text-transform:uppercase;',
+        '  color:var(--ink-3);margin:0 0 var(--s-2)}',
+        '.row{display:grid;gap:var(--s-3);margin-bottom:var(--s-3)}',
+        '.kpis{display:grid;gap:var(--s-2);grid-template-columns:repeat(auto-fit,minmax(190px,1fr));margin-bottom:var(--s-3)}',
+        '.hero{grid-template-columns:1.6fr 1fr}',
+        '.split{grid-template-columns:1fr 1fr}',
+        '.num{font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1}',
+        '.big{font-size:30px;font-weight:800;letter-spacing:-.02em}',
+        '.unit{font-size:12px;font-weight:600;color:var(--ink-3);margin-left:4px}',
+        '.muted{color:var(--ink-3);font-size:12px}',
+        '.up{color:var(--good)} .down{color:var(--bad)} .flat{color:var(--ink-3)}',
+        '.pill{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;',
+        '  border-radius:999px;padding:2px 9px}',
+        '.pill.ok{background:#e6f7ef;color:#0b7a4d} .pill.warn{background:#fdf3dd;color:#8a6100}',
+        '.pill.bad{background:#fdeaea;color:#a51f24}',
+        'table{width:100%;border-collapse:collapse;font-size:13px}',
+        'th{position:sticky;top:0;background:var(--card);text-align:left;font-size:11px;',
+        '  letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);',
+        '  padding:8px 10px;border-bottom:1px solid var(--line)}',
+        'td{padding:8px 10px;border-bottom:1px solid var(--line)}',
+        'tbody tr:nth-child(even){background:#fafcff}',
+        'td.n,th.n{text-align:right;font-variant-numeric:tabular-nums}',
+        '.foot{color:var(--ink-3);font-size:12px;text-align:center;padding:var(--s-3) 0 0;',
+        '  border-top:1px solid var(--line);margin-top:var(--s-3)}',
+        '@media(max-width:900px){.hero,.split{grid-template-columns:1fr}}'
+      ].join('\n')
+    };
+  }
+
+  function sectionSystemPrompt(tokens) {
+    return [
+      'You are a senior dashboard architect writing ONE SECTION of a larger Thai-language dashboard page.',
+      'Other sections are being written in parallel by your colleagues against the same stylesheet.',
+      '',
+      'ABSOLUTE RULES — a response breaking any of these is discarded:',
+      '1. Output an HTML FRAGMENT only. No <!DOCTYPE>, no <html>, <head> or <body>.',
+      '   No markdown fences, no commentary. Start with a tag, end with a tag.',
+      '2. NO JavaScript whatsoever. No <script>, no on* attributes, no javascript: URLs.',
+      '3. NO external resources — no <link>, no @import, no web fonts, no remote images,',
+      '   no http:// or https:// anywhere except the SVG namespace on <svg> elements.',
+      '4. Draw every chart as INLINE SVG computed by hand from the numbers given.',
+      '5. Use ONLY numbers present in the payload (including dataProfile.columns[].stats).',
+      '   Never invent, extrapolate or derive a figure that was not given. A missing',
+      '   fact means the element is left out, never filled in.',
+      '6. Write ONLY the section you were asked for. Anything belonging to another',
+      '   section is a duplicate on the finished page.',
+      '',
+      'THE STYLESHEET IS ALREADY WRITTEN AND LOADED. Use its classes and variables:',
+      '  layout   .wrap .row .hero .split .kpis .card .card-hd',
+      '  numbers  .num .big .unit .muted .up .down .flat',
+      '  state    .pill.ok .pill.warn .pill.bad',
+      '  tokens   var(--accent) --ink --ink-2 --ink-3 --card --line --good --warn --bad',
+      '           --r-sm/--r-md/--r-lg  --sh-1/--sh-2  --s-1..--s-4',
+      'The accent hue for this page is ' + tokens.accent + ' — build chart series as tints of it.',
+      'You may add ONE <style> block for rules unique to your section, but every',
+      'selector in it MUST be prefixed with your section id class so it cannot',
+      'collide with a colleague\'s. Never redefine :root, body, table, th or td.',
+      '',
+      'CONTEXT RULES (numbers without context get misread):',
+      '- Every number carries its unit. No unit supplied = label the aggregation',
+      '  instead (รวม / เฉลี่ย / จำนวน).',
+      '- Every delta names its baseline visibly beside the value. No baseline in the',
+      '  facts = no delta shown at all.',
+      '- Colour by business meaning, never by arithmetic sign: for cost / downtime /',
+      '  defect / waste metrics a DECREASE is good. Two-sided metrics (pH-like) get',
+      '  no good/bad arrow unless a target is supplied.',
+      '- Never signal with colour alone — pair it with an arrow or text.',
+      '',
+      'CHART RULES:',
+      '- One measure per axis. NEVER a dual-axis chart.',
+      '- Part-to-whole with 4+ categories: horizontal bar ranked largest-first.',
+      '  Donut only for 2-3 parts, with the total in the centre. Never negatives in a donut.',
+      '- Bars sorted descending unless the category order is chronological.',
+      '- Rounded bar caps, gradient fills under area/line, gridlines at ~8% opacity,',
+      '  direct value labels, legend only when 2+ series.',
+      '',
+      'QUALITY BAR — this is a flagship product surface. Spend the effort: real depth',
+      'on cards, a deliberate type hierarchy (oversized bold values, small tracked',
+      'labels, quiet secondary text), generous whitespace, nothing cramped and nothing',
+      'floating alone in a big empty card. Nothing may overflow horizontally at 1280px.',
+      'Finish every element you start and close every tag.'
+    ].join('\n');
+  }
+
+  function sectionUserPrompt(section, facts) {
+    return [
+      'สร้าง "' + section.label + '" ของหน้า Dashboard นี้',
+      '',
+      'ขอบเขตของส่วนนี้:',
+      section.brief,
+      '',
+      'ข้อมูลทั้งหมดที่ใช้ได้ (ใช้เฉพาะตัวเลขในนี้เท่านั้น):',
+      JSON.stringify(facts, null, 2),
+      '',
+      'วิธีอ่าน payload:',
+      '- dataProfile = โครงสร้างจริงของตารางที่ผู้ใช้อัปโหลด ทุกคอลัมน์ ชนิดข้อมูล',
+      '  ค่าสถิติที่คำนวณแล้ว ช่วงวันที่ และตัวอย่างค่าหมวดหมู่',
+      '- kpis / trend / donut / ranked / statusRows / alerts = ข้อเสนอจากระบบ',
+      '  ใช้ได้เลยถ้าเหมาะ ถ้าเห็นจาก dataProfile ว่ามีอย่างอื่นสำคัญกว่าให้เลือกอย่างนั้น',
+      '- คอลัมน์ที่ likelyIdentifier = true คือรหัส/เลขที่เอกสาร ห้ามเอามารวมเป็น KPI',
+      '- คอลัมน์ที่มี note: ชื่อในไฟล์ไม่น่าเชื่อถือ ให้ตั้งชื่อที่สื่อความหมายเองจากค่าที่เห็น',
+      '  ห้ามแสดงชื่ออย่าง "column_12" บนหน้าจอเด็ดขาด',
+      '',
+      'ตอบกลับเป็น HTML fragment ของส่วนนี้เท่านั้น ไม่มีคำอธิบายใดๆ'
+    ].join('\n');
+  }
+
+  /** One section = one Edge Function invocation, so none of them runs long. */
+  function requestSection(cfg, section, facts, tokens) {
+    var body = {
+      action: 'dashboard-section',
+      runId: 'ai-sec-' + section.id + '-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6),
+      payload: {
+        model: cfg.model,
+        system: sectionSystemPrompt(tokens),
+        prompt: sectionUserPrompt(section, facts),
+        facts: facts,
+        maxTokens: SECTION_TOKENS
+      }
+    };
+    var controller = (typeof AbortController !== 'undefined') ? new AbortController() : null;
+    var timer = controller ? setTimeout(function () { controller.abort(); }, TIMEOUT) : null;
+
+    return fetch(cfg.endpoint, {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        'Authorization': 'Bearer ' + cfg.apiKey,
+        'apikey': cfg.apiKey
+      },
+      body: JSON.stringify(body),
+      signal: controller ? controller.signal : undefined
+    })
+      .then(function (resp) {
+        return resp.text().then(function (raw) {
+          var data = null;
+          try { data = JSON.parse(raw); } catch (e) {}
+          if (!resp.ok) throw new Error(extractError(data, resp.status));
+          var r = (data && data.result) || {};
+          return { id: section.id, html: stripFences(typeof r === 'string' ? r : r.html) };
+        });
+      })
+      .catch(function (err) {
+        return { id: section.id, html: '', error: err && err.message ? err.message : String(err) };
+      })
+      .finally(function () { if (timer) clearTimeout(timer); });
+  }
+
+  /** Fragment rules are the inverse of a document's: it must NOT be one. */
+  function isFragmentSafe(html) {
+    if (typeof html !== 'string' || html.length < 80) return { ok: false, why: 'สั้นผิดปกติ' };
+    if (/<!doctype|<html[\s>]|<body[\s>]|<head[\s>]/i.test(html)) {
+      return { ok: false, why: 'ส่งเอกสารเต็มมาแทนที่จะเป็นชิ้นส่วน' };
+    }
+    for (var i = 0; i < UNSAFE.length; i++) {
+      if (UNSAFE[i].re.test(html)) return { ok: false, why: UNSAFE[i].why };
+    }
+    return { ok: true };
+  }
+
+  function generateSectioned(cfg, facts, onProgress) {
+    var tokens = designTokens(facts);
+    var done = 0;
+    var report = function () {
+      if (typeof onProgress === 'function') onProgress(done, SECTIONS.length);
+    };
+
+    return Promise.all(SECTIONS.map(function (s) {
+      return requestSection(cfg, s, facts, tokens).then(function (r) {
+        done++; report();
+        return r;
+      });
+    })).then(function (parts) {
+      var kept = [];
+      var dropped = [];
+      parts.forEach(function (p) {
+        // A section with nothing to say answers <!--skip-->, which is a correct
+        // outcome rather than a failure — the insight panel is told to do
+        // exactly that when no alerts exist. Not the same as an error.
+        if (!p.html || /^<!--\s*skip\s*-->$/i.test(p.html.trim())) {
+          if (p.error) dropped.push(p.id + ': ' + p.error);
+          return;
+        }
+        var safe = isFragmentSafe(p.html);
+        if (!safe.ok) { dropped.push(p.id + ': ' + safe.why); return; }
+        kept.push(p);
+      });
+
+      // The header carries the title and the KPI row. Without it the rest is a
+      // pile of charts with nothing naming what they are, so that is a failed
+      // page rather than a thin one — fall back to the deterministic render.
+      var hasHeader = kept.some(function (p) { return p.id === 'header'; });
+      if (!hasHeader || kept.length < 2) {
+        return {
+          ok: false,
+          reason: 'AI สร้างหน้าไม่ครบ (ได้ ' + kept.length + '/' + SECTIONS.length + ' ส่วน)' +
+                  (dropped.length ? ' — ' + explainError(cfg, dropped[0]) : '')
+        };
+      }
+
+      var html = [
+        '<!DOCTYPE html>',
+        '<html lang="th"><head><meta charset="utf-8">',
+        '<meta name="viewport" content="width=device-width,initial-scale=1">',
+        '<title>Dashboard — iDash</title>',
+        '<style>\n' + tokens.css + '\n</style>',
+        '</head><body><div class="wrap">',
+        kept.map(function (p) { return p.html; }).join('\n'),
+        '</div></body></html>'
+      ].join('\n');
+
+      return {
+        ok: true,
+        html: html,
+        providerId: cfg.providerId,
+        label: cfg.label,
+        model: cfg.model,
+        numbersVerified: citesRealNumbers(html, facts),
+        sections: kept.length,
+        sectionsDropped: dropped
+      };
+    });
+  }
+
   /* ── Request adapters ───────────────────────────────────────────────── */
 
   function buildRequest(cfg, facts) {
@@ -521,9 +877,10 @@
     // Nothing about the user's keys is wrong here, so say so plainly rather
     // than sending them back to re-check credentials that are already fine.
     if (/\b546\b|not having enough compute|compute resources|WORKER_LIMIT|resource limit/i.test(m)) {
-      return 'Supabase Edge Function ใช้ทรัพยากรเกินโควตาระหว่างสร้างหน้า (ไม่ใช่ปัญหาของ key) — ' +
-             'ให้ deploy gateway ตัวล่าสุด (ลด max_tokens เหลือ 16000) หรือเลือกโมเดลที่เบากว่า ' +
-             'เช่น Claude Sonnet 5 / Haiku 4.5 · หรือใช้โหมด "ต่อ AI โดยตรง" ซึ่งไม่ผ่าน Edge Function' + rawHint(m);
+      return 'Supabase Edge Function ถูกตัดกลางคัน (ไม่ใช่ปัญหาของ key) — ' +
+             'gateway ที่ deploy อยู่เป็นเวอร์ชันเก่าที่เขียนทั้งหน้าในครั้งเดียว ' +
+             'ให้วางโค้ดจาก _dev/supabase/functions/llm-gateway/index.ts ทับแล้ว Deploy ใหม่ ' +
+             '(เวอร์ชันใหม่แบ่งหน้าเป็นหลายส่วน ทำให้แต่ละครั้งสั้นพอที่จะไม่โดนตัด)' + rawHint(m);
     }
     if (viaGateway && /504|timed out|timeout/i.test(m)) {
       return 'Edge Function รอ Anthropic นานเกินกำหนด — ลองโมเดลที่เร็วกว่า (Sonnet 5 / Haiku 4.5) ' +
@@ -534,7 +891,14 @@
              'ตรวจว่าชื่อ Function ท้าย URL ตรงกับที่ deploy ไว้จริง และโค้ด deploy สำเร็จ' + rawHint(m);
     }
     if (viaGateway && /unsupported action|payload\.prompt/i.test(m)) {
-      return 'Edge Function ที่ URL นี้ไม่ใช่ llm-gateway ของ iDash (มันไม่รู้จักคำสั่ง dashboard-compose) — ' +
+      return 'Edge Function ที่ URL นี้ไม่รู้จักคำสั่ง dashboard-section — เป็น gateway เวอร์ชันเก่า ' +
+             'วางโค้ดจาก _dev/supabase/functions/llm-gateway/index.ts ทับแล้ว Deploy ใหม่' + rawHint(m);
+    }
+    // The old gateway validated every reply as a whole document, so a section
+    // fragment fails its check. Naming the cause beats leaving the user to
+    // wonder what the model did wrong — it did nothing wrong.
+    if (viaGateway && /not a complete HTML document/i.test(m)) {
+      return 'Edge Function เป็นเวอร์ชันเก่าที่ยอมรับเฉพาะหน้าเต็ม จึงปฏิเสธชิ้นส่วนที่ระบบส่งไป — ' +
              'วางโค้ดจาก _dev/supabase/functions/llm-gateway/index.ts ทับแล้ว Deploy ใหม่' + rawHint(m);
     }
     return m;
@@ -554,11 +918,20 @@
     return '  [ข้อความจากปลายทาง: ' + s + ']';
   }
 
-  function generateDashboard(facts) {
+  function generateDashboard(facts, onProgress) {
     var problem = configProblem();
     if (problem) return Promise.resolve({ ok: false, reason: problem });
 
     var cfg = currentConfig();
+    // Gateway mode writes the page in parallel sections; see generateSectioned
+    // for why. Direct mode has no worker between the browser and Anthropic, so
+    // it keeps the single 32000-token call.
+    if (cfg.shape === 'supabase') {
+      return generateSectioned(cfg, facts, onProgress)
+        .catch(function (err) {
+          return { ok: false, reason: explainError(cfg, err && err.message) || 'เรียก API ไม่สำเร็จ' };
+        });
+    }
     var req = buildRequest(cfg, facts);
     var controller = (typeof AbortController !== 'undefined') ? new AbortController() : null;
     var timedOut = false;
