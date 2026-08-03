@@ -6,6 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initAiProgressModal();
   initBuildModeModal();
   initAiSetupModal();
+  initUnknownChoiceModal();
   initWidgetPickModal();
 });
 
@@ -274,12 +275,64 @@ function pickFileThenRun(mode) {
       return; // user cancelled the sheet picker — quietly back out
     }
     if (file instanceof File) dataset.sourceFile = file;
-    // "Pick your own widgets" branches to the checklist popup instead of the
-    // auto-design pipeline; everything else runs the pipeline as before.
-    if (mode === 'pick') openWidgetPickModal(dataset);
+    if (mode === 'template') runTemplateRoute(dataset);
     else runAutopilotPipeline(dataset, null, { mode: mode });
   });
   input.click();
+}
+
+/**
+ * Template route, step 2: does the registry know this file? A matched file
+ * goes straight into the pipeline as before — the curated template IS the
+ * answer, so there is nothing to ask. Only an unknown file pauses on the
+ * chooser: iDash designs the page, or the user ticks the widgets themselves.
+ */
+function runTemplateRoute(dataset) {
+  var known = false;
+  try {
+    known = !!(window.iDashKnownDatasets &&
+               window.iDashKnownDatasets.match(dataset.columns, dataset.sheetNames));
+  } catch (e) { known = false; }
+  if (known) {
+    runAutopilotPipeline(dataset, null, { mode: 'template' });
+  } else {
+    openUnknownChoiceModal(dataset);
+  }
+}
+
+/* ── Unknown-dataset chooser (template route) ───────────────────────────── */
+
+let unknownChoiceDataset = null;
+
+function openUnknownChoiceModal(dataset) {
+  const modal = document.getElementById('unknownChoiceModal');
+  if (!modal) { runAutopilotPipeline(dataset, null, { mode: 'template' }); return; }
+  unknownChoiceDataset = dataset;
+  const sub = document.getElementById('ucSub');
+  if (sub && dataset.filename) {
+    sub.textContent = dataset.filename + ' — เลือกได้ว่าจะให้ iDash ออกแบบให้ หรือเลือก Widget เอง';
+  }
+  modal.hidden = false;
+}
+
+function initUnknownChoiceModal() {
+  const modal = document.getElementById('unknownChoiceModal');
+  if (!modal) return;
+  const close = () => { modal.hidden = true; unknownChoiceDataset = null; };
+
+  modal.querySelectorAll('[data-unknown-choice]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const dataset = unknownChoiceDataset;
+      unknownChoiceDataset = null;
+      modal.hidden = true;
+      if (!dataset) return;
+      if (btn.dataset.unknownChoice === 'pick') openWidgetPickModal(dataset);
+      else runAutopilotPipeline(dataset, null, { mode: 'template' });
+    });
+  });
+
+  document.getElementById('ucClose').addEventListener('click', close);
+  modal.addEventListener('click', (e) => { if (e.target === modal) close(); });
 }
 
 /* ── Manual widget picker (build-mode "pick") ───────────────────────────── */
@@ -463,8 +516,11 @@ function initBuildModeModal() {
 
       // No file yet (the usual path): settle the AI provider first if this
       // route needs one, then ask for the file.
+      // Dropped-file path included: template mode always passes through the
+      // registry check so an unknown file gets the design-vs-pick chooser.
       const start = dataset
-        ? () => runAutopilotPipeline(dataset, null, { mode: mode })
+        ? () => (mode === 'template' ? runTemplateRoute(dataset)
+                                     : runAutopilotPipeline(dataset, null, { mode: mode }))
         : () => pickFileThenRun(mode);
 
       // AI Autopilot always re-opens the setup modal, even when a provider is
