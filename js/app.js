@@ -1025,7 +1025,142 @@ function bufToBase64(buf) {
  * firing `change` runs the same listener a manual pick would, which is closer
  * to the real path than reaching for internals would be anyway.
  */
-async function prepareTemplateFromFile(entry, dataset) {
+/**
+ * Insight panel appended to curated dashboards that don't compute one.
+ *
+ * Every upload already produces an insight story — the pipeline runs module ⑨
+ * before any rendering decision — but a curated template owns its whole page,
+ * so that analysis was computed and then thrown away for 8 of the 46 entries.
+ * The 38 sugar dashboards build their own (they have #finds), so they are left
+ * alone rather than given a second one.
+ *
+ * Layered the way the analysis actually reasons, and kept in that order:
+ *   ข้อเท็จจริง → ข้อค้นพบ → สิ่งที่ควรทำ → ความเสี่ยง
+ * A fact ("อ้อยเข้าหีบ = 1.8M ตัน") is not a finding ("แนวโน้มลดลง 12%"), and a
+ * finding is not an instruction ("ตรวจสอบสาเหตุ") — collapsing them is what
+ * makes a dashboard sound confident and mean nothing. Every line carries the
+ * F-id it came from, so any claim can be traced back to the number behind it.
+ */
+function buildInsightPanelHtml(insightStory, domainNameTH) {
+  if (!insightStory || !insightStory.narration) return '';
+  var n = insightStory.narration;
+  var facts = insightStory.facts || [];
+  var esc = function (s) {
+    return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c];
+    });
+  };
+
+  // Curated dashboards are handed the whole workbook and pick their own sheet;
+  // our profiler picks its own, and when that sheet has blank header cells the
+  // columns come back as "column_10". A fact reading "ผลรวม — column_12 =
+  // 205.3K" names nothing the reader can act on, so anything still carrying a
+  // placeholder column name is dropped rather than shown.
+  var isPlaceholder = function (s) { return /column_\d+/i.test(String(s == null ? '' : s)); };
+  facts = facts.filter(function (f) { return !isPlaceholder(f.text); });
+
+  var insights = (n.topInsights || []).filter(function (it) { return !isPlaceholder(it.insight); });
+  var recs = (n.recommendations || []).filter(function (r) {
+    return !isPlaceholder(r.action) && !isPlaceholder(r.why);
+  });
+  var risks = (n.risks || []).filter(function (r) { return !isPlaceholder(r.risk); });
+
+  // "ชุดข้อมูลมี 51 แถว 22 คอลัมน์" on its own is a caption, not analysis. The
+  // panel earns its place only when something beyond the row count survives.
+  var substantive = facts.length > 1 || insights.length || recs.length || risks.length;
+  if (!substantive) return '';
+
+  var sevLabel = { high: 'สูง', medium: 'กลาง', low: 'ต่ำ' };
+  var rows = '';
+
+  if (n.executiveSummary && !isPlaceholder(n.executiveSummary)) {
+    rows += '<div class="idi-sum">' + esc(n.executiveSummary) + '</div>';
+  }
+
+  // Facts first: the numbers everything below is derived from.
+  if (facts.length) {
+    rows += '<div class="idi-h">ข้อเท็จจริงจากข้อมูล</div><ul class="idi-facts">';
+    facts.slice(0, 6).forEach(function (f) {
+      rows += '<li><span class="idi-fid">' + esc(f.id) + '</span>' + esc(f.text) + '</li>';
+    });
+    rows += '</ul>';
+  }
+
+  if (insights.length) {
+    rows += '<div class="idi-h">ข้อค้นพบ</div><ul class="idi-list">';
+    insights.forEach(function (it) {
+      var sev = it.severity || 'low';
+      rows += '<li><span class="idi-sev idi-' + esc(sev) + '">' + esc(sevLabel[sev] || sev) + '</span>' +
+              esc(it.insight) + '</li>';
+    });
+    rows += '</ul>';
+  }
+
+  if (recs.length) {
+    rows += '<div class="idi-h">สิ่งที่ควรทำ</div><ul class="idi-list">';
+    recs.forEach(function (r) {
+      rows += '<li><b>' + esc(r.action) + '</b>' +
+              (r.why ? '<div class="idi-why">เพราะ ' + esc(r.why) + '</div>' : '') + '</li>';
+    });
+    rows += '</ul>';
+  }
+
+  if (risks.length) {
+    rows += '<div class="idi-h">ความเสี่ยงที่ต้องเฝ้า</div><ul class="idi-list">';
+    risks.forEach(function (r) { rows += '<li>' + esc(r.risk) + '</li>'; });
+    rows += '</ul>';
+  }
+
+  var src = n.source === 'llm'
+    ? 'เรียบเรียงโดย AI จากตัวเลขที่คำนวณแล้ว'
+    : 'คำนวณจากข้อมูลจริง 100%';
+
+  // Self-contained styles: this is appended into templates with unrelated CSS,
+  // so every rule is prefixed and nothing inherits from the host page.
+  return '\n<style>\n' +
+    '.idi-wrap{font-family:system-ui,-apple-system,"Segoe UI","Noto Sans Thai",sans-serif;' +
+    'max-width:1400px;margin:22px auto 30px;padding:0 18px;box-sizing:border-box}\n' +
+    '.idi-card{background:#fff;border:1px solid #e4e9f0;border-radius:14px;padding:20px 24px;' +
+    'box-shadow:0 1px 3px rgba(15,27,45,.06);position:relative;overflow:hidden}\n' +
+    '.idi-card:before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;' +
+    'background:linear-gradient(180deg,#0f766e,#0891b2)}\n' +
+    '.idi-title{font-size:15px;font-weight:800;color:#0f1b2d;margin:0 0 2px}\n' +
+    '.idi-src{font-size:11px;color:#51617a;margin-bottom:14px}\n' +
+    '.idi-sum{font-size:13.5px;line-height:1.7;color:#0f1b2d;background:#f6f9fc;' +
+    'border-radius:9px;padding:11px 14px;margin-bottom:14px}\n' +
+    '.idi-h{font-size:11px;font-weight:800;letter-spacing:1.4px;text-transform:uppercase;' +
+    'color:#51617a;margin:14px 0 7px}\n' +
+    '.idi-list,.idi-facts{margin:0;padding-left:18px}\n' +
+    '.idi-list li,.idi-facts li{font-size:13px;line-height:1.75;color:#0f1b2d;margin-bottom:5px}\n' +
+    '.idi-facts{list-style:none;padding-left:0}\n' +
+    '.idi-fid{display:inline-block;min-width:26px;font-size:10px;font-weight:800;color:#0891b2;' +
+    'background:#e6f6f8;border-radius:5px;padding:1px 5px;margin-right:7px;text-align:center}\n' +
+    '.idi-sev{display:inline-block;font-size:10px;font-weight:800;border-radius:20px;' +
+    'padding:1px 8px;margin-right:7px}\n' +
+    '.idi-high{background:#fde8e8;color:#c81e1e}\n' +
+    '.idi-medium{background:#fdf6e3;color:#b45309}\n' +
+    '.idi-low{background:#e6f6ec;color:#0e7a4e}\n' +
+    '.idi-why{font-size:12px;color:#51617a;margin-top:2px}\n' +
+    '@media print{.idi-card{break-inside:avoid}}\n' +
+    '</style>\n' +
+    '<div class="idi-wrap"><div class="idi-card">' +
+    '<div class="idi-title">🔎 วิเคราะห์เชิงลึก' + (domainNameTH ? ' — ' + esc(domainNameTH) : '') + '</div>' +
+    '<div class="idi-src">' + esc(src) + '</div>' + rows +
+    '</div></div>\n';
+}
+
+/**
+ * Does this template already compute its own insight section?
+ * Two conventions exist in the curated set: the 38 sugar dashboards fill a
+ * #finds list, and soil_quality builds #icards from its own parsed sheet.
+ * Either one means a second panel would repeat the same reading of the same
+ * data, so we stay out.
+ */
+function templateHasOwnInsights(html) {
+  return /id=["']finds["']|id=["']icards["']/.test(html);
+}
+
+async function prepareTemplateFromFile(entry, dataset, insightStory, domainNameTH) {
   var file = dataset.sourceFile;
   if (!file) throw new Error('ไม่พบไฟล์ต้นฉบับสำหรับ template นี้');
 
@@ -1070,15 +1205,18 @@ async function prepareTemplateFromFile(entry, dataset) {
 
   var headIdx = html.indexOf('</head>');
   if (headIdx >= 0) html = html.substring(0, headIdx) + hideCSS + '\n' + html.substring(headIdx);
+  // Insight panel goes in before the boot script so it sits at the end of the
+  // page content, under the dashboard the template drew.
+  var panel = templateHasOwnInsights(html) ? '' : buildInsightPanelHtml(insightStory, domainNameTH);
   var bodyIdx = html.lastIndexOf('</body>');
-  if (bodyIdx >= 0) html = html.substring(0, bodyIdx) + boot + '\n' + html.substring(bodyIdx);
-  else html += boot;
+  if (bodyIdx >= 0) html = html.substring(0, bodyIdx) + panel + boot + '\n' + html.substring(bodyIdx);
+  else html += panel + boot;
 
   html = await inlineVendorLibs(html);
   return { html: html, rowCount: (dataset.data || []).length };
 }
 
-async function prepareTemplateHtml(entry, dataset) {
+async function prepareTemplateHtml(entry, dataset, insightStory, domainNameTH) {
   var html = await loadTemplateHtml(entry);
 
   var mapping = entry.columnMapping;
@@ -1153,9 +1291,10 @@ async function prepareTemplateHtml(entry, dataset) {
   // HTML-export code does), and a naive replace() would splice mid-script.
   var headIdx = html.indexOf('</head>');
   if (headIdx >= 0) html = html.substring(0, headIdx) + hideCSS + '\n' + html.substring(headIdx);
+  var panel = templateHasOwnInsights(html) ? '' : buildInsightPanelHtml(insightStory, domainNameTH);
   var bodyIdx = html.lastIndexOf('</body>');
-  if (bodyIdx >= 0) html = html.substring(0, bodyIdx) + inject + '\n' + html.substring(bodyIdx);
-  else html += inject;
+  if (bodyIdx >= 0) html = html.substring(0, bodyIdx) + panel + inject + '\n' + html.substring(bodyIdx);
+  else html += panel + inject;
 
   // Inline vendor libs LAST so their source can never receive the injections.
   html = await inlineVendorLibs(html);
@@ -1424,8 +1563,8 @@ async function runAutopilotPipeline(fileOrDataset, userModuleId, opts) {
     }
     else if (templateEntry) {
       const tpl = (templateEntry.inject && templateEntry.inject.mode === 'file')
-        ? await prepareTemplateFromFile(templateEntry, dataset)
-        : await prepareTemplateHtml(templateEntry, dataset);
+        ? await prepareTemplateFromFile(templateEntry, dataset, insightStory, winnerPack.identity.nameTH)
+        : await prepareTemplateHtml(templateEntry, dataset, insightStory, winnerPack.identity.nameTH);
       try {
         sessionStorage.setItem('idash.interactiveHtml', tpl.html);
         sessionStorage.setItem('idash.renderMode', 'interactive');

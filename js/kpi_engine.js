@@ -287,10 +287,13 @@
   // Columns whose numbers are identifiers, not quantities — summing them
   // produces impressive-looking garbage ("ผลรวม — Order ID = 48.5M").
   var ID_NAME_RE = /(^|[\s_.-])(id|code|no\.?|number|รหัส|เลขที่|เบอร์|phone|โทร|zip|postcode|ปี|year|barcode|sku|ref)([\s_.-]|$)/i;
+  // Document series named in full ("Purchase Requisition", "Purchase order",
+  // "Invoice") carry no id-word at all, so the pattern above lets them through.
+  var DOC_NAME_RE = /(requisition|purchase\s*order|invoice|receipt|voucher|ใบสั่ง|ใบขอ|ใบแจ้ง|ใบเสร็จ)/i;
 
   /** True when a numeric column is identifier/label-like rather than a measure. */
   function isIdentifierLike(dataset, col) {
-    if (ID_NAME_RE.test(col.trim())) return true;
+    if (ID_NAME_RE.test(col.trim()) || DOC_NAME_RE.test(col.trim())) return true;
     // Thai compounds attach with no separator ("รหัสบัญชี", "เลขที่ใบสั่งซื้อ")
     // so the word-boundary regex above misses them — a Thai id-word PREFIX
     // is decisive on its own.
@@ -324,8 +327,21 @@
       if (medianGap <= 2) return true;
     }
 
-    // Year-like values (ค.ศ. 1900-2100 / พ.ศ. 2400-2700) with tiny spread.
     var min = Math.min.apply(null, nums), max = Math.max.apply(null, nums);
+
+    // Document numbers (PR 110250763, PO 108040332, invoice numbers) survive
+    // the running-number test above because line items repeat the same number,
+    // so the distinct ratio never reaches 0.95. What gives them away is shape:
+    // a whole issuing series sits inside a narrow band at a huge magnitude,
+    // where a real measure spans orders of magnitude. Without this, summing
+    // 494 PR numbers yields "ผลรวม — Purchase Requisition = 385113.3M".
+    if (allIntegers && nums.length >= 20) {
+      var byValue = nums.slice().sort(function (a, b) { return a - b; });
+      var median = byValue[Math.floor(byValue.length / 2)];
+      if (median >= 100000 && (max - min) / median < 0.05) return true;
+    }
+
+    // Year-like values (ค.ศ. 1900-2100 / พ.ศ. 2400-2700) with tiny spread.
     var yearish = (min >= 1900 && max <= 2100) || (min >= 2400 && max <= 2700);
     if (yearish && allIntegers && (max - min) <= 100) return true;
 

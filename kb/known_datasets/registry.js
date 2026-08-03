@@ -220,7 +220,10 @@ window.iDashKnownDatasetEntries = [
     // data is all there underneath — verified 188 rows and 12 charts — the
     // user just lands on an upload prompt. An ID selector with !important
     // settles it without editing the template's CSS.
-    inject: { mode: 'file', input: '#fileInput', hide: ['#uploadOverlay'] }
+    // #reUpload ("อัปโหลดไฟล์ใหม่") goes too: iDash supplied the file, so a
+    // control that reopens the template's own upload screen only offers a way
+    // to break out of the paired view.
+    inject: { mode: 'file', input: '#fileInput', hide: ['#uploadOverlay', '#reUpload'] }
   },
 
   // ══════════════════════════════════════════════════════════════════════
