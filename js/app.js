@@ -6,6 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initAiProgressModal();
   initBuildModeModal();
   initAiSetupModal();
+  initWidgetPickModal();
 });
 
 function initModuleSelector() {
@@ -273,9 +274,142 @@ function pickFileThenRun(mode) {
       return; // user cancelled the sheet picker — quietly back out
     }
     if (file instanceof File) dataset.sourceFile = file;
-    runAutopilotPipeline(dataset, null, { mode: mode });
+    // "Pick your own widgets" branches to the checklist popup instead of the
+    // auto-design pipeline; everything else runs the pipeline as before.
+    if (mode === 'pick') openWidgetPickModal(dataset);
+    else runAutopilotPipeline(dataset, null, { mode: mode });
   });
   input.click();
+}
+
+/* ── Manual widget picker (build-mode "pick") ───────────────────────────── */
+
+let widgetPickDataset = null;
+
+function openWidgetPickModal(dataset) {
+  const modal = document.getElementById('widgetPickModal');
+  if (!modal || !window.iDashManualWidgets) { runAutopilotPipeline(dataset, null, { mode: 'template' }); return; }
+  widgetPickDataset = dataset;
+  const caps = window.iDashManualWidgets.capabilities(dataset);
+  const list = document.getElementById('wpList');
+  const check = '<span class="wp-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>';
+
+  list.innerHTML = window.iDashManualWidgets.CATALOG.map(w => {
+    const cap = caps[w.id] || { supported: false, recommended: false, reason: '' };
+    const cls = 'wp-item' + (!cap.supported ? ' is-off' : (cap.recommended ? ' is-on' : ''));
+    const desc = cap.supported ? w.desc : ('ข้อมูลนี้ยังไม่รองรับ — ' + (cap.reason || 'คอลัมน์ไม่พอ'));
+    return '<div class="' + cls + '" data-widget="' + w.id + '" data-supported="' + (cap.supported ? '1' : '0') + '">' +
+      check +
+      '<span class="wp-icn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' + w.icon + '</svg></span>' +
+      '<span class="wp-body"><span class="wp-name">' + escapeHtml(w.label) + '</span>' +
+      '<span class="wp-desc">' + escapeHtml(desc) + '</span></span></div>';
+  }).join('');
+
+  const fname = dataset.filename ? (' · ' + dataset.filename) : '';
+  document.getElementById('wpSub').textContent =
+    'ติ๊กกราฟที่อยากได้ ระบบจะผูกกับข้อมูลจริงและสร้างแดชบอร์ดธีมสว่างให้ทันที' + fname;
+  syncWidgetPickBuildBtn();
+  modal.hidden = false;
+}
+
+function syncWidgetPickBuildBtn() {
+  const any = document.querySelectorAll('#wpList .wp-item.is-on').length > 0;
+  document.getElementById('wpBuild').disabled = !any;
+}
+
+function initWidgetPickModal() {
+  const modal = document.getElementById('widgetPickModal');
+  if (!modal) return;
+  const close = () => { modal.hidden = true; widgetPickDataset = null; };
+
+  document.getElementById('wpList').addEventListener('click', (e) => {
+    const item = e.target.closest('.wp-item');
+    if (!item || item.dataset.supported !== '1') return; // unsupported = locked
+    item.classList.toggle('is-on');
+    syncWidgetPickBuildBtn();
+  });
+
+  document.getElementById('wpClose').addEventListener('click', close);
+  document.getElementById('wpCancel').addEventListener('click', close);
+  modal.addEventListener('click', (e) => { if (e.target === modal) close(); });
+
+  document.getElementById('wpBuild').addEventListener('click', () => {
+    const ids = [...document.querySelectorAll('#wpList .wp-item.is-on')].map(el => el.dataset.widget);
+    if (!ids.length || !widgetPickDataset) return;
+    const dataset = widgetPickDataset;
+    modal.hidden = true;
+    widgetPickDataset = null;
+    runManualPipeline(dataset, ids);
+  });
+}
+
+/**
+ * Build a finished dashboard from the widgets the user ticked. Reuses the same
+ * interactive generator as every other route — the ticked widgets become a
+ * blueprint it already knows how to render — so there is one renderer, one set
+ * of no-fabrication guarantees, and the output lands on infographic.html like
+ * everything else. Light theme by directive.
+ */
+async function runManualPipeline(dataset, widgetIds) {
+  openAiProgressModal('template');
+  try {
+    setAiStepStatus('upload', 'done');
+    setAiStepStatus('understand', 'done');
+    setAiStepStatus('analyze', 'active');
+    await ensureEchartsSource();
+
+    const blueprint = window.iDashManualWidgets.buildBlueprint(dataset, widgetIds);
+    // A light theme, always — the manual route is explicitly light-only.
+    const lightTheme = { id: 'ocean_blue' };
+    setAiStepStatus('analyze', 'done');
+    setAiStepStatus('build', 'active');
+    setAiProgress(70);
+
+    const meta = {
+      filename: dataset.filename,
+      datasetTitle: dataset.datasetName || null,
+      domainNameTH: 'เลือก Widget เอง',
+      theme: lightTheme
+    };
+
+    const ROW_CAPS = [5000, 1500, 500, 150];
+    let stored = false;
+    for (let i = 0; i < ROW_CAPS.length; i++) {
+      const gen = window.iDashInteractiveDashboard.generate(
+        {}, meta, lightTheme, dataset, { maxRows: ROW_CAPS[i], blueprint: blueprint });
+      try {
+        sessionStorage.setItem('idash.interactiveHtml', gen.html);
+        sessionStorage.setItem('idash.renderMode', 'interactive');
+        sessionStorage.removeItem('idash.htmlSource'); // not AI — no sandbox, no AI badge
+        stored = true;
+        break;
+      } catch (e) {
+        if (i === ROW_CAPS.length - 1) throw new Error('ไฟล์มีข้อมูลมากเกินกว่าที่เบราว์เซอร์จะเก็บได้ — ลองไฟล์ที่มีจำนวนแถวน้อยลง');
+      }
+    }
+    if (!stored) throw new Error('สร้างแดชบอร์ดไม่สำเร็จ');
+
+    sessionStorage.setItem('idash.dashboardMeta', JSON.stringify({
+      filename: dataset.filename,
+      datasetTitle: dataset.datasetName || null,
+      domainNameTH: 'เลือก Widget เอง',
+      theme: lightTheme,
+      manualPick: true,
+      widgets: widgetIds,
+      unknownDataset: true,
+      llmMode: 'offline'
+    }));
+    try {
+      sessionStorage.setItem('idash.dashboardDataset', JSON.stringify(dataset));
+    } catch (e) { sessionStorage.removeItem('idash.dashboardDataset'); }
+
+    setAiStepStatus('build', 'done');
+    setAiProgress(100);
+    setTimeout(() => { window.location.href = 'infographic.html'; }, 400);
+  } catch (err) {
+    const errorEl = document.getElementById('aiProgressError');
+    if (errorEl) { errorEl.textContent = 'สร้างไม่สำเร็จ: ' + (err.message || err); errorEl.hidden = false; }
+  }
 }
 
 /* ── Build-mode chooser ─────────────────────────────────────────────────── */

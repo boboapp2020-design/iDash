@@ -598,6 +598,40 @@ a.home-quick:hover .chev { color: var(--acc); }
 .bm-opt-icon svg { width: 22px; height: 22px; }
 .bm-opt-icon.tpl { background: #eef4ff; color: #2563eb; }
 .bm-opt-icon.ai  { background: #f5eeff; color: #7c3aed; }
+.bm-opt-icon.pick { background: #e9f9f1; color: #0f9d63; }
+
+/* ── Manual widget picker ── */
+.wp-card { max-width: 560px; }
+.wp-list { display: grid; gap: 8px; margin: 4px 0 12px; max-height: 46vh; overflow-y: auto; padding-right: 2px; }
+.wp-item {
+  display: flex; align-items: center; gap: 12px; padding: 11px 13px;
+  border: 1.5px solid var(--gray-200); border-radius: 12px; cursor: pointer;
+  transition: border-color .12s, background .12s;
+}
+.wp-item:hover:not(.is-off) { border-color: #0f9d63; background: #f6fdf9; }
+.wp-item.is-on { border-color: #0f9d63; background: #f1fbf6; }
+.wp-item.is-off { opacity: .55; cursor: not-allowed; background: var(--gray-50); }
+.wp-check {
+  width: 22px; height: 22px; border-radius: 7px; flex-shrink: 0;
+  border: 2px solid var(--gray-300); display: flex; align-items: center; justify-content: center;
+  color: #fff; background: #fff; transition: background .12s, border-color .12s;
+}
+.wp-item.is-on .wp-check { background: #0f9d63; border-color: #0f9d63; }
+.wp-check svg { width: 14px; height: 14px; opacity: 0; }
+.wp-item.is-on .wp-check svg { opacity: 1; }
+.wp-icn { width: 34px; height: 34px; border-radius: 9px; flex-shrink: 0; background: #eef4ff; color: #2563eb;
+  display: flex; align-items: center; justify-content: center; }
+.wp-icn svg { width: 19px; height: 19px; }
+.wp-body { flex: 1; min-width: 0; }
+.wp-name { font-size: 13.5px; font-weight: 800; color: var(--gray-900); }
+.wp-desc { font-size: 11.5px; color: var(--gray-500); line-height: 1.5; }
+.wp-item.is-off .wp-desc { color: #b4472d; }
+.wp-note { font-size: 11.5px; color: var(--gray-500); line-height: 1.6; margin-bottom: 14px; }
+.wp-actions { display: flex; gap: 10px; justify-content: flex-end; }
+.wp-btn { padding: 10px 20px; border-radius: 10px; font-size: 13.5px; font-weight: 700; cursor: pointer; border: none; }
+.wp-btn.ghost { background: var(--gray-100); color: var(--gray-700); }
+.wp-btn.primary { background: #0f9d63; color: #fff; }
+.wp-btn.primary:disabled { background: var(--gray-300); cursor: not-allowed; }
 .bm-opt-body { flex: 1; display: flex; flex-direction: column; gap: 3px; min-width: 0; }
 .bm-opt-name { font-size: 14.5px; font-weight: 800; color: var(--gray-900); }
 .bm-opt-desc { font-size: 12px; color: var(--gray-500); line-height: 1.6; }

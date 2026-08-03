@@ -13,7 +13,7 @@
   <title>iDash — AI Dashboard Intelligence Platform</title>
   <link rel="stylesheet" href="css/style.css?v=20260730b">
   <link rel="stylesheet" href="css/ai_progress.css?v=20260730a">
-  <link rel="stylesheet" href="css/home.css?v=20260731b">
+  <link rel="stylesheet" href="css/home.css?v=20260803e">
   <!-- The KPI row's slowest step is the round-trip to Apps Script, so warm the
        connection and start the request from <head> instead of waiting behind
        the ~900KB of vendor scripts at the end of <body>. -->
@@ -494,11 +494,40 @@
         </span>
         <svg class="bm-opt-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
       </button>
+
+      <button type="button" class="bm-opt" data-build-mode="pick">
+        <span class="bm-opt-icon pick">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 20 6"/><path d="M20 12v6a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h9"/></svg>
+        </span>
+        <span class="bm-opt-body">
+          <span class="bm-opt-name">เลือก Widget เอง</span>
+          <span class="bm-opt-desc">ติ๊กเลือกกราฟที่อยากได้จากป๊อปอัป แล้วระบบผูกกับข้อมูลจริงและสร้างให้ทันที (ธีมสว่าง)</span>
+          <span class="bm-opt-tag ok">ทำงานในเครื่อง 100%</span>
+        </span>
+        <svg class="bm-opt-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
     </div>
 
     <div class="bm-foot">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
-      ทั้งสองแบบส่งเฉพาะตัวเลขสรุปที่คำนวณแล้ว — ข้อมูลรายแถวไม่เคยออกจากเครื่องคุณ
+      ทุกแบบส่งเฉพาะตัวเลขสรุปที่คำนวณแล้ว — ข้อมูลรายแถวไม่เคยออกจากเครื่องคุณ
+    </div>
+  </div>
+</div>
+
+<!-- ─── Manual widget picker (build-mode "pick") ─── -->
+<div class="modal-overlay" id="widgetPickModal" hidden>
+  <div class="bm-card wp-card">
+    <button class="modal-close" id="wpClose" aria-label="Close">&times;</button>
+    <div class="bm-head">
+      <div class="bm-title">เลือก Widget ที่ต้องการ</div>
+      <div class="bm-sub" id="wpSub">ติ๊กกราฟที่อยากได้ ระบบจะผูกกับข้อมูลจริงและสร้างแดชบอร์ดธีมสว่างให้ทันที</div>
+    </div>
+    <div class="wp-list" id="wpList"></div>
+    <div class="wp-note">ตารางข้อมูลดิบพร้อมตัวกรองจะแนบให้อัตโนมัติทุกครั้ง · widget ที่ข้อมูลไม่รองรับจะถูกปิดไว้พร้อมเหตุผล</div>
+    <div class="wp-actions">
+      <button type="button" class="wp-btn ghost" id="wpCancel">ยกเลิก</button>
+      <button type="button" class="wp-btn primary" id="wpBuild">สร้างแดชบอร์ด</button>
     </div>
   </div>
 </div>
@@ -680,9 +709,10 @@
 <script src="js/kb_bundle.js?v=20260724"></script>
 <script src="js/known_dataset_registry.js?v=20260722c"></script>
 <script src="js/interactive_dashboard_generator.js?v=20260731a"></script>
+<script src="js/manual_widgets.js?v=20260803e"></script>
 <script src="js/infographic_ai_composer.js?v=20260803c"></script>
 <script src="js/ai_providers.js?v=20260803d"></script>
-<script src="js/app.js?v=20260803d"></script>
+<script src="js/app.js?v=20260803e"></script>
 <script src="js/sidebar.js?v=20260722c"></script>
 <script>
   // Live topbar values: greeting + today's date follow the viewer's real clock.
