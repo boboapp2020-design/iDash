@@ -550,6 +550,17 @@
         <input type="text" id="aiModelInput" spellcheck="false" autocomplete="off" placeholder="เช่น gemini-3.0-pro">
       </label>
 
+      <!-- Gateway mode only. The PIN is checked by the Edge Function, not here:
+           the function's URL ships inside this page, so a check that runs in
+           the browser stops nobody who can read it. The PIN is the one thing
+           that never leaves the user's head and the server's secrets. -->
+      <label class="bm-field" id="aiPinField" hidden>
+        <span class="bm-label">PIN ของ Edge Function</span>
+        <input type="password" id="aiPinInput" spellcheck="false" autocomplete="off"
+               inputmode="numeric" placeholder="ใส่ PIN ที่ตั้งไว้ใน Supabase Secrets">
+        <span class="bm-hint" id="aiPinHint">เว้นว่างได้ถ้ายังไม่ได้ตั้ง AUTOPILOT_PIN บน Edge Function</span>
+      </label>
+
       <label class="bm-field">
         <span class="bm-label">API key</span>
         <input type="password" id="aiKeyInput" spellcheck="false" autocomplete="off" placeholder="วาง API key ที่นี่">
@@ -670,8 +681,8 @@
 <script src="js/known_dataset_registry.js?v=20260722c"></script>
 <script src="js/interactive_dashboard_generator.js?v=20260731a"></script>
 <script src="js/infographic_ai_composer.js?v=20260803c"></script>
-<script src="js/ai_providers.js?v=20260803c"></script>
-<script src="js/app.js?v=20260803c"></script>
+<script src="js/ai_providers.js?v=20260803d"></script>
+<script src="js/app.js?v=20260803d"></script>
 <script src="js/sidebar.js?v=20260722c"></script>
 <script>
   // Live topbar values: greeting + today's date follow the viewer's real clock.

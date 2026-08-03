@@ -483,6 +483,14 @@ function syncAiSetupFields() {
   const endpointInput = document.getElementById('aiEndpointInput');
   endpointInput.value = saved.endpoint || def.endpoint || '';
   endpointInput.placeholder = def.endpointHint || 'https://.../chat/completions';
+
+  // Only the gateway has a PIN to give: it is the Edge Function that checks
+  // it. Direct mode already costs the holder of the key nothing extra.
+  const pinField = document.getElementById('aiPinField');
+  if (pinField) {
+    pinField.hidden = def.shape !== 'supabase';
+    document.getElementById('aiPinInput').value = saved.pin || '';
+  }
 }
 
 /**
@@ -549,7 +557,8 @@ function initAiSetupModal() {
     api.setProviderConfig(document.getElementById('aiProviderSelect').value, {
       model: resolveAiModel(),
       apiKey: document.getElementById('aiKeyInput').value.trim(),
-      endpoint: document.getElementById('aiEndpointInput').value.trim()
+      endpoint: document.getElementById('aiEndpointInput').value.trim(),
+      pin: document.getElementById('aiPinInput').value.trim()
     });
     btn.disabled = true;
     const original = btn.textContent;
@@ -576,7 +585,8 @@ function initAiSetupModal() {
     api.setProviderConfig(id, {
       model: resolveAiModel(),
       apiKey: document.getElementById('aiKeyInput').value.trim(),
-      endpoint: document.getElementById('aiEndpointInput').value.trim()
+      endpoint: document.getElementById('aiEndpointInput').value.trim(),
+      pin: document.getElementById('aiPinInput').value.trim()
     });
 
     const problem = api.configProblem();

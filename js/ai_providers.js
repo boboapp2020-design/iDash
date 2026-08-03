@@ -148,7 +148,11 @@
       shape: def.shape,
       endpoint: (saved.endpoint || def.endpoint || '').trim(),
       model: (saved.model || def.defaultModel || '').trim(),
-      apiKey: (saved.apiKey || '').trim()
+      apiKey: (saved.apiKey || '').trim(),
+      // Gateway only. Travels to the Edge Function, which is the only place it
+      // can be checked meaningfully — this page is public, so anything it
+      // verifies itself is verified by code the attacker already has.
+      pin: (saved.pin || '').trim()
     };
   }
 
@@ -547,7 +551,8 @@
         system: sectionSystemPrompt(tokens),
         prompt: sectionUserPrompt(section, facts),
         facts: facts,
-        maxTokens: SECTION_TOKENS
+        maxTokens: SECTION_TOKENS,
+        pin: cfg.pin
       }
     };
     var controller = (typeof AbortController !== 'undefined') ? new AbortController() : null;
@@ -850,6 +855,14 @@
       return 'Supabase ปฏิเสธ anon key ในหน้านี้ (ไม่เกี่ยวกับ ANTHROPIC_API_KEY) — ' +
              'ปิดสวิตช์ "Verify JWT" ที่ Edge Function หรือใช้ legacy anon key (ขึ้นต้น eyJ) แทน' + rawHint(m);
     }
+    // Checked before the 401/key branches: a rejected PIN also arrives as an
+    // auth failure, and blaming a key that is perfectly fine sends the user
+    // off to re-issue credentials over a four-digit typo.
+    if (viaGateway && /pin/i.test(m)) {
+      return /required|missing/i.test(m)
+        ? 'Edge Function ตัวนี้ตั้ง PIN ไว้ — ใส่ PIN ในช่อง "PIN ของ Edge Function" ก่อนใช้งาน' + rawHint(m)
+        : 'PIN ไม่ถูกต้อง — ตรวจกับค่า AUTOPILOT_PIN ที่ตั้งไว้ใน Supabase → Edge Functions → Secrets' + rawHint(m);
+    }
     if (/invalid x-api-key|authentication_error|invalid_api_key|incorrect api key|\b401\b/i.test(m)) {
       return (viaGateway
         ? 'Supabase เรียก Anthropic ไม่ผ่าน เพราะ ANTHROPIC_API_KEY บนฝั่ง Edge Function ไม่ถูกต้อง ' +
@@ -1004,7 +1017,7 @@
       req.body = {
         action: 'dashboard-compose',
         runId: 'probe-' + Date.now(),
-        payload: { model: cfg.model, system: 'reply with the single word: pong', prompt: 'ping', facts: { probe: true } }
+        payload: { model: cfg.model, system: 'reply with the single word: pong', prompt: 'ping', facts: { probe: true }, pin: cfg.pin }
       };
     } else {
       req.body = { model: cfg.model, max_tokens: 16, messages: [{ role: 'user', content: 'ping' }] };
