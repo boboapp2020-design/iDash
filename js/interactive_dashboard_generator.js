@@ -242,11 +242,20 @@
    * are (a) almost all integers and (b) almost all distinct is a label for
    * rows, not a measure of anything, whatever it is called.
    */
+  // Document series named in full carry no id-word for the name pattern to
+  // catch — "Purchase Requisition", "Purchase order", "ເລກແປງ" (plot number).
+  // Adding distribution and relationship charts made this urgent: before, an
+  // undetected identifier was merely summed into a wrong total; now it can be
+  // handed a histogram or a scatter axis, which states a relationship between
+  // two filing systems as though it were a finding.
+  var DOC_NAME_RE = /requisition|purchase\s*order|\bpo\b|\bpr\b|invoice|receipt|voucher|ໃບ|ເລກ|ໝາຍເລກ|ใบสั่ง|ใบขอ|ใบแจ้ง|ใบเสร็จ|เลขที่|หมายเลข/i;
+
   function detectIdLikeCols(dataset, numCols) {
     var data = dataset.data || [];
     var sample = data.length > 800 ? data.slice(0, 800) : data;
     var out = [];
     numCols.forEach(function (col) {
+      if (DOC_NAME_RE.test(String(col))) { out.push(col); return; }
       var seen = {}, vals = [], ints = 0, n = 0;
       sample.forEach(function (row) {
         var v = Number(row[col]);
@@ -256,7 +265,20 @@
         var k = String(v);
         if (!seen[k]) { seen[k] = 1; vals.push(v); }
       });
-      if (n < 8 || ints / n < 0.98 || vals.length / n < 0.85) return;
+      if (n < 8 || ints / n < 0.98) return;
+      // A whole issuing series sits in a narrow band at a huge magnitude,
+      // where a real measure spans orders of magnitude. This catches document
+      // numbers that repeat across line items, so the near-unique test below
+      // never fires on them.
+      if (vals.length >= 8) {
+        var sortedAll = vals.slice().sort(function (a, b) { return a - b; });
+        var med = sortedAll[Math.floor(sortedAll.length / 2)];
+        if (med >= 100000 &&
+            (sortedAll[sortedAll.length - 1] - sortedAll[0]) / med < 0.05) {
+          out.push(col); return;
+        }
+      }
+      if (vals.length / n < 0.85) return;
       // Near-unique integers alone is NOT enough — kpi_engine learned that the
       // hard way (random-valued budget columns are near-unique too). The extra
       // tell of a real identifier is that its distinct values sit in a dense
@@ -550,6 +572,101 @@
   function isActualCol(name) {
     return /จริง|actual|จ่ายจริง|ค่าใช้จ่ายจริง/i.test(name);
   }
+  // A column that states what a paired measure is SUPPOSED to be. Finding one
+  // is what lets a bullet chart exist at all: dashboard-architect §3.21 —
+  // without a target there is nothing to compare against, and inventing one
+  // would be fabricating a business decision we were never given.
+  function isTargetCol(name) {
+    return /เป้า|target|goal|แผน\b|plan\b|มาตรฐาน|spec|เกณฑ์|kpi_target/i.test(name);
+  }
+
+  /* ── Statistics behind the chart gates ─────────────────────────────────
+   * Every chart type below has to earn its place on real evidence — a
+   * distribution needs enough rows to have a shape, a scatter needs a
+   * correlation worth showing, a heatmap needs a grid that is actually dense.
+   * Charts that cannot pass their gate are simply never planned, which is why
+   * two different files produce two different dashboards.
+   */
+
+  function numericValues(data, col) {
+    var out = [];
+    for (var i = 0; i < data.length; i++) {
+      var v = Number(data[i][col]);
+      if (!isNaN(v) && data[i][col] !== null && data[i][col] !== '') out.push(v);
+    }
+    return out;
+  }
+
+  /** Pearson r over paired rows. Null when there is nothing to correlate. */
+  function correlation(data, a, b) {
+    var xs = [], ys = [];
+    for (var i = 0; i < data.length; i++) {
+      var x = Number(data[i][a]), y = Number(data[i][b]);
+      if (isNaN(x) || isNaN(y) || data[i][a] === '' || data[i][b] === '') continue;
+      if (data[i][a] === null || data[i][b] === null) continue;
+      xs.push(x); ys.push(y);
+    }
+    var n = xs.length;
+    if (n < 15) return null;
+    var sx = 0, sy = 0;
+    for (var j = 0; j < n; j++) { sx += xs[j]; sy += ys[j]; }
+    var mx = sx / n, my = sy / n, num = 0, dx = 0, dy = 0;
+    for (var k = 0; k < n; k++) {
+      var a1 = xs[k] - mx, b1 = ys[k] - my;
+      num += a1 * b1; dx += a1 * a1; dy += b1 * b1;
+    }
+    if (dx === 0 || dy === 0) return null;
+    return { r: num / Math.sqrt(dx * dy), n: n };
+  }
+
+  /** Distinct non-empty values of a column, capped so a scan can't run long. */
+  function distinctValues(data, col, cap) {
+    var seen = {}, out = [];
+    for (var i = 0; i < data.length && out.length <= (cap || 60); i++) {
+      var v = data[i][col];
+      if (v === null || v === undefined || v === '') continue;
+      v = String(v);
+      if (!seen[v]) { seen[v] = true; out.push(v); }
+    }
+    return out;
+  }
+
+  /**
+   * Does this measure vary enough to be worth a distribution chart? A column
+   * where every row is the same number has no shape to show — the histogram
+   * would be one tall bar, which says less than a KPI card already does.
+   */
+  function hasSpread(vals) {
+    if (vals.length < 30) return false;
+    var min = Math.min.apply(null, vals), max = Math.max.apply(null, vals);
+    if (max === min) return false;
+    var uniq = {}, n = 0;
+    for (var i = 0; i < vals.length && n <= 12; i++) {
+      if (!uniq[vals[i]]) { uniq[vals[i]] = 1; n++; }
+    }
+    return n >= 8; // fewer distinct values than bins = it is a category, not a measure
+  }
+
+  /** Share of the total held by the top few — the case Pareto is built for. */
+  function concentration(data, catCol, numCol) {
+    var sums = {}, order = [];
+    for (var i = 0; i < data.length; i++) {
+      var label = data[i][catCol];
+      if (label === null || label === undefined || label === '') continue;
+      label = String(label);
+      var v = numCol ? Number(data[i][numCol]) : 1;
+      if (isNaN(v)) v = 0;
+      if (sums[label] === undefined) { sums[label] = 0; order.push(label); }
+      sums[label] += v;
+    }
+    if (order.length < 4) return null;
+    var vals = order.map(function (l) { return sums[l]; }).sort(function (a, b) { return b - a; });
+    var total = vals.reduce(function (s, v) { return s + v; }, 0);
+    if (total <= 0) return null;
+    var topN = Math.max(1, Math.ceil(vals.length * 0.2));
+    var top = vals.slice(0, topN).reduce(function (s, v) { return s + v; }, 0);
+    return { share: top / total, groups: order.length, hasNegative: vals[vals.length - 1] < 0 };
+  }
 
   function detectTimeCol(classified, dataset) {
     var data = dataset.data || [];
@@ -610,7 +727,7 @@
     // ─── 4. COMPOSITION (donut) for first text column with 2-8 categories ───
     var usedTextCols = {};
     classified.textCols.forEach(function(textCol) {
-      if (plan.length >= 8) return;
+      if (plan.length >= 16) return;
       if (idPattern.test(textCol)) return;
       if (textCol === timeCol) return;
       var uniques = {};
@@ -637,10 +754,10 @@
     });
 
     // ─── 5. ADDITIONAL BAR using second numeric column ───
-    if (sumCols.length > 1 && plan.length < 8) {
+    if (sumCols.length > 1 && plan.length < 16) {
       var secondNum = sumCols[1];
       classified.textCols.forEach(function(tc) {
-        if (plan.length >= 8) return;
+        if (plan.length >= 16) return;
         if (idPattern.test(tc) || tc === timeCol) return;
         var exists = plan.some(function(p) { return p.textCol === tc && p.numCol === secondNum; });
         if (exists) return;
@@ -657,12 +774,234 @@
     }
 
     // ─── 6. RATE TREND (secondary line for % over time) ───
-    if (timeCol && rateCols.length > 0 && plan.length < 8) {
+    if (timeCol && rateCols.length > 0 && plan.length < 16) {
       var rateTrend = rateCols.slice(0, 2);
       plan.push({ role: 'rateTrend', type: 'line', timeCol: timeCol, numCols: rateTrend, title: 'แนวโน้มอัตรา — ' + rateTrend.join(', '), agg: 'avg' });
     }
 
-    return plan;
+    /* ─── 7-14. The analytical questions the old plan could not ask ────────
+     * Everything above answers only "how much" and "how did it change".
+     * dashboard-architect's chart matrix lists six more question types, and
+     * its audit of 45 real dashboards found NONE of them used even where the
+     * data called for it — distribution, relationship, and 2-D density were
+     * 0/45. Each block below adds one of those questions, and each is gated on
+     * evidence the data must actually contain, so a file that cannot support
+     * a chart never gets it. This is where the variety between two different
+     * uploads comes from.
+     */
+
+    // Categories for the analytical charts below. Date columns are classified
+    // as text (they are not summable), but a date is an axis, not a category —
+    // a Pareto of "Changed On" ranks calendar days as if they were causes. Only
+    // the chosen time column was excluded before, so a file with a second date
+    // column leaked it in here.
+    var cats = classified.textCols.filter(function (c) {
+      if (idPattern.test(c) || c === timeCol) return false;
+      var checked = 0, dateish = 0;
+      for (var i = 0; i < data.length && checked < 60; i++) {
+        var v = data[i][c];
+        if (v === null || v === undefined || v === '') continue;
+        checked++;
+        if (isDateLikeVal(v)) dateish++;
+      }
+      return !(checked >= 5 && dateish / checked > 0.6);
+    });
+
+    // 7. BULLET — actual vs target. The only honest way to show a target is to
+    //    find one in the file (§3.21); we never invent the number.
+    if (plan.length < 16) {
+      var targetCol = goodNums.find(isTargetCol);
+      if (targetCol) {
+        var actualForTarget = goodNums.find(function (c) {
+          return c !== targetCol && !isTargetCol(c) && (isRateCol(c) === isRateCol(targetCol));
+        }) || goodNums.find(function (c) { return c !== targetCol && !isTargetCol(c); });
+        if (actualForTarget && cats.length) {
+          plan.push({
+            role: 'target', type: 'bullet', textCol: cats[0],
+            numCol: actualForTarget, targetCol: targetCol,
+            title: 'เทียบเป้า — ' + actualForTarget + ' vs ' + targetCol
+          });
+        }
+      }
+    }
+
+    // 8. PARETO — "which few things cause most of it". Only when the data is
+    //    genuinely concentrated; on an even spread the cumulative line is a
+    //    straight diagonal that tells the reader nothing.
+    if (plan.length < 16 && cats.length && sumCols.length) {
+      for (var ci = 0; ci < cats.length; ci++) {
+        var conc = concentration(data, cats[ci], sumCols[0]);
+        if (conc && !conc.hasNegative && conc.share >= 0.6 && conc.groups >= 5) {
+          plan.push({
+            role: 'pareto', type: 'pareto', textCol: cats[ci], numCol: sumCols[0],
+            title: 'Pareto — ' + cats[ci] + ' (ไม่กี่รายการคิดเป็นส่วนใหญ่)'
+          });
+          break;
+        }
+      }
+    }
+
+    // 9. HISTOGRAM — the single biggest documented gap (§3.18, 0/45 dashboards
+    //    showed a distribution). A mean hides every outlier behind it.
+    if (plan.length < 16) {
+      for (var hi = 0; hi < goodNums.length; hi++) {
+        var hv = numericValues(data, goodNums[hi]);
+        if (hasSpread(hv)) {
+          plan.push({
+            role: 'distribution', type: 'histogram', numCol: goodNums[hi],
+            title: 'การกระจายตัว — ' + goodNums[hi] + ' (n=' + hv.length + ')'
+          });
+          break;
+        }
+      }
+    }
+
+    // 10. SCATTER — relationship between two measures, with r reported so the
+    //     reader can judge it (§3.9 bans dual-axis lines used for this).
+    if (plan.length < 16 && goodNums.length >= 2) {
+      var bestPair = null;
+      for (var a = 0; a < goodNums.length && !bestPair; a++) {
+        for (var b = a + 1; b < goodNums.length; b++) {
+          var cr = correlation(data, goodNums[a], goodNums[b]);
+          if (cr && Math.abs(cr.r) >= 0.45 && Math.abs(cr.r) < 0.999) {
+            bestPair = { x: goodNums[a], y: goodNums[b], r: cr.r, n: cr.n };
+            break;
+          }
+        }
+      }
+      if (bestPair) {
+        plan.push({
+          role: 'relationship', type: 'scatter', xCol: bestPair.x, yCol: bestPair.y,
+          r: Math.round(bestPair.r * 100) / 100, n: bestPair.n,
+          title: 'ความสัมพันธ์ — ' + bestPair.x + ' กับ ' + bestPair.y +
+                 ' (r=' + (Math.round(bestPair.r * 100) / 100) + ', n=' + bestPair.n + ')'
+        });
+      }
+    }
+
+    // 11. BOX PLOT — is one group merely lower, or also less stable? A bar of
+    //     group averages cannot answer that (§3.19).
+    if (plan.length < 16 && sumCols.length && cats.length) {
+      for (var bi = 0; bi < cats.length; bi++) {
+        var groups = distinctValues(data, cats[bi], 13);
+        if (groups.length >= 3 && groups.length <= 8 && data.length >= 40) {
+          plan.push({
+            role: 'spread', type: 'boxplot', textCol: cats[bi], numCol: sumCols[0],
+            title: 'ความสม่ำเสมอ — ' + sumCols[0] + ' แยกตาม ' + cats[bi]
+          });
+          break;
+        }
+      }
+    }
+
+    // 12. STACKED BAR — composition over time, capped at 4 layers (§3.4).
+    if (plan.length < 16 && timeCol && sumCols.length && cats.length) {
+      for (var si = 0; si < cats.length; si++) {
+        var parts = distinctValues(data, cats[si], 6);
+        if (parts.length >= 2 && parts.length <= 4) {
+          // A donut on the same category is NOT a duplicate: it shows today's
+          // split, this shows whether that split is moving. Only another
+          // time-composition chart would be saying the same thing twice.
+          var already = plan.some(function (p) { return p.type === 'stackedBar'; });
+          if (!already) {
+            plan.push({
+              role: 'compositionTime', type: 'stackedBar', timeCol: timeCol,
+              textCol: cats[si], numCol: sumCols[0], parts: parts,
+              title: 'องค์ประกอบตามเวลา — ' + sumCols[0] + ' แยกตาม ' + cats[si]
+            });
+            break;
+          }
+        }
+      }
+    }
+
+    // 13. HEATMAP — where two dimensions intersect; a grouped bar of the same
+    //     grid would be dozens of bars nobody can read (§3.11).
+    if (plan.length < 16 && cats.length >= 2 && sumCols.length) {
+      var rowsCat = null, colsCat = null;
+      for (var r1 = 0; r1 < cats.length && !rowsCat; r1++) {
+        var rv = distinctValues(data, cats[r1], 26);
+        if (rv.length < 3 || rv.length > 20) continue;
+        for (var c1 = 0; c1 < cats.length; c1++) {
+          if (cats[c1] === cats[r1]) continue;
+          var cv = distinctValues(data, cats[c1], 16);
+          if (cv.length >= 3 && cv.length <= 12) { rowsCat = cats[r1]; colsCat = cats[c1]; break; }
+        }
+      }
+      if (rowsCat && colsCat) {
+        plan.push({
+          role: 'density', type: 'heatmap', rowCol: rowsCat, colCol: colsCat,
+          numCol: sumCols[0], title: 'ความหนาแน่น — ' + rowsCat + ' × ' + colsCat
+        });
+      }
+    }
+
+    // 14. TREEMAP — part-to-whole with too many parts for any other form
+    //     (§3.12). Below 13 parts the ranked bar above already reads better.
+    if (plan.length < 16 && cats.length && sumCols.length) {
+      for (var ti = 0; ti < cats.length; ti++) {
+        var tv = distinctValues(data, cats[ti], 60);
+        if (tv.length > 12 && tv.length <= 60) {
+          var conc2 = concentration(data, cats[ti], sumCols[0]);
+          if (conc2 && !conc2.hasNegative) {
+            plan.push({
+              role: 'manyParts', type: 'treemap', textCol: cats[ti], numCol: sumCols[0],
+              title: 'สัดส่วนทั้งหมด — ' + cats[ti] + ' (' + tv.length + ' รายการ)'
+            });
+            break;
+          }
+        }
+      }
+    }
+
+    return diversifyPlan(plan);
+  }
+
+  /**
+   * Pick the final 8 cards by QUESTION TYPE rather than by discovery order.
+   *
+   * The rules above are greedy: the breakdown rule alone will happily emit a
+   * ranked bar for every category × every measure. On a file with 3 categories
+   * and 2 measures that filled the whole page with near-identical bars, and
+   * every analytical chart behind it — distribution, relationship, density —
+   * was crowded out before it could be considered. The page was full and said
+   * one thing.
+   *
+   * dashboard-architect §12: "ใส่ KPI ให้ครบทุกตัวที่วัดได้ → เมื่อทุกอย่าง
+   * สำคัญ = ไม่มีอะไรสำคัญ". Variety on the page is variety of QUESTION, not
+   * more answers to the question already asked. So each role gets a quota, and
+   * the order below is the reading order the layout expects: the hero
+   * time-series first, then composition, then the diagnostic charts.
+   */
+  var ROLE_ORDER = [
+    'trend', 'budget', 'composition', 'breakdown', 'gauges', 'target',
+    'pareto', 'compositionTime', 'relationship', 'distribution', 'spread',
+    'density', 'manyParts', 'rateTrend'
+  ];
+  // Two ranked bars can genuinely earn their place (different measures); a
+  // third is repetition. Everything else says its piece once.
+  var ROLE_QUOTA = { breakdown: 2 };
+
+  function diversifyPlan(candidates) {
+    var picked = [], used = {};
+    for (var i = 0; i < ROLE_ORDER.length && picked.length < 8; i++) {
+      var role = ROLE_ORDER[i];
+      var quota = ROLE_QUOTA[role] || 1;
+      for (var j = 0; j < candidates.length && picked.length < 8; j++) {
+        if (candidates[j].role !== role) continue;
+        if ((used[role] || 0) >= quota) break;
+        used[role] = (used[role] || 0) + 1;
+        picked.push(candidates[j]);
+      }
+    }
+    // A role the order above doesn't know about would silently vanish, so
+    // anything unlisted still gets whatever room is left.
+    for (var k = 0; k < candidates.length && picked.length < 8; k++) {
+      if (picked.indexOf(candidates[k]) < 0 && ROLE_ORDER.indexOf(candidates[k].role) < 0) {
+        picked.push(candidates[k]);
+      }
+    }
+    return picked;
   }
 
   function generateMainScript(columns, classified, allData, chartPlan, filterCols, activeTheme, themes, maxRows, kpiMax, blueprint) {
@@ -1065,6 +1404,123 @@
     lines.push('      chart.setOption({tooltip:{trigger:"item",formatter:"{b}: {c} ({d}%)"},legend:donutLegend,color:colors,series:[{type:"pie",radius:donutWide?["44%","64%"]:["36%","54%"],center:donutWide?["30%","50%"]:["50%","40%"],itemStyle:{borderColor:currentTheme.cardBg||"#fff",borderWidth:2},label:{show:true,position:"center",formatter:function(){return"\\n"+fmt(total)+"\\nรวม"},fontSize:14,fontWeight:700,color:currentTheme.textPrimary},emphasis:{label:{fontSize:16}},data:data}]});');
     lines.push('    }');
     lines.push('');
+
+    /* ── The six analytical questions the old renderer could not draw ──────
+     * Planned in buildChartPlan only when the data passes each gate, so these
+     * appear on the files that can support them and stay absent on the files
+     * that cannot.
+     */
+
+    // HISTOGRAM — Freedman-like binning capped to a readable 8-20 bins.
+    lines.push('    else if (p.type === "histogram") {');
+    lines.push('      var hv = [];');
+    lines.push('      filteredData.forEach(function(row){ var v=Number(row[p.numCol]); if(!isNaN(v)&&row[p.numCol]!==""&&row[p.numCol]!==null) hv.push(v); });');
+    lines.push('      if (hv.length < 10) return;');
+    lines.push('      var hmin=Math.min.apply(null,hv), hmax=Math.max.apply(null,hv);');
+    lines.push('      if (hmax===hmin) return;');
+    lines.push('      var bins=Math.max(8,Math.min(20,Math.round(Math.sqrt(hv.length))));');
+    lines.push('      var wdt=(hmax-hmin)/bins, counts=new Array(bins).fill(0);');
+    lines.push('      hv.forEach(function(v){ var i=Math.min(bins-1,Math.floor((v-hmin)/wdt)); counts[i]++; });');
+    lines.push('      var labels=counts.map(function(_,i){ return fmt(Math.round((hmin+i*wdt)*100)/100); });');
+    // Mean marked on the axis: the distribution exists precisely to show how
+    // much the mean is hiding, so the two belong on the same picture.
+    lines.push('      var hmean=hv.reduce(function(s,v){return s+v;},0)/hv.length;');
+    lines.push('      var meanIdx=Math.min(bins-1,Math.floor((hmean-hmin)/wdt));');
+    lines.push('      chart.setOption({tooltip:{trigger:"axis",axisPointer:{type:"shadow"},formatter:function(ps){return "ช่วง "+ps[0].name+" ขึ้นไป<br/>จำนวน "+ps[0].value+" แถว";}},grid:{left:"3%",right:"4%",bottom:"3%",top:24,containLabel:true},xAxis:{type:"category",data:labels,axisLabel:{color:textColor,fontSize:10,rotate:bins>12?35:0},axisTick:{show:false},axisLine:{lineStyle:{color:gridColor}}},yAxis:{type:"value",name:"จำนวนแถว",nameTextStyle:{color:textColor,fontSize:10},splitLine:{lineStyle:{color:gridColor}},axisLabel:{color:textColor,fontSize:11}},color:[ACC],series:[{type:"bar",data:counts,barCategoryGap:"2%",itemStyle:{borderRadius:[3,3,0,0]},markLine:{silent:true,symbol:"none",label:{formatter:"เฉลี่ย "+fmt(Math.round(hmean*100)/100),color:textColor,fontSize:10},lineStyle:{color:currentTheme.textMuted||"#94a3b8",type:"dashed"},data:[{xAxis:meanIdx}]}}]});');
+    lines.push('    }');
+    lines.push('');
+
+    // SCATTER — r is already in the title; the chart just has to be honest.
+    lines.push('    else if (p.type === "scatter") {');
+    lines.push('      var pts=[];');
+    lines.push('      filteredData.forEach(function(row){ var x=Number(row[p.xCol]),y=Number(row[p.yCol]); if(!isNaN(x)&&!isNaN(y)&&row[p.xCol]!==""&&row[p.yCol]!=="") pts.push([x,y]); });');
+    lines.push('      if (pts.length < 10) return;');
+    lines.push('      chart.setOption({tooltip:{trigger:"item",formatter:function(o){return p.xCol+": "+fmt(o.value[0])+"<br/>"+p.yCol+": "+fmt(o.value[1]);}},grid:{left:"3%",right:"5%",bottom:"3%",top:24,containLabel:true},xAxis:{type:"value",name:p.xCol,nameLocation:"middle",nameGap:26,nameTextStyle:{color:textColor,fontSize:10},splitLine:{lineStyle:{color:gridColor}},axisLabel:{color:textColor,fontSize:10,formatter:function(v){return fmt(v);}}},yAxis:{type:"value",name:p.yCol,nameTextStyle:{color:textColor,fontSize:10},splitLine:{lineStyle:{color:gridColor}},axisLabel:{color:textColor,fontSize:10,formatter:function(v){return fmt(v);}}},color:[ACC],series:[{type:"scatter",symbolSize:8,itemStyle:{opacity:.7},data:pts}]});');
+    lines.push('    }');
+    lines.push('');
+
+    // BOX PLOT — quartiles per group, so stability is visible next to level.
+    lines.push('    else if (p.type === "boxplot") {');
+    lines.push('      var gmap={},gorder=[];');
+    lines.push('      filteredData.forEach(function(row){ var g=row[p.textCol]; if(g==null||g==="")return; g=String(g); var v=Number(row[p.numCol]); if(isNaN(v))return; if(!gmap[g]){gmap[g]=[];gorder.push(g);} gmap[g].push(v); });');
+    lines.push('      gorder=gorder.filter(function(g){return gmap[g].length>=5;}).slice(0,8);');
+    lines.push('      if (gorder.length < 2) return;');
+    lines.push('      function q(arr,p2){ var s=arr.slice().sort(function(a,b){return a-b;}); var i=(s.length-1)*p2, lo=Math.floor(i), hi=Math.ceil(i); return lo===hi?s[lo]:s[lo]+(s[hi]-s[lo])*(i-lo); }');
+    lines.push('      var boxes=gorder.map(function(g){ var a=gmap[g]; return [Math.min.apply(null,a),q(a,.25),q(a,.5),q(a,.75),Math.max.apply(null,a)].map(function(v){return Math.round(v*100)/100;}); });');
+    lines.push('      chart.setOption({tooltip:{trigger:"item",formatter:function(o){var v=o.value;return o.name+"<br/>สูงสุด "+fmt(v[5])+"<br/>Q3 "+fmt(v[4])+"<br/>มัธยฐาน "+fmt(v[3])+"<br/>Q1 "+fmt(v[2])+"<br/>ต่ำสุด "+fmt(v[1]);}},grid:{left:"3%",right:"4%",bottom:"3%",top:24,containLabel:true},xAxis:{type:"category",data:gorder,axisLabel:{color:textColor,fontSize:10,rotate:gorder.length>5?25:0,width:90,overflow:"truncate"},axisLine:{lineStyle:{color:gridColor}}},yAxis:{type:"value",name:p.numCol,nameTextStyle:{color:textColor,fontSize:10},splitLine:{lineStyle:{color:gridColor}},axisLabel:{color:textColor,fontSize:10,formatter:function(v){return fmt(v);}}},series:[{type:"boxplot",data:boxes,itemStyle:{color:ACC+"33",borderColor:ACC,borderWidth:1.5}}]});');
+    lines.push('    }');
+    lines.push('');
+
+    // STACKED BAR — composition over time, ≤4 layers by plan.
+    lines.push('    else if (p.type === "stackedBar") {');
+    lines.push('      var tg={},torder=[],partSet=p.parts||[];');
+    lines.push('      filteredData.forEach(function(row){ var t=row[p.timeCol]; if(t==null||t==="")return; t=fmtDate(t); var g=row[p.textCol]; if(g==null||g==="")return; g=String(g); if(partSet.indexOf(g)<0)return; if(!tg[t]){tg[t]={};torder.push(t);} var v=Number(row[p.numCol]); if(isNaN(v))v=0; tg[t][g]=(tg[t][g]||0)+v; });');
+    lines.push('      if (torder.length < 2) return;');
+    lines.push('      var sser=partSet.map(function(g,gi){ return {name:g,type:"bar",stack:"s",emphasis:{focus:"series"},itemStyle:{color:colors[gi%colors.length]},data:torder.map(function(t){return Math.round((tg[t][g]||0)*100)/100;})}; });');
+    lines.push('      chart.setOption({tooltip:{trigger:"axis",axisPointer:{type:"shadow"}},legend:{top:0,textStyle:{color:textColor,fontSize:11},itemWidth:10,itemHeight:10,icon:"circle"},grid:{left:"3%",right:"4%",bottom:"3%",top:32,containLabel:true},xAxis:{type:"category",data:torder,axisLabel:{color:textColor,fontSize:10,rotate:torder.length>12?30:0},axisLine:{lineStyle:{color:gridColor}},axisTick:{show:false}},yAxis:{type:"value",splitLine:{lineStyle:{color:gridColor}},axisLabel:{color:textColor,fontSize:11,formatter:function(v){return fmt(v);}}},series:sser});');
+    lines.push('    }');
+    lines.push('');
+
+    // HEATMAP — one hue, light to dark, with the scale legend §3.11 requires.
+    lines.push('    else if (p.type === "heatmap") {');
+    lines.push('      var rset=[],cset=[],cell={};');
+    lines.push('      filteredData.forEach(function(row){ var r1=row[p.rowCol],c1=row[p.colCol]; if(r1==null||r1===""||c1==null||c1==="")return; r1=String(r1);c1=String(c1); if(rset.indexOf(r1)<0)rset.push(r1); if(cset.indexOf(c1)<0)cset.push(c1); var v=Number(row[p.numCol]); if(isNaN(v))v=0; var k=r1+"\\u0000"+c1; cell[k]=(cell[k]||0)+v; });');
+    lines.push('      rset=rset.slice(0,20); cset=cset.slice(0,12);');
+    lines.push('      if (rset.length<2||cset.length<2) return;');
+    lines.push('      var hdata=[],hmax2=0;');
+    lines.push('      rset.forEach(function(r1,ri){ cset.forEach(function(c1,ci2){ var v=cell[r1+"\\u0000"+c1]||0; if(v>hmax2)hmax2=v; hdata.push([ci2,ri,Math.round(v*100)/100]); }); });');
+    lines.push('      chart.setOption({tooltip:{position:"top",formatter:function(o){return rset[o.value[1]]+" × "+cset[o.value[0]]+"<br/>"+fmt(o.value[2]);}},grid:{left:"3%",right:"4%",bottom:"14%",top:12,containLabel:true},xAxis:{type:"category",data:cset,splitArea:{show:true},axisLabel:{color:textColor,fontSize:10,rotate:cset.length>6?25:0}},yAxis:{type:"category",data:rset,splitArea:{show:true},axisLabel:{color:textColor,fontSize:10,width:100,overflow:"truncate"}},visualMap:{min:0,max:hmax2||1,calculable:true,orient:"horizontal",left:"center",bottom:0,itemWidth:12,itemHeight:70,textStyle:{color:textColor,fontSize:10},inRange:{color:[currentTheme.cardBg||"#fff",ACC]}},series:[{type:"heatmap",data:hdata,label:{show:rset.length*cset.length<=60,fontSize:9,color:textColor,formatter:function(o){return fmt(o.value[2]);}},itemStyle:{borderColor:currentTheme.cardBg||"#fff",borderWidth:1}}]});');
+    lines.push('    }');
+    lines.push('');
+
+    // TREEMAP — many parts at once, labelled only where a label fits.
+    lines.push('    else if (p.type === "treemap") {');
+    lines.push('      var tsum={},tord=[];');
+    lines.push('      filteredData.forEach(function(row){ var g=row[p.textCol]; if(g==null||g==="")return; g=String(g); var v=Number(row[p.numCol]); if(isNaN(v))v=0; if(tsum[g]===undefined){tsum[g]=0;tord.push(g);} tsum[g]+=v; });');
+    lines.push('      var tdata=tord.filter(function(g){return tsum[g]>0;}).map(function(g){return {name:g,value:Math.round(tsum[g]*100)/100};}).sort(function(a,b){return b.value-a.value;}).slice(0,50);');
+    lines.push('      if (tdata.length < 4) return;');
+    lines.push('      var ttotal=tdata.reduce(function(s,d){return s+d.value;},0);');
+    lines.push('      chart.setOption({tooltip:{formatter:function(o){var pct=ttotal>0?Math.round(o.value/ttotal*1000)/10:0;return o.name+"<br/>"+fmt(o.value)+" ("+pct+"%)";}},series:[{type:"treemap",roam:false,nodeClick:false,breadcrumb:{show:false},itemStyle:{borderColor:currentTheme.cardBg||"#fff",borderWidth:2,gapWidth:2},label:{show:true,fontSize:11,color:"#fff",formatter:function(o){return o.value/ttotal>0.03?o.name:"";}},levels:[{color:colors,colorMappingBy:"value"}],data:tdata}]});');
+    lines.push('    }');
+    lines.push('');
+
+    // PARETO — bars plus a cumulative % line on the SAME 0-100 axis, drawn as
+    // a share of the total. A second y-axis is banned (D25 / §9 rule 9), and
+    // it is not needed: expressing both in % of total keeps one scale honest.
+    lines.push('    else if (p.type === "pareto") {');
+    lines.push('      var psum={},pord=[];');
+    lines.push('      filteredData.forEach(function(row){ var g=row[p.textCol]; if(g==null||g==="")return; g=String(g); var v=Number(row[p.numCol]); if(isNaN(v))v=0; if(psum[g]===undefined){psum[g]=0;pord.push(g);} psum[g]+=v; });');
+    lines.push('      var pd=pord.map(function(g){return {name:g,value:psum[g]};}).filter(function(d){return d.value>0;}).sort(function(a,b){return b.value-a.value;}).slice(0,12);');
+    lines.push('      if (pd.length < 4) return;');
+    lines.push('      var ptotal=pd.reduce(function(s,d){return s+d.value;},0);');
+    lines.push('      var pshare=pd.map(function(d){return Math.round(d.value/ptotal*1000)/10;});');
+    lines.push('      var cum=[],run=0; pshare.forEach(function(v){ run+=v; cum.push(Math.round(run*10)/10); });');
+    lines.push('      chart.setOption({tooltip:{trigger:"axis",axisPointer:{type:"shadow"},formatter:function(ps){var i=ps[0].dataIndex;return pd[i].name+"<br/>"+fmt(pd[i].value)+" ("+pshare[i]+"%)<br/>สะสม "+cum[i]+"%";}},legend:{top:0,data:["% ของทั้งหมด","สะสม %"],textStyle:{color:textColor,fontSize:11},itemWidth:10,itemHeight:10,icon:"circle"},grid:{left:"3%",right:"4%",bottom:"3%",top:32,containLabel:true},xAxis:{type:"category",data:pd.map(function(d){return d.name;}),axisLabel:{color:textColor,fontSize:10,rotate:pd.length>6?30:0,width:90,overflow:"truncate"},axisLine:{lineStyle:{color:gridColor}},axisTick:{show:false}},yAxis:{type:"value",max:100,name:"% ของทั้งหมด",nameTextStyle:{color:textColor,fontSize:10},splitLine:{lineStyle:{color:gridColor}},axisLabel:{color:textColor,fontSize:10,formatter:"{value}%"}},series:[{name:"% ของทั้งหมด",type:"bar",data:pshare,itemStyle:{color:ACC,borderRadius:[3,3,0,0]},label:{show:true,position:"top",color:textColor,fontSize:9,formatter:"{c}%"}},{name:"สะสม %",type:"line",data:cum,smooth:false,symbol:"circle",symbolSize:5,lineStyle:{width:2,color:currentTheme.textMuted||"#94a3b8"},itemStyle:{color:currentTheme.textMuted||"#94a3b8"}}]});');
+    lines.push('    }');
+    lines.push('');
+
+    // BULLET — actual bar, target marker, % attainment. Replaces the gauge
+    // wherever a real target exists (§3.21).
+    lines.push('    else if (p.type === "bullet") {');
+    lines.push('      var bg={},bord=[];');
+    lines.push('      filteredData.forEach(function(row){ var g=row[p.textCol]; if(g==null||g==="")return; g=String(g); var a1=Number(row[p.numCol]),t1=Number(row[p.targetCol]); if(!bg[g]){bg[g]={a:0,t:0};bord.push(g);} if(!isNaN(a1))bg[g].a+=a1; if(!isNaN(t1))bg[g].t+=t1; });');
+    lines.push('      bord=bord.filter(function(g){return bg[g].t>0;}).sort(function(a,b){return (bg[b].a/bg[b].t)-(bg[a].a/bg[a].t);}).slice(0,10);');
+    lines.push('      if (bord.length < 1) return;');
+    lines.push('      chart.dispose(); chartInstances.pop();');
+    lines.push('      el.innerHTML = \'<div class="stat-strip">\'+bord.map(function(g){');
+    lines.push('        var a1=bg[g].a,t1=bg[g].t,pct=t1>0?Math.round(a1/t1*1000)/10:0;');
+    lines.push('        var w=Math.max(2,Math.min(100,pct));');
+    lines.push('        var col=pct>=100?(currentTheme.dark?"#34d399":"#12a86a"):(pct>=90?"#f0a91c":"#e5484d");');
+    lines.push('        var mark=pct>0?Math.min(100,100/Math.max(pct,100)*100):100;');
+    lines.push('        return \'<div class="stat-row"><div class="stat-row-head"><span class="stat-name">\'+escHtmlClient(g)+\'</span>\'');
+    lines.push('          +\'<span class="stat-avg" style="color:\'+col+\'">\'+pct+\'%<small>ของเป้า</small></span></div>\'');
+    lines.push('          +\'<div class="stat-bar" style="position:relative"><div class="stat-bar-fill" style="width:\'+w+\'%;background:\'+col+\'"></div>\'');
+    lines.push('          +\'<div style="position:absolute;top:-2px;bottom:-2px;left:\'+mark+\'%;width:2px;background:\'+(currentTheme.textPrimary||"#0f172a")+\'"></div></div>\'');
+    lines.push('          +\'<div class="stat-range"><span>จริง \'+fmt(Math.round(a1*100)/100)+\'</span><span>เป้า \'+fmt(Math.round(t1*100)/100)+\'</span></div></div>\';');
+    lines.push('      }).join("")+\'</div>\';');
+    lines.push('    }');
+    lines.push('');
+
     // BAR (default)
     lines.push('    else {');
     lines.push('      var groups = {}, order = [];');
