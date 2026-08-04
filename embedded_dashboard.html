@@ -40,19 +40,17 @@
     }
     .embed-frame-wrap:fullscreen { background: #000; }
     .embed-frame-wrap:fullscreen iframe { width: 100% !important; height: 100% !important; transform: none !important; }
+    /* iDash mark next to the dashboard's own name in the topbar (?brand=1) —
+       a thin divider separates "whose page this is" (embedTitleText) from
+       "what's showing it" (this mark), so the two never read as one name. */
     .embed-brand {
-      position: absolute; right: 14px; bottom: 12px; z-index: 5;
-      display: flex; align-items: center; gap: 7px;
-      padding: 7px 13px; border-radius: 999px;
-      background: rgba(255,255,255,.92);
-      -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
-      border: 1px solid rgba(148,163,203,.3);
-      box-shadow: 0 2px 6px rgba(23,37,84,.08), 0 10px 24px -8px rgba(23,37,84,.18);
-      pointer-events: none; user-select: none;
+      display: flex; align-items: center; gap: 6px;
+      margin-left: 10px; padding-left: 12px;
+      border-left: 1px solid var(--border);
     }
     .embed-brand[hidden] { display: none; }
-    .embed-brand svg { width: 17px; height: 17px; }
-    .embed-brand span { font-size: 13px; font-weight: 800; color: #2563eb; letter-spacing: -.01em; }
+    .embed-brand svg { width: 16px; height: 16px; }
+    .embed-brand span { font-size: 12.5px; font-weight: 800; color: #2563eb; letter-spacing: -.01em; }
     .embed-back {
       display: inline-flex; align-items: center; gap: 5px; padding: 7px 14px;
       border-radius: var(--radius-sm); border: 1px solid var(--border); background: #fff;
@@ -132,6 +130,15 @@
         </a>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
         <span id="embedTitleText">Dashboard</span>
+        <span class="embed-brand" id="embedBrand" hidden aria-hidden="true">
+          <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="2" y="18" width="6" height="12" rx="1.5" fill="#2563eb"/>
+            <rect x="10" y="12" width="6" height="18" rx="1.5" fill="#3b82f6"/>
+            <rect x="18" y="6" width="6" height="24" rx="1.5" fill="#60a5fa"/>
+            <rect x="26" y="2" width="4" height="28" rx="1.5" fill="#93c5fd"/>
+          </svg>
+          <span>iDash</span>
+        </span>
       </div>
       <div class="embed-actions">
         <button class="embed-btn" id="embedFullscreen" type="button">
@@ -152,20 +159,6 @@
         <div class="embed-empty-desc">แดชบอร์ดนี้ยังไม่ได้ผูกกับลิงก์ภายนอก — ติดต่อ Admin เพื่อฝัง URL ให้เมนูนี้</div>
       </div>
       <iframe id="embedFrame" hidden title="Embedded Dashboard"></iframe>
-      <!-- iDash brand badge, floated over the frame's corner for external
-           dashboards (?brand=1). It lives in OUR page, not in the embedded
-           site's DOM — so it works on any site regardless of CORS, cannot
-           break the site underneath, and pointer-events:none means it can
-           never block a button that happens to sit under it. -->
-      <div class="embed-brand" id="embedBrand" hidden aria-hidden="true">
-        <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <rect x="2" y="18" width="6" height="12" rx="1.5" fill="#2563eb"/>
-          <rect x="10" y="12" width="6" height="18" rx="1.5" fill="#3b82f6"/>
-          <rect x="18" y="6" width="6" height="24" rx="1.5" fill="#60a5fa"/>
-          <rect x="26" y="2" width="4" height="28" rx="1.5" fill="#93c5fd"/>
-        </svg>
-        <span>iDash</span>
-      </div>
     </div>
   </div>
 </main>
@@ -175,7 +168,7 @@
   (function () {
     var params = new URLSearchParams(window.location.search);
     var url = params.get('url');
-    // ?brand=1 → float the iDash badge over the frame's corner. Opt-in per
+    // ?brand=1 → show the iDash mark beside the dashboard name. Opt-in per
     // menu link, so dashboards that carry their own branding stay untouched.
     if (params.get('brand') === '1') {
       var brandEl = document.getElementById('embedBrand');
