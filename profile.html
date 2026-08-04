@@ -7,7 +7,7 @@
   <script>if (!window.iDashAuth.requireSignIn()) { document.documentElement.style.display = 'none'; }</script>
   <title>iDash — Profile</title>
   <link rel="stylesheet" href="css/style.css?v=20260804b">
-  <link rel="stylesheet" href="css/account.css?v=20260804c">
+  <link rel="stylesheet" href="css/account.css?v=20260805a">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect x='2' y='18' width='6' height='12' rx='1' fill='%232563eb'/><rect x='10' y='12' width='6' height='18' rx='1' fill='%233b82f6'/><rect x='18' y='6' width='6' height='24' rx='1' fill='%2360a5fa'/><rect x='26' y='2' width='6' height='28' rx='1' fill='%2393c5fd'/></svg>">
 </head>
 <body>
@@ -103,10 +103,20 @@
 
     <div class="acct-card">
       <div class="pf-identity">
-        <div class="pf-avatar" id="pfAvatar">B</div>
+        <button type="button" class="pf-avatar-btn" id="pfAvatarBtn" title="เปลี่ยนรูปโปรไฟล์">
+          <span class="pf-avatar" id="pfAvatar">B</span>
+          <span class="pf-avatar-cam">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
+          </span>
+        </button>
+        <input type="file" id="pfPhotoFile" accept="image/*" hidden>
         <div>
           <div class="pf-identity-name" id="pfNamePreview">Bobo</div>
           <div class="pf-identity-note" id="pfRolePreview">Admin</div>
+          <div class="pf-photo-actions">
+            <button type="button" class="pf-photo-link" id="pfPhotoPick">อัปโหลดรูป</button>
+            <button type="button" class="pf-photo-link danger" id="pfPhotoRemove" hidden>ลบรูป</button>
+          </div>
         </div>
       </div>
 
@@ -148,7 +158,7 @@
   </div>
 </main>
 
-<script src="js/sidebar.js?v=20260804b"></script>
-<script src="js/account.js?v=20260804c"></script>
+<script src="js/sidebar.js?v=20260805a"></script>
+<script src="js/account.js?v=20260805a"></script>
 </body>
 </html>

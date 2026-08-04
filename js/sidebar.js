@@ -83,7 +83,19 @@
       var avEl = el.querySelector('.user-avatar');
       if (p.name && nameEl) nameEl.textContent = p.name;
       if (p.role && roleEl) roleEl.textContent = p.role;
-      if (p.name && avEl) avEl.textContent = p.name.charAt(0).toUpperCase();
+      if (avEl) {
+        if (p.photo) {
+          // The saved avatar is a small data URL; painted as background so the
+          // circle needs no <img> and the initial simply stops being visible.
+          avEl.textContent = '';
+          avEl.style.backgroundImage = 'url(' + p.photo + ')';
+          avEl.style.backgroundSize = 'cover';
+          avEl.style.backgroundPosition = 'center';
+        } else if (p.name) {
+          avEl.textContent = p.name.charAt(0).toUpperCase();
+          avEl.style.backgroundImage = '';
+        }
+      }
     });
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', applyProfile);

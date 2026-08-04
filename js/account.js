@@ -24,21 +24,82 @@
     var emailEl = document.getElementById('pfEmail');
     var msg = document.getElementById('pfMsg');
 
+    // Photo pending save — starts as whatever is stored; null = deleted.
+    var photoData = null;
+
     function fill() {
       var p = loadProfile();
       nameEl.value = p.name || 'Bobo';
       roleEl.value = p.role || 'Admin';
       emailEl.value = p.email || '';
+      photoData = p.photo || null;
       preview();
     }
     function preview() {
       var n = nameEl.value.trim() || 'Bobo';
       document.getElementById('pfNamePreview').textContent = n;
       document.getElementById('pfRolePreview').textContent = roleEl.value.trim() || 'Admin';
-      document.getElementById('pfAvatar').textContent = n.charAt(0).toUpperCase();
+      var av = document.getElementById('pfAvatar');
+      av.textContent = n.charAt(0).toUpperCase();
+      av.classList.toggle('has-photo', !!photoData);
+      av.style.backgroundImage = photoData ? 'url(' + photoData + ')' : '';
+      document.getElementById('pfPhotoRemove').hidden = !photoData;
+      document.getElementById('pfPhotoPick').textContent = photoData ? 'เปลี่ยนรูป' : 'อัปโหลดรูป';
     }
     nameEl.addEventListener('input', preview);
     roleEl.addEventListener('input', preview);
+
+    /* Any image, any size, becomes a 128×128 cover-cropped JPEG (~5-10KB)
+     * before it goes anywhere near localStorage — a phone photo stored raw
+     * would blow the ~5MB quota on its own and take every other saved thing
+     * down with it. */
+    function toAvatar(file) {
+      return new Promise(function (resolve, reject) {
+        if (!/^image\//.test(file.type)) { reject(new Error('ไฟล์นี้ไม่ใช่รูปภาพ')); return; }
+        var img = new Image();
+        var url = URL.createObjectURL(file);
+        img.onload = function () {
+          URL.revokeObjectURL(url);
+          try {
+            var S = 128;
+            var c = document.createElement('canvas');
+            c.width = S; c.height = S;
+            var side = Math.min(img.naturalWidth, img.naturalHeight);
+            var sx = (img.naturalWidth - side) / 2;
+            var sy = (img.naturalHeight - side) / 2;
+            c.getContext('2d').drawImage(img, sx, sy, side, side, 0, 0, S, S);
+            resolve(c.toDataURL('image/jpeg', 0.85));
+          } catch (e) { reject(new Error('อ่านรูปไม่สำเร็จ')); }
+        };
+        img.onerror = function () { URL.revokeObjectURL(url); reject(new Error('อ่านรูปไม่สำเร็จ')); };
+        img.src = url;
+      });
+    }
+
+    var fileEl = document.getElementById('pfPhotoFile');
+    function pickPhoto() { fileEl.click(); }
+    document.getElementById('pfPhotoPick').addEventListener('click', pickPhoto);
+    document.getElementById('pfAvatarBtn').addEventListener('click', pickPhoto);
+    fileEl.addEventListener('change', function () {
+      var f = fileEl.files[0];
+      fileEl.value = '';
+      if (!f) return;
+      toAvatar(f).then(function (data) {
+        photoData = data;
+        preview();
+        msg.className = 'acct-msg';
+        msg.textContent = 'กด "บันทึกโปรไฟล์" เพื่อใช้รูปนี้';
+      }).catch(function (err) {
+        msg.className = 'acct-msg err';
+        msg.textContent = err.message;
+      });
+    });
+    document.getElementById('pfPhotoRemove').addEventListener('click', function () {
+      photoData = null;
+      preview();
+      msg.className = 'acct-msg';
+      msg.textContent = 'กด "บันทึกโปรไฟล์" เพื่อยืนยันการลบรูป';
+    });
 
     pfForm.addEventListener('submit', function (e) {
       e.preventDefault();
@@ -50,7 +111,8 @@
       }
       try {
         localStorage.setItem(PROFILE_KEY, JSON.stringify({
-          name: nameEl.value.trim(), role: roleEl.value.trim(), email: em
+          name: nameEl.value.trim(), role: roleEl.value.trim(), email: em,
+          photo: photoData || undefined
         }));
         msg.className = 'acct-msg ok';
         msg.textContent = 'บันทึกแล้ว — มีผลกับทุกหน้าทันที';
