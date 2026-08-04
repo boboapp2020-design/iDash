@@ -407,7 +407,8 @@ form { margin-top: 32px; }
   // Empty = the form says registration isn't wired up yet instead of
   // pretending to submit. The window override exists so the URL can also be
   // set from a snippet/console without editing this file.
-  var SIGNUP_API_URL = window.IDASH_SIGNUP_URL || '';
+  var SIGNUP_API_URL = window.IDASH_SIGNUP_URL ||
+    'https://script.google.com/macros/s/AKfycbyY5SHhs5_-qFOraFkIRNcj4gUh2Ak1AEhoAv7cdEdFQi86glm7Lyw5ycpHRm9zB4aG/exec';
 
   var loginCard = document.getElementById('loginCard');
   var signupCard = document.getElementById('signupCard');
