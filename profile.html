@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="js/auth.js?v=20260729b"></script>
+  <script>if (!window.iDashAuth.requireSignIn()) { document.documentElement.style.display = 'none'; }</script>
+  <title>iDash — Profile</title>
+  <link rel="stylesheet" href="css/style.css?v=20260804b">
+  <link rel="stylesheet" href="css/account.css?v=20260804b">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect x='2' y='18' width='6' height='12' rx='1' fill='%232563eb'/><rect x='10' y='12' width='6' height='18' rx='1' fill='%233b82f6'/><rect x='18' y='6' width='6' height='24' rx='1' fill='%2360a5fa'/><rect x='26' y='2' width='6' height='28' rx='1' fill='%2393c5fd'/></svg>">
+</head>
+<body>
+
+<!-- ─── SIDEBAR ─── -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect x="2" y="18" width="6" height="12" rx="1.5" fill="#2563eb"/>
+      <rect x="10" y="12" width="6" height="18" rx="1.5" fill="#3b82f6"/>
+      <rect x="18" y="6" width="6" height="24" rx="1.5" fill="#60a5fa"/>
+      <rect x="26" y="2" width="4" height="28" rx="1.5" fill="#93c5fd"/>
+    </svg>
+    <div>
+      <span class="logo-text">iDash</span>
+      <span class="logo-sub">AI Dashboard Intelligence Platform</span>
+    </div>
+  </div>
+
+  <nav class="sidebar-nav">
+    <a href="index.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      Home
+    </a>
+    <a id="dashCenterToggle" style="cursor:pointer">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+      Dashboard Center
+      <svg class="nav-chevron" id="dashCenterChevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+    </a>
+    <div class="nav-submenu" id="dashCenterMenu" hidden>
+      <!-- Keep this list identical to index.html's #dashCenterMenu. -->
+      <a href="embedded_dashboard.html?name=Quality%20Dashboard&amp;view=dashboard&amp;url=https%3A%2F%2Fboboapp2020-design.github.io%2FML_Dashboard2026_2027%2F">Quality Dashboard</a>
+      <a href="embedded_dashboard.html?name=Production%20Dashboard&amp;url=https%3A%2F%2Fboboapp2020-design.github.io%2FML_Dashboard2026_2027%2F">Production Dashboard</a>
+      <a href="embedded_dashboard.html?name=Sale%20Dashboard&amp;url=dashboards%2Fsales_dashboard.html">Sale Dashboard</a>
+      <a href="embedded_dashboard.html?name=QM%20Dashboard&amp;url=dashboards%2Fqm_dashboard.html">QM Dashboard</a>
+      <a href="embedded_dashboard.html?name=Store%20Dashboard&amp;url=https%3A%2F%2Fshippingml.github.io%2FStoreML%2F">Store Dashboard</a>
+      <a href="embedded_dashboard.html?name=BOI%20Dashboard&amp;url=https%3A%2F%2Fshippingml.github.io%2FBOI-ML%2F">BOI Dashboard</a>
+    </div>
+    <a href="request.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+      Request Dashboard
+    </a>
+    <a href="chat.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="8" width="16" height="12" rx="2"/><circle cx="9" cy="14" r="1.2" fill="currentColor"/><circle cx="15" cy="14" r="1.2" fill="currentColor"/><path d="M12 8V4"/><circle cx="12" cy="3" r="1.2" fill="currentColor"/></svg>
+      AI Chatbot
+    </a>
+    <a class="active" href="profile.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      Profile
+    </a>
+    <a href="settings.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06A1.65 1.65 0 004.6 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06A1.65 1.65 0 009 4.6a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+      Settings
+    </a>
+  </nav>
+
+  <div class="sidebar-footer">
+    <div class="sidebar-user" id="sidebarUserTrigger">
+      <div class="user-avatar">A</div>
+      <div class="user-info">
+        <div class="user-name">Bobo</div>
+        <div class="user-role">Admin</div>
+      </div>
+      <div class="sidebar-user-menu" id="sidebarUserMenu" hidden>
+        <button type="button" data-action="profile">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          โปรไฟล์
+        </button>
+        <button type="button" data-action="settings">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06A1.65 1.65 0 004.6 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06A1.65 1.65 0 009 4.6a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+          ตั้งค่า
+        </button>
+        <div class="sidebar-user-menu-divider"></div>
+        <button type="button" data-action="logout" class="danger">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          ออกจากระบบ
+        </button>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- ─── MAIN ─── -->
+<main class="main">
+  <div class="acct-wrap">
+    <div class="acct-head">
+      <div class="acct-title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        โปรไฟล์ของฉัน
+      </div>
+      <div class="acct-sub">ข้อมูลนี้แสดงบนแถบด้านซ้ายของทุกหน้า และบันทึกไว้ในเครื่องนี้</div>
+    </div>
+
+    <div class="acct-card">
+      <div class="pf-identity">
+        <div class="pf-avatar" id="pfAvatar">B</div>
+        <div>
+          <div class="pf-identity-name" id="pfNamePreview">Bobo</div>
+          <div class="pf-identity-note" id="pfRolePreview">Admin</div>
+        </div>
+      </div>
+
+      <form id="pfForm" novalidate>
+        <div class="acct-row2">
+          <div class="acct-field">
+            <label class="acct-label" for="pfName">ชื่อที่แสดง</label>
+            <input class="acct-input" type="text" id="pfName" maxlength="40" placeholder="เช่น Bobo">
+          </div>
+          <div class="acct-field">
+            <label class="acct-label" for="pfRole">ตำแหน่ง / บทบาท</label>
+            <input class="acct-input" type="text" id="pfRole" maxlength="40" placeholder="เช่น Admin, Planner">
+          </div>
+        </div>
+        <div class="acct-field">
+          <label class="acct-label" for="pfEmail">Email ติดต่อ</label>
+          <input class="acct-input" type="email" id="pfEmail" maxlength="80" placeholder="name@example.com" spellcheck="false">
+          <div class="acct-hint">ใช้เป็นค่าเริ่มต้นในหน้า "ขอสร้าง Dashboard" เพื่อไม่ต้องพิมพ์ซ้ำ</div>
+        </div>
+
+        <div class="acct-actions">
+          <button type="submit" class="acct-btn primary">บันทึกโปรไฟล์</button>
+          <button type="button" class="acct-btn ghost" id="pfReset">คืนค่าเดิม</button>
+        </div>
+        <div class="acct-msg" id="pfMsg"></div>
+      </form>
+    </div>
+
+    <div class="acct-card">
+      <div class="acct-card-title">บัญชีผู้ใช้</div>
+      <div class="acct-card-desc">
+        โปรไฟล์นี้เก็บไว้ในเบราว์เซอร์เครื่องนี้เท่านั้น (localStorage) — ยังไม่ผูกกับระบบบัญชีกลาง
+        การสมัครสมาชิกจากหน้าเข้าสู่ระบบจะถูกส่งให้ผู้ดูแลตรวจและเปิดสิทธิ์ก่อนใช้งานจริง
+      </div>
+      <div class="acct-actions">
+        <button type="button" class="acct-btn danger" id="pfSignOut">ออกจากระบบ</button>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script src="js/sidebar.js?v=20260804b"></script>
+<script src="js/account.js?v=20260804b"></script>
+</body>
+</html>

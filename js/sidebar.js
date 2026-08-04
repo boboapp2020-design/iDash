@@ -52,8 +52,10 @@
       btn.addEventListener('click', () => {
         const action = btn.dataset.action;
         closeMenu();
-        if (action === 'settings' || action === 'profile') {
-          showAppToast('ฟีเจอร์นี้จะเปิดใช้งานเมื่อเชื่อมต่อระบบผู้ใช้ (หลัง Supabase Auth พร้อม)');
+        if (action === 'profile') {
+          window.location.href = 'profile.html';
+        } else if (action === 'settings') {
+          window.location.href = 'settings.html';
         } else if (action === 'logout') {
           clearLocalAppState();
           // End the session too, otherwise "ออกจากระบบ" just reloaded Home
@@ -64,4 +66,27 @@
       });
     });
   });
+
+  /* ── Profile display sync ────────────────────────────────────────────────
+   * The name/role/avatar in the footer are static HTML on every page; the
+   * Profile page saves the real values to localStorage. Applying them here
+   * means one save follows the user across the whole app without touching
+   * each page's markup.
+   */
+  function applyProfile() {
+    var p = null;
+    try { p = JSON.parse(localStorage.getItem('idash.profile') || 'null'); } catch (e) {}
+    if (!p) return;
+    document.querySelectorAll('.sidebar-user').forEach(function (el) {
+      var nameEl = el.querySelector('.user-name');
+      var roleEl = el.querySelector('.user-role');
+      var avEl = el.querySelector('.user-avatar');
+      if (p.name && nameEl) nameEl.textContent = p.name;
+      if (p.role && roleEl) roleEl.textContent = p.role;
+      if (p.name && avEl) avEl.textContent = p.name.charAt(0).toUpperCase();
+    });
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', applyProfile);
+  else applyProfile();
+  window.iDashSidebarProfile = { refresh: applyProfile };
 })();

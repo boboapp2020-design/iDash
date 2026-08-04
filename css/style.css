@@ -32,17 +32,24 @@
   --text: #1f2937;
   --text-secondary: #6b7280;
   --text-muted: #9ca3af;
-  /* Deeper, more dimensional surfaces: a firmer border plus a two-part shadow
-     (a tight contact shadow + a wider soft one) so cards lift off the page. */
-  --border: #dde3ec;
+  /* Light model for the whole app: one soft key light from the top.
+     Every surface carries (a) a cool hairline, (b) a 1px inner top highlight
+     where the light lands, and (c) a two-part drop shadow — a tight contact
+     shadow plus a wide tinted-ink ambient one. Depth reads from light, not
+     from heavy borders, which is what lets the page feel expensive while
+     staying quiet. --glow is the hover accent: a colour-bleed shadow used by
+     interactive cards so "this responds" is said with light. */
+  --border: #e3e9f4;
   --border-strong: #cdd6e3;
-  --shadow-sm: 0 1px 2px rgba(16,24,40,.07), 0 2px 6px rgba(16,24,40,.05);
-  --shadow: 0 2px 4px rgba(16,24,40,.07), 0 6px 16px rgba(16,24,40,.07);
-  --shadow-md: 0 4px 8px rgba(16,24,40,.08), 0 12px 28px rgba(16,24,40,.09);
-  --shadow-lg: 0 8px 16px rgba(16,24,40,.09), 0 24px 48px rgba(16,24,40,.12);
-  --radius: 14px;
-  --radius-sm: 8px;
-  --radius-lg: 20px;
+  --edge-light: inset 0 1px 0 rgba(255,255,255,.85);
+  --shadow-sm: 0 1px 2px rgba(23,37,84,.06), 0 4px 14px -4px rgba(23,37,84,.06);
+  --shadow: 0 1px 3px rgba(23,37,84,.07), 0 10px 28px -8px rgba(23,37,84,.10);
+  --shadow-md: 0 2px 6px rgba(23,37,84,.07), 0 18px 40px -12px rgba(23,37,84,.14);
+  --shadow-lg: 0 4px 10px rgba(23,37,84,.08), 0 32px 64px -16px rgba(23,37,84,.20);
+  --glow: 0 2px 6px rgba(23,37,84,.06), 0 18px 38px -10px rgba(37,99,235,.28);
+  --radius: 16px;
+  --radius-sm: 10px;
+  --radius-lg: 22px;
 
   --font: 'Inter', 'Noto Sans Thai', system-ui, -apple-system, sans-serif;
   --sidebar-w: 220px;
@@ -61,10 +68,19 @@ body {
 }
 
 /* ─── SIDEBAR ─── */
+/* Frosted glass over the page's colour wash: the mesh background shows
+   through at low alpha, so the rail feels lit by the page instead of pasted
+   beside it. The gradient keeps its top brighter than its foot — same key
+   light as the cards. Solid-white fallback first for engines without
+   backdrop-filter. */
 .sidebar {
   width: var(--sidebar-w);
   background: var(--sidebar-bg);
-  border-right: 1px solid var(--border);
+  background: linear-gradient(180deg, rgba(255,255,255,.86), rgba(255,255,255,.72));
+  -webkit-backdrop-filter: blur(22px) saturate(1.5);
+  backdrop-filter: blur(22px) saturate(1.5);
+  border-right: 1px solid rgba(148,163,203,.22);
+  box-shadow: 1px 0 0 rgba(255,255,255,.6) inset, 8px 0 32px -20px rgba(23,37,84,.18);
   display: flex;
   flex-direction: column;
   position: fixed;
@@ -99,7 +115,10 @@ body {
   background: var(--primary-gradient);
   color: #fff;
   font-weight: 700;
-  box-shadow: 0 4px 12px rgba(37, 99, 235, .30);
+  /* Lit from above (inner top highlight) and casting colour, not grey —
+     the one saturated element in the rail also carries the strongest light. */
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.28),
+              0 6px 18px -4px rgba(37, 99, 235, .45);
 }
 .sidebar-nav a.active:hover { background: var(--primary-gradient); color: #fff; }
 .sidebar-nav a svg { width: 18px; height: 18px; flex-shrink: 0; opacity: .7; }
@@ -201,13 +220,18 @@ body {
 .feature-desc { font-size: 11px; color: var(--text-secondary); line-height: 1.5; }
 
 /* ─── CARD SHARED ─── */
+/* Hairline + light, not a frame: the old 2px flat border drew the card, this
+   lets the shadow and the inner top highlight lift it off the wash instead. */
 .card {
   background: var(--card-bg);
+  background: linear-gradient(180deg, #ffffff 0%, #fdfdff 100%);
   border-radius: var(--radius);
   padding: 24px;
-  box-shadow: var(--shadow-sm);
-  border: 2px solid var(--border);
+  box-shadow: var(--edge-light), var(--shadow);
+  border: 1px solid var(--border);
+  transition: box-shadow .22s ease, transform .22s ease;
 }
+.card:hover { box-shadow: var(--edge-light), var(--shadow-md); }
 .card-title {
   font-size: 16px; font-weight: 700; margin-bottom: 4px; color: var(--gray-900);
 }
@@ -232,7 +256,7 @@ body {
 }
 .module-card:hover {
   border-color: var(--primary-light);
-  box-shadow: 0 0 0 3px rgba(37,99,235,.08);
+  box-shadow: 0 0 0 3px rgba(37,99,235,.10), 0 12px 26px -10px rgba(37,99,235,.30);
   transform: translateY(-2px);
 }
 .module-card.active {

@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="js/auth.js?v=20260729b"></script>
+  <script>if (!window.iDashAuth.requireSignIn()) { document.documentElement.style.display = 'none'; }</script>
+  <title>iDash — Settings</title>
+  <link rel="stylesheet" href="css/style.css?v=20260804b">
+  <link rel="stylesheet" href="css/account.css?v=20260804b">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect x='2' y='18' width='6' height='12' rx='1' fill='%232563eb'/><rect x='10' y='12' width='6' height='18' rx='1' fill='%233b82f6'/><rect x='18' y='6' width='6' height='24' rx='1' fill='%2360a5fa'/><rect x='26' y='2' width='6' height='28' rx='1' fill='%2393c5fd'/></svg>">
+</head>
+<body>
+
+<!-- ─── SIDEBAR ─── -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect x="2" y="18" width="6" height="12" rx="1.5" fill="#2563eb"/>
+      <rect x="10" y="12" width="6" height="18" rx="1.5" fill="#3b82f6"/>
+      <rect x="18" y="6" width="6" height="24" rx="1.5" fill="#60a5fa"/>
+      <rect x="26" y="2" width="4" height="28" rx="1.5" fill="#93c5fd"/>
+    </svg>
+    <div>
+      <span class="logo-text">iDash</span>
+      <span class="logo-sub">AI Dashboard Intelligence Platform</span>
+    </div>
+  </div>
+
+  <nav class="sidebar-nav">
+    <a href="index.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      Home
+    </a>
+    <a id="dashCenterToggle" style="cursor:pointer">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+      Dashboard Center
+      <svg class="nav-chevron" id="dashCenterChevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+    </a>
+    <div class="nav-submenu" id="dashCenterMenu" hidden>
+      <!-- Keep this list identical to index.html's #dashCenterMenu. -->
+      <a href="embedded_dashboard.html?name=Quality%20Dashboard&amp;view=dashboard&amp;url=https%3A%2F%2Fboboapp2020-design.github.io%2FML_Dashboard2026_2027%2F">Quality Dashboard</a>
+      <a href="embedded_dashboard.html?name=Production%20Dashboard&amp;url=https%3A%2F%2Fboboapp2020-design.github.io%2FML_Dashboard2026_2027%2F">Production Dashboard</a>
+      <a href="embedded_dashboard.html?name=Sale%20Dashboard&amp;url=dashboards%2Fsales_dashboard.html">Sale Dashboard</a>
+      <a href="embedded_dashboard.html?name=QM%20Dashboard&amp;url=dashboards%2Fqm_dashboard.html">QM Dashboard</a>
+      <a href="embedded_dashboard.html?name=Store%20Dashboard&amp;url=https%3A%2F%2Fshippingml.github.io%2FStoreML%2F">Store Dashboard</a>
+      <a href="embedded_dashboard.html?name=BOI%20Dashboard&amp;url=https%3A%2F%2Fshippingml.github.io%2FBOI-ML%2F">BOI Dashboard</a>
+    </div>
+    <a href="request.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+      Request Dashboard
+    </a>
+    <a href="chat.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="8" width="16" height="12" rx="2"/><circle cx="9" cy="14" r="1.2" fill="currentColor"/><circle cx="15" cy="14" r="1.2" fill="currentColor"/><path d="M12 8V4"/><circle cx="12" cy="3" r="1.2" fill="currentColor"/></svg>
+      AI Chatbot
+    </a>
+    <a href="profile.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      Profile
+    </a>
+    <a class="active" href="settings.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06A1.65 1.65 0 004.6 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06A1.65 1.65 0 009 4.6a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+      Settings
+    </a>
+  </nav>
+
+  <div class="sidebar-footer">
+    <div class="sidebar-user" id="sidebarUserTrigger">
+      <div class="user-avatar">A</div>
+      <div class="user-info">
+        <div class="user-name">Bobo</div>
+        <div class="user-role">Admin</div>
+      </div>
+      <div class="sidebar-user-menu" id="sidebarUserMenu" hidden>
+        <button type="button" data-action="profile">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          โปรไฟล์
+        </button>
+        <button type="button" data-action="settings">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06A1.65 1.65 0 004.6 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06A1.65 1.65 0 009 4.6a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+          ตั้งค่า
+        </button>
+        <div class="sidebar-user-menu-divider"></div>
+        <button type="button" data-action="logout" class="danger">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          ออกจากระบบ
+        </button>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- ─── MAIN ─── -->
+<main class="main">
+  <div class="acct-wrap">
+    <div class="acct-head">
+      <div class="acct-title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06A1.65 1.65 0 004.6 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06A1.65 1.65 0 009 4.6a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+        ตั้งค่า
+      </div>
+      <div class="acct-sub">การเชื่อมต่อ AI · ข้อมูลในเครื่อง · เวอร์ชันระบบ</div>
+    </div>
+
+    <!-- ── AI connection ── -->
+    <div class="acct-card">
+      <div class="acct-card-title">การเชื่อมต่อ AI</div>
+      <div class="acct-card-desc">ใช้กับโหมด AI Autopilot — เลือกผู้ให้บริการแล้วใส่ key ของคุณเอง ค่าเดียวกับที่ตั้งจากหน้า Home</div>
+
+      <div class="acct-field">
+        <label class="acct-label" for="stProvider">ผู้ให้บริการ</label>
+        <select class="acct-select" id="stProvider"></select>
+      </div>
+      <div class="acct-field">
+        <label class="acct-label" for="stKey">API Key</label>
+        <input class="acct-input" type="password" id="stKey" spellcheck="false" autocomplete="off" placeholder="">
+        <div class="acct-hint" id="stKeyHint"></div>
+      </div>
+      <div class="acct-field" id="stEndpointField" hidden>
+        <label class="acct-label" for="stEndpoint">API URL</label>
+        <input class="acct-input" type="url" id="stEndpoint" spellcheck="false" placeholder="">
+      </div>
+      <div class="acct-field">
+        <label class="acct-label" for="stModel">โมเดล</label>
+        <select class="acct-select" id="stModel"></select>
+      </div>
+      <div class="acct-field" id="stModelCustomField" hidden>
+        <label class="acct-label" for="stModelCustom">ชื่อโมเดล</label>
+        <input class="acct-input" type="text" id="stModelCustom" spellcheck="false" autocomplete="off" placeholder="เช่น gemini-3.0-pro">
+      </div>
+      <div class="acct-field" id="stPinField" hidden>
+        <label class="acct-label" for="stPin">PIN ของ Edge Function</label>
+        <input class="acct-input" type="password" id="stPin" spellcheck="false" autocomplete="off" inputmode="numeric" placeholder="ใส่ PIN ที่ตั้งไว้ใน Supabase Secrets">
+        <div class="acct-hint">เว้นว่างได้ถ้ายังไม่ได้ตั้ง AUTOPILOT_PIN บน Edge Function</div>
+      </div>
+
+      <div class="acct-actions">
+        <button type="button" class="acct-btn primary" id="stSave">บันทึก</button>
+        <button type="button" class="acct-btn ghost" id="stTest">ทดสอบการเชื่อมต่อ</button>
+      </div>
+      <div class="acct-msg" id="stMsg"></div>
+    </div>
+
+    <!-- ── Local data ── -->
+    <div class="acct-card">
+      <div class="acct-card-title">ข้อมูลในเครื่องนี้</div>
+      <div class="acct-card-desc">iDash เก็บงานของคุณไว้ในเบราว์เซอร์ — ลบได้จากที่นี่ ลบแล้วกู้คืนไม่ได้</div>
+      <div class="set-kv">
+        <div class="set-item">
+          <div>
+            <div class="set-item-name">แดชบอร์ดที่บันทึกไว้ + งานค้างใน Custom Studio</div>
+            <div class="set-item-desc">idash.customDashboards และ autosave ของหน้า Custom</div>
+          </div>
+          <button type="button" class="acct-btn danger" data-clear="dashboards">ลบ</button>
+        </div>
+        <div class="set-item">
+          <div>
+            <div class="set-item-name">การตั้งค่า AI ทั้งหมด</div>
+            <div class="set-item-desc">API key, endpoint, โมเดล และ PIN ที่เก็บไว้ในเครื่องนี้</div>
+          </div>
+          <button type="button" class="acct-btn danger" data-clear="ai">ลบ</button>
+        </div>
+        <div class="set-item">
+          <div>
+            <div class="set-item-name">โปรไฟล์ในเครื่อง</div>
+            <div class="set-item-desc">ชื่อที่แสดง ตำแหน่ง และอีเมลในหน้า Profile</div>
+          </div>
+          <button type="button" class="acct-btn danger" data-clear="profile">ลบ</button>
+        </div>
+      </div>
+      <div class="acct-msg" id="clearMsg"></div>
+    </div>
+
+    <!-- ── About ── -->
+    <div class="acct-card">
+      <div class="acct-card-title">เกี่ยวกับระบบ</div>
+      <div class="set-kv">
+        <div class="set-item">
+          <div class="set-item-name">เวอร์ชัน build</div>
+          <span class="set-badge" id="aboutBuild">—</span>
+        </div>
+        <div class="set-item">
+          <div class="set-item-name">โหมดการทำงาน</div>
+          <span class="set-badge ok">Offline-first · ข้อมูลรายแถวไม่ออกจากเครื่อง</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script src="js/sidebar.js?v=20260804b"></script>
+<script src="js/ai_providers.js?v=20260803d"></script>
+<script src="js/account.js?v=20260804b"></script>
+</body>
+</html>

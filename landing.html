@@ -241,7 +241,7 @@ form { margin-top: 32px; }
 
 <!-- ── Sign-in card ── -->
 <section class="panel">
-  <div class="card">
+  <div class="card" id="loginCard">
     <img class="card-logo" src="assets/img/logo_idash.png" alt="iDash">
     <div class="card-title">เข้าสู่ระบบ</div>
     <div class="card-sub">เข้าสู่ระบบเพื่อใช้งาน iDash</div>
@@ -282,11 +282,63 @@ form { margin-top: 32px; }
       เข้าสู่ระบบด้วย Google
     </button>
 
-    <div class="signup">ยังไม่มีบัญชี? <button type="button" class="link-muted not-ready" disabled title="ยังไม่เปิดใช้งาน">สมัครใช้งาน</button></div>
+    <div class="signup">ยังไม่มีบัญชี? <button type="button" class="link-muted" id="showSignup">สมัครใช้งาน</button></div>
 
     <div class="note">
-      เข้าสู่ระบบด้วย Google · ลืมรหัสผ่าน · สมัครใช้งาน — ยังไม่เปิดใช้งาน<br>
+      เข้าสู่ระบบด้วย Google · ลืมรหัสผ่าน — ยังไม่เปิดใช้งาน<br>
       เพราะต้องมีระบบบัญชีผู้ใช้ฝั่งเซิร์ฟเวอร์ก่อน
+    </div>
+  </div>
+
+  <!-- ── Signup card — swapped in place of the login card ──
+       Registration is a LOG, not an account: the row lands in the admin's
+       sheet as "pending" and sign-in still uses the existing credential until
+       an account backend exists. The card says so, so nobody registers and
+       then wonders why the new password doesn't open the door. -->
+  <div class="card" id="signupCard" hidden>
+    <img class="card-logo" src="assets/img/logo_idash.png" alt="iDash">
+    <div class="card-title">สมัครใช้งาน</div>
+    <div class="card-sub">กรอกข้อมูล 4 ช่อง — คำขอจะถูกส่งให้ผู้ดูแลระบบเปิดสิทธิ์</div>
+
+    <form id="signupForm" novalidate>
+      <div class="field">
+        <label class="field-label" for="suUser">ชื่อผู้ใช้</label>
+        <div class="input-wrap">
+          <svg class="lead" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          <input type="text" id="suUser" placeholder="a-z, 0-9, _ . - (3-32 ตัว)" autocomplete="username" spellcheck="false" autocapitalize="off">
+        </div>
+      </div>
+      <div class="field">
+        <label class="field-label" for="suPass">รหัสผ่าน</label>
+        <div class="input-wrap">
+          <svg class="lead" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          <input type="password" id="suPass" placeholder="อย่างน้อย 6 ตัวอักษร" autocomplete="new-password">
+        </div>
+      </div>
+      <div class="field">
+        <label class="field-label" for="suPass2">ยืนยันรหัสผ่าน</label>
+        <div class="input-wrap">
+          <svg class="lead" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/><polyline points="9 16 11 18 15 14"/></svg>
+          <input type="password" id="suPass2" placeholder="พิมพ์รหัสผ่านซ้ำอีกครั้ง" autocomplete="new-password">
+        </div>
+      </div>
+      <div class="field">
+        <label class="field-label" for="suEmail">Email ติดต่อ</label>
+        <div class="input-wrap">
+          <svg class="lead" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/></svg>
+          <input type="email" id="suEmail" placeholder="name@example.com" autocomplete="email" spellcheck="false">
+        </div>
+      </div>
+
+      <button type="submit" class="submit" id="suBtn">สมัครใช้งาน</button>
+      <div class="msg" id="suMsg"></div>
+    </form>
+
+    <div class="signup">มีบัญชีแล้ว? <button type="button" class="link-muted" id="showLogin">เข้าสู่ระบบ</button></div>
+
+    <div class="note">
+      รหัสผ่านถูกเข้ารหัส (SHA-256) ก่อนส่งจากเครื่องคุณ — ระบบไม่เก็บรหัสผ่านจริง<br>
+      คำขอสมัครจะถูกบันทึกไว้ให้ผู้ดูแลตรวจและเปิดสิทธิ์
     </div>
   </div>
 </section>
@@ -342,6 +394,92 @@ form { margin-top: 32px; }
   });
 
   userEl.focus();
+
+  /* ── Signup ─────────────────────────────────────────────────────────────
+   * The submission is a LOG entry, not an account: the Apps Script appends
+   * [timestamp, username, email, sha256, "pending"] to the admin's sheet.
+   * The password is hashed HERE, before it leaves the machine — the endpoint,
+   * the network, and the sheet never see the real password (same posture as
+   * auth.js, and the reason the .gs validates a 64-hex hash, not a password).
+   */
+
+  // Paste the Web-app URL from deploying _dev/integrations/signup_log.gs.
+  // Empty = the form says registration isn't wired up yet instead of
+  // pretending to submit. The window override exists so the URL can also be
+  // set from a snippet/console without editing this file.
+  var SIGNUP_API_URL = window.IDASH_SIGNUP_URL || '';
+
+  var loginCard = document.getElementById('loginCard');
+  var signupCard = document.getElementById('signupCard');
+  var suMsg = document.getElementById('suMsg');
+  var suBtn = document.getElementById('suBtn');
+
+  function swap(showSignup) {
+    loginCard.hidden = showSignup;
+    signupCard.hidden = !showSignup;
+    suMsg.textContent = '';
+    (showSignup ? document.getElementById('suUser') : userEl).focus();
+  }
+  document.getElementById('showSignup').addEventListener('click', function () { swap(true); });
+  document.getElementById('showLogin').addEventListener('click', function () { swap(false); });
+
+  function sha256Hex(text) {
+    var subtle = window.crypto && window.crypto.subtle;
+    if (!subtle || !window.TextEncoder) return Promise.reject(new Error('เบราว์เซอร์นี้ไม่รองรับการเข้ารหัส (ต้องเปิดผ่าน https)'));
+    return subtle.digest('SHA-256', new TextEncoder().encode('idash-auth:' + text)).then(function (buf) {
+      var out = '', v = new Uint8Array(buf);
+      for (var i = 0; i < v.length; i++) out += ('0' + v[i].toString(16)).slice(-2);
+      return out;
+    });
+  }
+
+  document.getElementById('signupForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+    suMsg.textContent = '';
+    var u = document.getElementById('suUser').value.trim();
+    var p1 = document.getElementById('suPass').value;
+    var p2 = document.getElementById('suPass2').value;
+    var em = document.getElementById('suEmail').value.trim();
+
+    if (!/^[a-zA-Z0-9_.\-]{3,32}$/.test(u)) { suMsg.textContent = 'ชื่อผู้ใช้: a-z, 0-9, _ . - ยาว 3-32 ตัว'; return; }
+    if (p1.length < 6) { suMsg.textContent = 'รหัสผ่านต้องยาวอย่างน้อย 6 ตัวอักษร'; return; }
+    if (p1 !== p2) { suMsg.textContent = 'รหัสผ่านทั้งสองช่องไม่ตรงกัน'; return; }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(em)) { suMsg.textContent = 'รูปแบบอีเมลไม่ถูกต้อง'; return; }
+    if (!SIGNUP_API_URL) { suMsg.textContent = 'ระบบสมัครยังไม่ได้เชื่อมต่อปลายทาง — แจ้งผู้ดูแลระบบ'; return; }
+
+    suBtn.disabled = true;
+    suBtn.textContent = 'กำลังส่งคำขอ…';
+    sha256Hex(u + ':' + p1)
+      .then(function (hash) {
+        // Content-Type is deliberately text/plain: it keeps the request
+        // "simple" so the browser skips the CORS preflight Apps Script
+        // cannot answer. The body is still JSON; the .gs parses it.
+        return fetch(SIGNUP_API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({ username: u, email: em, passwordHash: hash })
+        });
+      })
+      .then(function (resp) { return resp.json(); })
+      .then(function (data) {
+        if (data && data.ok) {
+          suMsg.style.color = '#16a34a';
+          suMsg.textContent = 'ส่งคำขอสมัครแล้ว — ผู้ดูแลจะติดต่อกลับทางอีเมลของคุณ';
+          document.getElementById('signupForm').reset();
+        } else {
+          suMsg.style.color = '';
+          suMsg.textContent = (data && data.error) || 'ส่งคำขอไม่สำเร็จ — ลองใหม่อีกครั้ง';
+        }
+      })
+      .catch(function () {
+        suMsg.style.color = '';
+        suMsg.textContent = 'ติดต่อปลายทางไม่ได้ — ตรวจอินเทอร์เน็ตแล้วลองใหม่';
+      })
+      .finally(function () {
+        suBtn.disabled = false;
+        suBtn.textContent = 'สมัครใช้งาน';
+      });
+  });
 })();
 </script>
 </body>
