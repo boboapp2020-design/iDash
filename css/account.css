@@ -83,6 +83,36 @@ body {
 .acct-msg.ok { color: var(--accent-green); }
 .acct-msg.err { color: var(--accent-red); }
 
+/* ── Settings layout: section rail + content, like every real settings page ── */
+.set-wide { max-width: 980px; }
+.set-layout { display: grid; grid-template-columns: 220px 1fr; gap: 22px; align-items: start; }
+.set-nav {
+  position: sticky; top: 24px;
+  display: flex; flex-direction: column; gap: 4px;
+  background: linear-gradient(180deg, #ffffff 0%, #fdfdff 100%);
+  border: 1px solid var(--border); border-radius: var(--radius);
+  box-shadow: var(--edge-light), var(--shadow-sm);
+  padding: 10px;
+}
+.set-tab {
+  display: flex; align-items: center; gap: 10px;
+  padding: 11px 12px; border: none; border-radius: 10px;
+  background: transparent; font-family: inherit; font-size: 13px; font-weight: 600;
+  color: var(--gray-600); cursor: pointer; text-align: left; transition: all .15s;
+}
+.set-tab svg { width: 16px; height: 16px; flex-shrink: 0; opacity: .7; }
+.set-tab:hover { background: var(--gray-100); color: var(--text); }
+.set-tab.active {
+  background: var(--primary-gradient); color: #fff; font-weight: 700;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.25), 0 6px 16px -4px rgba(37,99,235,.4);
+}
+.set-tab.active svg { opacity: 1; }
+.set-content { min-width: 0; }
+@media (max-width: 860px) {
+  .set-layout { grid-template-columns: 1fr; }
+  .set-nav { position: static; flex-direction: row; flex-wrap: wrap; }
+}
+
 /* ── Settings ── */
 .set-kv { display: flex; flex-direction: column; gap: 0; }
 .set-item {

@@ -229,6 +229,19 @@
   }
 
   // What the Admin actually receives for this field.
+  /** Profile saved on this device — name/email for prefill and the mail body. */
+  function loadProfile() {
+    try { return JSON.parse(localStorage.getItem('idash.profile') || '{}') || {}; }
+    catch (e) { return {}; }
+  }
+
+  /** "ชื่อผู้ส่ง: X (ตำแหน่ง)" line for the top of the admin email. */
+  function senderNameLine() {
+    var p = loadProfile();
+    if (!p.name) return '';
+    return 'ชื่อผู้ส่ง: ' + p.name + (p.role ? ' (' + p.role + ')' : '') + '\n\n';
+  }
+
   function buildExampleText() {
     if (el.exampleField.hidden) return '';
     var names = selectedExamples();
@@ -342,7 +355,10 @@
           body: JSON.stringify({
             fromEmail: el.from.value.trim(),
             subject: el.subject.value,
-            details: el.details.value.trim(),
+            // The sender's name rides inside details, so it reaches the admin
+            // through the ALREADY-DEPLOYED mailer — a separate fromName field
+            // would sit unread until the Apps Script is redeployed.
+            details: senderNameLine() + el.details.value.trim(),
             example: buildExampleText(),
             exampleImages: exampleImages,
             files: files
@@ -395,6 +411,13 @@
     $('reqFootTo').textContent = ADMIN_EMAIL;
 
     restoreDraft();
+    // The profile page saves a contact email exactly so it never has to be
+    // typed again — an empty field starts from it. A draft or the user's own
+    // typing always wins; this only fills silence.
+    if (!el.from.value) {
+      var prof = loadProfile();
+      if (prof.email) el.from.value = prof.email;
+    }
     [el.from, el.subject, el.details, el.example].forEach(function (n) {
       n.addEventListener('input', saveDraft);
       n.addEventListener('change', saveDraft);

@@ -35,16 +35,52 @@
     return out;
   }
 
-  // SubtleCrypto needs a secure context (https or localhost). Missing → fail
-  // closed rather than letting anything through.
-  function verify(username, password) {
+  // The Settings page can override the built-in credential with one the user
+  // chose. The override is a salted hash in localStorage, so it is exactly as
+  // strong (and exactly as device-local) as the built-in gate: whoever set a
+  // password on THIS browser signs in with it here, other machines keep the
+  // default. Clearing browser data clears the override and the default works
+  // again — stated in the Settings UI so a "forgotten" password can't brick
+  // the machine.
+  var OVERRIDE_KEY = 'idash.cred';
+
+  function storedOverride() {
+    try { return localStorage.getItem(OVERRIDE_KEY) || ''; } catch (e) { return ''; }
+  }
+
+  function digestHex(username, password) {
     var subtle = window.crypto && window.crypto.subtle;
-    if (!subtle || !window.TextEncoder) return Promise.resolve(false);
+    // SubtleCrypto needs a secure context (https or localhost). Missing → fail
+    // closed rather than letting anything through.
+    if (!subtle || !window.TextEncoder) return Promise.reject(new Error('no-subtle'));
     var data = new TextEncoder().encode(SALT + username + ':' + password);
-    return subtle.digest('SHA-256', data)
-      .then(function (buf) { return toHex(buf) === CREDENTIAL_SHA256; })
+    return subtle.digest('SHA-256', data).then(toHex);
+  }
+
+  function verify(username, password) {
+    return digestHex(username, password)
+      .then(function (hex) {
+        var override = storedOverride();
+        return override ? hex === override : hex === CREDENTIAL_SHA256;
+      })
       .catch(function () { return false; });
   }
+
+  /** Replace this device's credential. Caller must have verified the current one. */
+  function setLocalPassword(username, newPassword) {
+    return digestHex(String(username || '').trim(), String(newPassword || ''))
+      .then(function (hex) {
+        try { localStorage.setItem(OVERRIDE_KEY, hex); return true; }
+        catch (e) { return false; }
+      })
+      .catch(function () { return false; });
+  }
+
+  function clearLocalPassword() {
+    try { localStorage.removeItem(OVERRIDE_KEY); } catch (e) {}
+  }
+
+  function hasLocalPassword() { return !!storedOverride(); }
 
   function signIn(username, password) {
     return verify(String(username || '').trim(), String(password || '')).then(function (ok) {
@@ -71,6 +107,10 @@
     signIn: signIn,
     signOut: signOut,
     requireSignIn: requireSignIn,
+    verify: verify,
+    setLocalPassword: setLocalPassword,
+    clearLocalPassword: clearLocalPassword,
+    hasLocalPassword: hasLocalPassword,
     LOGIN_PAGE: LOGIN_PAGE
   };
 })();

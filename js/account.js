@@ -190,12 +190,176 @@
     });
   }
 
-  /* ── Settings page — build version ────────────────────────────────────── */
+  /* ── Settings page — section tabs ─────────────────────────────────────── */
+  var setNav = document.getElementById('setNav');
+  if (setNav) {
+    var tabs = setNav.querySelectorAll('.set-tab');
+    var sections = document.querySelectorAll('.set-section');
+    function showTab(name) {
+      tabs.forEach(function (t) { t.classList.toggle('active', t.dataset.tab === name); });
+      sections.forEach(function (s) { s.hidden = s.dataset.section !== name; });
+      // Deep-linkable (settings.html#security), like settings pages elsewhere.
+      try { history.replaceState(null, '', '#' + name); } catch (e) {}
+    }
+    tabs.forEach(function (t) {
+      t.addEventListener('click', function () { showTab(t.dataset.tab); });
+    });
+    var initial = (location.hash || '').slice(1);
+    if ([].some.call(tabs, function (t) { return t.dataset.tab === initial; })) showTab(initial);
+  }
+
+  /* ── Settings page — general ──────────────────────────────────────────── */
+  var startSel = document.getElementById('gnStartPage');
+  if (startSel) {
+    try { startSel.value = localStorage.getItem('idash.pref.startPage') || 'index.html'; } catch (e) {}
+    if (!startSel.value) startSel.value = 'index.html';
+    document.getElementById('gnSave').addEventListener('click', function () {
+      var msg = document.getElementById('gnMsg');
+      try {
+        localStorage.setItem('idash.pref.startPage', startSel.value);
+        msg.className = 'acct-msg ok';
+        msg.textContent = 'บันทึกแล้ว — มีผลเมื่อเข้าสู่ระบบครั้งถัดไป';
+      } catch (e) {
+        msg.className = 'acct-msg err';
+        msg.textContent = 'บันทึกไม่สำเร็จ';
+      }
+    });
+  }
+
+  /* ── Settings page — security (device-local password change) ──────────── */
+  var secForm = document.getElementById('secForm');
+  if (secForm && window.iDashAuth) {
+    var secMsg = document.getElementById('secMsg');
+    function secStatus() {
+      var el = document.getElementById('secStatus');
+      var custom = window.iDashAuth.hasLocalPassword();
+      el.textContent = custom ? 'ใช้รหัสที่ตั้งเองบนเครื่องนี้' : 'ใช้รหัสเริ่มต้นของระบบ';
+      el.className = custom ? 'set-badge ok' : 'set-badge';
+    }
+    secStatus();
+
+    secForm.addEventListener('submit', function (e) {
+      e.preventDefault();
+      var u = document.getElementById('secUser').value.trim();
+      var cur = document.getElementById('secCurrent').value;
+      var n1 = document.getElementById('secNew').value;
+      var n2 = document.getElementById('secNew2').value;
+      secMsg.className = 'acct-msg err';
+      if (!u || !cur) { secMsg.textContent = 'กรอกชื่อผู้ใช้และรหัสผ่านปัจจุบัน'; return; }
+      if (n1.length < 6) { secMsg.textContent = 'รหัสผ่านใหม่ต้องยาวอย่างน้อย 6 ตัวอักษร'; return; }
+      if (n1 !== n2) { secMsg.textContent = 'รหัสผ่านใหม่ทั้งสองช่องไม่ตรงกัน'; return; }
+      secMsg.className = 'acct-msg';
+      secMsg.textContent = 'กำลังตรวจสอบ…';
+      // The current credential must verify BEFORE anything is replaced —
+      // otherwise anyone at an unlocked machine could silently take over.
+      window.iDashAuth.verify(u, cur).then(function (ok) {
+        if (!ok) {
+          secMsg.className = 'acct-msg err';
+          secMsg.textContent = 'ชื่อผู้ใช้หรือรหัสผ่านปัจจุบันไม่ถูกต้อง';
+          return;
+        }
+        return window.iDashAuth.setLocalPassword(u, n1).then(function (saved) {
+          secMsg.className = saved ? 'acct-msg ok' : 'acct-msg err';
+          secMsg.textContent = saved
+            ? 'เปลี่ยนรหัสผ่านแล้ว — ใช้กับการเข้าสู่ระบบครั้งถัดไปบนเครื่องนี้'
+            : 'บันทึกไม่สำเร็จ';
+          if (saved) { secForm.reset(); secStatus(); }
+        });
+      });
+    });
+
+    document.getElementById('secReset').addEventListener('click', function () {
+      if (!window.iDashAuth.hasLocalPassword()) {
+        secMsg.className = 'acct-msg';
+        secMsg.textContent = 'เครื่องนี้ใช้รหัสเริ่มต้นอยู่แล้ว';
+        return;
+      }
+      if (!confirm('กลับไปใช้รหัสเริ่มต้นของระบบ? รหัสที่ตั้งเองบนเครื่องนี้จะถูกลบ')) return;
+      window.iDashAuth.clearLocalPassword();
+      secMsg.className = 'acct-msg ok';
+      secMsg.textContent = 'กลับไปใช้รหัสเริ่มต้นแล้ว';
+      secStatus();
+    });
+  }
+
+  /* ── Settings page — backup / restore ─────────────────────────────────── */
+  var bkExport = document.getElementById('bkExport');
+  if (bkExport) {
+    var bkMsg = document.getElementById('bkMsg');
+    bkExport.addEventListener('click', function () {
+      var out = {};
+      Object.keys(localStorage).forEach(function (k) {
+        if (/^idash\./.test(k)) out[k] = localStorage.getItem(k);
+      });
+      var blob = new Blob([JSON.stringify({ app: 'iDash', exportedAt: new Date().toISOString(), data: out }, null, 2)],
+        { type: 'application/json' });
+      var a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'idash-settings-' + new Date().toISOString().slice(0, 10) + '.json';
+      a.click();
+      URL.revokeObjectURL(a.href);
+      bkMsg.className = 'acct-msg ok';
+      bkMsg.textContent = 'ดาวน์โหลดแล้ว — ไฟล์นี้มี API key ด้วย เก็บให้ปลอดภัย';
+    });
+
+    document.getElementById('bkImportBtn').addEventListener('click', function () {
+      document.getElementById('bkImportFile').click();
+    });
+    document.getElementById('bkImportFile').addEventListener('change', function () {
+      var f = this.files[0];
+      this.value = '';
+      if (!f) return;
+      var reader = new FileReader();
+      reader.onload = function () {
+        try {
+          var parsed = JSON.parse(reader.result);
+          var data = parsed && parsed.app === 'iDash' && parsed.data;
+          if (!data) throw new Error('bad');
+          var n = 0;
+          Object.keys(data).forEach(function (k) {
+            // Only idash.* keys, so a crafted file can't plant anything else.
+            if (/^idash\./.test(k) && typeof data[k] === 'string') {
+              localStorage.setItem(k, data[k]); n++;
+            }
+          });
+          bkMsg.className = 'acct-msg ok';
+          bkMsg.textContent = 'กู้คืนแล้ว ' + n + ' รายการ — รีเฟรชหน้าเพื่อใช้ค่าใหม่';
+          if (window.iDashSidebarProfile) window.iDashSidebarProfile.refresh();
+        } catch (e) {
+          bkMsg.className = 'acct-msg err';
+          bkMsg.textContent = 'ไฟล์นี้ไม่ใช่ไฟล์สำรองของ iDash';
+        }
+      };
+      reader.readAsText(f);
+    });
+  }
+
+  /* ── Settings page — about ────────────────────────────────────────────── */
   var buildEl = document.getElementById('aboutBuild');
   if (buildEl) {
     fetch('version.json', { cache: 'no-store' })
       .then(function (r) { return r.json(); })
       .then(function (v) { buildEl.textContent = (v && v.build) || 'ไม่ทราบ'; })
       .catch(function () { buildEl.textContent = 'ไม่ทราบ'; });
+  }
+  var aboutUpdate = document.getElementById('aboutUpdate');
+  if (aboutUpdate) {
+    aboutUpdate.addEventListener('click', function () {
+      var msg = document.getElementById('aboutMsg');
+      msg.className = 'acct-msg';
+      msg.textContent = 'กำลังตรวจ…';
+      // Same mechanism as build_guard: reload stamped with the server's build
+      // id, which busts the GitHub Pages cache immediately.
+      fetch('version.json', { cache: 'no-store' })
+        .then(function (r) { return r.json(); })
+        .then(function (v) {
+          var b = (v && v.build) || Date.now();
+          window.location.href = window.location.pathname + '?b=' + encodeURIComponent(b) + window.location.hash;
+        })
+        .catch(function () {
+          msg.className = 'acct-msg err';
+          msg.textContent = 'ตรวจไม่สำเร็จ — ลองใหม่ภายหลัง';
+        });
+    });
   }
 })();
