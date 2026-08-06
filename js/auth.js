@@ -20,6 +20,14 @@
   var KEY = 'idash.session';
   var LOGIN_PAGE = 'landing.html';
 
+  // The account service (signup_log.gs). Approved sheet accounts sign in
+  // against this; the built-in admin credential does not need it. One URL for
+  // signup, admin review, and sign-in verification — landing.html and
+  // admin.js read it from here so there is a single source of truth.
+  var ACCOUNT_API_URL =
+    'https://script.google.com/macros/s/AKfycbyY5SHhs5_-qFOraFkIRNcj4gUh2Ak1AEhoAv7cdEdFQi86glm7Lyw5ycpHRm9zB4aG/exec';
+  var ACCOUNT_KEY = 'idash.account';
+
   function isSignedIn() {
     try { return sessionStorage.getItem(KEY) === '1'; } catch (e) { return false; }
   }
@@ -82,10 +90,56 @@
 
   function hasLocalPassword() { return !!storedOverride(); }
 
+  /**
+   * Ask the account service whether this username + password hash is a real,
+   * APPROVED account. Text/plain keeps it a simple request (no CORS preflight,
+   * which Apps Script can't answer). Returns a verdict object; a network or
+   * service failure is reported as its own reason rather than a bare false, so
+   * "the server is down" never reads as "wrong password".
+   */
+  function remoteVerify(username, password) {
+    return digestHex(username, password).then(function (hex) {
+      return fetch(ACCOUNT_API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({ action: 'verify', username: username, passwordHash: hex })
+      })
+        .then(function (r) { return r.json(); })
+        .then(function (d) {
+          if (d && d.valid) return { ok: true, role: d.role || 'user' };
+          if (d && d.status === 'pending') return { ok: false, reason: 'บัญชีนี้ยังรอผู้ดูแลระบบอนุมัติ' };
+          if (d && d.status === 'rejected') return { ok: false, reason: 'บัญชีนี้ไม่ได้รับอนุมัติให้ใช้งาน' };
+          return { ok: false, reason: '' }; // unknown user or wrong password
+        });
+    }).catch(function () {
+      return { ok: false, reason: 'ตรวจสอบบัญชีไม่สำเร็จ — ตรวจอินเทอร์เน็ตแล้วลองใหม่', network: true };
+    });
+  }
+
+  /**
+   * @returns Promise<{ok:true}|{ok:false, reason}>
+   * Built-in / device-local credential first (works offline, admin path
+   * unchanged). Only if that misses do we ask the sheet — so an approved
+   * account signs in, and a pending/rejected one is told exactly why.
+   */
   function signIn(username, password) {
-    return verify(String(username || '').trim(), String(password || '')).then(function (ok) {
-      if (ok) { try { sessionStorage.setItem(KEY, '1'); } catch (e) {} }
-      return ok;
+    username = String(username || '').trim();
+    password = String(password || '');
+    return verify(username, password).then(function (localOk) {
+      if (localOk) {
+        try { sessionStorage.setItem(KEY, '1'); } catch (e) {}
+        return { ok: true };
+      }
+      return remoteVerify(username, password).then(function (res) {
+        if (res.ok) {
+          try {
+            sessionStorage.setItem(KEY, '1');
+            localStorage.setItem(ACCOUNT_KEY, JSON.stringify({ username: username, role: res.role }));
+          } catch (e) {}
+          return { ok: true };
+        }
+        return { ok: false, reason: res.reason || 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง' };
+      });
     });
   }
 
@@ -102,15 +156,22 @@
     return false;
   }
 
+  function signOutFull() {
+    try { localStorage.removeItem(ACCOUNT_KEY); } catch (e) {}
+    signOut();
+  }
+
   window.iDashAuth = {
     isSignedIn: isSignedIn,
     signIn: signIn,
-    signOut: signOut,
+    signOut: signOutFull,
     requireSignIn: requireSignIn,
     verify: verify,
+    digestHex: digestHex,
     setLocalPassword: setLocalPassword,
     clearLocalPassword: clearLocalPassword,
     hasLocalPassword: hasLocalPassword,
+    accountApiUrl: ACCOUNT_API_URL,
     LOGIN_PAGE: LOGIN_PAGE
   };
 })();

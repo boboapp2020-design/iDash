@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="js/auth.js?v=20260805h"></script>
   <script>if (!window.iDashAuth.requireSignIn()) { document.documentElement.style.display = 'none'; }</script>
-  <title>iDash — Profile</title>
+  <title>iDash — จัดการคำขอสมัคร</title>
   <link rel="stylesheet" href="css/style.css?v=20260804b">
   <link rel="stylesheet" href="css/account.css?v=20260805h">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect x='2' y='18' width='6' height='12' rx='1' fill='%232563eb'/><rect x='10' y='12' width='6' height='18' rx='1' fill='%233b82f6'/><rect x='18' y='6' width='6' height='24' rx='1' fill='%2360a5fa'/><rect x='26' y='2' width='6' height='28' rx='1' fill='%2393c5fd'/></svg>">
@@ -88,70 +88,70 @@
   <div class="acct-wrap">
     <div class="acct-head">
       <div class="acct-title">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-        โปรไฟล์ของฉัน
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+        จัดการคำขอสมัคร
       </div>
-      <div class="acct-sub">ข้อมูลนี้แสดงบนแถบด้านซ้ายของทุกหน้า และบันทึกไว้ในเครื่องนี้</div>
+      <div class="acct-sub">อนุมัติหรือปฏิเสธคำขอใช้งาน iDash — ผลจะถูกส่งกลับทางอีเมลของผู้สมัคร</div>
     </div>
 
-    <div class="acct-card">
-      <div class="pf-identity">
-        <button type="button" class="pf-avatar-btn" id="pfAvatarBtn" title="เปลี่ยนรูปโปรไฟล์">
-          <span class="pf-avatar" id="pfAvatar">B</span>
-          <span class="pf-avatar-cam">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
-          </span>
-        </button>
-        <input type="file" id="pfPhotoFile" accept="image/*" hidden>
-        <div>
-          <div class="pf-identity-name" id="pfNamePreview">Bobo</div>
-          <div class="pf-identity-note" id="pfRolePreview">Admin</div>
-          <div class="pf-photo-actions">
-            <button type="button" class="pf-photo-link" id="pfPhotoPick">อัปโหลดรูป</button>
-            <button type="button" class="pf-photo-link danger" id="pfPhotoRemove" hidden>ลบรูป</button>
-          </div>
-        </div>
-      </div>
-
-      <form id="pfForm" novalidate>
-        <div class="acct-row2">
-          <div class="acct-field">
-            <label class="acct-label" for="pfName">ชื่อที่แสดง</label>
-            <input class="acct-input" type="text" id="pfName" maxlength="40" placeholder="เช่น Bobo">
-          </div>
-          <div class="acct-field">
-            <label class="acct-label" for="pfRole">ตำแหน่ง / บทบาท</label>
-            <input class="acct-input" type="text" id="pfRole" maxlength="40" placeholder="เช่น Admin, Planner">
-          </div>
-        </div>
-        <div class="acct-field">
-          <label class="acct-label" for="pfEmail">Email ติดต่อ</label>
-          <input class="acct-input" type="email" id="pfEmail" maxlength="80" placeholder="name@example.com" spellcheck="false">
-          <div class="acct-hint">ใช้เป็นค่าเริ่มต้นในหน้า "ขอสร้าง Dashboard" เพื่อไม่ต้องพิมพ์ซ้ำ</div>
-        </div>
-
-        <div class="acct-actions">
-          <button type="submit" class="acct-btn primary">บันทึกโปรไฟล์</button>
-          <button type="button" class="acct-btn ghost" id="pfReset">คืนค่าเดิม</button>
-        </div>
-        <div class="acct-msg" id="pfMsg"></div>
-      </form>
-    </div>
-
-    <div class="acct-card">
-      <div class="acct-card-title">บัญชีผู้ใช้</div>
+    <!-- Admin token setup: shown until a token is stored on this device. -->
+    <div class="acct-card" id="tokenCard" hidden>
+      <div class="acct-card-title">ตั้งค่า Admin Token</div>
       <div class="acct-card-desc">
-        โปรไฟล์นี้เก็บไว้ในเบราว์เซอร์เครื่องนี้เท่านั้น (localStorage) — ยังไม่ผูกกับระบบบัญชีกลาง
-        การสมัครสมาชิกจากหน้าเข้าสู่ระบบจะถูกส่งให้ผู้ดูแลตรวจและเปิดสิทธิ์ก่อนใช้งานจริง
+        ใส่ค่าเดียวกับ <b>ADMIN_TOKEN</b> ที่ตั้งไว้ใน Apps Script (Project Settings → Script properties)
+        — เก็บไว้ในเครื่องนี้เท่านั้น ใช้ยืนยันว่าคุณคือผู้ดูแลก่อนอนุมัติใครได้
+      </div>
+      <div class="acct-field">
+        <label class="acct-label" for="tokenInput">Admin Token</label>
+        <input class="acct-input" type="password" id="tokenInput" spellcheck="false" autocomplete="off" placeholder="วาง token ที่นี่">
       </div>
       <div class="acct-actions">
-        <button type="button" class="acct-btn danger" id="pfSignOut">ออกจากระบบ</button>
+        <button type="button" class="acct-btn primary" id="tokenSave">บันทึกและโหลดคำขอ</button>
       </div>
+      <div class="acct-msg" id="tokenMsg"></div>
+    </div>
+
+    <!-- Request list -->
+    <div class="acct-card" id="listCard" hidden>
+      <div class="adm-toolbar">
+        <div class="adm-tabs">
+          <button type="button" class="adm-tab active" data-filter="pending">รออนุมัติ</button>
+          <button type="button" class="adm-tab" data-filter="all">ทั้งหมด</button>
+        </div>
+        <div class="adm-tools">
+          <button type="button" class="acct-btn ghost" id="admRefresh">รีเฟรช</button>
+          <button type="button" class="acct-btn ghost" id="admChangeToken" title="เปลี่ยน Admin Token">เปลี่ยน token</button>
+        </div>
+      </div>
+      <div id="admList" class="adm-list"></div>
+      <div class="acct-msg" id="admMsg"></div>
     </div>
   </div>
 </main>
 
+<!-- Decision popup -->
+<div class="modal-overlay" id="decideModal" hidden>
+  <div class="bm-card adm-modal">
+    <button class="modal-close" id="decClose" aria-label="Close">&times;</button>
+    <div class="bm-head">
+      <div class="bm-title">ตรวจสอบคำขอสมัคร</div>
+      <div class="bm-sub">ผลการตัดสินจะถูกส่งไปที่อีเมลของผู้สมัคร</div>
+    </div>
+    <div class="adm-detail">
+      <div class="adm-detail-row"><span>ชื่อผู้ใช้</span><b id="decUser">—</b></div>
+      <div class="adm-detail-row"><span>อีเมล</span><b id="decEmail">—</b></div>
+      <div class="adm-detail-row"><span>เวลาที่สมัคร</span><b id="decTime">—</b></div>
+      <div class="adm-detail-row"><span>สถานะปัจจุบัน</span><span id="decStatus" class="set-badge">—</span></div>
+    </div>
+    <div class="adm-actions">
+      <button type="button" class="acct-btn danger" id="decReject">ไม่อนุมัติ</button>
+      <button type="button" class="acct-btn primary" id="decApprove">อนุมัติ</button>
+    </div>
+    <div class="acct-msg" id="decMsg"></div>
+  </div>
+</div>
+
 <script src="js/sidebar.js?v=20260805h"></script>
-<script src="js/account.js?v=20260805a"></script>
+<script src="js/admin.js?v=20260805h"></script>
 </body>
 </html>

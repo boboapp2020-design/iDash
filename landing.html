@@ -359,7 +359,7 @@ form { margin-top: 32px; }
   </div>
 </section>
 
-<script src="js/auth.js?v=20260804c"></script>
+<script src="js/auth.js?v=20260805h"></script>
 <script>
 (function () {
   'use strict';
@@ -404,11 +404,13 @@ form { margin-top: 32px; }
 
     btn.disabled = true;
     btn.textContent = 'กำลังเข้าสู่ระบบ…';
-    window.iDashAuth.signIn(userEl.value, passEl.value).then(function (ok) {
-      if (ok) { window.location.href = nextPage(); return; }
+    window.iDashAuth.signIn(userEl.value, passEl.value).then(function (res) {
+      if (res && res.ok) { window.location.href = nextPage(); return; }
       btn.disabled = false;
       btn.textContent = 'เข้าสู่ระบบ';
-      msg.textContent = 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง';
+      // signIn now distinguishes "wrong password" from "pending/rejected/offline"
+      // so an approved-but-not-yet user isn't told their password is wrong.
+      msg.textContent = (res && res.reason) || 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง';
       passEl.value = '';
       passEl.focus();
     });
@@ -424,12 +426,10 @@ form { margin-top: 32px; }
    * auth.js, and the reason the .gs validates a 64-hex hash, not a password).
    */
 
-  // Paste the Web-app URL from deploying _dev/integrations/signup_log.gs.
-  // Empty = the form says registration isn't wired up yet instead of
-  // pretending to submit. The window override exists so the URL can also be
-  // set from a snippet/console without editing this file.
+  // Single source of truth is auth.js (accountApiUrl); the window override
+  // stays in front for testing.
   var SIGNUP_API_URL = window.IDASH_SIGNUP_URL ||
-    'https://script.google.com/macros/s/AKfycbyY5SHhs5_-qFOraFkIRNcj4gUh2Ak1AEhoAv7cdEdFQi86glm7Lyw5ycpHRm9zB4aG/exec';
+    (window.iDashAuth && window.iDashAuth.accountApiUrl) || '';
 
   var loginCard = document.getElementById('loginCard');
   var signupCard = document.getElementById('signupCard');
@@ -480,7 +480,7 @@ form { margin-top: 32px; }
         return fetch(SIGNUP_API_URL, {
           method: 'POST',
           headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-          body: JSON.stringify({ username: u, email: em, passwordHash: hash })
+          body: JSON.stringify({ action: 'signup', username: u, email: em, passwordHash: hash })
         });
       })
       .then(function (resp) { return resp.json(); })
