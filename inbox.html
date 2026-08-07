@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="js/auth.js?v=20260805n"></script>
+  <script>if (!window.iDashAuth.requireSignIn()) { document.documentElement.style.display = 'none'; }</script>
+  <title>iDash — กล่องข้อความ</title>
+  <link rel="stylesheet" href="css/style.css?v=20260804b">
+  <link rel="stylesheet" href="css/account.css?v=20260805m">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect x='2' y='18' width='6' height='12' rx='1' fill='%232563eb'/><rect x='10' y='12' width='6' height='18' rx='1' fill='%233b82f6'/><rect x='18' y='6' width='6' height='24' rx='1' fill='%2360a5fa'/><rect x='26' y='2' width='6' height='28' rx='1' fill='%2393c5fd'/></svg>">
+  <style>
+    .ib-list { display: flex; flex-direction: column; gap: 10px; }
+    .ib-item {
+      display: flex; align-items: flex-start; gap: 14px;
+      padding: 15px 16px; border: 1px solid var(--border); border-radius: 14px;
+      background: linear-gradient(180deg, #ffffff, #fdfdff);
+      box-shadow: var(--edge-light), var(--shadow-sm);
+    }
+    .ib-ic {
+      width: 38px; height: 38px; border-radius: 10px; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .ib-ic svg { width: 19px; height: 19px; }
+    .ib-ic.acct { background: #eef2ff; color: #4f46e5; }
+    .ib-ic.dash { background: #ecfdf5; color: #0e9f6e; }
+    .ib-main { flex: 1; min-width: 0; }
+    .ib-top { display: flex; align-items: center; gap: 10px; justify-content: space-between; }
+    .ib-title { font-size: 13.5px; font-weight: 800; color: var(--gray-900); }
+    .ib-body { font-size: 12.5px; color: var(--text-secondary); margin-top: 3px; line-height: 1.6; }
+    .ib-time { font-size: 11px; color: var(--text-muted); margin-top: 6px; }
+    .ib-pill { font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 20px; white-space: nowrap; }
+    .ib-pill.done, .ib-pill.approved { background: #e2f5ec; color: #0e7a4e; }
+    .ib-pill.progress { background: #e6efff; color: #1d4ed8; }
+    .ib-pill.pending { background: var(--gray-100); color: var(--gray-600); }
+    .ib-pill.rejected { background: #fdeaea; color: #a51f24; }
+    .ib-empty { text-align: center; color: var(--text-muted); font-size: 13.5px; padding: 46px 0; }
+    .ib-empty svg { width: 44px; height: 44px; opacity: .35; margin-bottom: 12px; }
+    .ib-refresh {
+      border: 1px solid var(--border-strong); background: #fff; border-radius: 10px;
+      padding: 8px 14px; font-family: inherit; font-size: 12.5px; font-weight: 700;
+      color: var(--gray-700); cursor: pointer;
+    }
+    .ib-refresh:hover { background: var(--gray-100); }
+  </style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect x="2" y="18" width="6" height="12" rx="1.5" fill="#2563eb"/>
+      <rect x="10" y="12" width="6" height="18" rx="1.5" fill="#3b82f6"/>
+      <rect x="18" y="6" width="6" height="24" rx="1.5" fill="#60a5fa"/>
+      <rect x="26" y="2" width="4" height="28" rx="1.5" fill="#93c5fd"/>
+    </svg>
+    <div>
+      <span class="logo-text">iDash</span>
+      <span class="logo-sub">AI Dashboard Intelligence Platform</span>
+    </div>
+  </div>
+
+  <nav class="sidebar-nav">
+    <a href="index.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      Home
+    </a>
+    <a id="dashCenterToggle" style="cursor:pointer">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+      Dashboard Center
+      <svg class="nav-chevron" id="dashCenterChevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+    </a>
+    <div class="nav-submenu" id="dashCenterMenu" hidden>
+      <a href="embedded_dashboard.html?name=Quality%20Dashboard&amp;view=dashboard&amp;url=https%3A%2F%2Fboboapp2020-design.github.io%2FML_Dashboard2026_2027%2F">Quality Dashboard</a>
+      <a href="embedded_dashboard.html?name=Production%20Dashboard&amp;url=https%3A%2F%2Fboboapp2020-design.github.io%2FSmartdashboardML%2F">Production Dashboard</a>
+      <a href="embedded_dashboard.html?name=Sale%20Dashboard&amp;url=dashboards%2Fsales_dashboard.html">Sale Dashboard</a>
+      <a href="embedded_dashboard.html?name=QM%20Dashboard&amp;url=dashboards%2Fqm_dashboard.html">QM Dashboard</a>
+      <a href="embedded_dashboard.html?name=Store%20Dashboard&amp;brand=1&amp;url=https%3A%2F%2Fshippingml.github.io%2FStoreML%2F">Store Dashboard</a>
+      <a href="embedded_dashboard.html?name=Warehouse%20Dashboard&amp;brand=1&amp;url=https%3A%2F%2Fboboapp2020-design.github.io%2FWarehouseDashboard%2F">Warehouse Dashboard</a>
+      <a href="embedded_dashboard.html?name=BOI%20Dashboard&amp;brand=1&amp;url=https%3A%2F%2Fshippingml.github.io%2FBOI-ML%2F">BOI Dashboard</a>
+    </div>
+    <a href="request.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+      Request Dashboard
+    </a>
+    <a href="chat.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="8" width="16" height="12" rx="2"/><circle cx="9" cy="14" r="1.2" fill="currentColor"/><circle cx="15" cy="14" r="1.2" fill="currentColor"/><path d="M12 8V4"/><circle cx="12" cy="3" r="1.2" fill="currentColor"/></svg>
+      AI Chatbot
+    </a>
+  </nav>
+
+  <div class="sidebar-footer">
+    <div class="sidebar-user" id="sidebarUserTrigger">
+      <div class="user-avatar">A</div>
+      <div class="user-info">
+        <div class="user-name">Bobo</div>
+        <div class="user-role">Admin</div>
+      </div>
+      <div class="sidebar-user-menu" id="sidebarUserMenu" hidden>
+        <button type="button" data-action="profile">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          โปรไฟล์
+        </button>
+        <button type="button" data-action="settings">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06A1.65 1.65 0 004.6 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06A1.65 1.65 0 009 4.6a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+          ตั้งค่า
+        </button>
+        <div class="sidebar-user-menu-divider"></div>
+        <button type="button" data-action="logout" class="danger">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          ออกจากระบบ
+        </button>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<main class="main">
+  <div class="acct-wrap">
+    <div class="acct-head">
+      <div class="acct-title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16a2 2 0 012 2v12a2 2 0 01-2 2H4a2 2 0 01-2-2V6a2 2 0 012-2z"/><polyline points="22 6 12 13 2 6"/></svg>
+        กล่องข้อความ
+      </div>
+      <div class="acct-sub">ผลการอนุมัติบัญชี และสถานะคำขอสร้าง Dashboard ของคุณ จะแจ้งที่นี่</div>
+    </div>
+
+    <div class="acct-card">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px">
+        <div class="acct-card-title" style="margin:0">การแจ้งเตือนของคุณ</div>
+        <button type="button" class="ib-refresh" id="ibRefresh">รีเฟรช</button>
+      </div>
+      <div class="acct-msg" id="ibMsg"></div>
+      <div class="ib-list" id="ibList"></div>
+    </div>
+  </div>
+</main>
+
+<script src="js/sidebar.js?v=20260805q"></script>
+<script>
+(function () {
+  'use strict';
+  var API = (window.iDashAuth && window.iDashAuth.accountApiUrl) || '';
+  var listEl = document.getElementById('ibList');
+  var msgEl = document.getElementById('ibMsg');
+
+  function acct() {
+    try { return JSON.parse(localStorage.getItem('idash.account') || 'null'); } catch (e) { return null; }
+  }
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c];
+    });
+  }
+
+  var PILL = {
+    approved: 'อนุมัติแล้ว', rejected: 'ไม่อนุมัติ', pending: 'รออนุมัติ',
+    done: 'เสร็จแล้ว', progress: 'กำลังดำเนินการ'
+  };
+  var ICON = {
+    acct: '<path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/>',
+    dash: '<rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>'
+  };
+
+  function emptyState(text) {
+    listEl.innerHTML =
+      '<div class="ib-empty">' +
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16a2 2 0 012 2v12a2 2 0 01-2 2H4a2 2 0 01-2-2V6a2 2 0 012-2z"/><polyline points="22 6 12 13 2 6"/></svg>' +
+        '<div>' + esc(text) + '</div>' +
+      '</div>';
+  }
+
+  function render(items) {
+    if (!items.length) { emptyState('ยังไม่มีข้อความ'); return; }
+    listEl.innerHTML = items.map(function (n) {
+      var isDash = n.type === 'dashreq';
+      var icCls = isDash ? 'dash' : 'acct';
+      var icPath = isDash ? ICON.dash : ICON.acct;
+      var pill = PILL[n.status] || n.status || '';
+      return '<div class="ib-item">' +
+        '<div class="ib-ic ' + icCls + '"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + icPath + '</svg></div>' +
+        '<div class="ib-main">' +
+          '<div class="ib-top">' +
+            '<div class="ib-title">' + esc(n.title) + '</div>' +
+            '<span class="ib-pill ' + esc(n.status) + '">' + esc(pill) + '</span>' +
+          '</div>' +
+          '<div class="ib-body">' + esc(n.body) + '</div>' +
+          (n.timeText ? '<div class="ib-time">' + esc(n.timeText) + '</div>' : '') +
+        '</div>' +
+      '</div>';
+    }).join('');
+  }
+
+  function markSeen(items) {
+    var max = 0;
+    items.forEach(function (n) { if (n.sortKey > max) max = n.sortKey; });
+    try { localStorage.setItem('idash.inboxSeen', String(max)); } catch (e) {}
+    // Clear the sidebar dot right away.
+    if (window.iDashInbox && window.iDashInbox.clearDot) window.iDashInbox.clearDot();
+  }
+
+  function load() {
+    var a = acct();
+    if (!a || !a.username) { emptyState('บัญชีนี้ไม่มีกล่องข้อความส่วนตัว'); return; }
+    if (!API) { msgEl.className = 'acct-msg err'; msgEl.textContent = 'ยังไม่ได้เชื่อมต่อปลายทาง'; return; }
+    msgEl.className = 'acct-msg'; msgEl.textContent = 'กำลังโหลด…';
+    fetch(API, {
+      method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ action: 'inbox', username: a.username })
+    })
+      .then(function (r) { return r.json(); })
+      .then(function (d) {
+        msgEl.textContent = '';
+        if (d && d.ok) { render(d.notifications || []); markSeen(d.notifications || []); }
+        else { msgEl.className = 'acct-msg err'; msgEl.textContent = (d && d.error) || 'โหลดไม่สำเร็จ'; }
+      })
+      .catch(function () {
+        msgEl.className = 'acct-msg err';
+        msgEl.textContent = 'เชื่อมต่อปลายทางไม่ได้ — ตรวจอินเทอร์เน็ตแล้วลองใหม่';
+      });
+  }
+
+  document.getElementById('ibRefresh').addEventListener('click', load);
+  load();
+})();
+</script>
+</body>
+</html>

@@ -18,6 +18,57 @@
   // Non-blocking toast shared by all pages (alert() freezes the page).
   window.iDashToast = showAppToast;
 
+  /* ── Inbox unread dot ─────────────────────────────────────────────────────
+   * The nav "กล่องข้อความ" link carries a red dot when there is a notification
+   * newer than the last one the user has seen (idash.inboxSeen). The count is
+   * fetched at most once every 90s per tab so rapid navigation doesn't hammer
+   * the Apps Script. inbox.html clears the dot via window.iDashInbox.clearDot. */
+  function inboxAccount() {
+    try { return JSON.parse(localStorage.getItem('idash.account') || 'null'); } catch (e) { return null; }
+  }
+  function inboxSeen() {
+    try { return +(localStorage.getItem('idash.inboxSeen') || 0) || 0; } catch (e) { return 0; }
+  }
+  function applyInboxDot(max) {
+    var dot = document.getElementById('inboxDot');
+    if (dot) dot.hidden = !(max > inboxSeen());
+  }
+  function checkInboxUnread() {
+    var a = inboxAccount();
+    if (!a || !a.username) return;                 // owner / not a sheet account
+    var API = window.iDashAuth && window.iDashAuth.accountApiUrl;
+    if (!API) return;
+    try {
+      var c = JSON.parse(sessionStorage.getItem('idash.inboxCheck') || 'null');
+      if (c && (Date.now() - c.ts) < 90000) { applyInboxDot(c.max || 0); return; }
+    } catch (e) {}
+    fetch(API, {
+      method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ action: 'inbox', username: a.username })
+    })
+      .then(function (r) { return r.json(); })
+      .then(function (d) {
+        if (!d || !d.ok) return;
+        var max = 0;
+        (d.notifications || []).forEach(function (n) { if (n.sortKey > max) max = n.sortKey; });
+        try { sessionStorage.setItem('idash.inboxCheck', JSON.stringify({ ts: Date.now(), max: max })); } catch (e) {}
+        applyInboxDot(max);
+      })
+      .catch(function () {});
+  }
+  window.iDashInbox = {
+    clearDot: function () {
+      var dot = document.getElementById('inboxDot');
+      if (dot) dot.hidden = true;
+      // Keep the per-tab cache honest so other pages agree the dot is cleared.
+      try {
+        var c = JSON.parse(sessionStorage.getItem('idash.inboxCheck') || 'null') || {};
+        c.ts = Date.now();
+        sessionStorage.setItem('idash.inboxCheck', JSON.stringify(c));
+      } catch (e) {}
+    }
+  };
+
   function clearLocalAppState() {
     const sessionKeys = ['idash.pendingDataset', 'idash.pendingModule', 'idash.dashboardSpec', 'idash.dashboardMeta'];
     const localKeys = ['idash.customDraftAutosave'];
@@ -57,6 +108,23 @@
       else menu.appendChild(adminBtn);
     }
 
+    // "กล่องข้อความ" (inbox) — injected into the main nav on every page so one
+    // change reaches all. Carries an unread dot; the count is fetched below.
+    const nav = document.querySelector('.sidebar-nav');
+    if (nav && !document.getElementById('inboxLink')) {
+      const a = document.createElement('a');
+      a.href = 'inbox.html';
+      a.id = 'inboxLink';
+      a.style.position = 'relative';
+      if (/(^|\/)inbox\.html/.test(location.pathname)) a.classList.add('active');
+      a.innerHTML =
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16a2 2 0 012 2v12a2 2 0 01-2 2H4a2 2 0 01-2-2V6a2 2 0 012-2z"/><polyline points="22 6 12 13 2 6"/></svg>' +
+        'กล่องข้อความ' +
+        '<span id="inboxDot" hidden style="position:absolute;top:11px;left:26px;width:8px;height:8px;border-radius:50%;background:#ef4444;border:1.5px solid #fff;box-shadow:0 0 0 1px rgba(239,68,68,.25)"></span>';
+      // Place it just after AI Chatbot (last nav link), else append.
+      nav.appendChild(a);
+    }
+
     trigger.addEventListener('click', (e) => {
       e.stopPropagation();
       if (menu.hidden) openMenu(); else closeMenu();
@@ -85,6 +153,9 @@
         }
       });
     });
+
+    // Fire the unread check after the nav (and its dot) are in the DOM.
+    checkInboxUnread();
   });
 
   /* ── Profile display sync ────────────────────────────────────────────────

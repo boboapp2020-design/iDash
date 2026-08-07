@@ -41,6 +41,11 @@
     return Math.max(1, Math.round(n / 1024)) + ' KB';
   }
   function isEmail(s) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(s).trim()); }
+  /** The signed-in sheet account's username, or '' for the built-in owner. */
+  function loggedInUsername() {
+    try { return (JSON.parse(localStorage.getItem('idash.account') || 'null') || {}).username || ''; }
+    catch (e) { return ''; }
+  }
   function totalBytes() {
     return picked.reduce(function (s, f) { return s + f.size; }, 0);
   }
@@ -357,6 +362,9 @@
           body: JSON.stringify({
             action: 'dashreq',
             fromEmail: el.from.value.trim(),
+            // The signed-in account username, so this request shows up in that
+            // user's in-app inbox even if they typed a different contact email.
+            username: loggedInUsername(),
             subject: el.subject.value,
             // The sender's name rides inside details, so it reaches the admin
             // through the ALREADY-DEPLOYED mailer — a separate fromName field
