@@ -359,7 +359,9 @@
    * every user's Copilot works with no per-device setup and Google can't
    * auto-revoke a leaked key. Fill COPILOT_ANON to turn shared mode on. */
   var COPILOT_GATEWAY = 'https://hcckwaukoaioxpsfpipk.supabase.co/functions/v1/swift-action';
-  var COPILOT_ANON = ''; // <-- paste the project's anon (public) key to enable shared mode
+  // Supabase publishable key — public by design (safe in the page). The Groq
+  // key it fronts stays a server-side secret in the gateway.
+  var COPILOT_ANON = 'sb_publishable_BZEZ_UVLqNLg2pQsXtNUjQ_cp2ZPY5h';
 
   function askViaGateway(question) {
     var facts = qualityFacts();
@@ -376,7 +378,7 @@
       headers: { 'content-type': 'application/json', 'Authorization': 'Bearer ' + COPILOT_ANON, 'apikey': COPILOT_ANON },
       body: JSON.stringify({
         action: 'quick-ask',
-        payload: { system: QA_SYSTEM, prompt: prompt, facts: facts, maxTokens: 900, geminiModel: copilotModel() }
+        payload: { provider: 'groq', model: copilotModel(), system: QA_SYSTEM, prompt: prompt, facts: facts, maxTokens: 900 }
       })
     })
       .then(function (r) { return r.json(); })
@@ -406,7 +408,7 @@
     try { localStorage.setItem('idash.copilotKey', String(k || '').trim()); } catch (e) {}
   }
   function copilotModel() {
-    try { return (localStorage.getItem('idash.copilotModel') || 'gemini-2.0-flash').trim(); } catch (e) { return 'gemini-2.0-flash'; }
+    try { return (localStorage.getItem('idash.copilotModel') || 'llama-3.3-70b-versatile').trim(); } catch (e) { return 'llama-3.3-70b-versatile'; }
   }
   function setCopilotModel(m) {
     try { localStorage.setItem('idash.copilotModel', String(m || '').trim()); } catch (e) {}
@@ -563,19 +565,17 @@
         '</div>' +
       '</div>' +
       '<div class="qb-set" id="qbSet" hidden>' +
-        '<div class="qb-set-label">Gemini API key (ฟรีจาก Google AI Studio)</div>' +
-        '<div class="qb-set-row">' +
-          '<input id="qbSetInput" type="password" placeholder="วาง API key ที่นี่" autocomplete="off">' +
+        '<div class="qb-set-label">โมเดล AI (Groq · ฟรี)</div>' +
+        '<select id="qbSetModel" class="qb-set-model">' +
+          '<option value="llama-3.3-70b-versatile">llama-3.3-70b (ฉลาดสุด)</option>' +
+          '<option value="llama-3.1-8b-instant">llama-3.1-8b (เร็วสุด)</option>' +
+          '<option value="gemma2-9b-it">gemma2-9b</option>' +
+        '</select>' +
+        '<div class="qb-set-row" style="margin-top:8px">' +
           '<button type="button" id="qbSetSave">บันทึก</button>' +
         '</div>' +
-        '<div class="qb-set-label" style="margin-top:9px">โมเดล (ถ้าตัวหนึ่งโควตาเต็ม ลองอีกตัว)</div>' +
-        '<select id="qbSetModel" class="qb-set-model">' +
-          '<option value="gemini-2.0-flash">gemini-2.0-flash</option>' +
-          '<option value="gemini-2.5-flash">gemini-2.5-flash</option>' +
-          '<option value="gemini-2.0-flash-lite">gemini-2.0-flash-lite</option>' +
-          '<option value="gemini-1.5-flash">gemini-1.5-flash</option>' +
-        '</select>' +
-        '<div class="qb-set-hint">รับ key ฟรีที่ <b>aistudio.google.com/apikey</b> — ตอน Create key เลือก <b>"Create API key in new project"</b> เพื่อให้ได้โควตาฟรี · เก็บไว้ในเครื่องนี้เท่านั้น</div>' +
+        '<div class="qb-set-hint">Copilot ใช้ AI ฟรีร่วมกันทั้งองค์กร (Groq) — ทุกคนถามได้เลย ไม่ต้องตั้งค่า key เอง</div>' +
+        '<input id="qbSetInput" type="hidden">' +
       '</div>' +
       '<div class="qb-src" id="qbSrc"></div>' +
       '<div class="qb-log" id="qbLog"></div>' +
@@ -633,12 +633,9 @@
       if (!setBox.hidden) setInput.focus();
     });
     mount.querySelector('#qbSetSave').addEventListener('click', function () {
-      setCopilotKey(setInput.value);
       setCopilotModel(setModel.value);
       setBox.hidden = true;
-      pushMsg(copilotKey()
-        ? '✅ บันทึกแล้ว (โมเดล ' + esc(copilotModel()) + ') — แท็บ Quality ถามเป็นประโยค/วิเคราะห์ย้อนหลังได้เลย (ฟรี)'
-        : 'ล้าง key แล้ว — แท็บ Quality กลับไปโหมดค้นหา keyword', 'bot');
+      pushMsg('✅ บันทึกแล้ว — ใช้โมเดล <b>' + esc(copilotModel()) + '</b> (Groq · ฟรี) ถามแท็บ Quality เป็นประโยค/วิเคราะห์ย้อนหลังได้เลย', 'bot');
     });
 
     // Warm the feed so answers are instant.
