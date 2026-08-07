@@ -170,19 +170,38 @@
         '</div>' +
       '</div>' +
       '<div class="wxp-alert lv-' + adv.lv + '">🌱 ' + esc(adv.txt) + '</div>' +
+      statusStrip(f) +
       '<div class="wxp-acc">ฝนสะสม 7 วันที่ผ่านมา: <b style="color:' + wetColor(f.past7) + '">' + fmt(f.past7, 1) + ' มม.</b>' +
         (f.past7 >= 20 ? ' · แปลงอาจยังชื้น' : ' · แปลงแห้ง') + '</div>' +
       '<div class="wxp-days">' + days + '</div>' +
       '<div class="wxp-note">💧 = ฝน (มม.) · % = โอกาสฝน · ข้อมูล Open-Meteo</div>' +
       '<div class="wxp-tiles">' +
-        tile('💨', 'ลม', fmt(cur.wind_speed_10m, 1), 'กม./ชม. ' + windDir(cur.wind_direction_10m)) +
-        tile('💧', 'ความชื้น', fmt(cur.relative_humidity_2m, 0) + '%', (cur.relative_humidity_2m >= 80 ? 'สูง' : 'ปกติ')) +
-        tile('🌡️', 'ความกดอากาศ', fmt(cur.surface_pressure, 0), 'hPa') +
-        tile('🌅', 'พระอาทิตย์', hhmm(f.sunrise[0]) + ' ขึ้น', hhmm(f.sunset[0]) + ' ตก') +
+        tile('💨', 'sky', 'ลม', fmt(cur.wind_speed_10m, 1), 'กม./ชม. ' + windDir(cur.wind_direction_10m)) +
+        tile('💧', 'blue', 'ความชื้น', fmt(cur.relative_humidity_2m, 0) + '%', (cur.relative_humidity_2m >= 80 ? 'สูง' : 'ปกติ')) +
+        tile('🌡️', 'violet', 'ความกดอากาศ', fmt(cur.surface_pressure, 0), 'hPa') +
+        tile('🌅', 'amber', 'พระอาทิตย์', hhmm(f.sunrise[0]) + ' ขึ้น', hhmm(f.sunset[0]) + ' ตก') +
       '</div>';
   }
-  function tile(emoji, name, big, sub) {
-    return '<div class="wxt"><div class="wxt-ic">' + emoji + '</div><div class="wxt-name">' + esc(name) + '</div>' +
+  /* 3-way operational status (deterministic, cane-brain thresholds):
+     ตัดอ้อย = today's rain + wet-field; ขนส่ง = soil trafficability from
+     past-7d accumulation; ความหวาน = Brix dilution risk from recent rain. */
+  function statusStrip(f) {
+    var today = f.rain[0] || 0;
+    function chip(label, lv, txt) {
+      return '<div class="wxs lv-' + lv + '"><div class="wxs-n">' + label + '</div><div class="wxs-v">' + txt + '</div></div>';
+    }
+    var cut = (today >= 30 || f.past7 >= 60) ? ['bad', 'ควรเลื่อน'] : (today >= 10 || f.past7 >= 20) ? ['watch', 'เฝ้าระวัง'] : ['ok', 'ตัดได้'];
+    var haul = f.past7 >= 60 ? ['bad', 'เสี่ยงติดหล่ม'] : (f.past7 >= 20 || today >= 10) ? ['watch', 'ระวังแปลงแฉะ'] : ['ok', 'คล่องตัว'];
+    var ccs = today >= 10 ? ['watch', 'Brix เจือจาง'] : f.past7 >= 60 ? ['watch', 'รอแปลงแห้ง'] : ['ok', 'ปกติ'];
+    return '<div class="wxp-status">' +
+      chip('🚜 ตัดอ้อย', cut[0], cut[1]) +
+      chip('🚚 ขนส่ง', haul[0], haul[1]) +
+      chip('🍬 ความหวาน', ccs[0], ccs[1]) +
+    '</div>';
+  }
+
+  function tile(emoji, hue, name, big, sub) {
+    return '<div class="wxt"><div class="wxt-ic hue-' + hue + '">' + emoji + '</div><div class="wxt-name">' + esc(name) + '</div>' +
       '<div class="wxt-big">' + esc(big) + '</div><div class="wxt-sub">' + esc(sub) + '</div></div>';
   }
 
@@ -221,8 +240,25 @@
       .then(function (d) {
         if (btn) btn.disabled = false;
         if (d && d.result && d.result.text) {
-          box.innerHTML = '<div class="wxai-text">' + esc(d.result.text.trim()).replace(/\n/g, '<br>') + '</div>' +
-            '<div class="wxai-cred">🤖 AI · วิเคราะห์จากพยากรณ์จริง ' + zonesReady.length + ' เขต · หลักวิชาการอ้อย</div>';
+          // Collapsible result: a header bar toggles the body so the analysis
+          // doesn't permanently push the forecast panel down.
+          box.innerHTML =
+            '<div class="wxai-bar" id="wxAiBar">' +
+              '<span>🤖 ผลวิเคราะห์ AI · ' + zonesReady.length + ' เขต</span>' +
+              '<span class="wxai-toggle" id="wxAiToggle">พับเก็บ ▴</span>' +
+            '</div>' +
+            '<div class="wxai-wrap" id="wxAiWrap">' +
+              '<div class="wxai-text">' + esc(d.result.text.trim()).replace(/\n/g, '<br>') + '</div>' +
+              '<div class="wxai-cred">🤖 AI · วิเคราะห์จากพยากรณ์จริง ' + zonesReady.length + ' เขต · หลักวิชาการอ้อย</div>' +
+            '</div>';
+          var bar = document.getElementById('wxAiBar');
+          bar.addEventListener('click', function () {
+            var w = document.getElementById('wxAiWrap');
+            var t = document.getElementById('wxAiToggle');
+            var hide = !w.hidden;
+            w.hidden = hide;
+            t.textContent = hide ? 'ดูผล ▾' : 'พับเก็บ ▴';
+          });
         } else {
           var em = (d && d.error && d.error.message) || 'ไม่ทราบสาเหตุ';
           box.innerHTML = '<div class="wxai-load">' + (/rate limit|TPM/i.test(em) ? '⏳ AI ไม่ว่างชั่วคราว รอ 20-30 วิแล้วลองใหม่' : 'ตอบไม่สำเร็จ: ' + esc(em)) + '</div>';
@@ -254,12 +290,13 @@
   }
 
   /* ── Map (3D MapLibre with key → fallback 2D Leaflet) ─────────────────── */
-  var activeGoTo = null, activeDrawBoundary = null, setLayerMode = null;
-  var layerMode = 'acc';   // 'acc' | 'radar' | 'sat'
+  // One view only, per the owner: the weather map (satellite base + live rain
+  // radar always on). Pins colour by today's forecast rain risk.
+  var activeGoTo = null, activeDrawBoundary = null;
 
   function pinColorFor(z) {
     if (!z._f) return '#64748b';
-    return layerMode === 'acc' ? wetColor(z._f.past7) : riskColor(z._f.rain[0] || 0);
+    return riskColor(z._f.rain[0] || 0);
   }
   function repaintPins() {
     ZONES.forEach(function (z) {
@@ -324,29 +361,17 @@
         map.setTerrain({ source: 'terrain', exaggeration: 1.4 });
       } catch (e) {}
 
-      // Radar overlay layers (hidden until the radar tab is picked).
+      // Live rain radar — always on over the satellite base.
       loadRadarMeta().then(function () {
         var url = radarTileUrl();
-        if (!url) return;
-        try {
-          map.addSource('wx-dim', { type: 'geojson', data: { type: 'Feature', geometry: { type: 'Polygon', coordinates: [[[-180, -85], [180, -85], [180, 85], [-180, 85], [-180, -85]]] }, properties: {} } });
-          map.addLayer({ id: 'wx-dim', type: 'fill', source: 'wx-dim', paint: { 'fill-color': '#0b1220', 'fill-opacity': 0 } });
-          map.addSource('wx-radar', { type: 'raster', tiles: [url], tileSize: 256 });
-          map.addLayer({ id: 'wx-radar', type: 'raster', source: 'wx-radar', paint: { 'raster-opacity': 0 } });
-        } catch (e) {}
+        if (url) {
+          try {
+            map.addSource('wx-radar', { type: 'raster', tiles: [url], tileSize: 256 });
+            map.addLayer({ id: 'wx-radar', type: 'raster', source: 'wx-radar', paint: { 'raster-opacity': 0.8 } });
+          } catch (e) {}
+        }
         stampUpdated();
-        applyMode();
       });
-
-      setLayerMode = function () { applyMode(); };
-      function applyMode() {
-        var showRadar = layerMode === 'radar';
-        try { map.setPaintProperty('wx-radar', 'raster-opacity', showRadar ? 0.85 : 0); } catch (e) {}
-        try { map.setPaintProperty('wx-dim', 'fill-opacity', showRadar ? 0.45 : 0); } catch (e) {}
-        repaintPins();
-        var lg = document.getElementById('wxRainScale');
-        if (lg) lg.hidden = !showRadar;
-      }
 
       ZONES.forEach(function (z) {
         var el = document.createElement('div');
@@ -376,9 +401,7 @@
 
   function boot2D(mapEl) {
     var map = L.map('wxMap', { scrollWheelZoom: true, zoomControl: true }).fitBounds([[15.4, 104.3], [18.0, 106.6]]);
-    var baseOsm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 18, attribution: '© OpenStreetMap' }).addTo(map);
-    var baseSat = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { maxZoom: 18, attribution: '© Esri' });
-    var radarLayer = null;
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 18, attribution: '© OpenStreetMap' }).addTo(map);
     activeGoTo = function (lat, lon) { map.setView([lat, lon], 12, { animate: true }); };
     var boundaryLayer = null;
     activeDrawBoundary = function (geojson) {
@@ -389,24 +412,12 @@
       }).addTo(map);
     };
 
+    // Live rain radar — always on.
     loadRadarMeta().then(function () {
       var url = radarTileUrl();
-      if (url) radarLayer = L.tileLayer(url, { opacity: 0.85 });
+      if (url) L.tileLayer(url, { opacity: 0.8 }).addTo(map);
       stampUpdated();
-      applyMode();
     });
-
-    setLayerMode = function () { applyMode(); };
-    function applyMode() {
-      var showRadar = layerMode === 'radar';
-      var showSat = layerMode === 'sat';
-      if (showSat) { if (!map.hasLayer(baseSat)) baseSat.addTo(map); if (map.hasLayer(baseOsm)) map.removeLayer(baseOsm); }
-      else { if (!map.hasLayer(baseOsm)) baseOsm.addTo(map); if (map.hasLayer(baseSat)) map.removeLayer(baseSat); }
-      if (radarLayer) { if (showRadar) { radarLayer.addTo(map); } else if (map.hasLayer(radarLayer)) map.removeLayer(radarLayer); }
-      repaintPins();
-      var lg = document.getElementById('wxRainScale');
-      if (lg) lg.hidden = !showRadar;
-    }
 
     ZONES.forEach(function (z) {
       var m = L.circleMarker([z.lat, z.lon], { radius: z.factory ? 11 : 8, color: '#ffffff', weight: 2.5, fillColor: '#64748b', fillOpacity: 1 }).addTo(map);
@@ -492,15 +503,6 @@
       ('0' + d.getHours()).slice(-2) + ':' + ('0' + d.getMinutes()).slice(-2) + ' น.';
     var rf = document.getElementById('wxRefresh');
     if (rf) rf.addEventListener('click', function () { location.reload(); });
-
-    [].forEach.call(document.querySelectorAll('.wx-tab'), function (t) {
-      t.addEventListener('click', function () {
-        [].forEach.call(document.querySelectorAll('.wx-tab'), function (x) { x.classList.remove('on'); });
-        t.classList.add('on');
-        layerMode = t.getAttribute('data-mode');
-        if (setLayerMode) setLayerMode();
-      });
-    });
 
     var aiBtn = document.getElementById('wxAiBtn');
     if (aiBtn) aiBtn.addEventListener('click', aiBrief);

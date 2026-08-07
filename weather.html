@@ -32,10 +32,8 @@
     @media (max-width: 980px) { .if-grid { grid-template-columns: 1fr; } }
     .if-card { background: #fff; border: 1px solid #e3e9f2; border-radius: 18px; box-shadow: 0 10px 30px -14px rgba(15,27,45,.18); overflow: hidden; }
     /* Map card top: tabs */
-    .if-tabs { display: flex; align-items: center; gap: 6px; padding: 11px 14px; border-bottom: 1px solid #eef2f8; }
-    .wx-tab { border: 1px solid transparent; background: transparent; border-radius: 10px; padding: 7px 13px; font-family: inherit; font-size: 12.5px; font-weight: 700; color: #64748b; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
-    .wx-tab:hover { background: #f4f8ff; }
-    .wx-tab.on { background: #e8f0ff; color: #1d4ed8; border-color: #cddcfb; }
+    .if-tabs { display: flex; align-items: center; gap: 6px; padding: 12px 16px; border-bottom: 1px solid #eef2f8; }
+    .if-maptitle { font-size: 13px; font-weight: 800; color: #0f1b3d; }
     .if-tabs .hint { margin-left: auto; font-size: 11.5px; color: #94a3b8; font-weight: 600; }
     /* Map */
     .if-mapwrap { position: relative; }
@@ -48,7 +46,6 @@
     /* In-map overlays */
     .if-stamp { position: absolute; right: 12px; bottom: 12px; z-index: 5; background: rgba(15,23,42,.72); color: #e2e8f0; font-size: 11px; font-weight: 600; padding: 6px 12px; border-radius: 999px; backdrop-filter: blur(6px); display: flex; align-items: center; gap: 6px; }
     .if-rainscale { position: absolute; left: 12px; bottom: 12px; z-index: 5; background: rgba(15,23,42,.72); color: #e2e8f0; padding: 8px 12px; border-radius: 12px; backdrop-filter: blur(6px); }
-    .if-rainscale[hidden] { display: none; }
     .if-rainscale .t { font-size: 10px; font-weight: 700; margin-bottom: 4px; }
     .if-rainscale .bar { width: 190px; height: 8px; border-radius: 4px; background: linear-gradient(90deg,#38bdf8,#22c55e,#eab308,#f97316,#ef4444,#d946ef); }
     .if-rainscale .nums { display: flex; justify-content: space-between; font-size: 8.5px; color: #cbd5e1; margin-top: 2px; }
@@ -70,11 +67,16 @@
     .if-panel-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
     .if-ph-t { font-size: 15px; font-weight: 800; color: #0f1b3d; display: flex; align-items: center; gap: 7px; }
     .if-ph-coord { font-size: 11.5px; color: #94a3b8; margin-top: 3px; }
-    .if-ai-btn { border: 1px solid #ddd6fe; background: linear-gradient(180deg,#f5f3ff,#ede9fe); color: #6d28d9; border-radius: 11px; padding: 8px 13px; font-family: inherit; font-size: 12px; font-weight: 800; cursor: pointer; white-space: nowrap; }
-    .if-ai-btn:hover { background: #ede9fe; }
-    .if-ai-btn:disabled { opacity: .55; cursor: default; }
+    .if-ai-btn { border: none; background: linear-gradient(135deg,#8b5cf6,#6d28d9); color: #fff; border-radius: 11px; padding: 9px 14px; font-family: inherit; font-size: 12px; font-weight: 800; cursor: pointer; white-space: nowrap;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.25), 0 6px 16px -6px rgba(109,40,217,.5); transition: transform .12s; }
+    .if-ai-btn:hover { transform: translateY(-1px); }
+    .if-ai-btn:disabled { opacity: .55; cursor: default; transform: none; }
     #wxAiBody:empty { display: none; }
-    .wxai-text { font-size: 12.5px; color: #374151; line-height: 1.7; background: #faf9ff; border: 1px solid #ede9fe; border-radius: 12px; padding: 12px 14px; margin-top: 10px; }
+    .wxai-bar { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 10px; padding: 9px 13px; border-radius: 11px; cursor: pointer;
+      background: linear-gradient(120deg,#f5f3ff,#ede9fe); border: 1px solid #ddd6fe; font-size: 12px; font-weight: 800; color: #5b21b6; }
+    .wxai-toggle { font-size: 11px; font-weight: 700; color: #7c3aed; }
+    .wxai-wrap[hidden] { display: none; }
+    .wxai-text { font-size: 12.5px; color: #374151; line-height: 1.7; background: #faf9ff; border: 1px solid #ede9fe; border-radius: 0 0 12px 12px; border-top: none; padding: 12px 14px; }
     .wxai-cred { font-size: 10px; color: #94a3b8; margin-top: 6px; }
     .wxai-load { font-size: 12px; color: #7c6bd6; padding: 10px 2px 2px; }
     /* Panel body (filled by weather.js) */
@@ -82,12 +84,24 @@
     .wxp-head { margin: 10px 0 6px; }
     .wxp-title { font-size: 17px; font-weight: 800; color: #0f1b3d; letter-spacing: -.01em; line-height: 1.25; }
     .wxp-sub { font-size: 11.5px; color: #94a3b8; margin-top: 3px; word-break: break-word; }
-    .wxp-now { display: flex; align-items: center; gap: 15px; padding: 8px 0 12px; }
-    .wxp-now-emoji { font-size: 52px; line-height: 1; }
-    .wxp-now-temp { font-size: 34px; font-weight: 800; color: #0f1b3d; }
-    .wxp-now-temp span { font-size: 18px; font-weight: 600; color: #94a3b8; }
+    .wxp-now { display: flex; align-items: center; gap: 16px; padding: 14px 16px; margin: 8px 0 12px;
+      background: linear-gradient(120deg,#eef5ff 0%,#f6f9ff 60%,#fdfeff 100%); border: 1px solid #dbe7fb; border-radius: 16px;
+      box-shadow: inset 0 1px 0 #fff; }
+    .wxp-now-emoji { font-size: 54px; line-height: 1; filter: drop-shadow(0 6px 10px rgba(37,99,235,.18)); }
+    .wxp-now-temp { font-size: 36px; font-weight: 800; letter-spacing: -.02em;
+      background: linear-gradient(100deg,#0f1b3d 40%,#2563eb 95%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+    .wxp-now-temp span { font-size: 18px; font-weight: 600; -webkit-text-fill-color: #94a3b8; }
     .wxp-now-desc { font-size: 12.5px; color: #475569; margin-top: 2px; }
     .wxp-now-meta { font-size: 11.5px; color: #94a3b8; margin-top: 3px; }
+    /* 3-way operational status */
+    .wxp-status { display: grid; grid-template-columns: repeat(3, 1fr); gap: 7px; margin-bottom: 10px; }
+    .wxs { border-radius: 12px; padding: 8px 6px; text-align: center; border: 1px solid #eef2f8; }
+    .wxs.lv-ok { background: #f0fdf6; border-color: #c9ecd9; }
+    .wxs.lv-watch { background: #fffaf0; border-color: #f3e0b8; }
+    .wxs.lv-bad { background: #fef4f4; border-color: #f4caca; }
+    .wxs-n { font-size: 10.5px; font-weight: 700; color: #64748b; }
+    .wxs-v { font-size: 12px; font-weight: 800; margin-top: 2px; }
+    .wxs.lv-ok .wxs-v { color: #0e7a4e; } .wxs.lv-watch .wxs-v { color: #b45309; } .wxs.lv-bad .wxs-v { color: #b91c1c; }
     .wxp-alert { font-size: 12.5px; line-height: 1.65; padding: 10px 13px; border-radius: 12px; margin-bottom: 8px; }
     .wxp-alert.lv-ok { background: #e7f8ef; color: #0e7a4e; }
     .wxp-alert.lv-watch { background: #fff7e6; color: #a15c00; }
@@ -107,9 +121,13 @@
     .wxp-note { font-size: 10px; color: #94a3b8; margin: 9px 0 12px; }
     .wxp-tiles { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
     @media (max-width: 1120px) { .wxp-tiles { grid-template-columns: repeat(2, 1fr); } }
-    .wxt { background: #fbfdff; border: 1px solid #eef2f8; border-radius: 14px; padding: 12px 8px; text-align: center; }
-    .wxt-ic { font-size: 19px; }
-    .wxt-name { font-size: 10.5px; font-weight: 700; color: #64748b; margin-top: 4px; }
+    .wxt { background: linear-gradient(180deg,#ffffff,#fbfdff); border: 1px solid #eef2f8; border-radius: 15px; padding: 13px 8px; text-align: center;
+      box-shadow: 0 2px 8px -4px rgba(15,27,45,.08); transition: transform .15s, box-shadow .15s; }
+    .wxt:hover { transform: translateY(-2px); box-shadow: 0 8px 18px -8px rgba(15,27,45,.16); }
+    .wxt-ic { width: 36px; height: 36px; border-radius: 50%; margin: 0 auto; display: flex; align-items: center; justify-content: center; font-size: 17px; }
+    .wxt-ic.hue-sky { background: #e0f2fe; } .wxt-ic.hue-blue { background: #dbeafe; }
+    .wxt-ic.hue-violet { background: #ede9fe; } .wxt-ic.hue-amber { background: #fef3c7; }
+    .wxt-name { font-size: 10.5px; font-weight: 700; color: #64748b; margin-top: 6px; }
     .wxt-big { font-size: 16px; font-weight: 800; color: #0f1b3d; margin-top: 2px; }
     .wxt-sub { font-size: 10px; color: #94a3b8; margin-top: 1px; }
   </style>
@@ -206,10 +224,8 @@
       <!-- ── Map card ── -->
       <div class="if-card">
         <div class="if-tabs">
-          <button class="wx-tab on" data-mode="acc">🌱 สะสมในแปลง</button>
-          <button class="wx-tab" data-mode="radar">🌧️ เรดาร์ฝน</button>
-          <button class="wx-tab" data-mode="sat">🛰️ ดาวเทียม</button>
-          <span class="hint">คลิกบนแผนที่เพื่อดูพยากรณ์จุดนั้น</span>
+          <span class="if-maptitle">🌧️ แผนที่สภาพอากาศ · เรดาร์ฝนสด</span>
+          <span class="hint">คลิกหมุดหรือจุดใดก็ได้บนแผนที่เพื่อดูพยากรณ์</span>
         </div>
         <div class="if-mapwrap">
           <div id="wxMap"><div class="wx-fallback">กำลังโหลดแผนที่…</div></div>
@@ -254,6 +270,6 @@
         integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
 <script src="js/sidebar.js?v=20260808i"></script>
-<script src="js/weather.js?v=20260808i"></script>
+<script src="js/weather.js?v=20260808j"></script>
 </body>
 </html>
