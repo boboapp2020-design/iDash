@@ -101,19 +101,25 @@
   var activeGoTo = null;
 
   // Nominatim (OpenStreetMap) — reaches village/บ้าน level in Laos, unlike the
-  // Open-Meteo geocoder. Biased to Laos + Thailand.
+  // Open-Meteo geocoder. Biased to Laos + Thailand. polygon_geojson gives the
+  // administrative BOUNDARY of a district/village when OSM has one mapped.
   function geocode(name) {
-    var url = 'https://nominatim.openstreetmap.org/search?format=jsonv2&limit=6&accept-language=th&countrycodes=la,th&q=' + encodeURIComponent(name);
+    var url = 'https://nominatim.openstreetmap.org/search?format=jsonv2&limit=6&accept-language=th&countrycodes=la,th&polygon_geojson=1&q=' + encodeURIComponent(name);
     return fetch(url).then(function (r) { return r.json(); }).then(function (list) {
       return (list || []).map(function (r) {
         return {
           name: r.name || String(r.display_name || '').split(',')[0],
           display: r.display_name || r.name,
-          latitude: parseFloat(r.lat), longitude: parseFloat(r.lon)
+          latitude: parseFloat(r.lat), longitude: parseFloat(r.lon),
+          geojson: r.geojson || null
         };
       }).filter(function (r) { return !isNaN(r.latitude) && !isNaN(r.longitude); });
     });
   }
+
+  // Set by whichever map booted: draws (or clears, when null) the boundary of
+  // the selected area on the map.
+  var activeDrawBoundary = null;
 
   function forecast(lat, lon) {
     var url = FORECAST + '?latitude=' + lat + '&longitude=' + lon +
@@ -122,13 +128,19 @@
     return fetch(url).then(function (r) { return r.json(); });
   }
 
-  /* ── Detail panel (map page) ─────────────────────────────────────────── */
+  /* ── Detail popup (floats over the full-page map) ────────────────────── */
+  function openPopup() {
+    var pop = document.getElementById('wxPopup');
+    if (pop) pop.hidden = false;
+  }
   function renderPanelLoading(title) {
     var p = document.getElementById('wxPanel'); if (!p) return;
+    openPopup();
     p.innerHTML = '<div class="wxp-empty">กำลังโหลดพยากรณ์ ' + esc(title) + '…</div>';
   }
   function renderPanel(title, sub, factory, data) {
     var p = document.getElementById('wxPanel'); if (!p) return;
+    openPopup();
     if (!data || !data.daily || !data.daily.time) { p.innerHTML = '<div class="wxp-empty">ดึงพยากรณ์ไม่สำเร็จ</div>'; return; }
     var d = data.daily;
     var sum = zoneSummary(d);
@@ -193,6 +205,19 @@
     });
     map.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), 'top-right');
     activeGoTo = function (lat, lon) { map.flyTo({ center: [lon, lat], zoom: 11, pitch: 64, duration: 900 }); };
+    // Area boundary overlay (source + fill/line layers, data replaced per pick).
+    activeDrawBoundary = function (geojson) {
+      var empty = { type: 'FeatureCollection', features: [] };
+      var data = geojson ? { type: 'Feature', geometry: geojson, properties: {} } : empty;
+      var src = map.getSource('wx-boundary');
+      if (src) { src.setData(data); return; }
+      if (!map.isStyleLoaded()) { map.once('load', function () { activeDrawBoundary(geojson); }); return; }
+      map.addSource('wx-boundary', { type: 'geojson', data: data });
+      map.addLayer({ id: 'wx-boundary-fill', type: 'fill', source: 'wx-boundary',
+        paint: { 'fill-color': '#3b82f6', 'fill-opacity': 0.14 } });
+      map.addLayer({ id: 'wx-boundary-line', type: 'line', source: 'wx-boundary',
+        paint: { 'line-color': '#60a5fa', 'line-width': 2.5, 'line-opacity': 0.95 } });
+    };
 
     function selectZone(z) {
       map.flyTo({ center: [z.lon, z.lat], zoom: Math.max(map.getZoom(), 9.5), pitch: 64, duration: 900 });
@@ -241,6 +266,14 @@
       maxZoom: 18, attribution: '© OpenStreetMap'
     }).addTo(map);
     activeGoTo = function (lat, lon) { map.setView([lat, lon], 12, { animate: true }); };
+    var boundaryLayer = null;
+    activeDrawBoundary = function (geojson) {
+      if (boundaryLayer) { try { map.removeLayer(boundaryLayer); } catch (e) {} boundaryLayer = null; }
+      if (!geojson) return;
+      boundaryLayer = L.geoJSON({ type: 'Feature', geometry: geojson, properties: {} }, {
+        style: { color: '#60a5fa', weight: 2.5, opacity: 0.95, fillColor: '#3b82f6', fillOpacity: 0.14 }
+      }).addTo(map);
+    };
 
     ZONES.forEach(function (z) {
       var m = L.circleMarker([z.lat, z.lon], {
@@ -322,6 +355,12 @@
             res.innerHTML = '';
             inp.value = r.name;
             if (activeGoTo) activeGoTo(r.latitude, r.longitude);
+            // Draw the area's real boundary when OSM has one (districts usually
+            // do; small villages may only be a point — then no outline).
+            if (activeDrawBoundary) {
+              var g = r.geojson && /Polygon/i.test(r.geojson.type) ? r.geojson : null;
+              activeDrawBoundary(g);
+            }
             renderPanelLoading(r.name);
             var sub = String(r.display || '').split(',').slice(1, 4).join(',').trim() || (fmt(r.latitude, 3) + ', ' + fmt(r.longitude, 3));
             forecast(r.latitude, r.longitude)
@@ -335,7 +374,19 @@
     inp.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); go(); } });
   }
 
-  function boot() { if (bootMap()) { wireSearch(); return; } bootHome(); }
+  function boot() {
+    if (bootMap()) {
+      wireSearch();
+      var closeBtn = document.getElementById('wxPopupClose');
+      if (closeBtn) closeBtn.addEventListener('click', function () {
+        var pop = document.getElementById('wxPopup');
+        if (pop) pop.hidden = true;
+        if (activeDrawBoundary) activeDrawBoundary(null);
+      });
+      return;
+    }
+    bootHome();
+  }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
   else boot();
 })();

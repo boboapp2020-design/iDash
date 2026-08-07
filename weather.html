@@ -7,67 +7,80 @@
   <script>if (!window.iDashAuth.requireSignIn()) { document.documentElement.style.display = 'none'; }</script>
   <title>iDash — อากาศ × อ้อย</title>
   <link rel="stylesheet" href="css/style.css?v=20260804b">
-  <link rel="stylesheet" href="css/account.css?v=20260805m">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
         integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
   <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect x='2' y='18' width='6' height='12' rx='1' fill='%232563eb'/><rect x='10' y='12' width='6' height='18' rx='1' fill='%233b82f6'/><rect x='18' y='6' width='6' height='24' rx='1' fill='%2360a5fa'/><rect x='26' y='2' width='6' height='28' rx='1' fill='%2393c5fd'/></svg>">
   <style>
-    .wx-wide { max-width: 1180px; }
-    .wx-grid { display: grid; grid-template-columns: 1.35fr 1fr; gap: 18px; align-items: start; }
-    @media (max-width: 900px) { .wx-grid { grid-template-columns: 1fr; } }
-    .wx-mapcard { background: #fff; border: 1px solid var(--border); border-radius: 18px; box-shadow: var(--edge-light), var(--shadow); overflow: hidden; }
-    .wx-maphead { display: flex; align-items: center; gap: 8px; padding: 12px 16px; border-bottom: 1px solid var(--border); font-size: 12.5px; color: var(--text-secondary); font-weight: 600; }
-    .wx-prov { display: inline-flex; align-items: center; gap: 5px; padding: 3px 9px; border-radius: 20px; font-size: 11px; font-weight: 700; }
-    .wx-prov.p1 { background: #eef2ff; color: #4f46e5; }
-    .wx-prov.p2 { background: #ecfdf5; color: #0e9f6e; }
-    #wxMap { height: 560px; width: 100%; background: #eaf1fb; z-index: 0; }
-    #wxMap .maplibregl-ctrl-attrib, #wxMap .leaflet-control-attribution { font-size: 9px; }
-    .wx-fallback { display: flex; align-items: center; justify-content: center; height: 100%; color: var(--text-muted); font-size: 13.5px; padding: 24px; text-align: center; }
-    .wx-pin { width: 15px; height: 15px; border-radius: 50%; background: #64748b; border: 2.5px solid #fff; box-shadow: 0 2px 6px rgba(0,0,0,.4); cursor: pointer; transition: transform .15s; }
-    .wx-pin:hover { transform: scale(1.35); }
-    .wx-pin.factory { width: 21px; height: 21px; border-width: 3px; box-shadow: 0 0 0 3px rgba(255,255,255,.35), 0 2px 8px rgba(0,0,0,.5); }
-    /* Village search */
-    .wx-search { display: flex; gap: 8px; padding: 11px 16px; border-top: 1px solid var(--border); }
-    .wx-search input { flex: 1; border: 1px solid var(--border-strong); border-radius: 9px; padding: 8px 12px; font-family: inherit; font-size: 13px; outline: none; }
-    .wx-search input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(37,99,235,.11); }
-    .wx-search button { border: none; background: var(--primary-gradient); color: #fff; border-radius: 9px; padding: 0 16px; font-family: inherit; font-size: 13px; font-weight: 700; cursor: pointer; }
-    #wxSearchResults { display: flex; flex-direction: column; gap: 5px; padding: 0 16px 12px; }
-    #wxSearchResults:empty { padding: 0; }
-    .wx-sr { text-align: left; border: 1px solid var(--border); background: #fff; border-radius: 9px; padding: 8px 12px; font-family: inherit; font-size: 12.5px; color: var(--gray-800); cursor: pointer; }
+    .wx-main { padding: 0 !important; position: relative; height: 100vh; overflow: hidden; }
+    #wxMap { position: absolute; inset: 0; background: #dfeaf7; z-index: 0; }
+    #wxMap canvas, #wxMap .leaflet-container { outline: none; }
+    .wx-fallback { display:flex; align-items:center; justify-content:center; height:100%; color:#64748b; font-size:13.5px; text-align:center; padding:24px; }
+    .wx-pin { width: 15px; height: 15px; border-radius: 50%; background: #64748b; border: 2.5px solid #fff; box-shadow: 0 2px 7px rgba(0,0,0,.5); cursor: pointer; transition: transform .15s; }
+    .wx-pin:hover { transform: scale(1.4); }
+    .wx-pin.factory { width: 22px; height: 22px; border-width: 3px; box-shadow: 0 0 0 3px rgba(255,255,255,.4), 0 2px 9px rgba(0,0,0,.55); }
+
+    /* Floating glass panels */
+    .wx-glass { position: absolute; z-index: 5; background: rgba(255,255,255,.84); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+      border: 1px solid rgba(255,255,255,.7); border-radius: 16px; box-shadow: 0 12px 40px -10px rgba(15,27,45,.4); }
+    /* top-left: brand + search */
+    .wx-tl { top: 16px; left: 16px; width: min(380px, calc(100vw - 320px)); padding: 12px; }
+    .wx-brand { display: flex; align-items: center; gap: 8px; padding: 2px 4px 10px; }
+    .wx-brand-ic { width: 34px; height: 34px; border-radius: 10px; background: linear-gradient(135deg,#3b82f6,#2563eb); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+    .wx-brand-ic svg { width: 19px; height: 19px; color: #fff; }
+    .wx-brand-t { font-size: 15px; font-weight: 800; color: #0f1b3d; letter-spacing: -.01em; }
+    .wx-brand-s { font-size: 10.5px; color: #64748b; margin-top: 1px; }
+    .wx-search { display: flex; gap: 7px; }
+    .wx-search input { flex: 1; min-width: 0; border: 1px solid #dbe5f4; border-radius: 10px; padding: 9px 12px; font-family: inherit; font-size: 13px; outline: none; background: #fff; }
+    .wx-search input:focus { border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37,99,235,.12); }
+    .wx-search button { border: none; background: linear-gradient(180deg,#3b82f6,#2563eb); color: #fff; border-radius: 10px; padding: 0 15px; font-family: inherit; font-size: 13px; font-weight: 700; cursor: pointer; }
+    #wxSearchResults { display: flex; flex-direction: column; gap: 5px; margin-top: 8px; max-height: 240px; overflow-y: auto; }
+    #wxSearchResults:empty { margin: 0; }
+    .wx-sr { text-align: left; border: 1px solid #eef2f8; background: #fff; border-radius: 10px; padding: 8px 11px; font-family: inherit; font-size: 12px; color: #334155; cursor: pointer; line-height: 1.4; }
     .wx-sr:hover { background: #f4f8ff; border-color: #bcd2f7; }
-    .wx-sr-load { font-size: 12px; color: var(--text-muted); padding: 4px 2px; }
-    .wx-legend { display: flex; gap: 14px; flex-wrap: wrap; padding: 10px 16px; border-top: 1px solid var(--border); font-size: 11.5px; color: var(--text-secondary); }
+    .wx-sr-load { font-size: 12px; color: #94a3b8; padding: 5px 2px; }
+
+    /* bottom-left: legend */
+    .wx-legend { bottom: 16px; left: 16px; padding: 9px 15px; display: flex; gap: 14px; font-size: 11.5px; color: #475569; font-weight: 600; }
     .wx-legend span { display: inline-flex; align-items: center; gap: 6px; }
-    .wx-dot { width: 11px; height: 11px; border-radius: 50%; border: 2px solid #fff; box-shadow: 0 0 0 1px #e2e8f0; }
-    /* Detail panel */
-    #wxPanel { background: linear-gradient(180deg, #ffffff, #fbfdff); border: 1px solid var(--border); border-radius: 18px; box-shadow: var(--edge-light), var(--shadow); padding: 20px; min-height: 300px; position: sticky; top: 20px; }
-    .wxp-empty { text-align: center; color: var(--text-muted); font-size: 13.5px; padding: 60px 0; }
-    .wxp-head { margin-bottom: 12px; }
-    .wxp-title { font-size: 18px; font-weight: 800; color: var(--gray-900); letter-spacing: -.01em; }
-    .wxp-sub { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
-    .wxp-now { display: flex; align-items: center; gap: 14px; padding: 12px 0 14px; }
+    .wx-dot { width: 11px; height: 11px; border-radius: 50%; border: 2px solid #fff; box-shadow: 0 0 0 1px #cbd5e1; }
+    @media (max-width: 560px) { .wx-legend { display: none; } .wx-tl { width: calc(100vw - 90px); } }
+
+    /* Forecast popup (right, floats over the map) */
+    .wx-popup { top: 16px; right: 16px; width: min(370px, calc(100vw - 90px)); max-height: calc(100vh - 32px); overflow-y: auto; padding: 18px 18px 16px;
+      animation: wxSlide .22s cubic-bezier(.16,1,.3,1); }
+    @keyframes wxSlide { from { opacity: 0; transform: translateX(16px); } to { opacity: 1; transform: none; } }
+    .wx-popup[hidden] { display: none; }
+    .wx-close { position: absolute; top: 12px; right: 12px; border: none; background: #f1f5f9; color: #64748b; width: 28px; height: 28px; border-radius: 9px; cursor: pointer; font-size: 15px; line-height: 1; }
+    .wx-close:hover { background: #e2e8f0; color: #0f172a; }
+    .wxp-empty { text-align: center; color: #94a3b8; font-size: 13px; padding: 40px 0; }
+    .wxp-head { margin: 0 30px 10px 0; }
+    .wxp-title { font-size: 17px; font-weight: 800; color: #0f1b3d; letter-spacing: -.01em; line-height: 1.25; }
+    .wxp-sub { font-size: 11.5px; color: #94a3b8; margin-top: 3px; word-break: break-word; }
+    .wxp-now { display: flex; align-items: center; gap: 14px; padding: 6px 0 14px; }
     .wxp-now-emoji { font-size: 46px; line-height: 1; }
-    .wxp-now-temp { font-size: 30px; font-weight: 800; color: var(--gray-900); }
-    .wxp-now-temp span { font-size: 17px; font-weight: 600; color: var(--text-muted); }
-    .wxp-now-desc { font-size: 12.5px; color: var(--text-secondary); margin-top: 3px; }
-    .wxp-alert { font-size: 13px; line-height: 1.6; padding: 11px 14px; border-radius: 12px; margin-bottom: 14px; }
+    .wxp-now-temp { font-size: 30px; font-weight: 800; color: #0f1b3d; }
+    .wxp-now-temp span { font-size: 17px; font-weight: 600; color: #94a3b8; }
+    .wxp-now-desc { font-size: 12.5px; color: #475569; margin-top: 3px; }
+    .wxp-alert { font-size: 12.5px; line-height: 1.6; padding: 10px 13px; border-radius: 12px; margin-bottom: 13px; }
     .wxp-alert.lv-ok { background: #e7f8ef; color: #0e7a4e; }
     .wxp-alert.lv-watch { background: #fff7e6; color: #a15c00; }
     .wxp-alert.lv-mid { background: #fef3e2; color: #b45309; }
     .wxp-alert.lv-high { background: #fdeaea; color: #b91c1c; }
-    .wxp-days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
-    .wxp-day { border: 1px solid var(--border); border-radius: 11px; padding: 9px 3px; text-align: center; background: #fff; }
+    .wxp-days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; }
+    .wxp-day { border: 1px solid #eef2f8; border-radius: 11px; padding: 8px 2px; text-align: center; background: #fff; }
     .wxp-day.lv-high { border-color: #f6c9c9; background: #fef5f5; }
     .wxp-day.lv-mid { border-color: #f7d9b3; background: #fffaf3; }
     .wxp-day.lv-watch { border-color: #f3e3b3; background: #fffdf5; }
     .wxp-day.lv-heat { border-color: #f3cdae; background: #fff8f3; }
-    .wxp-dow { font-size: 10.5px; font-weight: 700; color: var(--gray-600); }
-    .wxp-emoji { font-size: 21px; margin: 3px 0 2px; }
-    .wxp-temp { font-size: 11px; font-weight: 700; color: var(--gray-800); }
-    .wxp-rain { font-size: 10.5px; color: #2563eb; font-weight: 700; margin-top: 2px; }
-    .wxp-prob { font-size: 9.5px; color: var(--text-muted); }
-    .wxp-note { font-size: 10.5px; color: var(--text-muted); line-height: 1.6; margin-top: 12px; }
+    .wxp-dow { font-size: 10px; font-weight: 700; color: #64748b; }
+    .wxp-emoji { font-size: 20px; margin: 3px 0 1px; }
+    .wxp-temp { font-size: 10.5px; font-weight: 700; color: #334155; }
+    .wxp-rain { font-size: 10px; color: #2563eb; font-weight: 700; margin-top: 2px; }
+    .wxp-prob { font-size: 9px; color: #94a3b8; }
+    .wxp-note { font-size: 10px; color: #94a3b8; line-height: 1.6; margin-top: 11px; }
+
+    .maplibregl-ctrl-bottom-right, .leaflet-bottom.leaflet-right { margin-bottom: 6px; }
   </style>
 </head>
 <body>
@@ -141,38 +154,35 @@
   </div>
 </aside>
 
-<main class="main">
-  <div class="acct-wrap wx-wide">
-    <div class="acct-head">
-      <div class="acct-title">
+<main class="main wx-main">
+  <div id="wxMap"><div class="wx-fallback">กำลังโหลดแผนที่…</div></div>
+
+  <!-- top-left: brand + village search -->
+  <div class="wx-glass wx-tl">
+    <div class="wx-brand">
+      <div class="wx-brand-ic">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 19a4.5 4.5 0 100-9 6 6 0 10-11.5 2"/><line x1="8" y1="19" x2="8" y2="21"/><line x1="12" y1="20" x2="12" y2="22"/><line x1="16" y1="19" x2="16" y2="21"/></svg>
-        อากาศ × อ้อย
       </div>
-      <div class="acct-sub">แผนที่พยากรณ์อากาศพื้นที่ปลูกอ้อย — คลิกหมุดหรือจุดใดก็ได้บนแผนที่เพื่อดูพยากรณ์ 7 วัน + ผลต่อการเก็บเกี่ยว · โฟกัส แขวงคำม่วน &amp; สะหวันนะเขต</div>
+      <div><div class="wx-brand-t">อากาศ × อ้อย</div><div class="wx-brand-s">คำม่วน &amp; สะหวันนะเขต · คลิกจุด/หมุด/ค้นหา เพื่อดูพยากรณ์</div></div>
     </div>
-
-    <div class="wx-grid">
-      <div class="wx-mapcard">
-        <div class="wx-maphead">
-          <span class="wx-prov p2">🏭 สะหวันนะเขต</span>
-          <span class="wx-prov p1">คำม่วน</span>
-          <span style="margin-left:auto">คลิกบนแผนที่เพื่อดูพยากรณ์จุดนั้น</span>
-        </div>
-        <div id="wxMap"><div class="wx-fallback">กำลังโหลดแผนที่…</div></div>
-        <div class="wx-legend">
-          <span><i class="wx-dot" style="background:#16a34a"></i> อากาศดี</span>
-          <span><i class="wx-dot" style="background:#f59e0b"></i> ฝนปานกลาง</span>
-          <span><i class="wx-dot" style="background:#dc2626"></i> ฝนหนัก (เสี่ยง)</span>
-        </div>
-        <div class="wx-search">
-          <input id="wxSearchInput" placeholder="ค้นหาระดับหมู่บ้าน/เมือง เช่น Champhone, Xaybuly, บ้าน…" autocomplete="off">
-          <button id="wxSearchBtn">ค้นหา</button>
-        </div>
-        <div id="wxSearchResults"></div>
-      </div>
-
-      <div id="wxPanel"><div class="wxp-empty">เลือกจุดบนแผนที่เพื่อดูพยากรณ์</div></div>
+    <div class="wx-search">
+      <input id="wxSearchInput" placeholder="ค้นหาหมู่บ้าน/เมือง เช่น Champhone, บ้าน…" autocomplete="off">
+      <button id="wxSearchBtn">ค้นหา</button>
     </div>
+    <div id="wxSearchResults"></div>
+  </div>
+
+  <!-- bottom-left: legend -->
+  <div class="wx-glass wx-legend">
+    <span><i class="wx-dot" style="background:#16a34a"></i> อากาศดี</span>
+    <span><i class="wx-dot" style="background:#f59e0b"></i> ฝนปานกลาง</span>
+    <span><i class="wx-dot" style="background:#dc2626"></i> ฝนหนัก</span>
+  </div>
+
+  <!-- forecast popup (right, over the map) -->
+  <div class="wx-glass wx-popup" id="wxPopup" hidden>
+    <button class="wx-close" id="wxPopupClose" aria-label="ปิด">✕</button>
+    <div id="wxPanel"></div>
   </div>
 </main>
 
@@ -180,6 +190,6 @@
         integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
 <script src="js/sidebar.js?v=20260807t"></script>
-<script src="js/weather.js?v=20260808f"></script>
+<script src="js/weather.js?v=20260808h"></script>
 </body>
 </html>
