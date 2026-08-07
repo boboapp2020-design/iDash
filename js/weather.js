@@ -18,7 +18,7 @@
   // MapTiler key (public by design, domain-restrictable). When set, the map
   // renders in 3D terrain + satellite via MapLibre; empty → the reliable 2D
   // Leaflet map. Get a free key at cloud.maptiler.com.
-  var MAPTILER_KEY = '';
+  var MAPTILER_KEY = '9ZNAFkXEzT9KdManlDo0';
 
   // Zones down to the district level. Savannakhet is covered densely (all 15
   // districts) per the owner; Khammouane keeps its main towns. Coordinates are
@@ -175,7 +175,18 @@
   // it renders where the free ESRI/DEM tiles did not).
   function boot3D(mapEl) {
     mapEl.innerHTML = '';
-    var map = new maplibregl.Map({
+    var map, loaded = false;
+    // If 3D can't get going (WebGL/tiles), fall back to the reliable 2D map so
+    // there's always a working map.
+    var fallback = setTimeout(function () {
+      if (loaded) return;
+      try { map.remove(); } catch (e) {}
+      mapEl.innerHTML = '';
+      if (window.L) boot2D(mapEl);
+      else mapEl.innerHTML = '<div class="wx-fallback">แผนที่โหลดไม่สำเร็จ</div>';
+    }, 8000);
+
+    map = new maplibregl.Map({
       container: 'wxMap',
       style: 'https://api.maptiler.com/maps/hybrid/style.json?key=' + MAPTILER_KEY,
       center: [105.05, 16.85], zoom: 7.0, pitch: 60, bearing: -15, maxPitch: 80, attributionControl: true
@@ -194,6 +205,7 @@
     }
 
     map.on('load', function () {
+      loaded = true; clearTimeout(fallback);
       try {
         map.addSource('terrain', { type: 'raster-dem', url: 'https://api.maptiler.com/tiles/terrain-rgb-v2/tiles.json?key=' + MAPTILER_KEY });
         map.setTerrain({ source: 'terrain', exaggeration: 1.5 });
