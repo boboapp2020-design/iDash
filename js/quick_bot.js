@@ -261,25 +261,104 @@
     '1) ใช้ได้เฉพาะตัวเลขที่อยู่ใน JSON facts ที่ให้มาเท่านั้น ห้ามสร้าง/เดา/ประมาณตัวเลขที่ไม่มีใน facts',
     '2) ถ้าคำถามไม่เกี่ยวกับข้อมูล Quality นี้ หรือ facts ไม่มีข้อมูลที่ถาม ให้บอกตรง ๆ ว่า "ไม่มีข้อมูลนี้ใน Quality Dashboard" และย้ำว่าตอบได้เฉพาะเรื่องในแดชบอร์ดนี้',
     '3) ตอบภาษาไทย กระชับ อ้างอิงตัวเลขจริงพร้อมหน่วยและวันที่เสมอ',
-    '4) แต่ละ KPI มี history เรียงจากวันเก่าไปวันใหม่ (ค่าล่าสุด = รายการสุดท้าย) ใช้เปรียบเทียบย้อนหลัง/แนวโน้มได้',
+    '4) ข้อมูลมี dates[] (วันที่ เก่า→ใหม่) และแต่ละตัวชี้วัดมี values[] ที่ตรงตำแหน่งกับ dates[] (ค่าล่าสุด = ตัวสุดท้าย, null = ไม่มีข้อมูลวันนั้น) ใช้ดูแนวโน้ม/เทียบย้อนหลัง/หาสูงสุด-ต่ำสุดได้',
     '5) ห้ามพูดหรือแนะนำเรื่องนอกเหนือข้อมูลในแดชบอร์ดนี้'
   ].join('\n');
 
+  // The FULL Quality Dashboard field set sent to the AI (every section). t =
+  // "today" field in the feed, g = target field (optional), label + unit for
+  // the model. Kept < 60 entries so the gateway's raw-rows guard never trips.
+  var Q_FIELDS = [
+    // อ้อย
+    { t:'cane_today', g:'cane_target', label:'อ้อยเข้าหีบ', unit:'ตัน' },
+    { t:'fiber_today', label:'% Fiber in Cane', unit:'%' },
+    { t:'pol_today', g:'pol_target', label:'% Pol in Cane', unit:'%' },
+    { t:'ccs_today', g:'ccs_target', label:'CCS of Factory', unit:'' },
+    { t:'burnt_today', label:'% อ้อยไฟไหม้', unit:'%' },
+    { t:'trash_today', label:'% Trash (สิ่งปลอมปน)', unit:'%' },
+    { t:'soil_today', label:'% ดินติดอ้อย', unit:'%' },
+    { t:'pcttelq_today', g:'pcttelq_target', label:'% Cane as TELQ', unit:'%' },
+    // หีบ & สกัด
+    { t:'tcph_today', g:'tcph_target', label:'อัตราการหีบ TCH', unit:'ตัน/ชม.' },
+    { t:'prepidx_today', g:'prepidx_target', label:'Preparation Index (PI)', unit:'' },
+    { t:'extpol_today', g:'extpol_target', label:'% Extraction (Pol)', unit:'%' },
+    { t:'polbag_today', label:'% Pol in Bagasse', unit:'%' },
+    { t:'moistbag_today', label:'% Moisture in Bagasse', unit:'%' },
+    { t:'mjcane_today', label:'Mixed Juice % Cane', unit:'%' },
+    { t:'bagcane_today', label:'Bagasse % Cane', unit:'%' },
+    // น้ำอ้อย (ค่าเดี่ยว)
+    { t:'fej_brix', label:'FEJ Brix', unit:'' },
+    { t:'fej_pol', label:'FEJ Pol', unit:'' },
+    { t:'fej_purity', label:'FEJ Purity', unit:'%' },
+    { t:'mj_brix', label:'Mixed Juice Brix', unit:'' },
+    { t:'mj_pol', label:'Mixed Juice Pol', unit:'' },
+    { t:'mj_purity', label:'Mixed Juice Purity', unit:'%' },
+    { t:'cj_brix', label:'Clarified Juice Brix', unit:'' },
+    { t:'cj_purity', label:'Clarified Juice Purity', unit:'%' },
+    { t:'rs_brix', label:'Syrup Brix', unit:'' },
+    { t:'rs_purity', label:'Syrup Purity', unit:'%' },
+    // Recovery & การสูญเสีย
+    { t:'recov_today', g:'recov_target', label:'% Overall Recovery', unit:'%' },
+    { t:'bhr_today', g:'bhr_target', label:'BHR (Boiling House Recovery)', unit:'%' },
+    { t:'loss_today', g:'loss_target', label:'% การสูญเสียรวม', unit:'%' },
+    { t:'loss_bag_today', label:'สูญเสียในชานอ้อย', unit:'%' },
+    { t:'loss_fc_today', label:'สูญเสียในกากตะกอน', unit:'%' },
+    { t:'loss_fm_today', label:'สูญเสียในโมลาส', unit:'%' },
+    { t:'loss_undet_today', label:'สูญเสียหาสาเหตุไม่ได้', unit:'%' },
+    // Final Molasses
+    { t:'fm_today', label:'Final Molasses (โมลาส)', unit:'ตัน' },
+    { t:'fm_pctcane_today', label:'Final Molasses % Cane', unit:'%' },
+    { t:'fm_brix_today', g:'fm_brix_target', label:'FM Brix', unit:'' },
+    { t:'fm_purity_today', g:'fm_purity_target', label:'FM Purity (ความบริสุทธิ์โมลาส)', unit:'%' },
+    { t:'fm_rs_today', label:'FM Reducing Sugar', unit:'%' },
+    { t:'fm_ash_today', label:'FM Ash (เถ้า)', unit:'%' },
+    // Filter Cake
+    { t:'fc_today', label:'Filter Cake (กากตะกอน)', unit:'ตัน' },
+    { t:'fc_moist_today', g:'fc_moist_target', label:'FC Moisture (ความชื้นกาก)', unit:'%' },
+    { t:'fc_pol_today', g:'fc_pol_target', label:'FC Pol (Pol กากตะกอน)', unit:'%' },
+    // คุณภาพน้ำตาล
+    { t:'vhp_today', g:'vhp_target', label:'น้ำตาล VHP (ผลิต)', unit:'ตัน' },
+    { t:'totsugar_today', g:'totsugar_target', label:'น้ำตาลรวม', unit:'ตัน' },
+    { t:'vhp_pol_today', label:'Pol น้ำตาล VHP', unit:'%' },
+    { t:'vhp_moist_today', label:'ความชื้นน้ำตาล VHP', unit:'%' },
+    { t:'vhp_colour_today', label:'สีน้ำตาล VHP (ICUMSA)', unit:'IU' },
+    { t:'purity_today', g:'purity_target', label:'% Purity รวม', unit:'%' },
+    { t:'me_today', g:'me_target', label:'% Mechanical Efficiency', unit:'%' },
+    // พลังงาน & น้ำ
+    { t:'avgsteam_today', g:'avgsteam_target', label:'ไอน้ำต่อตันอ้อย', unit:'' },
+    { t:'kwhtc_today', g:'kwhtc_target', label:'หน่วยไฟต่อตันอ้อย', unit:'' },
+    { t:'kwhsugar_today', g:'kwhsugar_target', label:'หน่วยไฟต่อตันน้ำตาล', unit:'' },
+    { t:'edl_today', g:'edl_target', label:'ขายไฟ (EDL)', unit:'kWh' },
+    { t:'netkwh_today', g:'netkwh_target', label:'ไฟฟ้าสุทธิ', unit:'kWh' },
+    { t:'waterused_today', label:'น้ำที่ใช้', unit:'' },
+    { t:'wastewater_today', label:'น้ำเสีย', unit:'' }
+  ];
+
+  // Compact facts: a shared dates[] plus each KPI's values[] aligned to it —
+  // far fewer tokens than repeating the date on every point, so all ~55 fields
+  // fit with 10 days of history.
   function qualityFacts() {
     var f = readFeedCache();
     if (!f || !f.daily.length) return null;
-    var rows = f.daily, recent = rows.slice(-14), latest = rows[rows.length - 1];
-    var kpis = CATALOG.filter(function (k) { return k.tag === 'q'; }).map(function (k) {
-      var hist = recent.map(function (r) { return { date: r.date, value: num(r[k.t]) }; })
-        .filter(function (p) { return p.value !== null; });
-      if (!hist.length) return null;
-      return {
-        name: k.nameTH, unit: k.unit || '', history: hist,
-        cumulative: k.c ? num(latest[k.c]) : null,
-        target: k.g ? num(latest[k.g]) : null
-      };
+    var rows = f.daily.slice(-10);
+    var latest = rows[rows.length - 1];
+    var dates = rows.map(function (r) { return r.date; });
+    function r3(v) { return v === null ? null : Math.round(v * 1000) / 1000; }
+    var kpis = Q_FIELDS.map(function (k) {
+      var vals = rows.map(function (row) { return r3(num(row[k.t])); });
+      if (vals.every(function (v) { return v === null; })) return null;
+      var o = { name: k.label, unit: k.unit || '', values: vals };
+      if (k.g) { var t = num(latest[k.g]); if (t !== null) o.target = r3(t); }
+      return o;
     }).filter(Boolean);
-    return kpis.length ? { latestDate: latest.date, kpis: kpis } : null;
+    return kpis.length ? { latestDate: latest.date, dates: dates, kpis: kpis } : null;
+  }
+
+  function buildAiPrompt(facts, question) {
+    return 'ข้อมูล Quality Dashboard โรงงานน้ำตาล (ล่าสุด ' + facts.latestDate + ')\n' +
+      'dates (วันที่ เก่า→ใหม่): ' + JSON.stringify(facts.dates) + '\n' +
+      'ตัวชี้วัด (values[] ตรงตำแหน่งกับ dates[]): ' + JSON.stringify(facts.kpis) + '\n\n' +
+      'คำถามผู้ใช้: ' + question + '\n\nตอบเป็นภาษาไทยตามกติกา:';
   }
 
   var thinkSeq = 0;
@@ -302,8 +381,7 @@
     if (nums.length < 2) return true;
     var real = [];
     facts.kpis.forEach(function (k) {
-      (k.history || []).forEach(function (p) { if (p.value != null) real.push(p.value); });
-      if (k.cumulative != null) real.push(k.cumulative);
+      (k.values || []).forEach(function (v) { if (v != null) real.push(v); });
       if (k.target != null) real.push(k.target);
     });
     var hit = nums.some(function (n) {
@@ -371,8 +449,7 @@
       return;
     }
     var tid = pushThinking();
-    var prompt = 'ข้อมูล Quality Dashboard (ล่าสุด ' + facts.latestDate + ') เป็น JSON:\n' +
-      JSON.stringify(facts.kpis) + '\n\nคำถามผู้ใช้: ' + question + '\n\nตอบเป็นภาษาไทยตามกติกา:';
+    var prompt = buildAiPrompt(facts, question);
     fetch(COPILOT_GATEWAY, {
       method: 'POST',
       headers: { 'content-type': 'application/json', 'Authorization': 'Bearer ' + COPILOT_ANON, 'apikey': COPILOT_ANON },
@@ -388,7 +465,7 @@
           var ans = d.result.text.trim();
           var ok = verifyNumbers(ans, facts);
           pushMsg(esc(ans).replace(/\n/g, '<br>') +
-            '<div class="qb-aicred">🤖 AI (Gemini · ฟรี) · ตอบจากข้อมูล Quality จริง' +
+            '<div class="qb-aicred">🤖 AI · ตอบจากข้อมูล Quality Dashboard จริง' +
             (ok ? '' : ' · <span class="qb-warn">⚠ โปรดตรวจตัวเลขอีกครั้ง</span>') + '</div>', 'bot');
         } else {
           pushMsg('ขออภัย ตอบไม่สำเร็จ: ' + esc((d && d.error && d.error.message) || 'ไม่ทราบสาเหตุ'), 'bot');
@@ -423,8 +500,7 @@
       return;
     }
     var tid = pushThinking();
-    var prompt = 'ข้อมูล Quality Dashboard (ล่าสุด ' + facts.latestDate + ') เป็น JSON:\n' +
-      JSON.stringify(facts.kpis) + '\n\nคำถามผู้ใช้: ' + question + '\n\nตอบเป็นภาษาไทยตามกติกา:';
+    var prompt = buildAiPrompt(facts, question);
     var url = 'https://generativelanguage.googleapis.com/v1beta/models/' + copilotModel() +
       ':generateContent?key=' + encodeURIComponent(key);
     fetch(url, {
