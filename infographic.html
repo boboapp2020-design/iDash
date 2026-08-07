@@ -7,7 +7,7 @@
        flashes on screen for a signed-out visitor. -->
   <script src="js/auth.js?v=20260805n"></script>
   <script>if (!window.iDashAuth.requireSignIn()) { document.documentElement.style.display = 'none'; }</script>
-  <title>Infographic Dashboard â€” iDash</title>
+  <title>Infographic Dashboard — iDash</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect x='2' y='18' width='6' height='12' rx='1' fill='%232563eb'/><rect x='10' y='12' width='6' height='18' rx='1' fill='%233b82f6'/><rect x='18' y='6' width='6' height='24' rx='1' fill='%2360a5fa'/><rect x='26' y='2' width='6' height='28' rx='1' fill='%2393c5fd'/></svg>">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -88,7 +88,7 @@
 <!-- Toolbar (floating, no sidebar) -->
 <div class="ig-toolbar">
   <div class="ig-toolbar-left">
-    <div class="ig-toolbar-logo" onclick="window.location.href='index.html'" title="à¸à¸¥à¸±à¸šà¸«à¸™à¹‰à¸² Home">
+    <div class="ig-toolbar-logo" onclick="window.location.href='index.html'" title="กลับหน้า Home">
       <svg viewBox="0 0 32 32" fill="none">
         <rect x="2" y="18" width="6" height="12" rx="1.5" fill="#2563eb"/>
         <rect x="10" y="12" width="6" height="18" rx="1.5" fill="#3b82f6"/>
@@ -98,25 +98,25 @@
     </div>
     <div>
       <div class="ig-toolbar-title" id="igTitle">Infographic Dashboard</div>
-      <div class="ig-toolbar-sub" id="igSubtitle">à¸­à¸±à¸›à¹‚à¸«à¸¥à¸”à¸‚à¹‰à¸­à¸¡à¸¹à¸¥à¸ˆà¸²à¸à¸«à¸™à¹‰à¸² Home à¹€à¸žà¸·à¹ˆà¸­à¸ªà¸£à¹‰à¸²à¸‡ Infographic</div>
+      <div class="ig-toolbar-sub" id="igSubtitle">อัปโหลดข้อมูลจากหน้า Home เพื่อสร้าง Infographic</div>
     </div>
   </div>
   <div class="ig-toolbar-right">
-    <button class="ig-toolbar-btn" id="igBtnHome" title="à¸à¸¥à¸±à¸šà¸«à¸™à¹‰à¸² Home">
+    <button class="ig-toolbar-btn" id="igBtnHome" title="กลับหน้า Home">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
       Home
     </button>
-    <button class="ig-toolbar-btn" id="igBtnDownload" title="à¸šà¸±à¸™à¸—à¸¶à¸ Dashboard à¸—à¸±à¹‰à¸‡à¸«à¸™à¹‰à¸²à¹€à¸›à¹‡à¸™à¹„à¸Ÿà¸¥à¹Œ .html">
+    <button class="ig-toolbar-btn" id="igBtnDownload" title="บันทึก Dashboard ทั้งหน้าเป็นไฟล์ .html">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
       HTML
     </button>
-    <button class="ig-toolbar-btn" id="igBtnPrint" title="à¸žà¸´à¸¡à¸žà¹Œ">
+    <button class="ig-toolbar-btn" id="igBtnPrint" title="พิมพ์">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
       Print
     </button>
-    <button class="ig-toolbar-btn primary" id="igBtnLearn" style="display:none" title="à¸ªà¹ˆà¸‡à¸‚à¹‰à¸­à¸¡à¸¹à¸¥à¸Šà¸¸à¸”à¸™à¸µà¹‰à¹ƒà¸«à¹‰ Admin à¹€à¸žà¸·à¹ˆà¸­à¸ªà¸£à¹‰à¸²à¸‡ Dashboard Template à¹ƒà¸«à¸¡à¹ˆ">
+    <button class="ig-toolbar-btn primary" id="igBtnLearn" style="display:none" title="ส่งข้อมูลชุดนี้ให้ Admin เพื่อสร้าง Dashboard Template ใหม่">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 4L12 13 2 4"/></svg>
-      à¸ªà¹ˆà¸‡à¸‚à¹‰à¸­à¸¡à¸¹à¸¥à¹ƒà¸«à¹‰ Admin
+      ส่งข้อมูลให้ Admin
     </button>
   </div>
 </div>
@@ -129,7 +129,7 @@
 <!-- AI generation loading state -->
 <div class="ig-ai-loading" id="igAiLoading">
   <div class="spinner"></div>
-  <h3 id="igAiLoadingTitle">à¹‚à¸›à¸£à¸”à¸£à¸­à¸ªà¸±à¸à¸„à¸£à¸¹à¹ˆ...</h3>
+  <h3 id="igAiLoadingTitle">โปรดรอสักครู่...</h3>
 </div>
 
 <!-- Empty state -->
@@ -140,11 +140,11 @@
     <line x1="16" y1="13" x2="8" y2="13"/>
     <line x1="16" y1="17" x2="8" y2="17"/>
   </svg>
-  <h3>à¸¢à¸±à¸‡à¹„à¸¡à¹ˆà¸¡à¸µà¸‚à¹‰à¸­à¸¡à¸¹à¸¥</h3>
-  <p>à¸­à¸±à¸›à¹‚à¸«à¸¥à¸”à¹„à¸Ÿà¸¥à¹Œà¸‚à¹‰à¸­à¸¡à¸¹à¸¥à¸ˆà¸²à¸à¸«à¸™à¹‰à¸² Home à¹‚à¸”à¸¢à¹€à¸¥à¸·à¸­à¸à¹‚à¸¡à¸”à¸¹à¸¥à¸—à¸µà¹ˆà¸•à¹‰à¸­à¸‡à¸à¸²à¸£<br>à¸£à¸°à¸šà¸šà¸ˆà¸°à¸§à¸´à¹€à¸„à¸£à¸²à¸°à¸«à¹Œà¸‚à¹‰à¸­à¸¡à¸¹à¸¥à¹à¸¥à¸°à¸ªà¸£à¹‰à¸²à¸‡ Infographic à¸­à¸±à¸•à¹‚à¸™à¸¡à¸±à¸•à¸´</p>
+  <h3>ยังไม่มีข้อมูล</h3>
+  <p>อัปโหลดไฟล์ข้อมูลจากหน้า Home โดยเลือกโมดูลที่ต้องการ<br>ระบบจะวิเคราะห์ข้อมูลและสร้าง Infographic อัตโนมัติ</p>
   <button class="ig-toolbar-btn primary" style="margin-top:20px" onclick="window.location.href='index.html'">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
-    à¹„à¸›à¸—à¸µà¹ˆà¸«à¸™à¹‰à¸² Home
+    ไปที่หน้า Home
   </button>
 </div>
 
@@ -152,16 +152,16 @@
 <script src="js/interactive_dashboard_generator.js?v=20260804a"></script>
 <script>
 // Single-module offline iDash (pivot 2026-07-22): this page renders the
-// interactive dashboard generated by app.js â€” zero API calls. A known-dataset
+// interactive dashboard generated by app.js — zero API calls. A known-dataset
 // registry hit shows a matched chip; unknown data offers the
-// "à¹€à¸£à¸µà¸¢à¸™à¸£à¸¹à¹‰à¸‚à¹‰à¸­à¸¡à¸¹à¸¥à¸Šà¸¸à¸”à¸™à¸µà¹‰" learning-packet export (the growth loop: the owner
+// "เรียนรู้ข้อมูลชุดนี้" learning-packet export (the growth loop: the owner
 // hands the packet to Claude, which adds a curated registry entry).
 (function () {
   'use strict';
 
-  // â”€â”€ Google Sheets Webhook â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-  // à¸•à¸±à¹‰à¸‡à¸„à¹ˆà¸² URL à¸‚à¸­à¸‡ Apps Script Web App à¸—à¸µà¹ˆ deploy à¹à¸¥à¹‰à¸§
-  // à¸”à¸¹à¸§à¸´à¸˜à¸µà¸•à¸±à¹‰à¸‡à¸„à¹ˆà¸²: docs/google-sheets-webhook-setup.md
+  // ── Google Sheets Webhook ──────────────────────────────────────────────
+  // ตั้งค่า URL ของ Apps Script Web App ที่ deploy แล้ว
+  // ดูวิธีตั้งค่า: docs/google-sheets-webhook-setup.md
   var LEARN_PACKET_WEBHOOK = 'https://script.google.com/macros/s/AKfycby_lBduMkdzdXl9QzHAE6nB7sabx0iD3VU-fhusNKCykGgW2arweOTSKgavaF67BQEQ/exec';
 
   var generatedHtml = null;
@@ -175,7 +175,7 @@
 
     // AI-authored pages are untrusted third-party HTML, so they render inside
     // a fully sandboxed frame (no scripts, no same-origin). That is the real
-    // containment boundary â€” the pattern screen in ai_providers.js is only
+    // containment boundary — the pattern screen in ai_providers.js is only
     // defense in depth. Locally generated dashboards keep doc.write() because
     // they legitimately run their own ECharts code.
     if (sessionStorage.getItem('idash.htmlSource') === 'ai') {
@@ -202,7 +202,7 @@
     document.getElementById('igAiBadge').style.display = 'none';
   }
 
-  // â”€â”€ Learning packet: columns + inferred types + stats + sample rows â”€â”€
+  // ── Learning packet: columns + inferred types + stats + sample rows ──
   function inferColType(values) {
     var num = 0, date = 0, checked = 0;
     for (var i = 0; i < values.length && checked < 40; i++) {
@@ -258,19 +258,19 @@
   function handleLearnClick() {
     var datasetJson = sessionStorage.getItem('idash.dashboardDataset');
     if (!datasetJson || !currentMeta) {
-      showBadge('à¹„à¸¡à¹ˆà¸žà¸šà¸‚à¹‰à¸­à¸¡à¸¹à¸¥à¸•à¹‰à¸™à¸‰à¸šà¸±à¸šà¸ªà¸³à¸«à¸£à¸±à¸šà¸ªà¹ˆà¸‡à¸­à¸­à¸ â€” à¸¥à¸­à¸‡à¸­à¸±à¸›à¹‚à¸«à¸¥à¸”à¹„à¸Ÿà¸¥à¹Œà¹ƒà¸«à¸¡à¹ˆà¸­à¸µà¸à¸„à¸£à¸±à¹‰à¸‡', true);
+      showBadge('ไม่พบข้อมูลต้นฉบับสำหรับส่งออก — ลองอัปโหลดไฟล์ใหม่อีกครั้ง', true);
       setTimeout(hideBadge, 5000);
       return;
     }
     var dataset = JSON.parse(datasetJson);
     var packet = buildLearnPacket(dataset, currentMeta);
 
-    // If webhook URL is configured â†’ POST to Google Sheets automatically
+    // If webhook URL is configured → POST to Google Sheets automatically
     if (LEARN_PACKET_WEBHOOK) {
       var btn = document.getElementById('igBtnLearn');
       var origHtml = btn.innerHTML;
       btn.disabled = true;
-      btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="animation:spin 1s linear infinite"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> à¸à¸³à¸¥à¸±à¸‡à¸ªà¹ˆà¸‡...';
+      btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="animation:spin 1s linear infinite"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> กำลังส่ง...';
 
       fetch(LEARN_PACKET_WEBHOOK, {
         method: 'POST',
@@ -281,13 +281,13 @@
       .then(function () {
         btn.disabled = false;
         btn.innerHTML = origHtml;
-        showBadge('à¸ªà¹ˆà¸‡à¸‚à¹‰à¸­à¸¡à¸¹à¸¥à¸«à¸² Admin à¹€à¸£à¸µà¸¢à¸šà¸£à¹‰à¸­à¸¢à¹à¸¥à¹‰à¸§', false);
+        showBadge('ส่งข้อมูลหา Admin เรียบร้อยแล้ว', false);
         setTimeout(hideBadge, 6000);
       })
       .catch(function (err) {
         btn.disabled = false;
         btn.innerHTML = origHtml;
-        showBadge('à¸ªà¹ˆà¸‡à¸‚à¹‰à¸­à¸¡à¸¹à¸¥à¹„à¸¡à¹ˆà¸ªà¸³à¹€à¸£à¹‡à¸ˆ â€” à¸•à¸£à¸§à¸ˆà¸ªà¸­à¸šà¸à¸²à¸£à¹€à¸Šà¸·à¹ˆà¸­à¸¡à¸•à¹ˆà¸­à¸­à¸´à¸™à¹€à¸—à¸­à¸£à¹Œà¹€à¸™à¹‡à¸•', true);
+        showBadge('ส่งข้อมูลไม่สำเร็จ — ตรวจสอบการเชื่อมต่ออินเทอร์เน็ต', true);
         setTimeout(hideBadge, 6000);
         fallbackDownload(packet);
       });
@@ -296,7 +296,7 @@
 
     // Fallback: download JSON file locally
     fallbackDownload(packet);
-    showBadge('à¸”à¸²à¸§à¸™à¹Œà¹‚à¸«à¸¥à¸”à¸Šà¸¸à¸”à¸‚à¹‰à¸­à¸¡à¸¹à¸¥à¹à¸¥à¹‰à¸§ â€” à¸ªà¹ˆà¸‡à¹„à¸Ÿà¸¥à¹Œà¸™à¸µà¹‰à¹ƒà¸«à¹‰ Admin à¹€à¸žà¸·à¹ˆà¸­à¸ªà¸£à¹‰à¸²à¸‡ Dashboard Template', false);
+    showBadge('ดาวน์โหลดชุดข้อมูลแล้ว — ส่งไฟล์นี้ให้ Admin เพื่อสร้าง Dashboard Template', false);
     setTimeout(hideBadge, 7000);
   }
 
@@ -326,30 +326,30 @@
     var title = meta.datasetTitle || (meta.filename || '').replace(/\.(xlsx?|csv|json)$/i, '').replace(/[_\-]+/g, ' ') || 'Dashboard';
     document.getElementById('igTitle').textContent = title;
 
-    // Matched registry entry â†’ confirm which curated template applied.
+    // Matched registry entry → confirm which curated template applied.
     var sub = meta.domainNameTH || '';
     if (meta.matchedDataset) {
-      sub += (sub ? ' Â· ' : '') + 'à¸ˆà¸±à¸šà¸„à¸¹à¹ˆà¹€à¸—à¸¡à¹€à¸žà¸¥à¸•: ' + meta.matchedDataset.nameTH + ' (' + meta.matchedDataset.score + '%)';
+      sub += (sub ? ' · ' : '') + 'จับคู่เทมเพลต: ' + meta.matchedDataset.nameTH + ' (' + meta.matchedDataset.score + '%)';
     }
     document.getElementById('igSubtitle').textContent = sub;
     document.getElementById('igEmpty').style.display = 'none';
 
     // AI Autopilot was requested but couldn't deliver, so this page is the
-    // deterministic render. Say so plainly â€” a page that stayed silent here
+    // deterministic render. Say so plainly — a page that stayed silent here
     // would be read as the AI's work.
     if (meta.aiFallbackReason) {
-      showBadge('AI à¸­à¸­à¸à¹à¸šà¸šà¹„à¸¡à¹ˆà¸ªà¸³à¹€à¸£à¹‡à¸ˆ â€” à¸™à¸µà¹ˆà¸„à¸·à¸­ Dashboard à¸—à¸µà¹ˆà¸£à¸°à¸šà¸šà¸„à¸³à¸™à¸§à¸“à¹ƒà¸«à¹‰ Â· ' + meta.aiFallbackReason, true);
+      showBadge('AI ออกแบบไม่สำเร็จ — นี่คือ Dashboard ที่ระบบคำนวณให้ · ' + meta.aiFallbackReason, true);
     }
     // Name the AI that drew this, and say so when its numbers couldn't be
-    // matched back to the ones we computed â€” silence would imply "verified".
+    // matched back to the ones we computed — silence would imply "verified".
     else if (sessionStorage.getItem('idash.htmlSource') === 'ai') {
       var ai = null;
       try { ai = JSON.parse(sessionStorage.getItem('idash.aiDesign') || 'null'); } catch (e) {}
       if (ai) {
         showBadge(
           ai.numbersVerified
-            ? 'à¸­à¸­à¸à¹à¸šà¸šà¹‚à¸”à¸¢ AI Â· ' + ai.label + ' (' + ai.model + ')'
-            : 'à¸­à¸­à¸à¹à¸šà¸šà¹‚à¸”à¸¢ AI Â· ' + ai.label + ' â€” à¸•à¸£à¸§à¸ˆà¹„à¸¡à¹ˆà¸žà¸šà¸•à¸±à¸§à¹€à¸¥à¸‚à¸šà¸²à¸‡à¸ªà¹ˆà¸§à¸™ à¹‚à¸›à¸£à¸”à¸•à¸£à¸§à¸ˆà¸—à¸²à¸™à¸à¹ˆà¸­à¸™à¹ƒà¸Šà¹‰',
+            ? 'ออกแบบโดย AI · ' + ai.label + ' (' + ai.model + ')'
+            : 'ออกแบบโดย AI · ' + ai.label + ' — ตรวจไม่พบตัวเลขบางส่วน โปรดตรวจทานก่อนใช้',
           !ai.numbersVerified
         );
       }
@@ -358,7 +358,7 @@
     renderIframe(interactiveHtml);
     document.getElementById('igFrameWrap').style.display = 'block';
 
-    // Unknown data â†’ offer the learning-packet export.
+    // Unknown data → offer the learning-packet export.
     if (meta.unknownDataset) {
       var learnBtn = document.getElementById('igBtnLearn');
       if (learnBtn) learnBtn.style.display = 'inline-flex';
