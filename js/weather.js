@@ -15,6 +15,11 @@
 
   var FORECAST = 'https://api.open-meteo.com/v1/forecast';
 
+  // MapTiler key (public by design, domain-restrictable). When set, the map
+  // renders in 3D terrain + satellite via MapLibre; empty → the reliable 2D
+  // Leaflet map. Get a free key at cloud.maptiler.com.
+  var MAPTILER_KEY = '';
+
   // Zones down to the district level. Savannakhet is covered densely (all 15
   // districts) per the owner; Khammouane keeps its main towns. Coordinates are
   // approximate district centres — the map also lets you click ANY point for an
@@ -92,6 +97,24 @@
   }
   function riskColor(p) { return p >= 30 ? '#dc2626' : p >= 10 ? '#f59e0b' : '#16a34a'; }
 
+  // Set by whichever map booted, so the village search can recentre it.
+  var activeGoTo = null;
+
+  // Nominatim (OpenStreetMap) — reaches village/บ้าน level in Laos, unlike the
+  // Open-Meteo geocoder. Biased to Laos + Thailand.
+  function geocode(name) {
+    var url = 'https://nominatim.openstreetmap.org/search?format=jsonv2&limit=6&accept-language=th&countrycodes=la,th&q=' + encodeURIComponent(name);
+    return fetch(url).then(function (r) { return r.json(); }).then(function (list) {
+      return (list || []).map(function (r) {
+        return {
+          name: r.name || String(r.display_name || '').split(',')[0],
+          display: r.display_name || r.name,
+          latitude: parseFloat(r.lat), longitude: parseFloat(r.lon)
+        };
+      }).filter(function (r) { return !isNaN(r.latitude) && !isNaN(r.longitude); });
+    });
+  }
+
   function forecast(lat, lon) {
     var url = FORECAST + '?latitude=' + lat + '&longitude=' + lon +
       '&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,wind_speed_10m_max' +
@@ -138,19 +161,74 @@
       '<div class="wxp-note">💧 = ฝน (มม.) · % = โอกาสฝน · สีการ์ด/หมุด = ระดับผลกระทบต่อการเก็บเกี่ยว · ข้อมูล Open-Meteo</div>';
   }
 
-  /* ── Map page ────────────────────────────────────────────────────────── */
+  /* ── Map page — 3D (MapTiler) when a key is set, else 2D (Leaflet) ────── */
   function bootMap() {
     var mapEl = document.getElementById('wxMap');
     if (!mapEl) return false;
-    if (!window.L) {
-      mapEl.innerHTML = '<div class="wx-fallback">แผนที่โหลดไม่สำเร็จ — ต้องต่ออินเทอร์เน็ตเพื่อโหลดแผนที่</div>';
-      return true;
+    if (MAPTILER_KEY && window.maplibregl) return boot3D(mapEl);
+    if (window.L) return boot2D(mapEl);
+    mapEl.innerHTML = '<div class="wx-fallback">แผนที่โหลดไม่สำเร็จ — ต้องต่ออินเทอร์เน็ต</div>';
+    return true;
+  }
+
+  // 3D terrain + satellite via MapLibre GL + MapTiler (CORS-enabled tiles, so
+  // it renders where the free ESRI/DEM tiles did not).
+  function boot3D(mapEl) {
+    mapEl.innerHTML = '';
+    var map = new maplibregl.Map({
+      container: 'wxMap',
+      style: 'https://api.maptiler.com/maps/hybrid/style.json?key=' + MAPTILER_KEY,
+      center: [105.05, 16.85], zoom: 7.0, pitch: 60, bearing: -15, maxPitch: 80, attributionControl: true
+    });
+    map.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), 'top-right');
+    activeGoTo = function (lat, lon) { map.flyTo({ center: [lon, lat], zoom: 11, pitch: 64, duration: 900 }); };
+
+    function selectZone(z) {
+      map.flyTo({ center: [z.lon, z.lat], zoom: Math.max(map.getZoom(), 9.5), pitch: 64, duration: 900 });
+      if (z._data) renderPanel(z.name, z.prov, z.factory, z._data);
+      else {
+        renderPanelLoading(z.name);
+        forecast(z.lat, z.lon).then(function (d) { z._data = d; renderPanel(z.name, z.prov, z.factory, d); })
+          .catch(function () { renderPanel(z.name, z.prov, z.factory, null); });
+      }
     }
+
+    map.on('load', function () {
+      try {
+        map.addSource('terrain', { type: 'raster-dem', url: 'https://api.maptiler.com/tiles/terrain-rgb-v2/tiles.json?key=' + MAPTILER_KEY });
+        map.setTerrain({ source: 'terrain', exaggeration: 1.5 });
+      } catch (e) {}
+      ZONES.forEach(function (z) {
+        var el = document.createElement('div');
+        el.className = 'wx-pin' + (z.factory ? ' factory' : '');
+        el.title = (z.factory ? '🏭 ' : '') + z.name + ' · ' + z.prov;
+        new maplibregl.Marker({ element: el, anchor: 'center' }).setLngLat([z.lon, z.lat]).addTo(map);
+        z._el = el;
+        el.addEventListener('click', function (ev) { ev.stopPropagation(); selectZone(z); });
+        forecast(z.lat, z.lon).then(function (d) {
+          z._data = d;
+          if (d && d.daily) el.style.background = riskColor(d.daily.precipitation_sum[0] || 0);
+        }).catch(function () {});
+      });
+      selectZone(ZONES[0]);
+    });
+
+    map.on('click', function (e) {
+      renderPanelLoading('จุดที่เลือก');
+      forecast(e.lngLat.lat, e.lngLat.lng)
+        .then(function (d) { renderPanel('จุดที่เลือกบนแผนที่', fmt(e.lngLat.lat, 3) + ', ' + fmt(e.lngLat.lng, 3), false, d); })
+        .catch(function () { renderPanel('จุดที่เลือก', '', false, null); });
+    });
+    return true;
+  }
+
+  function boot2D(mapEl) {
     var map = L.map('wxMap', { scrollWheelZoom: true, zoomControl: true })
       .fitBounds([[15.4, 104.3], [18.0, 106.4]]);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      maxZoom: 12, attribution: '© OpenStreetMap'
+      maxZoom: 18, attribution: '© OpenStreetMap'
     }).addTo(map);
+    activeGoTo = function (lat, lon) { map.setView([lat, lon], 12, { animate: true }); };
 
     ZONES.forEach(function (z) {
       var m = L.circleMarker([z.lat, z.lon], {
@@ -211,7 +289,41 @@
     return true;
   }
 
-  function boot() { if (bootMap()) return; bootHome(); }
+  /* ── Village-level search (any place name → forecast, recentre the map) ── */
+  function wireSearch() {
+    var inp = document.getElementById('wxSearchInput');
+    var btn = document.getElementById('wxSearchBtn');
+    var res = document.getElementById('wxSearchResults');
+    if (!inp || !btn) return;
+    function go() {
+      var q = inp.value.trim();
+      if (!q) return;
+      res.innerHTML = '<div class="wx-sr-load">กำลังค้นหา…</div>';
+      geocode(q).then(function (list) {
+        if (!list.length) { res.innerHTML = '<div class="wx-sr-load">ไม่พบ "' + esc(q) + '" — ลองพิมพ์เป็นอังกฤษ หรือคลิกจุดบนแผนที่</div>'; return; }
+        res.innerHTML = list.map(function (r, i) {
+          return '<button class="wx-sr" data-i="' + i + '">' + esc(r.display) + '</button>';
+        }).join('');
+        [].forEach.call(res.querySelectorAll('.wx-sr'), function (b) {
+          b.addEventListener('click', function () {
+            var r = list[+b.getAttribute('data-i')];
+            res.innerHTML = '';
+            inp.value = r.name;
+            if (activeGoTo) activeGoTo(r.latitude, r.longitude);
+            renderPanelLoading(r.name);
+            var sub = String(r.display || '').split(',').slice(1, 4).join(',').trim() || (fmt(r.latitude, 3) + ', ' + fmt(r.longitude, 3));
+            forecast(r.latitude, r.longitude)
+              .then(function (d) { renderPanel(r.name, sub, false, d); })
+              .catch(function () { renderPanel(r.name, sub, false, null); });
+          });
+        });
+      }).catch(function () { res.innerHTML = '<div class="wx-sr-load">ค้นหาไม่สำเร็จ — ตรวจอินเทอร์เน็ต</div>'; });
+    }
+    btn.addEventListener('click', go);
+    inp.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); go(); } });
+  }
+
+  function boot() { if (bootMap()) { wireSearch(); return; } bootHome(); }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
   else boot();
 })();

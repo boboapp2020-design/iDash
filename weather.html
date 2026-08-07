@@ -10,6 +10,7 @@
   <link rel="stylesheet" href="css/account.css?v=20260805m">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
         integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+  <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect x='2' y='18' width='6' height='12' rx='1' fill='%232563eb'/><rect x='10' y='12' width='6' height='18' rx='1' fill='%233b82f6'/><rect x='18' y='6' width='6' height='24' rx='1' fill='%2360a5fa'/><rect x='26' y='2' width='6' height='28' rx='1' fill='%2393c5fd'/></svg>">
   <style>
     .wx-wide { max-width: 1180px; }
@@ -21,7 +22,21 @@
     .wx-prov.p1 { background: #eef2ff; color: #4f46e5; }
     .wx-prov.p2 { background: #ecfdf5; color: #0e9f6e; }
     #wxMap { height: 560px; width: 100%; background: #eaf1fb; z-index: 0; }
+    #wxMap .maplibregl-ctrl-attrib, #wxMap .leaflet-control-attribution { font-size: 9px; }
     .wx-fallback { display: flex; align-items: center; justify-content: center; height: 100%; color: var(--text-muted); font-size: 13.5px; padding: 24px; text-align: center; }
+    .wx-pin { width: 15px; height: 15px; border-radius: 50%; background: #64748b; border: 2.5px solid #fff; box-shadow: 0 2px 6px rgba(0,0,0,.4); cursor: pointer; transition: transform .15s; }
+    .wx-pin:hover { transform: scale(1.35); }
+    .wx-pin.factory { width: 21px; height: 21px; border-width: 3px; box-shadow: 0 0 0 3px rgba(255,255,255,.35), 0 2px 8px rgba(0,0,0,.5); }
+    /* Village search */
+    .wx-search { display: flex; gap: 8px; padding: 11px 16px; border-top: 1px solid var(--border); }
+    .wx-search input { flex: 1; border: 1px solid var(--border-strong); border-radius: 9px; padding: 8px 12px; font-family: inherit; font-size: 13px; outline: none; }
+    .wx-search input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(37,99,235,.11); }
+    .wx-search button { border: none; background: var(--primary-gradient); color: #fff; border-radius: 9px; padding: 0 16px; font-family: inherit; font-size: 13px; font-weight: 700; cursor: pointer; }
+    #wxSearchResults { display: flex; flex-direction: column; gap: 5px; padding: 0 16px 12px; }
+    #wxSearchResults:empty { padding: 0; }
+    .wx-sr { text-align: left; border: 1px solid var(--border); background: #fff; border-radius: 9px; padding: 8px 12px; font-family: inherit; font-size: 12.5px; color: var(--gray-800); cursor: pointer; }
+    .wx-sr:hover { background: #f4f8ff; border-color: #bcd2f7; }
+    .wx-sr-load { font-size: 12px; color: var(--text-muted); padding: 4px 2px; }
     .wx-legend { display: flex; gap: 14px; flex-wrap: wrap; padding: 10px 16px; border-top: 1px solid var(--border); font-size: 11.5px; color: var(--text-secondary); }
     .wx-legend span { display: inline-flex; align-items: center; gap: 6px; }
     .wx-dot { width: 11px; height: 11px; border-radius: 50%; border: 2px solid #fff; box-shadow: 0 0 0 1px #e2e8f0; }
@@ -149,6 +164,11 @@
           <span><i class="wx-dot" style="background:#f59e0b"></i> ฝนปานกลาง</span>
           <span><i class="wx-dot" style="background:#dc2626"></i> ฝนหนัก (เสี่ยง)</span>
         </div>
+        <div class="wx-search">
+          <input id="wxSearchInput" placeholder="ค้นหาระดับหมู่บ้าน/เมือง เช่น Champhone, Xaybuly, บ้าน…" autocomplete="off">
+          <button id="wxSearchBtn">ค้นหา</button>
+        </div>
+        <div id="wxSearchResults"></div>
       </div>
 
       <div id="wxPanel"><div class="wxp-empty">เลือกจุดบนแผนที่เพื่อดูพยากรณ์</div></div>
@@ -158,7 +178,8 @@
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
         integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
 <script src="js/sidebar.js?v=20260807t"></script>
-<script src="js/weather.js?v=20260808b"></script>
+<script src="js/weather.js?v=20260808d"></script>
 </body>
 </html>
