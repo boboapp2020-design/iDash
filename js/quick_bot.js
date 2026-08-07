@@ -139,24 +139,26 @@
     var css = document.createElement('style');
     css.id = 'qbStyles';
     css.textContent =
-      '.home-quickbot{display:flex;flex-direction:column}' +
+      '.home-quickbot{display:flex;flex-direction:column;background:linear-gradient(180deg,#f0fdfa 0%,#ffffff 46%)!important;border-color:#c9ede6!important}' +
+      '.home-quickbot:hover{border-color:#8fddce!important}' +
+      '.home-quickbot .home-chat-badge{background:linear-gradient(135deg,#2dd4bf,#0d9488)}' +
       '.qb-hero{display:flex;align-items:center;gap:14px;padding:2px 2px 13px;margin-bottom:2px;border-bottom:1px solid #eef2f8}' +
       '.qb-hero-ava{width:56px;height:56px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;' +
-        'background:radial-gradient(circle at 50% 32%,#f2f7ff,#dce8fb);box-shadow:0 8px 18px -7px rgba(37,99,235,.45),inset 0 1px 0 #fff,0 0 0 1px #e6eefb}' +
-      '.qb-hero-ava svg{width:42px;height:42px}' +
+        'background:radial-gradient(circle at 50% 32%,#ecfdf9,#cbf3ec);box-shadow:0 8px 18px -7px rgba(13,148,136,.5),inset 0 1px 0 #fff,0 0 0 1px #d3f2ec}' +
+      '.qb-hero-ava svg{width:38px;height:38px}' +
       '.qb-hero-txt{flex:1;min-width:0}' +
       '.qb-hero-title{font-size:20px;font-weight:800;letter-spacing:-.01em;line-height:1.1;' +
-        'background:linear-gradient(100deg,#0f1b3d 42%,#2563eb 96%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}' +
+        'background:linear-gradient(100deg,#0f2a28 38%,#0d9488 96%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}' +
       '.qb-spark{-webkit-text-fill-color:initial;font-size:16px}' +
       '.qb-hero-sub{font-size:12.5px;color:#64748b;margin-top:3px;font-weight:500}' +
       '.qb-hero-badge{align-self:flex-start;font-size:10px;font-weight:700;color:#0e7a4e;background:#e2f5ec;border-radius:20px;padding:3px 9px;white-space:nowrap}' +
       '.qb-src{display:flex;gap:6px;margin:10px 0 8px;flex-wrap:wrap}' +
       '.qb-chip{border:1px solid #d3e0f7;background:#fff;border-radius:20px;padding:4px 12px;font:inherit;font-size:11.5px;font-weight:700;color:#475569;cursor:pointer;transition:background .15s,border-color .15s}' +
-      '.qb-chip.on{background:#2563eb;color:#fff;border-color:#2563eb}' +
+      '.qb-chip.on{background:#0d9488;color:#fff;border-color:#0d9488}' +
       '.qb-chip.lock{opacity:.55;cursor:pointer}.qb-chip.lock::after{content:" 🔒";font-size:9px}' +
       '.qb-log{height:300px;overflow-y:auto;background:linear-gradient(180deg,#f7faff,#fbfdff);border:1px solid #eaf1fb;border-radius:10px;padding:13px;display:flex;flex-direction:column;gap:9px;margin-bottom:9px}' +
       '.qb-msg{max-width:90%;font-size:12.5px;line-height:1.6}' +
-      '.qb-msg.me{align-self:flex-end;background:#2563eb;color:#fff;padding:8px 12px;border-radius:12px 12px 4px 12px}' +
+      '.qb-msg.me{align-self:flex-end;background:linear-gradient(180deg,#14b8a6,#0d9488);color:#fff;padding:8px 12px;border-radius:12px 12px 4px 12px}' +
       '.qb-msg.bot{align-self:flex-start;background:#fff;border:1px solid #e3ecfa;color:#374151;padding:10px 12px;border-radius:3px 12px 12px 12px;box-shadow:var(--shadow-sm)}' +
       '.qb-date{font-size:10.5px;color:#94a3b8;margin-bottom:6px;font-weight:600}' +
       '.qb-ans{padding:7px 0;border-top:1px dashed #eef2f8}.qb-ans:first-of-type{border-top:none;padding-top:0}' +
@@ -164,12 +166,12 @@
       '.qb-ans-val{font-size:18px;font-weight:800;color:#0f1b3d;margin:1px 0 2px}' +
       '.qb-ans-sub{font-size:11px;color:#64748b}.qb-good{color:#0e9f6e;font-weight:700}.qb-bad{color:#e11d48;font-weight:700}' +
       '.qb-sugg{display:flex;gap:7px;flex-wrap:wrap;margin:0 0 10px}' +
-      '.qb-sugg button{border:1px solid #d3e0f7;background:#fff;border-radius:999px;padding:5px 11px;font:inherit;font-size:11.5px;color:#1d4ed8;font-weight:700;cursor:pointer;transition:background .15s,transform .15s}' +
-      '.qb-sugg button:hover{background:#eef4ff;transform:translateY(-1px)}' +
-      '.qb-input{display:flex;align-items:center;gap:8px;background:#fff;border:1px solid #dbe5f4;border-radius:10px;padding:5px 5px 5px 14px}' +
-      '.qb-input:focus-within{border-color:var(--primary);box-shadow:0 0 0 3px rgba(37,99,235,.12)}' +
+      '.qb-sugg button{border:1px solid #bfeee5;background:#fff;border-radius:999px;padding:5px 11px;font:inherit;font-size:11.5px;color:#0d9488;font-weight:700;cursor:pointer;transition:background .15s,transform .15s}' +
+      '.qb-sugg button:hover{background:#ecfdf9;transform:translateY(-1px)}' +
+      '.qb-input{display:flex;align-items:center;gap:8px;background:#fff;border:1px solid #cfe9e3;border-radius:10px;padding:5px 5px 5px 14px}' +
+      '.qb-input:focus-within{border-color:#0d9488;box-shadow:0 0 0 3px rgba(13,148,136,.14)}' +
       '.qb-input input{flex:1;min-width:0;border:none;outline:none;background:none;font-family:var(--font);font-size:13px;color:var(--text)}' +
-      '.qb-input button{width:30px;height:30px;border-radius:8px;border:none;flex-shrink:0;cursor:pointer;background:var(--primary);display:flex;align-items:center;justify-content:center}' +
+      '.qb-input button{width:30px;height:30px;border-radius:8px;border:none;flex-shrink:0;cursor:pointer;background:linear-gradient(180deg,#14b8a6,#0d9488);display:flex;align-items:center;justify-content:center}' +
       '.qb-input button svg{width:16px;height:16px;color:#fff}';
     document.head.appendChild(css);
   }
@@ -179,17 +181,11 @@
     mount.innerHTML =
       '<div class="qb-hero">' +
         '<div class="qb-hero-ava">' +
-          '<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">' +
-            '<line x1="32" y1="8" x2="32" y2="15" stroke="#2563eb" stroke-width="2.6" stroke-linecap="round"/>' +
-            '<circle cx="32" cy="6.5" r="3" fill="#3b82f6"/>' +
-            '<rect x="8" y="24" width="7" height="13" rx="3.5" fill="#93c5fd"/>' +
-            '<rect x="49" y="24" width="7" height="13" rx="3.5" fill="#93c5fd"/>' +
-            '<rect x="14" y="15" width="36" height="30" rx="11" fill="url(#qbRg)"/>' +
-            '<rect x="19" y="21" width="26" height="18" rx="9" fill="#0f1b3d"/>' +
-            '<circle cx="27" cy="29.5" r="3.2" fill="#5eead4"/>' +
-            '<circle cx="37" cy="29.5" r="3.2" fill="#5eead4"/>' +
-            '<path d="M27 35 q5 3 10 0" stroke="#5eead4" stroke-width="2" fill="none" stroke-linecap="round"/>' +
-            '<defs><linearGradient id="qbRg" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#60a5fa"/><stop offset="1" stop-color="#2563eb"/></linearGradient></defs>' +
+          '<svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">' +
+            '<path d="M27 4 L11 27 h10 l-3 17 L37 20 H26 z" fill="url(#qbBolt)" stroke="#0d9488" stroke-width="1.4" stroke-linejoin="round"/>' +
+            '<circle cx="38.5" cy="9.5" r="1.7" fill="#5eead4"/>' +
+            '<circle cx="9" cy="16" r="1.3" fill="#99f6e4"/>' +
+            '<defs><linearGradient id="qbBolt" x1="10" y1="4" x2="38" y2="44" gradientUnits="userSpaceOnUse"><stop stop-color="#2dd4bf"/><stop offset="1" stop-color="#0d9488"/></linearGradient></defs>' +
           '</svg>' +
         '</div>' +
         '<div class="qb-hero-txt">' +
