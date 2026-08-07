@@ -280,7 +280,7 @@ form { margin-top: 32px; }
       </div>
 
       <div class="forgot">
-        <button type="button" class="link-muted not-ready" disabled title="ยังไม่เปิดใช้งาน">ลืมรหัสผ่าน?</button>
+        <button type="button" class="link-muted" id="showForgot">ลืมรหัสผ่าน?</button>
       </div>
 
       <button type="submit" class="submit" id="submitBtn">เข้าสู่ระบบ</button>
@@ -297,8 +297,41 @@ form { margin-top: 32px; }
     <div class="signup">ยังไม่มีบัญชี? <button type="button" class="link-muted" id="showSignup">สมัครใช้งาน</button></div>
 
     <div class="note">
-      เข้าสู่ระบบด้วย Google · ลืมรหัสผ่าน — ยังไม่เปิดใช้งาน<br>
-      เพราะต้องมีระบบบัญชีผู้ใช้ฝั่งเซิร์ฟเวอร์ก่อน
+      เข้าสู่ระบบด้วย Google — ยังไม่เปิดใช้งาน<br>
+      ลืมรหัสผ่าน? กดลิงก์ด้านบน แล้วระบบจะส่งลิงก์ตั้งรหัสใหม่ไปที่อีเมลของคุณ
+    </div>
+  </div>
+
+  <!-- ── Forgot-password card — swapped in place of the login card ──
+       The user enters their registered email; the Apps Script stamps a
+       one-hour token on their row and mails a reset link. The reply is always
+       the same, so this never reveals which emails have an account. -->
+  <div class="card" id="forgotCard" hidden>
+    <button type="button" class="back-btn" id="forgotBack" aria-label="กลับไปหน้าเข้าสู่ระบบ">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+      กลับ
+    </button>
+    <img class="card-logo" src="assets/img/logo_idash.png" alt="iDash">
+    <div class="card-title">ลืมรหัสผ่าน</div>
+    <div class="card-sub">กรอกอีเมลที่ใช้สมัคร ระบบจะส่งลิงก์ตั้งรหัสผ่านใหม่ไปให้</div>
+
+    <form id="forgotForm" novalidate>
+      <div class="field">
+        <label class="field-label" for="fgEmail">Email ที่ลงทะเบียนไว้</label>
+        <div class="input-wrap">
+          <svg class="lead" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/></svg>
+          <input type="email" id="fgEmail" placeholder="name@example.com" autocomplete="email" spellcheck="false">
+        </div>
+      </div>
+
+      <button type="submit" class="submit" id="fgBtn">ส่งลิงก์ตั้งรหัสใหม่</button>
+      <div class="msg" id="fgMsg"></div>
+    </form>
+
+    <div class="signup">นึกรหัสได้แล้ว? <button type="button" class="link-muted" id="showLoginFromForgot">เข้าสู่ระบบ</button></div>
+
+    <div class="note">
+      ลิงก์ตั้งรหัสใหม่จะใช้ได้ภายใน 1 ชั่วโมง — ตรวจกล่องจดหมาย (และโฟลเดอร์สแปม) ของคุณ
     </div>
   </div>
 
@@ -461,6 +494,63 @@ form { margin-top: 32px; }
   document.getElementById('showSignup').addEventListener('click', function () { swap(true); });
   document.getElementById('showLogin').addEventListener('click', function () { swap(false); });
   document.getElementById('signupBack').addEventListener('click', function () { swap(false); });
+
+  /* ── Forgot password ────────────────────────────────────────────────────
+   * The user gives their registered email; the Apps Script stamps a one-hour
+   * token and mails a reset link. The reply is always the same success, so
+   * this never reveals which emails have an account. The new password itself
+   * is set on reset.html, hashed there before it leaves the machine. */
+  var forgotCard = document.getElementById('forgotCard');
+  var fgMsg = document.getElementById('fgMsg');
+  var fgBtn = document.getElementById('fgBtn');
+
+  function showForgotView() {
+    loginCard.hidden = true;
+    signupCard.hidden = true;
+    forgotCard.hidden = false;
+    fgMsg.textContent = '';
+    document.getElementById('fgEmail').focus();
+  }
+  function backToLogin() {
+    forgotCard.hidden = true;
+    signupCard.hidden = true;
+    loginCard.hidden = false;
+    userEl.focus();
+  }
+  document.getElementById('showForgot').addEventListener('click', showForgotView);
+  document.getElementById('forgotBack').addEventListener('click', backToLogin);
+  document.getElementById('showLoginFromForgot').addEventListener('click', backToLogin);
+
+  document.getElementById('forgotForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+    fgMsg.textContent = '';
+    var em = document.getElementById('fgEmail').value.trim();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(em)) { fgMsg.textContent = 'รูปแบบอีเมลไม่ถูกต้อง'; return; }
+    if (!SIGNUP_API_URL) { fgMsg.textContent = 'ระบบยังไม่ได้เชื่อมต่อปลายทาง — แจ้งผู้ดูแลระบบ'; return; }
+
+    fgBtn.disabled = true;
+    fgBtn.textContent = 'กำลังส่ง…';
+    fetch(SIGNUP_API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ action: 'forgot', email: em })
+    })
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
+        if (data && data.ok) {
+          document.getElementById('forgotForm').reset();
+          showOkModal(
+            'ส่งลิงก์แล้ว',
+            'ถ้าอีเมลนี้มีบัญชีในระบบ เราได้ส่งลิงก์ตั้งรหัสผ่านใหม่ไปให้แล้ว — ลิงก์ใช้ได้ภายใน 1 ชั่วโมง กรุณาตรวจกล่องจดหมาย (และโฟลเดอร์สแปม)',
+            backToLogin
+          );
+        } else {
+          fgMsg.textContent = (data && data.error) || 'ส่งไม่สำเร็จ — ลองใหม่อีกครั้ง';
+        }
+      })
+      .catch(function () { fgMsg.textContent = 'ติดต่อปลายทางไม่ได้ — ตรวจอินเทอร์เน็ตแล้วลองใหม่'; })
+      .finally(function () { fgBtn.disabled = false; fgBtn.textContent = 'ส่งลิงก์ตั้งรหัสใหม่'; });
+  });
 
   function sha256Hex(text) {
     var subtle = window.crypto && window.crypto.subtle;

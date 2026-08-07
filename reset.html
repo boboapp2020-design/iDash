@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ตั้งรหัสผ่านใหม่ — iDash</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect x='2' y='18' width='6' height='12' rx='1' fill='%232563eb'/><rect x='10' y='12' width='6' height='18' rx='1' fill='%233b82f6'/><rect x='18' y='6' width='6' height='24' rx='1' fill='%2360a5fa'/><rect x='26' y='2' width='6' height='28' rx='1' fill='%2393c5fd'/></svg>">
+<script src="js/auth.js?v=20260805n"></script>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --primary: #2563eb; --primary-dark: #1d4ed8;
+  --ink: #14161c; --ink-2: #475569; --muted: #858b9c;
+  --border: #e3e9f2; --red: #dc2626; --green: #16a34a;
+  --font: 'Inter', 'Noto Sans Thai', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+}
+body {
+  font-family: var(--font); color: var(--ink);
+  min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px;
+  background:
+    radial-gradient(820px 520px at 12% -8%, rgba(59,130,246,.16), transparent 60%),
+    radial-gradient(760px 480px at 96% 4%, rgba(139,92,246,.13), transparent 60%),
+    linear-gradient(160deg, #f7faff 0%, #eef4fe 55%, #e6eefc 100%);
+}
+.card {
+  width: 100%; max-width: 420px; background: #fff; border: 1px solid var(--border);
+  border-radius: 20px; padding: 34px 34px 28px; text-align: center;
+  box-shadow: 0 24px 60px -18px rgba(15,27,45,.28);
+}
+.card-logo { width: 132px; margin: 0 auto 18px; display: block; }
+.card-title { font-size: 20px; font-weight: 800; letter-spacing: -.01em; margin-bottom: 6px; }
+.card-sub { font-size: 13px; color: var(--ink-2); line-height: 1.6; margin-bottom: 22px; }
+.who { font-weight: 800; color: var(--primary); }
+.field { text-align: left; margin-bottom: 15px; }
+.field-label { display: block; font-size: 12.5px; font-weight: 700; color: #334155; margin-bottom: 7px; }
+.input-wrap { position: relative; display: flex; align-items: center; }
+.input-wrap .lead { position: absolute; left: 13px; width: 17px; height: 17px; color: var(--muted); pointer-events: none; }
+.input-wrap input {
+  width: 100%; padding: 12px 44px 12px 40px; font-family: inherit; font-size: 14px; color: var(--ink);
+  border: 1px solid var(--border); border-radius: 11px; background: #fff; outline: none;
+  transition: border-color .15s, box-shadow .15s;
+}
+.input-wrap input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(37,99,235,.12); }
+.peek { position: absolute; right: 8px; border: none; background: none; padding: 6px; cursor: pointer; color: var(--muted); display: flex; }
+.peek svg { width: 18px; height: 18px; }
+.submit {
+  width: 100%; padding: 13px; margin-top: 4px; border: none; border-radius: 11px; cursor: pointer;
+  font-family: inherit; font-size: 14.5px; font-weight: 700; color: #fff;
+  background: linear-gradient(180deg, var(--primary) 0%, var(--primary-dark) 100%);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.25), 0 10px 24px -8px rgba(37,99,235,.5);
+  transition: transform .12s, box-shadow .18s;
+}
+.submit:hover:not(:disabled) { transform: translateY(-1px); }
+.submit:disabled { opacity: .6; cursor: default; }
+.msg { min-height: 18px; font-size: 12.5px; font-weight: 600; margin-top: 12px; color: var(--red); }
+.msg.ok { color: var(--green); }
+.state-icon { width: 62px; height: 62px; border-radius: 50%; margin: 0 auto 16px; display: flex; align-items: center; justify-content: center; }
+.state-icon svg { width: 30px; height: 30px; }
+.state-icon.bad { background: #fdeaea; color: var(--red); }
+.state-icon.good { background: #e7f8ef; color: var(--green); }
+.linkbtn {
+  display: inline-block; margin-top: 6px; padding: 11px 22px; border-radius: 11px;
+  font-size: 13.5px; font-weight: 700; text-decoration: none; color: #fff;
+  background: linear-gradient(180deg, var(--primary) 0%, var(--primary-dark) 100%);
+}
+.hint { font-size: 11.5px; color: var(--muted); line-height: 1.6; margin-top: 18px; }
+[hidden] { display: none !important; }
+</style>
+</head>
+<body>
+
+<div class="card">
+  <img class="card-logo" src="assets/img/logo_idash.png" alt="iDash">
+
+  <!-- 1. Checking the token -->
+  <div id="viewLoading">
+    <div class="card-title">กำลังตรวจสอบลิงก์…</div>
+    <div class="card-sub">กรุณารอสักครู่</div>
+  </div>
+
+  <!-- 2. Bad / expired token -->
+  <div id="viewInvalid" hidden>
+    <div class="state-icon bad">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+    </div>
+    <div class="card-title">ลิงก์ใช้ไม่ได้</div>
+    <div class="card-sub">ลิงก์ตั้งรหัสผ่านนี้ไม่ถูกต้อง หมดอายุ หรือถูกใช้ไปแล้ว<br>กรุณาขอลิงก์ใหม่จากหน้าเข้าสู่ระบบ</div>
+    <a class="linkbtn" href="landing.html">กลับไปหน้าเข้าสู่ระบบ</a>
+  </div>
+
+  <!-- 3. Set the new password -->
+  <div id="viewForm" hidden>
+    <div class="card-title">ตั้งรหัสผ่านใหม่</div>
+    <div class="card-sub">บัญชี <span class="who" id="whoName"></span></div>
+    <form id="resetForm" novalidate>
+      <div class="field">
+        <label class="field-label" for="np1">รหัสผ่านใหม่</label>
+        <div class="input-wrap">
+          <svg class="lead" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          <input type="password" id="np1" placeholder="อย่างน้อย 6 ตัวอักษร" autocomplete="new-password">
+          <button type="button" class="peek" id="peek" aria-label="แสดงรหัสผ่าน">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="field">
+        <label class="field-label" for="np2">ยืนยันรหัสผ่านใหม่</label>
+        <div class="input-wrap">
+          <svg class="lead" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/><polyline points="9 16 11 18 15 14"/></svg>
+          <input type="password" id="np2" placeholder="พิมพ์รหัสผ่านใหม่ซ้ำอีกครั้ง" autocomplete="new-password">
+        </div>
+      </div>
+      <button type="submit" class="submit" id="rsBtn">บันทึกรหัสผ่านใหม่</button>
+      <div class="msg" id="rsMsg"></div>
+    </form>
+    <div class="hint">รหัสผ่านถูกเข้ารหัส (SHA-256) ก่อนส่งจากเครื่องคุณ — ระบบไม่เก็บรหัสผ่านจริง</div>
+  </div>
+
+  <!-- 4. Done -->
+  <div id="viewDone" hidden>
+    <div class="state-icon good">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+    </div>
+    <div class="card-title">ตั้งรหัสผ่านใหม่แล้ว</div>
+    <div class="card-sub">คุณเข้าสู่ระบบด้วยรหัสผ่านใหม่ได้ทันที</div>
+    <a class="linkbtn" href="landing.html">ไปหน้าเข้าสู่ระบบ</a>
+  </div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+  var API = (window.iDashAuth && window.iDashAuth.accountApiUrl) || '';
+  var token = new URLSearchParams(location.search).get('token') || '';
+  var username = '';
+
+  var vLoading = document.getElementById('viewLoading');
+  var vInvalid = document.getElementById('viewInvalid');
+  var vForm = document.getElementById('viewForm');
+  var vDone = document.getElementById('viewDone');
+
+  function show(el) {
+    [vLoading, vInvalid, vForm, vDone].forEach(function (v) { v.hidden = v !== el; });
+  }
+
+  function post(payload) {
+    return fetch(API, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify(payload)
+    }).then(function (r) { return r.json(); });
+  }
+
+  if (!token || !API) { show(vInvalid); return; }
+
+  // Ask the service who this token unlocks (needed so we hash the new password
+  // with the right username), and whether it is still valid.
+  post({ action: 'resettoken', token: token })
+    .then(function (d) {
+      if (d && d.ok && d.valid && d.username) {
+        username = d.username;
+        document.getElementById('whoName').textContent = username;
+        show(vForm);
+        document.getElementById('np1').focus();
+      } else {
+        show(vInvalid);
+      }
+    })
+    .catch(function () { show(vInvalid); });
+
+  document.getElementById('peek').addEventListener('click', function () {
+    var p = document.getElementById('np1');
+    p.type = p.type === 'password' ? 'text' : 'password';
+    p.focus();
+  });
+
+  document.getElementById('resetForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var msg = document.getElementById('rsMsg');
+    var btn = document.getElementById('rsBtn');
+    msg.className = 'msg';
+    var p1 = document.getElementById('np1').value;
+    var p2 = document.getElementById('np2').value;
+    if (p1.length < 6) { msg.textContent = 'รหัสผ่านต้องยาวอย่างน้อย 6 ตัวอักษร'; return; }
+    if (p1 !== p2) { msg.textContent = 'รหัสผ่านทั้งสองช่องไม่ตรงกัน'; return; }
+
+    btn.disabled = true;
+    btn.textContent = 'กำลังบันทึก…';
+    // Hash HERE with the account's username, matching signup/sign-in, so the
+    // real password never leaves the machine.
+    window.iDashAuth.digestHex(username, p1)
+      .then(function (hash) { return post({ action: 'resetpw', token: token, passwordHash: hash }); })
+      .then(function (d) {
+        if (d && d.ok) {
+          show(vDone);
+        } else {
+          msg.textContent = (d && d.error) || 'บันทึกไม่สำเร็จ — ลิงก์อาจหมดอายุ';
+          btn.disabled = false;
+          btn.textContent = 'บันทึกรหัสผ่านใหม่';
+        }
+      })
+      .catch(function () {
+        msg.textContent = 'ติดต่อปลายทางไม่ได้ — ตรวจอินเทอร์เน็ตแล้วลองใหม่';
+        btn.disabled = false;
+        btn.textContent = 'บันทึกรหัสผ่านใหม่';
+      });
+  });
+})();
+</script>
+</body>
+</html>
