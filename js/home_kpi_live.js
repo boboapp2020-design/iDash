@@ -305,7 +305,12 @@
       localStorage.removeItem(CACHE_KEY);
       load();
     },
-    render: renderAll
+    render: renderAll,
+    // Shared with the Quick bot: the same normalized {latestDate, kpis[]} the
+    // row paints, so the bot answers from the identical real figures (one
+    // source of truth — the KPI definitions live only here).
+    getData: function () { var c = readCache(); return c ? c.payload : null; },
+    refresh: function () { inFlight = startFetch(); return inFlight; }
   };
 
   // Network first, DOM second — this file is loaded `async` from <head>, so it

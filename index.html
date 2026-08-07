@@ -19,7 +19,7 @@
        the ~900KB of vendor scripts at the end of <body>. -->
   <link rel="preconnect" href="https://script.google.com" crossorigin>
   <link rel="dns-prefetch" href="https://script.google.com">
-  <script src="js/home_kpi_live.js?v=20260730a" async></script>
+  <script src="js/home_kpi_live.js?v=20260807a" async></script>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect x='2' y='18' width='6' height='12' rx='1' fill='%232563eb'/><rect x='10' y='12' width='6' height='18' rx='1' fill='%233b82f6'/><rect x='18' y='6' width='6' height='24' rx='1' fill='%2360a5fa'/><rect x='26' y='2' width='6' height='28' rx='1' fill='%2393c5fd'/></svg>">
   <style>
     /* Inbox — icon-only button next to the topbar date. Matches the date pill's
@@ -266,43 +266,10 @@
     <!-- ─── RECENT DASHBOARDS + AI CHATBOT ─── -->
     <div class="home-bottom">
 
-      <!-- Recent dashboards — real template assets, click opens the lightbox preview -->
-      <section class="home-panel">
-        <div class="home-sec-head">
-          <span class="home-sec-title">Recent Dashboards</span>
-          <a class="home-sec-link" href="templates.html">ดูทั้งหมด</a>
-        </div>
-        <div class="home-recent-grid">
-          <div class="template-card">
-            <div class="template-thumb"><img src="assets/img/templates/003.png" alt="Production Summary"></div>
-            <div class="template-info">
-              <div class="template-name">Production Summary</div>
-              <div class="template-desc">อัปเดต 1 ชั่วโมงที่แล้ว</div>
-            </div>
-          </div>
-          <div class="template-card">
-            <div class="template-thumb"><img src="assets/img/templates/002.png" alt="Sugar Loss Analysis"></div>
-            <div class="template-info">
-              <div class="template-name">Sugar Loss Analysis</div>
-              <div class="template-desc">อัปเดต 2 ชั่วโมงที่แล้ว</div>
-            </div>
-          </div>
-          <div class="template-card">
-            <div class="template-thumb"><img src="assets/img/templates/004.png" alt="Raw Sugar Inventory"></div>
-            <div class="template-info">
-              <div class="template-name">Raw Sugar Inventory</div>
-              <div class="template-desc">อัปเดต 3 ชั่วโมงที่แล้ว</div>
-            </div>
-          </div>
-          <div class="template-card">
-            <div class="template-thumb"><img src="assets/img/templates/001.png" alt="Boiler Performance"></div>
-            <div class="template-info">
-              <div class="template-name">Boiler Performance</div>
-              <div class="template-desc">อัปเดต เมื่อวาน 16:30</div>
-            </div>
-          </div>
-        </div>
-      </section>
+      <!-- Quick Ask bot — grounded, no-AI: answers Production performance from
+           the same real KPI feed the row above uses. Rendered by quick_bot.js
+           into this slot (replaces the old placeholder "Recent Dashboards"). -->
+      <section class="home-panel" id="qbMount"></section>
 
       <!-- AI Chatbot — entry point to ML Expert AI (opened full-page). -->
       <section class="home-panel home-chat">
@@ -756,6 +723,7 @@
 <script src="js/infographic_ai_composer.js?v=20260803c"></script>
 <script src="js/ai_providers.js?v=20260803d"></script>
 <script src="js/app.js?v=20260803h"></script>
+<script src="js/quick_bot.js?v=20260807a"></script>
 <script src="js/sidebar.js?v=20260805r"></script>
 <script>
   // Live topbar values: greeting + today's date follow the viewer's real clock.
