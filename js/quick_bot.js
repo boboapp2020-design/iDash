@@ -217,9 +217,13 @@
       return;
     }
 
-    // Quality answers with grounded AI (Google Gemini free tier, scoped to the
-    // dashboard data) when a Copilot key is set; otherwise keyword lookup.
-    if (src.id === 'quality' && copilotKey()) { askGemini(query); return; }
+    // Quality answers with grounded AI (Gemini free tier, scoped to the
+    // dashboard). Shared mode (one server-side key for everyone) is preferred;
+    // a per-user key is the fallback; otherwise keyword lookup.
+    if (src.id === 'quality') {
+      if (COPILOT_ANON) { askViaGateway(query); return; }
+      if (copilotKey()) { askGemini(query); return; }
+    }
 
     var data = src.getKpis();
     if (!data) {
@@ -348,7 +352,53 @@
       });
   }
 
-  /* ── Google Gemini (free tier, direct) — the Copilot's default AI ───────── */
+  /* ── Shared gateway (one key for everyone, kept server-side) ─────────────
+   * The Copilot reaches Gemini through the iDash gateway, which holds the
+   * Gemini key as a secret. The anon key below is public by Supabase design
+   * (it ships in every client) — the real key never leaves the server, so
+   * every user's Copilot works with no per-device setup and Google can't
+   * auto-revoke a leaked key. Fill COPILOT_ANON to turn shared mode on. */
+  var COPILOT_GATEWAY = 'https://hcckwaukoaioxpsfpipk.supabase.co/functions/v1/swift-action';
+  var COPILOT_ANON = ''; // <-- paste the project's anon (public) key to enable shared mode
+
+  function askViaGateway(question) {
+    var facts = qualityFacts();
+    if (!facts) {
+      pushMsg('กำลังโหลดข้อมูล Quality… ลองอีกครั้งในอีกสักครู่', 'bot');
+      loadFeed().catch(function () {});
+      return;
+    }
+    var tid = pushThinking();
+    var prompt = 'ข้อมูล Quality Dashboard (ล่าสุด ' + facts.latestDate + ') เป็น JSON:\n' +
+      JSON.stringify(facts.kpis) + '\n\nคำถามผู้ใช้: ' + question + '\n\nตอบเป็นภาษาไทยตามกติกา:';
+    fetch(COPILOT_GATEWAY, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', 'Authorization': 'Bearer ' + COPILOT_ANON, 'apikey': COPILOT_ANON },
+      body: JSON.stringify({
+        action: 'quick-ask',
+        payload: { system: QA_SYSTEM, prompt: prompt, facts: facts, maxTokens: 900, geminiModel: copilotModel() }
+      })
+    })
+      .then(function (r) { return r.json(); })
+      .then(function (d) {
+        removeThinking(tid);
+        if (d && d.result && d.result.text) {
+          var ans = d.result.text.trim();
+          var ok = verifyNumbers(ans, facts);
+          pushMsg(esc(ans).replace(/\n/g, '<br>') +
+            '<div class="qb-aicred">🤖 AI (Gemini · ฟรี) · ตอบจากข้อมูล Quality จริง' +
+            (ok ? '' : ' · <span class="qb-warn">⚠ โปรดตรวจตัวเลขอีกครั้ง</span>') + '</div>', 'bot');
+        } else {
+          pushMsg('ขออภัย ตอบไม่สำเร็จ: ' + esc((d && d.error && d.error.message) || 'ไม่ทราบสาเหตุ'), 'bot');
+        }
+      })
+      .catch(function () {
+        removeThinking(tid);
+        pushMsg('เชื่อมต่อ AI ไม่สำเร็จ — ลองใหม่อีกครั้ง', 'bot');
+      });
+  }
+
+  /* ── Google Gemini (per-user key, direct) — fallback when no shared key ──── */
   function copilotKey() {
     try { return (localStorage.getItem('idash.copilotKey') || '').trim(); } catch (e) { return ''; }
   }
@@ -550,7 +600,7 @@
           pushMsg('ยังไม่ได้เชื่อมข้อมูลของ <b>' + esc(s.label) + '</b> — เมื่อมี data API แล้วจะถามได้ทันที', 'bot');
         } else if (s.id === 'quality' && !qualityNoted) {
           qualityNoted = true;
-          pushMsg(copilotKey()
+          pushMsg((COPILOT_ANON || copilotKey())
             ? '💬 แท็บ <b>Quality</b> ตอบด้วย <b>AI (Gemini · ฟรี)</b> เฉพาะข้อมูลในแดชบอร์ดนี้ — ถามเป็นประโยคได้เลย เช่น "แนวโน้มสีน้ำตาล 7 วัน" หรือ "เทียบความบริสุทธิ์เมื่อวานกับวันนี้"'
             : '🔑 แท็บ <b>Quality</b> ใช้ <b>AI ฟรี (Gemini)</b> — กดรูปเฟือง ⚙ มุมขวาบนเพื่อใส่ API key ฟรีก่อน (ตอนนี้ยังค้นแบบ keyword ได้)', 'bot');
         }
