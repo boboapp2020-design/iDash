@@ -217,10 +217,11 @@
       return;
     }
 
-    // Quality answers with grounded AI (Gemini free tier, scoped to the
-    // dashboard). Shared mode (one server-side key for everyone) is preferred;
-    // a per-user key is the fallback; otherwise keyword lookup.
-    if (src.id === 'quality') {
+    // Production & Quality both answer with grounded AI (free, scoped to the
+    // dashboard's real fields — which cover both). Shared mode (one server-side
+    // key for everyone) is preferred; a per-user key is the fallback; only if
+    // no AI is available at all does it fall through to keyword lookup.
+    if (src.id === 'production' || src.id === 'quality') {
       if (COPILOT_ANON) { askViaGateway(query); return; }
       if (copilotKey()) { askGemini(query); return; }
     }
@@ -256,10 +257,10 @@
   }
 
   var QA_SYSTEM = [
-    'คุณคือผู้ช่วยตอบคำถามเกี่ยวกับ "Quality Dashboard" ของโรงงานน้ำตาลมิตรลาวเท่านั้น',
+    'คุณคือผู้ช่วยตอบคำถามเกี่ยวกับข้อมูลแดชบอร์ดการผลิตและคุณภาพ (Production & Quality) ของโรงงานน้ำตาลมิตรลาวเท่านั้น',
     'กติกาเด็ดขาด (ห้ามฝ่าฝืน):',
     '1) ใช้ได้เฉพาะตัวเลขที่อยู่ใน JSON facts ที่ให้มาเท่านั้น ห้ามสร้าง/เดา/ประมาณตัวเลขที่ไม่มีใน facts',
-    '2) ถ้าคำถามไม่เกี่ยวกับข้อมูล Quality นี้ หรือ facts ไม่มีข้อมูลที่ถาม ให้บอกตรง ๆ ว่า "ไม่มีข้อมูลนี้ใน Quality Dashboard" และย้ำว่าตอบได้เฉพาะเรื่องในแดชบอร์ดนี้',
+    '2) ถ้าคำถามไม่เกี่ยวกับข้อมูลโรงงานนี้ หรือ facts ไม่มีข้อมูลที่ถาม ให้บอกตรง ๆ ว่า "ไม่มีข้อมูลนี้ในแดชบอร์ด" และย้ำว่าตอบได้เฉพาะเรื่องในแดชบอร์ดโรงงานน้ำตาลนี้',
     '3) ตอบภาษาไทย กระชับ อ้างอิงตัวเลขจริงพร้อมหน่วยและวันที่เสมอ',
     '4) ข้อมูลมี dates[] (วันที่ เก่า→ใหม่) และแต่ละตัวชี้วัดมี values[] ที่ตรงตำแหน่งกับ dates[] (ค่าล่าสุด = ตัวสุดท้าย, null = ไม่มีข้อมูลวันนั้น) ใช้ดูแนวโน้ม/เทียบย้อนหลัง/หาสูงสุด-ต่ำสุดได้',
     '5) ห้ามพูดหรือแนะนำเรื่องนอกเหนือข้อมูลในแดชบอร์ดนี้'
@@ -355,7 +356,7 @@
   }
 
   function buildAiPrompt(facts, question) {
-    return 'ข้อมูล Quality Dashboard โรงงานน้ำตาล (ล่าสุด ' + facts.latestDate + ')\n' +
+    return 'ข้อมูลแดชบอร์ดโรงงานน้ำตาล Production & Quality (ล่าสุด ' + facts.latestDate + ')\n' +
       'dates (วันที่ เก่า→ใหม่): ' + JSON.stringify(facts.dates) + '\n' +
       'ตัวชี้วัด (values[] ตรงตำแหน่งกับ dates[]): ' + JSON.stringify(facts.kpis) + '\n\n' +
       'คำถามผู้ใช้: ' + question + '\n\nตอบเป็นภาษาไทยตามกติกา:';
@@ -465,7 +466,7 @@
           var ans = d.result.text.trim();
           var ok = verifyNumbers(ans, facts);
           pushMsg(esc(ans).replace(/\n/g, '<br>') +
-            '<div class="qb-aicred">🤖 AI · ตอบจากข้อมูล Quality Dashboard จริง' +
+            '<div class="qb-aicred">🤖 AI · ตอบจากข้อมูลโรงงานจริง' +
             (ok ? '' : ' · <span class="qb-warn">⚠ โปรดตรวจตัวเลขอีกครั้ง</span>') + '</div>', 'bot');
         } else {
           pushMsg('ขออภัย ตอบไม่สำเร็จ: ' + esc((d && d.error && d.error.message) || 'ไม่ทราบสาเหตุ'), 'bot');
@@ -686,8 +687,9 @@
 
     renderSugg(mount);
 
-    pushMsg('สวัสดีครับ 👋 ถามผลงานโรงงานได้เลย — <b>Production</b> (อ้อย/หีบ/Recovery/ไฟ) หรือ <b>Quality</b> (Pol/สี/ความชื้น/ความบริสุทธิ์) ' +
-      'พิมพ์ชื่อ KPI หรือกด "สรุป" ก็ได้ ตอบจากตัวเลขจริงในระบบเท่านั้น', 'bot');
+    pushMsg('สวัสดีครับ 👋 ผมคือ iDash Copilot — ถามเรื่องผลงานโรงงานได้ทั้ง <b>Production</b> และ <b>Quality</b> ' +
+      'พิมพ์เป็นประโยคได้เลย เช่น "คุณภาพเมื่อวานเป็นยังไง", "Recovery 7 วันล่าสุด", "อ้อยเข้าหีบวันนี้เทียบเมื่อวาน" ' +
+      '— ตอบจากตัวเลขจริงในระบบเท่านั้น', 'bot');
 
     mount.querySelector('#qbForm').addEventListener('submit', function (e) {
       e.preventDefault();
