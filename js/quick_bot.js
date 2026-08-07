@@ -219,43 +219,31 @@
     pushMsg(head + hits.map(kpiBlock).join(''), 'bot');
   }
 
+  // Keyword fallback data — the WHOLE catalog (Production + Quality merged).
+  function allKpisData() {
+    var f = readFeedCache();
+    if (!f || !f.daily.length) return null;
+    var rows = f.daily, last = rows[rows.length - 1], prev = rows.length > 1 ? rows[rows.length - 2] : null;
+    var kpis = CATALOG.map(function (k) { return buildOne(k, last, prev); }).filter(Boolean);
+    return kpis.length ? { latestDate: last.date, kpis: kpis } : null;
+  }
+
   function answer(query) {
     pushMsg(esc(query), 'me');
-    var src = byId(activeSourceId);
+    // One unified Copilot — grounded AI over the whole factory feed (Production
+    // + Quality merged). No rooms to pick: ask anything. Keyword lookup is only
+    // the no-AI fallback.
+    if (COPILOT_ANON) { askViaGateway(query); return; }
+    if (copilotKey()) { askGemini(query); return; }
 
-    if (!src.ready) {
-      pushMsg('ยังไม่ได้เชื่อมข้อมูลของ <b>' + esc(src.label) + '</b> — ตอนนี้ตอบได้ <b>Production</b> และ <b>Quality</b> ' +
-        'เมื่อเชื่อม data API ของ ' + esc(src.label) + ' แล้วจะถามได้ทันที', 'bot');
-      return;
-    }
-
-    // Production & Quality both answer with grounded AI (free, scoped to the
-    // dashboard's real fields — which cover both). Shared mode (one server-side
-    // key for everyone) is preferred; a per-user key is the fallback; only if
-    // no AI is available at all does it fall through to keyword lookup.
-    if (src.id === 'production' || src.id === 'quality') {
-      if (COPILOT_ANON) { askViaGateway(query); return; }
-      if (copilotKey()) { askGemini(query); return; }
-    }
-
-    var data = src.getKpis();
+    var data = allKpisData();
     if (!data) {
       pushMsg('กำลังโหลดข้อมูล… ลองอีกครั้งในอีกสักครู่', 'bot');
       loadFeed().catch(function () {});
       return;
     }
-
     var hits = matchKpis(query, data);
-    if (hits.length) { renderHits(hits, data, src.label); return; }
-
-    // Forgiving: look in the OTHER ready source too (Production ⇄ Quality).
-    var others = SOURCES.filter(function (s) { return s.ready && s.id !== activeSourceId; });
-    for (var i = 0; i < others.length; i++) {
-      var od = others[i].getKpis();
-      if (!od) continue;
-      var oh = matchKpis(query, od);
-      if (oh.length) { renderHits(oh, od, others[i].label, 'พบในแท็บ ' + others[i].label); return; }
-    }
+    if (hits.length) { renderHits(hits, data, 'Dashboard'); return; }
     pushMsg('ไม่พบตัวชี้วัดที่ตรงกับคำถาม ลองพิมพ์ชื่อ KPI เช่น <b>Recovery · สีน้ำตาล · ความบริสุทธิ์ · การสูญเสีย</b> หรือกด <b>สรุป</b>', 'bot');
   }
 
@@ -274,7 +262,7 @@
     '1) ใช้ได้เฉพาะตัวเลขที่อยู่ใน JSON facts ที่ให้มาเท่านั้น ห้ามสร้าง/เดา/ประมาณตัวเลขที่ไม่มีใน facts',
     '2) ถ้าคำถามไม่เกี่ยวกับข้อมูลโรงงานนี้ หรือ facts ไม่มีข้อมูลที่ถาม ให้บอกตรง ๆ ว่า "ไม่มีข้อมูลนี้ในแดชบอร์ด" และย้ำว่าตอบได้เฉพาะเรื่องในแดชบอร์ดโรงงานน้ำตาลนี้',
     '3) ตอบภาษาไทย กระชับ อ้างอิงตัวเลขจริงพร้อมหน่วยและวันที่เสมอ',
-    '4) ข้อมูลมี dates[] (วันที่ เก่า→ใหม่) และแต่ละตัวชี้วัดมี values[] ที่ตรงตำแหน่งกับ dates[] (ค่าล่าสุด = ตัวสุดท้าย, null = ไม่มีข้อมูลวันนั้น) ใช้ดูแนวโน้ม/เทียบย้อนหลัง/หาสูงสุด-ต่ำสุดได้',
+    '4) latest[] = ค่าล่าสุดของทุกตัวชี้วัด (วันเดียว). history[] = เฉพาะตัวชี้วัดหลัก มี values[] ตรงตำแหน่งกับ dates[] (เก่า→ใหม่, null = ไม่มีข้อมูลวันนั้น) ใช้ดูแนวโน้ม/เทียบย้อนหลัง/หาสูงสุด-ต่ำสุด. ถ้าถามค่าย้อนหลังของตัวชี้วัดที่ไม่ได้อยู่ใน history ให้บอกว่ามีเฉพาะค่าล่าสุด',
     '5) ห้ามพูดหรือแนะนำเรื่องนอกเหนือข้อมูลในแดชบอร์ดนี้'
   ].join('\n');
 
@@ -347,31 +335,44 @@
     { t:'wastewater_today', label:'น้ำเสีย', unit:'' }
   ];
 
-  // Compact facts: a shared dates[] plus each KPI's values[] aligned to it —
-  // far fewer tokens than repeating the date on every point. Per the owner we
-  // send the WHOLE season (every day in the feed) so any date can be asked; the
-  // compact shape keeps even a full season inside the model's context.
+  // The headline metrics that carry FULL-season history (so any date can be
+  // asked for these). Every other field is still available at its latest value.
+  var Q_CORE = {
+    cane_today: 1, ccs_today: 1, recov_today: 1, pol_today: 1, burnt_today: 1,
+    tcph_today: 1, loss_today: 1, vhp_today: 1, vhp_colour_today: 1,
+    purity_today: 1, fm_purity_today: 1, edl_today: 1
+  };
+
+  // Hybrid facts to fit the free model's per-minute token budget while still
+  // answering any date: latest[] = the latest value of ALL ~55 fields; history[]
+  // = the whole season for the ~20 core fields (values[] aligned to dates[]).
   function qualityFacts() {
     var f = readFeedCache();
     if (!f || !f.daily.length) return null;
-    var rows = f.daily;
-    var latest = rows[rows.length - 1];
+    var rows = f.daily, latest = rows[rows.length - 1];
     var dates = rows.map(function (r) { return r.date; });
     function r3(v) { return v === null ? null : Math.round(v * 1000) / 1000; }
-    var kpis = Q_FIELDS.map(function (k) {
-      var vals = rows.map(function (row) { return r3(num(row[k.t])); });
-      if (vals.every(function (v) { return v === null; })) return null;
-      var o = { name: k.label, unit: k.unit || '', values: vals };
-      if (k.g) { var t = num(latest[k.g]); if (t !== null) o.target = r3(t); }
-      return o;
-    }).filter(Boolean);
-    return kpis.length ? { latestDate: latest.date, dates: dates, kpis: kpis } : null;
+    var all = [], history = [];
+    Q_FIELDS.forEach(function (k) {
+      var lv = r3(num(latest[k.t]));
+      if (lv !== null) {
+        var one = { name: k.label, unit: k.unit || '', value: lv };
+        if (k.g) { var t = num(latest[k.g]); if (t !== null) one.target = r3(t); }
+        all.push(one);
+      }
+      if (Q_CORE[k.t]) {
+        var vals = rows.map(function (row) { return r3(num(row[k.t])); });
+        if (!vals.every(function (v) { return v === null; })) history.push({ name: k.label, unit: k.unit || '', values: vals });
+      }
+    });
+    return all.length ? { latestDate: latest.date, dates: dates, latest: all, history: history } : null;
   }
 
   function buildAiPrompt(facts, question) {
     return 'ข้อมูลแดชบอร์ดโรงงานน้ำตาล Production & Quality (ล่าสุด ' + facts.latestDate + ')\n' +
-      'dates (วันที่ เก่า→ใหม่): ' + JSON.stringify(facts.dates) + '\n' +
-      'ตัวชี้วัด (values[] ตรงตำแหน่งกับ dates[]): ' + JSON.stringify(facts.kpis) + '\n\n' +
+      'latest = ค่าล่าสุดของตัวชี้วัดทั้งหมด (วันที่ ' + facts.latestDate + '):\n' + JSON.stringify(facts.latest) + '\n' +
+      'dates = วันที่ย้อนหลังทั้งฤดู เก่า→ใหม่: ' + JSON.stringify(facts.dates) + '\n' +
+      'history = ตัวชี้วัดหลักย้อนหลังทั้งฤดู (values[] ตรงตำแหน่งกับ dates[]):\n' + JSON.stringify(facts.history) + '\n\n' +
       'คำถามผู้ใช้: ' + question + '\n\nตอบเป็นภาษาไทยตามกติกา:';
   }
 
@@ -394,9 +395,12 @@
     var nums = String(answerText).replace(/,/g, '').match(/\d+(?:\.\d+)?/g) || [];
     if (nums.length < 2) return true;
     var real = [];
-    facts.kpis.forEach(function (k) {
-      (k.values || []).forEach(function (v) { if (v != null) real.push(v); });
+    (facts.latest || []).forEach(function (k) {
+      if (k.value != null) real.push(k.value);
       if (k.target != null) real.push(k.target);
+    });
+    (facts.history || []).forEach(function (k) {
+      (k.values || []).forEach(function (v) { if (v != null) real.push(v); });
     });
     var hit = nums.some(function (n) {
       var f = parseFloat(n);
@@ -482,7 +486,12 @@
             '<div class="qb-aicred">🤖 AI · ตอบจากข้อมูลโรงงานจริง' +
             (ok ? '' : ' · <span class="qb-warn">⚠ โปรดตรวจตัวเลขอีกครั้ง</span>') + '</div>', 'bot');
         } else {
-          pushMsg('ขออภัย ตอบไม่สำเร็จ: ' + esc((d && d.error && d.error.message) || 'ไม่ทราบสาเหตุ'), 'bot');
+          var em = (d && d.error && d.error.message) || 'ไม่ทราบสาเหตุ';
+          if (/rate limit|tokens per minute|TPM/i.test(em)) {
+            pushMsg('⏳ ตอนนี้มีคนถามพร้อมกันเยอะ (โควตา AI ฟรีต่อนาทีเต็มชั่วคราว) — รอสัก 20–30 วินาทีแล้วถามใหม่ได้เลยครับ', 'bot');
+          } else {
+            pushMsg('ขออภัย ตอบไม่สำเร็จ: ' + esc(em), 'bot');
+          }
         }
       })
       .catch(function () {
@@ -670,7 +679,6 @@
         '<div class="qb-set-hint">Copilot ใช้ AI ฟรีร่วมกันทั้งองค์กร (Groq) — ทุกคนถามได้เลย ไม่ต้องตั้งค่า key เอง</div>' +
         '<input id="qbSetInput" type="hidden">' +
       '</div>' +
-      '<div class="qb-src" id="qbSrc"></div>' +
       '<div class="qb-log" id="qbLog"></div>' +
       '<div class="qb-sugg" id="qbSugg"></div>' +
       '<form class="qb-input" id="qbForm">' +
@@ -678,30 +686,14 @@
         '<button type="submit" aria-label="ถาม"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></button>' +
       '</form>';
 
-    var srcEl = mount.querySelector('#qbSrc');
-    SOURCES.forEach(function (s) {
+    var suggEl = mount.querySelector('#qbSugg');
+    ['อ้อยเข้าหีบ', 'CCS', 'Recovery', 'สีน้ำตาล', 'ความบริสุทธิ์', 'สรุป'].forEach(function (t) {
       var b = document.createElement('button');
       b.type = 'button';
-      b.className = 'qb-chip' + (s.id === activeSourceId ? ' on' : '') + (s.ready ? '' : ' lock');
-      b.textContent = s.label;
-      b.addEventListener('click', function () {
-        activeSourceId = s.id;
-        [].forEach.call(srcEl.children, function (c) { c.classList.remove('on'); });
-        b.classList.add('on');
-        renderSugg(mount);
-        if (!s.ready) {
-          pushMsg('ยังไม่ได้เชื่อมข้อมูลของ <b>' + esc(s.label) + '</b> — เมื่อมี data API แล้วจะถามได้ทันที', 'bot');
-        } else if (s.id === 'quality' && !qualityNoted) {
-          qualityNoted = true;
-          pushMsg((COPILOT_ANON || copilotKey())
-            ? '💬 แท็บ <b>Quality</b> ตอบด้วย <b>AI (Gemini · ฟรี)</b> เฉพาะข้อมูลในแดชบอร์ดนี้ — ถามเป็นประโยคได้เลย เช่น "แนวโน้มสีน้ำตาล 7 วัน" หรือ "เทียบความบริสุทธิ์เมื่อวานกับวันนี้"'
-            : '🔑 แท็บ <b>Quality</b> ใช้ <b>AI ฟรี (Gemini)</b> — กดรูปเฟือง ⚙ มุมขวาบนเพื่อใส่ API key ฟรีก่อน (ตอนนี้ยังค้นแบบ keyword ได้)', 'bot');
-        }
-      });
-      srcEl.appendChild(b);
+      b.textContent = t;
+      b.addEventListener('click', function () { answer(t); });
+      suggEl.appendChild(b);
     });
-
-    renderSugg(mount);
 
     greeting();
 
@@ -728,7 +720,7 @@
     mount.querySelector('#qbSetSave').addEventListener('click', function () {
       setCopilotModel(setModel.value);
       setBox.hidden = true;
-      pushMsg('✅ บันทึกแล้ว — ใช้โมเดล <b>' + esc(copilotModel()) + '</b> (Groq · ฟรี) ถามแท็บ Quality เป็นประโยค/วิเคราะห์ย้อนหลังได้เลย', 'bot');
+      pushMsg('✅ บันทึกแล้ว — ใช้โมเดล <b>' + esc(copilotModel()) + '</b> (Groq · ฟรี) ถามเป็นประโยค/วิเคราะห์ย้อนหลังได้เลย', 'bot');
     });
 
     // Warm the feed so answers are instant.
