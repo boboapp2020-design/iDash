@@ -5,9 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <!-- Sign-in gate. Runs before the page renders so protected content never
        flashes on screen for a signed-out visitor. -->
-  <script src="js/auth.js?v=20260805i"></script>
+  <script src="js/auth.js?v=20260805n"></script>
   <script>if (!window.iDashAuth.requireSignIn()) { document.documentElement.style.display = 'none'; }</script>
-  <title>iDash — Embedded Dashboard</title>
+  <title>iDash â€” Embedded Dashboard</title>
   <link rel="stylesheet" href="css/style.css?v=20260804b">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect x='2' y='18' width='6' height='12' rx='1' fill='%232563eb'/><rect x='10' y='12' width='6' height='18' rx='1' fill='%233b82f6'/><rect x='18' y='6' width='6' height='24' rx='1' fill='%2360a5fa'/><rect x='26' y='2' width='6' height='28' rx='1' fill='%2393c5fd'/></svg>">
   <style>
@@ -40,7 +40,7 @@
     }
     .embed-frame-wrap:fullscreen { background: #000; }
     .embed-frame-wrap:fullscreen iframe { width: 100% !important; height: 100% !important; transform: none !important; }
-    /* iDash mark next to the dashboard's own name in the topbar (?brand=1) —
+    /* iDash mark next to the dashboard's own name in the topbar (?brand=1) â€”
        a thin divider separates "whose page this is" (embedTitleText) from
        "what's showing it" (this mark), so the two never read as one name. */
     .embed-brand {
@@ -66,7 +66,7 @@
 </head>
 <body>
 
-<!-- ─── SIDEBAR ─── -->
+<!-- â”€â”€â”€ SIDEBAR â”€â”€â”€ -->
 <aside class="sidebar">
   <div class="sidebar-logo">
     <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -86,7 +86,7 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
       Home
     </a>
-    <!-- Only the dashboard being viewed — its name is filled in by the script. -->
+    <!-- Only the dashboard being viewed â€” its name is filled in by the script. -->
     <a class="active" id="embedNavLabel">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
       <span id="embedNavText">Dashboard</span>
@@ -103,30 +103,30 @@
       <div class="sidebar-user-menu" id="sidebarUserMenu" hidden>
         <button type="button" data-action="profile">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-          โปรไฟล์
+          à¹‚à¸›à¸£à¹„à¸Ÿà¸¥à¹Œ
         </button>
         <button type="button" data-action="settings">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06A1.65 1.65 0 004.6 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06A1.65 1.65 0 009 4.6a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
-          ตั้งค่า
+          à¸•à¸±à¹‰à¸‡à¸„à¹ˆà¸²
         </button>
         <div class="sidebar-user-menu-divider"></div>
         <button type="button" data-action="logout" class="danger">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/></svg>
-          ออกจากระบบ
+          à¸­à¸­à¸à¸ˆà¸²à¸à¸£à¸°à¸šà¸š
         </button>
       </div>
     </div>
   </div>
 </aside>
 
-<!-- ─── MAIN ─── -->
+<!-- â”€â”€â”€ MAIN â”€â”€â”€ -->
 <main class="main">
   <div class="embed-content">
     <div class="embed-topbar">
       <div class="embed-title">
-        <a class="embed-back" href="index.html" title="ย้อนกลับ">
+        <a class="embed-back" href="index.html" title="à¸¢à¹‰à¸­à¸™à¸à¸¥à¸±à¸š">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
-          ย้อนกลับ
+          à¸¢à¹‰à¸­à¸™à¸à¸¥à¸±à¸š
         </a>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
         <span id="embedTitleText">Dashboard</span>
@@ -148,27 +148,27 @@
         </button>
         <button class="embed-btn" id="embedReload" type="button">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>
-          รีเฟรช
+          à¸£à¸µà¹€à¸Ÿà¸£à¸Š
         </button>
       </div>
     </div>
     <div class="embed-frame-wrap">
       <div class="embed-empty" id="embedEmpty" hidden>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12" y2="16"/></svg>
-        <div class="embed-empty-title">ยังไม่ได้ตั้งค่าลิงก์ Dashboard</div>
-        <div class="embed-empty-desc">แดชบอร์ดนี้ยังไม่ได้ผูกกับลิงก์ภายนอก — ติดต่อ Admin เพื่อฝัง URL ให้เมนูนี้</div>
+        <div class="embed-empty-title">à¸¢à¸±à¸‡à¹„à¸¡à¹ˆà¹„à¸”à¹‰à¸•à¸±à¹‰à¸‡à¸„à¹ˆà¸²à¸¥à¸´à¸‡à¸à¹Œ Dashboard</div>
+        <div class="embed-empty-desc">à¹à¸”à¸Šà¸šà¸­à¸£à¹Œà¸”à¸™à¸µà¹‰à¸¢à¸±à¸‡à¹„à¸¡à¹ˆà¹„à¸”à¹‰à¸œà¸¹à¸à¸à¸±à¸šà¸¥à¸´à¸‡à¸à¹Œà¸ à¸²à¸¢à¸™à¸­à¸ â€” à¸•à¸´à¸”à¸•à¹ˆà¸­ Admin à¹€à¸žà¸·à¹ˆà¸­à¸à¸±à¸‡ URL à¹ƒà¸«à¹‰à¹€à¸¡à¸™à¸¹à¸™à¸µà¹‰</div>
       </div>
       <iframe id="embedFrame" hidden title="Embedded Dashboard"></iframe>
     </div>
   </div>
 </main>
 
-<script src="js/sidebar.js?v=20260805h"></script>
+<script src="js/sidebar.js?v=20260805n"></script>
 <script>
   (function () {
     var params = new URLSearchParams(window.location.search);
     var url = params.get('url');
-    // ?brand=1 → show the iDash mark beside the dashboard name. Opt-in per
+    // ?brand=1 â†’ show the iDash mark beside the dashboard name. Opt-in per
     // menu link, so dashboards that carry their own branding stay untouched.
     if (params.get('brand') === '1') {
       var brandEl = document.getElementById('embedBrand');
@@ -176,7 +176,7 @@
     }
     var name = params.get('name') || 'Dashboard';
 
-    document.title = 'iDash — ' + name;
+    document.title = 'iDash â€” ' + name;
     document.getElementById('embedTitleText').textContent = name;
 
     document.getElementById('embedNavText').textContent = name;
@@ -221,13 +221,13 @@
       frameWrap.style.setProperty('--iframe-nat-h', IFRAME_H + 'px');
     }
 
-    // ── Optional deep link into a view of the embedded SPA ──────────────────
+    // â”€â”€ Optional deep link into a view of the embedded SPA â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     // The embedded page is cross-origin, so we cannot call into its iframe.
     // Instead we fetch its HTML and append a tiny bootstrap that opens the
     // wanted view, then run that through srcdoc.
     //
     // Views are a fixed allowlist. `probe` must exist in the fetched HTML for
-    // the deep link to be attempted, and `boot` is the code we append — neither
+    // the deep link to be attempted, and `boot` is the code we append â€” neither
     // is ever taken from the query string.
     var VIEWS = {
       dashboard: {
@@ -250,19 +250,19 @@
     var viewSpec = view ? VIEWS[view] : null;
     var viewArg = params.get('q') || '';
 
-    // Safe JS string literal — JSON escapes quotes/newlines, and "<" is escaped
+    // Safe JS string literal â€” JSON escapes quotes/newlines, and "<" is escaped
     // so a value can never close the injected <script> tag.
     function jsString(s) {
       return JSON.stringify(String(s)).replace(/</g, '\\u003c');
     }
 
     // GitHub Pages serves every file with Cache-Control: max-age=600, and a
-    // plain iframe src is a normal cached fetch — so a page like Sale
+    // plain iframe src is a normal cached fetch â€” so a page like Sale
     // Dashboard, which the user edits and reloads through repeatedly in one
     // sitting, can keep showing a snapshot from before their last save for up
     // to ten minutes. Busting only OUR relative dashboards/*.html pages (never
     // an absolute https:// URL) keeps the deliberate cache reuse below for the
-    // 2MB external Production Dashboard intact — that one changes rarely and
+    // 2MB external Production Dashboard intact â€” that one changes rarely and
     // is worth the bandwidth savings; ours changes every time the user edits.
     function isOwnRelativePage(u) { return !/^https?:\/\//i.test(u); }
     function freshUrl(u) {
@@ -282,7 +282,7 @@
       catch (e) { return false; }
     }
 
-    // Plain src keeps the browser's HTTP cache in play — the Production
+    // Plain src keeps the browser's HTTP cache in play â€” the Production
     // Dashboard's document is ~2MB, and srcdoc bypasses the cache entirely, so
     // every visit paid the full download again. Load it normally, then reach
     // into the frame and open the view.
@@ -304,7 +304,7 @@
             }
           }
         } catch (e) {
-          // Hook missing or renamed — the default view is still on screen.
+          // Hook missing or renamed â€” the default view is still on screen.
           console.warn('[iDash] deep link skipped:', e.message);
         }
       });
@@ -319,7 +319,7 @@
         })
         .then(function (html) {
           // If the page no longer exposes that hook, don't ship a broken frame
-          // — fall back to its normal landing view.
+          // â€” fall back to its normal landing view.
           if (html.indexOf(spec.probe) === -1) throw new Error(spec.probe + ' not found');
           var code = spec.boot(arg);
           if (!code) throw new Error('nothing to run');

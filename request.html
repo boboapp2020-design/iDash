@@ -5,16 +5,16 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <!-- Sign-in gate. Runs before the page renders so protected content never
        flashes on screen for a signed-out visitor. -->
-  <script src="js/auth.js?v=20260805i"></script>
+  <script src="js/auth.js?v=20260805n"></script>
   <script>if (!window.iDashAuth.requireSignIn()) { document.documentElement.style.display = 'none'; }</script>
-  <title>iDash — ขอสร้าง Dashboard</title>
+  <title>iDash â€” à¸‚à¸­à¸ªà¸£à¹‰à¸²à¸‡ Dashboard</title>
   <link rel="stylesheet" href="css/style.css?v=20260804b">
   <link rel="stylesheet" href="css/request.css?v=20260728b">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect x='2' y='18' width='6' height='12' rx='1' fill='%232563eb'/><rect x='10' y='12' width='6' height='18' rx='1' fill='%233b82f6'/><rect x='18' y='6' width='6' height='24' rx='1' fill='%2360a5fa'/><rect x='26' y='2' width='6' height='28' rx='1' fill='%2393c5fd'/></svg>">
 </head>
 <body>
 
-<!-- ─── SIDEBAR ─── -->
+<!-- â”€â”€â”€ SIDEBAR â”€â”€â”€ -->
 <aside class="sidebar">
   <div class="sidebar-logo">
     <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -69,32 +69,32 @@
       <div class="sidebar-user-menu" id="sidebarUserMenu" hidden>
         <button type="button" data-action="profile">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-          โปรไฟล์
+          à¹‚à¸›à¸£à¹„à¸Ÿà¸¥à¹Œ
         </button>
         <button type="button" data-action="settings">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06A1.65 1.65 0 004.6 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06A1.65 1.65 0 009 4.6a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
-          ตั้งค่า
+          à¸•à¸±à¹‰à¸‡à¸„à¹ˆà¸²
         </button>
         <div class="sidebar-user-menu-divider"></div>
         <button type="button" data-action="logout" class="danger">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-          ออกจากระบบ
+          à¸­à¸­à¸à¸ˆà¸²à¸à¸£à¸°à¸šà¸š
         </button>
       </div>
     </div>
   </div>
 </aside>
 
-<!-- ─── MAIN ─── -->
+<!-- â”€â”€â”€ MAIN â”€â”€â”€ -->
 <main class="main">
   <div class="req-wrap">
 
     <div class="req-head">
       <div class="req-title">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-        ขอสร้าง / แก้ไข Dashboard
+        à¸‚à¸­à¸ªà¸£à¹‰à¸²à¸‡ / à¹à¸à¹‰à¹„à¸‚ Dashboard
       </div>
-      <div class="req-sub">กรอกรายละเอียดที่ต้องการ แล้วส่งถึง Admin โดยตรง — ทีมงานจะติดต่อกลับทางอีเมลที่คุณระบุ</div>
+      <div class="req-sub">à¸à¸£à¸­à¸à¸£à¸²à¸¢à¸¥à¸°à¹€à¸­à¸µà¸¢à¸”à¸—à¸µà¹ˆà¸•à¹‰à¸­à¸‡à¸à¸²à¸£ à¹à¸¥à¹‰à¸§à¸ªà¹ˆà¸‡à¸–à¸¶à¸‡ Admin à¹‚à¸”à¸¢à¸•à¸£à¸‡ â€” à¸—à¸µà¸¡à¸‡à¸²à¸™à¸ˆà¸°à¸•à¸´à¸”à¸•à¹ˆà¸­à¸à¸¥à¸±à¸šà¸—à¸²à¸‡à¸­à¸µà¹€à¸¡à¸¥à¸—à¸µà¹ˆà¸„à¸¸à¸“à¸£à¸°à¸šà¸¸</div>
     </div>
 
     <form class="req-letter" id="reqForm" novalidate>
@@ -103,50 +103,50 @@
       <div class="req-body">
 
         <div class="req-field">
-          <label class="req-label" for="reqFrom">อีเมลผู้ส่ง <span class="req-req">*</span>
-            <span class="req-hint">Admin จะตอบกลับมาที่อีเมลนี้</span>
+          <label class="req-label" for="reqFrom">à¸­à¸µà¹€à¸¡à¸¥à¸œà¸¹à¹‰à¸ªà¹ˆà¸‡ <span class="req-req">*</span>
+            <span class="req-hint">Admin à¸ˆà¸°à¸•à¸­à¸šà¸à¸¥à¸±à¸šà¸¡à¸²à¸—à¸µà¹ˆà¸­à¸µà¹€à¸¡à¸¥à¸™à¸µà¹‰</span>
           </label>
           <input class="req-input" type="email" id="reqFrom" placeholder="yourname@mitrphol.com" autocomplete="email">
         </div>
 
         <div class="req-field">
-          <label class="req-label">ผู้รับ</label>
+          <label class="req-label">à¸œà¸¹à¹‰à¸£à¸±à¸š</label>
           <div class="req-locked">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
             <span id="reqTo">Surasakna@mitrphol.com</span>
-            <span class="req-lock-note">กำหนดไว้แล้ว</span>
+            <span class="req-lock-note">à¸à¸³à¸«à¸™à¸”à¹„à¸§à¹‰à¹à¸¥à¹‰à¸§</span>
           </div>
         </div>
 
         <div class="req-field">
-          <label class="req-label" for="reqSubject">ชื่อเรื่อง <span class="req-req">*</span></label>
+          <label class="req-label" for="reqSubject">à¸Šà¸·à¹ˆà¸­à¹€à¸£à¸·à¹ˆà¸­à¸‡ <span class="req-req">*</span></label>
           <select class="req-select" id="reqSubject">
-            <option value="">— เลือกประเภทคำขอ —</option>
-            <option>ขอสร้าง Dashboard ใหม่</option>
-            <option>ขอแก้ไข Template / รูปแบบ Dashboard เดิม</option>
-            <option>ขอเพิ่ม / แก้ไข KPI หรือกราฟ</option>
-            <option>ขอเชื่อมต่อแหล่งข้อมูลใหม่ (Excel / Google Sheet / ระบบอื่น)</option>
-            <option>แจ้งปัญหา — ข้อมูลไม่ถูกต้อง หรือไม่อัปเดต</option>
-            <option>แจ้งปัญหา — ใช้งานระบบไม่ได้</option>
-            <option>ขอสิทธิ์เข้าถึง Dashboard</option>
-            <option>ขอ Export / รายงานประจำงวด</option>
-            <option>อื่น ๆ (ระบุในรายละเอียด)</option>
+            <option value="">â€” à¹€à¸¥à¸·à¸­à¸à¸›à¸£à¸°à¹€à¸ à¸—à¸„à¸³à¸‚à¸­ â€”</option>
+            <option>à¸‚à¸­à¸ªà¸£à¹‰à¸²à¸‡ Dashboard à¹ƒà¸«à¸¡à¹ˆ</option>
+            <option>à¸‚à¸­à¹à¸à¹‰à¹„à¸‚ Template / à¸£à¸¹à¸›à¹à¸šà¸š Dashboard à¹€à¸”à¸´à¸¡</option>
+            <option>à¸‚à¸­à¹€à¸žà¸´à¹ˆà¸¡ / à¹à¸à¹‰à¹„à¸‚ KPI à¸«à¸£à¸·à¸­à¸à¸£à¸²à¸Ÿ</option>
+            <option>à¸‚à¸­à¹€à¸Šà¸·à¹ˆà¸­à¸¡à¸•à¹ˆà¸­à¹à¸«à¸¥à¹ˆà¸‡à¸‚à¹‰à¸­à¸¡à¸¹à¸¥à¹ƒà¸«à¸¡à¹ˆ (Excel / Google Sheet / à¸£à¸°à¸šà¸šà¸­à¸·à¹ˆà¸™)</option>
+            <option>à¹à¸ˆà¹‰à¸‡à¸›à¸±à¸à¸«à¸² â€” à¸‚à¹‰à¸­à¸¡à¸¹à¸¥à¹„à¸¡à¹ˆà¸–à¸¹à¸à¸•à¹‰à¸­à¸‡ à¸«à¸£à¸·à¸­à¹„à¸¡à¹ˆà¸­à¸±à¸›à¹€à¸”à¸•</option>
+            <option>à¹à¸ˆà¹‰à¸‡à¸›à¸±à¸à¸«à¸² â€” à¹ƒà¸Šà¹‰à¸‡à¸²à¸™à¸£à¸°à¸šà¸šà¹„à¸¡à¹ˆà¹„à¸”à¹‰</option>
+            <option>à¸‚à¸­à¸ªà¸´à¸—à¸˜à¸´à¹Œà¹€à¸‚à¹‰à¸²à¸–à¸¶à¸‡ Dashboard</option>
+            <option>à¸‚à¸­ Export / à¸£à¸²à¸¢à¸‡à¸²à¸™à¸›à¸£à¸°à¸ˆà¸³à¸‡à¸§à¸”</option>
+            <option>à¸­à¸·à¹ˆà¸™ à¹† (à¸£à¸°à¸šà¸¸à¹ƒà¸™à¸£à¸²à¸¢à¸¥à¸°à¹€à¸­à¸µà¸¢à¸”)</option>
           </select>
         </div>
 
         <div class="req-field">
-          <label class="req-label" for="reqDetails">รายละเอียด <span class="req-req">*</span>
-            <span class="req-hint">ยิ่งละเอียด ยิ่งตรงกับที่ต้องการ</span>
+          <label class="req-label" for="reqDetails">à¸£à¸²à¸¢à¸¥à¸°à¹€à¸­à¸µà¸¢à¸” <span class="req-req">*</span>
+            <span class="req-hint">à¸¢à¸´à¹ˆà¸‡à¸¥à¸°à¹€à¸­à¸µà¸¢à¸” à¸¢à¸´à¹ˆà¸‡à¸•à¸£à¸‡à¸à¸±à¸šà¸—à¸µà¹ˆà¸•à¹‰à¸­à¸‡à¸à¸²à¸£</span>
           </label>
           <textarea class="req-textarea" id="reqDetails"
-            placeholder="เช่น&#10;• ต้องการดูอะไร — ยอดผลิตรายวัน เทียบเป้าหมาย แยกตามกะ&#10;• ใครเป็นคนใช้ — หัวหน้ากะ / ผู้จัดการโรงงาน&#10;• ใช้ตัดสินใจเรื่องอะไร — ปรับแผนเดินเครื่องวันถัดไป&#10;• ข้อมูลมาจากไหน — ไฟล์ Daily Report ที่แนบมา"></textarea>
+            placeholder="à¹€à¸Šà¹ˆà¸™&#10;â€¢ à¸•à¹‰à¸­à¸‡à¸à¸²à¸£à¸”à¸¹à¸­à¸°à¹„à¸£ â€” à¸¢à¸­à¸”à¸œà¸¥à¸´à¸•à¸£à¸²à¸¢à¸§à¸±à¸™ à¹€à¸—à¸µà¸¢à¸šà¹€à¸›à¹‰à¸²à¸«à¸¡à¸²à¸¢ à¹à¸¢à¸à¸•à¸²à¸¡à¸à¸°&#10;â€¢ à¹ƒà¸„à¸£à¹€à¸›à¹‡à¸™à¸„à¸™à¹ƒà¸Šà¹‰ â€” à¸«à¸±à¸§à¸«à¸™à¹‰à¸²à¸à¸° / à¸œà¸¹à¹‰à¸ˆà¸±à¸”à¸à¸²à¸£à¹‚à¸£à¸‡à¸‡à¸²à¸™&#10;â€¢ à¹ƒà¸Šà¹‰à¸•à¸±à¸”à¸ªà¸´à¸™à¹ƒà¸ˆà¹€à¸£à¸·à¹ˆà¸­à¸‡à¸­à¸°à¹„à¸£ â€” à¸›à¸£à¸±à¸šà¹à¸œà¸™à¹€à¸”à¸´à¸™à¹€à¸„à¸£à¸·à¹ˆà¸­à¸‡à¸§à¸±à¸™à¸–à¸±à¸”à¹„à¸›&#10;â€¢ à¸‚à¹‰à¸­à¸¡à¸¹à¸¥à¸¡à¸²à¸ˆà¸²à¸à¹„à¸«à¸™ â€” à¹„à¸Ÿà¸¥à¹Œ Daily Report à¸—à¸µà¹ˆà¹à¸™à¸šà¸¡à¸²"></textarea>
         </div>
 
-        <!-- Only relevant when asking for a brand-new dashboard — revealed by
+        <!-- Only relevant when asking for a brand-new dashboard â€” revealed by
              the subject dropdown, hidden (and cleared) for every other type. -->
         <div class="req-field" id="reqExampleField" hidden>
-          <label class="req-label">ตัวอย่าง Dashboard ที่ต้องการ
-            <span class="req-hint">เลือกแบบที่ใกล้เคียงที่สุด 1 แบบ</span>
+          <label class="req-label">à¸•à¸±à¸§à¸­à¸¢à¹ˆà¸²à¸‡ Dashboard à¸—à¸µà¹ˆà¸•à¹‰à¸­à¸‡à¸à¸²à¸£
+            <span class="req-hint">à¹€à¸¥à¸·à¸­à¸à¹à¸šà¸šà¸—à¸µà¹ˆà¹ƒà¸à¸¥à¹‰à¹€à¸„à¸µà¸¢à¸‡à¸—à¸µà¹ˆà¸ªà¸¸à¸” 1 à¹à¸šà¸š</span>
           </label>
 
           <div class="req-picker" id="reqPicker">
@@ -181,29 +181,29 @@
           </div>
 
           <div class="req-picker-foot">
-            <span id="reqPickCount">ยังไม่ได้เลือก</span>
+            <span id="reqPickCount">à¸¢à¸±à¸‡à¹„à¸¡à¹ˆà¹„à¸”à¹‰à¹€à¸¥à¸·à¸­à¸</span>
             <div class="req-picker-nav">
-              <button class="req-picker-arrow" type="button" id="reqPickPrev" aria-label="เลื่อนดูแบบก่อนหน้า">
+              <button class="req-picker-arrow" type="button" id="reqPickPrev" aria-label="à¹€à¸¥à¸·à¹ˆà¸­à¸™à¸”à¸¹à¹à¸šà¸šà¸à¹ˆà¸­à¸™à¸«à¸™à¹‰à¸²">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
               </button>
-              <button class="req-picker-arrow" type="button" id="reqPickNext" aria-label="เลื่อนดูแบบถัดไป">
+              <button class="req-picker-arrow" type="button" id="reqPickNext" aria-label="à¹€à¸¥à¸·à¹ˆà¸­à¸™à¸”à¸¹à¹à¸šà¸šà¸–à¸±à¸”à¹„à¸›">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
               </button>
             </div>
           </div>
 
           <textarea class="req-textarea short" id="reqExample"
-            placeholder="อธิบายเพิ่มเติมได้ที่นี่ เช่น อยากได้แบบ Production Summary แต่เพิ่มกราฟเทียบรายกะ&#10;หรือวางลิงก์ตัวอย่างจากที่อื่น"></textarea>
+            placeholder="à¸­à¸˜à¸´à¸šà¸²à¸¢à¹€à¸žà¸´à¹ˆà¸¡à¹€à¸•à¸´à¸¡à¹„à¸”à¹‰à¸—à¸µà¹ˆà¸™à¸µà¹ˆ à¹€à¸Šà¹ˆà¸™ à¸­à¸¢à¸²à¸à¹„à¸”à¹‰à¹à¸šà¸š Production Summary à¹à¸•à¹ˆà¹€à¸žà¸´à¹ˆà¸¡à¸à¸£à¸²à¸Ÿà¹€à¸—à¸µà¸¢à¸šà¸£à¸²à¸¢à¸à¸°&#10;à¸«à¸£à¸·à¸­à¸§à¸²à¸‡à¸¥à¸´à¸‡à¸à¹Œà¸•à¸±à¸§à¸­à¸¢à¹ˆà¸²à¸‡à¸ˆà¸²à¸à¸—à¸µà¹ˆà¸­à¸·à¹ˆà¸™"></textarea>
         </div>
 
         <div class="req-field">
-          <label class="req-label">แนบไฟล์
-            <span class="req-hint">ไฟล์ข้อมูล หรือรูปตัวอย่าง — สูงสุด 8 ไฟล์ รวมไม่เกิน 15 MB</span>
+          <label class="req-label">à¹à¸™à¸šà¹„à¸Ÿà¸¥à¹Œ
+            <span class="req-hint">à¹„à¸Ÿà¸¥à¹Œà¸‚à¹‰à¸­à¸¡à¸¹à¸¥ à¸«à¸£à¸·à¸­à¸£à¸¹à¸›à¸•à¸±à¸§à¸­à¸¢à¹ˆà¸²à¸‡ â€” à¸ªà¸¹à¸‡à¸ªà¸¸à¸” 8 à¹„à¸Ÿà¸¥à¹Œ à¸£à¸§à¸¡à¹„à¸¡à¹ˆà¹€à¸à¸´à¸™ 15 MB</span>
           </label>
           <div class="req-drop" id="reqDrop" tabindex="0" role="button">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-            <div class="req-drop-title">คลิกเพื่อเลือกไฟล์ หรือลากไฟล์มาวางที่นี่</div>
-            <div class="req-drop-sub">Excel, CSV, PDF, รูปภาพ และอื่น ๆ</div>
+            <div class="req-drop-title">à¸„à¸¥à¸´à¸à¹€à¸žà¸·à¹ˆà¸­à¹€à¸¥à¸·à¸­à¸à¹„à¸Ÿà¸¥à¹Œ à¸«à¸£à¸·à¸­à¸¥à¸²à¸à¹„à¸Ÿà¸¥à¹Œà¸¡à¸²à¸§à¸²à¸‡à¸—à¸µà¹ˆà¸™à¸µà¹ˆ</div>
+            <div class="req-drop-sub">Excel, CSV, PDF, à¸£à¸¹à¸›à¸ à¸²à¸ž à¹à¸¥à¸°à¸­à¸·à¹ˆà¸™ à¹†</div>
           </div>
           <input type="file" id="reqFiles" multiple hidden>
           <ul class="req-files" id="reqFileList"></ul>
@@ -213,10 +213,10 @@
       </div>
 
       <div class="req-foot">
-        <div class="req-foot-note">ส่งถึง <b id="reqFootTo">Surasakna@mitrphol.com</b> ทันทีเมื่อกดส่ง</div>
+        <div class="req-foot-note">à¸ªà¹ˆà¸‡à¸–à¸¶à¸‡ <b id="reqFootTo">Surasakna@mitrphol.com</b> à¸—à¸±à¸™à¸—à¸µà¹€à¸¡à¸·à¹ˆà¸­à¸à¸”à¸ªà¹ˆà¸‡</div>
         <button class="req-send" type="submit" id="reqSend">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-          <span id="reqSendLabel">ส่งคำขอ</span>
+          <span id="reqSendLabel">à¸ªà¹ˆà¸‡à¸„à¸³à¸‚à¸­</span>
         </button>
       </div>
     </form>
@@ -224,7 +224,7 @@
   </div>
 </main>
 
-<script src="js/sidebar.js?v=20260805h"></script>
+<script src="js/sidebar.js?v=20260805n"></script>
 <script src="js/request.js?v=20260805k"></script>
 <script>
   // Dashboard Center submenu toggle (same behaviour as the Home page).

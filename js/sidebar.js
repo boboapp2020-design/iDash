@@ -93,6 +93,21 @@
   function applyProfile() {
     var p = null;
     try { p = JSON.parse(localStorage.getItem('idash.profile') || 'null'); } catch (e) {}
+    // The signed-in sheet account outranks the device-local profile: a user
+    // who logged in with their own approved account must see THEIR name and
+    // role, not whatever profile (e.g. "Bobo / Admin") was saved on this
+    // machine earlier. The built-in owner login doesn't set idash.account,
+    // so the owner's local profile still applies for them.
+    var acct = null;
+    try { acct = JSON.parse(localStorage.getItem('idash.account') || 'null'); } catch (e) {}
+    if (acct && acct.username) {
+      p = p || {};
+      p.name = acct.username;
+      p.role = acct.role === 'admin' ? 'Admin' : 'User';
+      // The stored photo belongs to whoever customised this device's profile,
+      // not necessarily this account — drop it so identity stays truthful.
+      p.photo = '';
+    }
     if (!p) return;
     document.querySelectorAll('.sidebar-user').forEach(function (el) {
       var nameEl = el.querySelector('.user-name');

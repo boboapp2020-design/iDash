@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>เข้าสู่ระบบ — iDash</title>
+<title>à¹€à¸‚à¹‰à¸²à¸ªà¸¹à¹ˆà¸£à¸°à¸šà¸š â€” iDash</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect x='2' y='18' width='6' height='12' rx='1' fill='%232563eb'/><rect x='10' y='12' width='6' height='18' rx='1' fill='%233b82f6'/><rect x='18' y='6' width='6' height='24' rx='1' fill='%2360a5fa'/><rect x='26' y='2' width='6' height='28' rx='1' fill='%2393c5fd'/></svg>">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -21,7 +21,7 @@ body {
   min-height: 100vh; display: grid; grid-template-columns: 1fr 1fr;
 }
 
-/* ── Left: brand panel ─────────────────────────────────────────────────
+/* â”€â”€ Left: brand panel â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
    The soft blobs and the wave are inline CSS/SVG so the page has no image
    dependencies and renders identically offline. */
 .brand {
@@ -33,7 +33,7 @@ body {
      buys that back without shrinking the logo. */
   padding: 40px clamp(32px, 5vw, 88px);
 }
-/* Decoration only — kept small and faint so they never compete with the logo. */
+/* Decoration only â€” kept small and faint so they never compete with the logo. */
 .blob { position: absolute; border-radius: 50%; background: #dbe7fb; opacity: .4; pointer-events: none; }
 .blob-1 { width: 104px; height: 104px; top: 11%; right: 14%; }
 .blob-2 { width: 170px; height: 170px; top: 24%; left: -90px; opacity: .28; }
@@ -45,7 +45,7 @@ body {
    The PNG has a transparent background, so it sits on the gradient cleanly. */
 .brand-logo { margin-bottom: 30px; }
 .brand-logo img {
-  /* The lockup is ~3.2:1, so width is the only real constraint — at full
+  /* The lockup is ~3.2:1, so width is the only real constraint â€” at full
      container width it is still only ~150px tall. The earlier viewport-height
      clamps existed for the old portrait lockup and would just shrink this one
      for no reason. */
@@ -73,7 +73,7 @@ body {
 .feature-title { font-size: 14.5px; font-weight: 700; color: var(--ink); }
 .feature-desc { font-size: 12.5px; color: var(--ink-2); line-height: 1.8; margin-top: 4px; }
 
-/* ── Right: sign-in card ─────────────────────────────────────────────── */
+/* â”€â”€ Right: sign-in card â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .panel { display: flex; align-items: center; justify-content: center; padding: 40px 32px; }
 .card {
   width: 100%; max-width: 430px;
@@ -81,8 +81,8 @@ body {
   box-shadow: 0 4px 12px rgba(16,24,40,.05), 0 24px 56px rgba(16,24,40,.07);
   position: relative;
 }
-/* Back to sign-in, pinned to the card's top-left like every web signup flow —
-   the "เข้าสู่ระบบ" link at the foot stays for people who read to the end. */
+/* Back to sign-in, pinned to the card's top-left like every web signup flow â€”
+   the "à¹€à¸‚à¹‰à¸²à¸ªà¸¹à¹ˆà¸£à¸°à¸šà¸š" link at the foot stays for people who read to the end. */
 .back-btn {
   position: absolute; top: 16px; left: 16px;
   display: inline-flex; align-items: center; gap: 6px;
@@ -159,7 +159,7 @@ form { margin-top: 32px; }
 }
 
 /* The landscape lockup leaves plenty of headroom, so only short windows need
-   any tightening — and the login card, not the brand panel, is what runs out
+   any tightening â€” and the login card, not the brand panel, is what runs out
    of room first. */
 @media (max-height: 820px) {
   .brand { padding-top: 32px; padding-bottom: 32px; }
@@ -199,7 +199,7 @@ form { margin-top: 32px; }
 </head>
 <body>
 
-<!-- ── Brand panel ── -->
+<!-- â”€â”€ Brand panel â”€â”€ -->
 <section class="brand">
   <span class="blob blob-1"></span>
   <span class="blob blob-2"></span>
@@ -210,12 +210,12 @@ form { margin-top: 32px; }
 
   <div class="brand-inner">
     <div class="brand-logo">
-      <img src="assets/img/logo_idash.png" alt="iDash — AI Dashboard Intelligence Platform">
+      <img src="assets/img/logo_idash.png" alt="iDash â€” AI Dashboard Intelligence Platform">
     </div>
 
-    <h1 class="brand-head">เปลี่ยนข้อมูลดิบ<br>ให้เป็น <b>Dashboard</b> อัจฉริยะ</h1>
+    <h1 class="brand-head">à¹€à¸›à¸¥à¸µà¹ˆà¸¢à¸™à¸‚à¹‰à¸­à¸¡à¸¹à¸¥à¸”à¸´à¸š<br>à¹ƒà¸«à¹‰à¹€à¸›à¹‡à¸™ <b>Dashboard</b> à¸­à¸±à¸ˆà¸‰à¸£à¸´à¸¢à¸°</h1>
     <div class="brand-rule"></div>
-    <p class="brand-desc">iDash คือแพลตฟอร์มที่ช่วยวิเคราะห์ข้อมูล ออกแบบ Dashboard<br>และแนะนำกราฟที่เหมาะสมกับข้อมูลของคุณโดยอัตโนมัติ</p>
+    <p class="brand-desc">iDash à¸„à¸·à¸­à¹à¸žà¸¥à¸•à¸Ÿà¸­à¸£à¹Œà¸¡à¸—à¸µà¹ˆà¸Šà¹ˆà¸§à¸¢à¸§à¸´à¹€à¸„à¸£à¸²à¸°à¸«à¹Œà¸‚à¹‰à¸­à¸¡à¸¹à¸¥ à¸­à¸­à¸à¹à¸šà¸š Dashboard<br>à¹à¸¥à¸°à¹à¸™à¸°à¸™à¸³à¸à¸£à¸²à¸Ÿà¸—à¸µà¹ˆà¹€à¸«à¸¡à¸²à¸°à¸ªà¸¡à¸à¸±à¸šà¸‚à¹‰à¸­à¸¡à¸¹à¸¥à¸‚à¸­à¸‡à¸„à¸¸à¸“à¹‚à¸”à¸¢à¸­à¸±à¸•à¹‚à¸™à¸¡à¸±à¸•à¸´</p>
 
     <div class="features">
       <div class="feature">
@@ -223,8 +223,8 @@ form { margin-top: 32px; }
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 17 9 11 13 15 21 7"/><polyline points="15 7 21 7 21 13"/></svg>
         </div>
         <div>
-          <div class="feature-title">แหล่งรวม Dashboard มากมาย</div>
-          <div class="feature-desc">ครอบคลุมทุกมิติของธุรกิจ อาทิ การผลิต การตลาด<br>การเงิน และอื่น ๆ อีกมากมาย</div>
+          <div class="feature-title">à¹à¸«à¸¥à¹ˆà¸‡à¸£à¸§à¸¡ Dashboard à¸¡à¸²à¸à¸¡à¸²à¸¢</div>
+          <div class="feature-desc">à¸„à¸£à¸­à¸šà¸„à¸¥à¸¸à¸¡à¸—à¸¸à¸à¸¡à¸´à¸•à¸´à¸‚à¸­à¸‡à¸˜à¸¸à¸£à¸à¸´à¸ˆ à¸­à¸²à¸—à¸´ à¸à¸²à¸£à¸œà¸¥à¸´à¸• à¸à¸²à¸£à¸•à¸¥à¸²à¸”<br>à¸à¸²à¸£à¹€à¸‡à¸´à¸™ à¹à¸¥à¸°à¸­à¸·à¹ˆà¸™ à¹† à¸­à¸µà¸à¸¡à¸²à¸à¸¡à¸²à¸¢</div>
         </div>
       </div>
 
@@ -233,8 +233,8 @@ form { margin-top: 32px; }
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="8" width="16" height="12" rx="2.5"/><circle cx="9" cy="14" r="1.3" fill="currentColor"/><circle cx="15" cy="14" r="1.3" fill="currentColor"/><path d="M12 8V4.5"/><circle cx="12" cy="3.2" r="1.3" fill="currentColor"/><path d="M2 13v3M22 13v3"/></svg>
         </div>
         <div>
-          <div class="feature-title">AI Chatbot อัจฉริยะ</div>
-          <div class="feature-desc">ถาม-ตอบทุกข้อสงสัยเกี่ยวกับโรงงานของเรา<br>ได้อย่างรวดเร็วและแม่นยำ</div>
+          <div class="feature-title">AI Chatbot à¸­à¸±à¸ˆà¸‰à¸£à¸´à¸¢à¸°</div>
+          <div class="feature-desc">à¸–à¸²à¸¡-à¸•à¸­à¸šà¸—à¸¸à¸à¸‚à¹‰à¸­à¸ªà¸‡à¸ªà¸±à¸¢à¹€à¸à¸µà¹ˆà¸¢à¸§à¸à¸±à¸šà¹‚à¸£à¸‡à¸‡à¸²à¸™à¸‚à¸­à¸‡à¹€à¸£à¸²<br>à¹„à¸”à¹‰à¸­à¸¢à¹ˆà¸²à¸‡à¸£à¸§à¸”à¹€à¸£à¹‡à¸§à¹à¸¥à¸°à¹à¸¡à¹ˆà¸™à¸¢à¸³</div>
         </div>
       </div>
 
@@ -243,123 +243,123 @@ form { margin-top: 32px; }
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.2 15.9A10 10 0 1 1 8.1 2.8"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></svg>
         </div>
         <div>
-          <div class="feature-title">วิเคราะห์ลึก เข้าใจง่าย</div>
-          <div class="feature-desc">ช่วยให้คุณมองเห็นภาพรวม ค้นพบ Insight<br>และตัดสินใจได้อย่างมั่นใจ</div>
+          <div class="feature-title">à¸§à¸´à¹€à¸„à¸£à¸²à¸°à¸«à¹Œà¸¥à¸¶à¸ à¹€à¸‚à¹‰à¸²à¹ƒà¸ˆà¸‡à¹ˆà¸²à¸¢</div>
+          <div class="feature-desc">à¸Šà¹ˆà¸§à¸¢à¹ƒà¸«à¹‰à¸„à¸¸à¸“à¸¡à¸­à¸‡à¹€à¸«à¹‡à¸™à¸ à¸²à¸žà¸£à¸§à¸¡ à¸„à¹‰à¸™à¸žà¸š Insight<br>à¹à¸¥à¸°à¸•à¸±à¸”à¸ªà¸´à¸™à¹ƒà¸ˆà¹„à¸”à¹‰à¸­à¸¢à¹ˆà¸²à¸‡à¸¡à¸±à¹ˆà¸™à¹ƒà¸ˆ</div>
         </div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ── Sign-in card ── -->
+<!-- â”€â”€ Sign-in card â”€â”€ -->
 <section class="panel">
   <div class="card" id="loginCard">
     <img class="card-logo" src="assets/img/logo_idash.png" alt="iDash">
-    <div class="card-title">เข้าสู่ระบบ</div>
-    <div class="card-sub">เข้าสู่ระบบเพื่อใช้งาน iDash</div>
+    <div class="card-title">à¹€à¸‚à¹‰à¸²à¸ªà¸¹à¹ˆà¸£à¸°à¸šà¸š</div>
+    <div class="card-sub">à¹€à¸‚à¹‰à¸²à¸ªà¸¹à¹ˆà¸£à¸°à¸šà¸šà¹€à¸žà¸·à¹ˆà¸­à¹ƒà¸Šà¹‰à¸‡à¸²à¸™ iDash</div>
 
     <form id="loginForm" novalidate>
       <div class="field">
-        <label class="field-label" for="username">ชื่อผู้ใช้</label>
+        <label class="field-label" for="username">à¸Šà¸·à¹ˆà¸­à¸œà¸¹à¹‰à¹ƒà¸Šà¹‰</label>
         <div class="input-wrap">
           <svg class="lead" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-          <input type="text" id="username" name="username" placeholder="กรอกชื่อผู้ใช้"
+          <input type="text" id="username" name="username" placeholder="à¸à¸£à¸­à¸à¸Šà¸·à¹ˆà¸­à¸œà¸¹à¹‰à¹ƒà¸Šà¹‰"
                  autocomplete="username" spellcheck="false" autocapitalize="off">
         </div>
       </div>
 
       <div class="field">
-        <label class="field-label" for="password">รหัสผ่าน</label>
+        <label class="field-label" for="password">à¸£à¸«à¸±à¸ªà¸œà¹ˆà¸²à¸™</label>
         <div class="input-wrap">
           <svg class="lead" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-          <input type="password" id="password" name="password" placeholder="กรอกรหัสผ่านของคุณ" autocomplete="current-password">
-          <button type="button" class="peek" id="peek" aria-label="แสดงรหัสผ่าน">
+          <input type="password" id="password" name="password" placeholder="à¸à¸£à¸­à¸à¸£à¸«à¸±à¸ªà¸œà¹ˆà¸²à¸™à¸‚à¸­à¸‡à¸„à¸¸à¸“" autocomplete="current-password">
+          <button type="button" class="peek" id="peek" aria-label="à¹à¸ªà¸”à¸‡à¸£à¸«à¸±à¸ªà¸œà¹ˆà¸²à¸™">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
           </button>
         </div>
       </div>
 
       <div class="forgot">
-        <button type="button" class="link-muted not-ready" disabled title="ยังไม่เปิดใช้งาน">ลืมรหัสผ่าน?</button>
+        <button type="button" class="link-muted not-ready" disabled title="à¸¢à¸±à¸‡à¹„à¸¡à¹ˆà¹€à¸›à¸´à¸”à¹ƒà¸Šà¹‰à¸‡à¸²à¸™">à¸¥à¸·à¸¡à¸£à¸«à¸±à¸ªà¸œà¹ˆà¸²à¸™?</button>
       </div>
 
-      <button type="submit" class="submit" id="submitBtn">เข้าสู่ระบบ</button>
+      <button type="submit" class="submit" id="submitBtn">à¹€à¸‚à¹‰à¸²à¸ªà¸¹à¹ˆà¸£à¸°à¸šà¸š</button>
       <div class="msg" id="loginMsg"></div>
     </form>
 
-    <div class="divider">หรือ</div>
+    <div class="divider">à¸«à¸£à¸·à¸­</div>
 
-    <button type="button" class="google not-ready" disabled title="ยังไม่เปิดใช้งาน">
+    <button type="button" class="google not-ready" disabled title="à¸¢à¸±à¸‡à¹„à¸¡à¹ˆà¹€à¸›à¸´à¸”à¹ƒà¸Šà¹‰à¸‡à¸²à¸™">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#4285F4" d="M23 12.3c0-.8-.1-1.6-.2-2.3H12v4.5h6.2a5.3 5.3 0 0 1-2.3 3.5v2.9h3.7c2.2-2 3.4-5 3.4-8.6z"/><path fill="#34A853" d="M12 24c3.1 0 5.7-1 7.6-2.8l-3.7-2.9c-1 .7-2.3 1.1-3.9 1.1-3 0-5.5-2-6.4-4.7H1.8v3C3.7 21.4 7.6 24 12 24z"/><path fill="#FBBC05" d="M5.6 14.7a7.2 7.2 0 0 1 0-4.6v-3H1.8a12 12 0 0 0 0 10.6l3.8-3z"/><path fill="#EA4335" d="M12 4.8c1.7 0 3.2.6 4.4 1.7l3.3-3.3C17.7 1.2 15.1 0 12 0 7.6 0 3.7 2.6 1.8 6.1l3.8 3c.9-2.7 3.4-4.3 6.4-4.3z"/></svg>
-      เข้าสู่ระบบด้วย Google
+      à¹€à¸‚à¹‰à¸²à¸ªà¸¹à¹ˆà¸£à¸°à¸šà¸šà¸”à¹‰à¸§à¸¢ Google
     </button>
 
-    <div class="signup">ยังไม่มีบัญชี? <button type="button" class="link-muted" id="showSignup">สมัครใช้งาน</button></div>
+    <div class="signup">à¸¢à¸±à¸‡à¹„à¸¡à¹ˆà¸¡à¸µà¸šà¸±à¸à¸Šà¸µ? <button type="button" class="link-muted" id="showSignup">à¸ªà¸¡à¸±à¸„à¸£à¹ƒà¸Šà¹‰à¸‡à¸²à¸™</button></div>
 
     <div class="note">
-      เข้าสู่ระบบด้วย Google · ลืมรหัสผ่าน — ยังไม่เปิดใช้งาน<br>
-      เพราะต้องมีระบบบัญชีผู้ใช้ฝั่งเซิร์ฟเวอร์ก่อน
+      à¹€à¸‚à¹‰à¸²à¸ªà¸¹à¹ˆà¸£à¸°à¸šà¸šà¸”à¹‰à¸§à¸¢ Google Â· à¸¥à¸·à¸¡à¸£à¸«à¸±à¸ªà¸œà¹ˆà¸²à¸™ â€” à¸¢à¸±à¸‡à¹„à¸¡à¹ˆà¹€à¸›à¸´à¸”à¹ƒà¸Šà¹‰à¸‡à¸²à¸™<br>
+      à¹€à¸žà¸£à¸²à¸°à¸•à¹‰à¸­à¸‡à¸¡à¸µà¸£à¸°à¸šà¸šà¸šà¸±à¸à¸Šà¸µà¸œà¸¹à¹‰à¹ƒà¸Šà¹‰à¸à¸±à¹ˆà¸‡à¹€à¸‹à¸´à¸£à¹Œà¸Ÿà¹€à¸§à¸­à¸£à¹Œà¸à¹ˆà¸­à¸™
     </div>
   </div>
 
-  <!-- ── Signup card — swapped in place of the login card ──
+  <!-- â”€â”€ Signup card â€” swapped in place of the login card â”€â”€
        Registration is a LOG, not an account: the row lands in the admin's
        sheet as "pending" and sign-in still uses the existing credential until
        an account backend exists. The card says so, so nobody registers and
        then wonders why the new password doesn't open the door. -->
   <div class="card" id="signupCard" hidden>
-    <button type="button" class="back-btn" id="signupBack" aria-label="กลับไปหน้าเข้าสู่ระบบ">
+    <button type="button" class="back-btn" id="signupBack" aria-label="à¸à¸¥à¸±à¸šà¹„à¸›à¸«à¸™à¹‰à¸²à¹€à¸‚à¹‰à¸²à¸ªà¸¹à¹ˆà¸£à¸°à¸šà¸š">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
-      กลับ
+      à¸à¸¥à¸±à¸š
     </button>
     <img class="card-logo" src="assets/img/logo_idash.png" alt="iDash">
-    <div class="card-title">สมัครใช้งาน</div>
-    <div class="card-sub">กรอกข้อมูล 4 ช่อง — คำขอจะถูกส่งให้ผู้ดูแลระบบเปิดสิทธิ์</div>
+    <div class="card-title">à¸ªà¸¡à¸±à¸„à¸£à¹ƒà¸Šà¹‰à¸‡à¸²à¸™</div>
+    <div class="card-sub">à¸à¸£à¸­à¸à¸‚à¹‰à¸­à¸¡à¸¹à¸¥ 4 à¸Šà¹ˆà¸­à¸‡ â€” à¸„à¸³à¸‚à¸­à¸ˆà¸°à¸–à¸¹à¸à¸ªà¹ˆà¸‡à¹ƒà¸«à¹‰à¸œà¸¹à¹‰à¸”à¸¹à¹à¸¥à¸£à¸°à¸šà¸šà¹€à¸›à¸´à¸”à¸ªà¸´à¸—à¸˜à¸´à¹Œ</div>
 
     <form id="signupForm" novalidate>
       <div class="field">
-        <label class="field-label" for="suUser">ชื่อผู้ใช้</label>
+        <label class="field-label" for="suUser">à¸Šà¸·à¹ˆà¸­à¸œà¸¹à¹‰à¹ƒà¸Šà¹‰</label>
         <div class="input-wrap">
           <svg class="lead" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-          <input type="text" id="suUser" placeholder="a-z, 0-9, _ . - (3-32 ตัว)" autocomplete="username" spellcheck="false" autocapitalize="off">
+          <input type="text" id="suUser" placeholder="a-z, 0-9, _ . - (3-32 à¸•à¸±à¸§)" autocomplete="username" spellcheck="false" autocapitalize="off">
         </div>
       </div>
       <div class="field">
-        <label class="field-label" for="suPass">รหัสผ่าน</label>
+        <label class="field-label" for="suPass">à¸£à¸«à¸±à¸ªà¸œà¹ˆà¸²à¸™</label>
         <div class="input-wrap">
           <svg class="lead" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-          <input type="password" id="suPass" placeholder="อย่างน้อย 6 ตัวอักษร" autocomplete="new-password">
+          <input type="password" id="suPass" placeholder="à¸­à¸¢à¹ˆà¸²à¸‡à¸™à¹‰à¸­à¸¢ 6 à¸•à¸±à¸§à¸­à¸±à¸à¸©à¸£" autocomplete="new-password">
         </div>
       </div>
       <div class="field">
-        <label class="field-label" for="suPass2">ยืนยันรหัสผ่าน</label>
+        <label class="field-label" for="suPass2">à¸¢à¸·à¸™à¸¢à¸±à¸™à¸£à¸«à¸±à¸ªà¸œà¹ˆà¸²à¸™</label>
         <div class="input-wrap">
           <svg class="lead" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/><polyline points="9 16 11 18 15 14"/></svg>
-          <input type="password" id="suPass2" placeholder="พิมพ์รหัสผ่านซ้ำอีกครั้ง" autocomplete="new-password">
+          <input type="password" id="suPass2" placeholder="à¸žà¸´à¸¡à¸žà¹Œà¸£à¸«à¸±à¸ªà¸œà¹ˆà¸²à¸™à¸‹à¹‰à¸³à¸­à¸µà¸à¸„à¸£à¸±à¹‰à¸‡" autocomplete="new-password">
         </div>
       </div>
       <div class="field">
-        <label class="field-label" for="suEmail">Email ติดต่อ</label>
+        <label class="field-label" for="suEmail">Email à¸•à¸´à¸”à¸•à¹ˆà¸­</label>
         <div class="input-wrap">
           <svg class="lead" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/></svg>
           <input type="email" id="suEmail" placeholder="name@example.com" autocomplete="email" spellcheck="false">
         </div>
       </div>
 
-      <button type="submit" class="submit" id="suBtn">สมัครใช้งาน</button>
+      <button type="submit" class="submit" id="suBtn">à¸ªà¸¡à¸±à¸„à¸£à¹ƒà¸Šà¹‰à¸‡à¸²à¸™</button>
       <div class="msg" id="suMsg"></div>
     </form>
 
-    <div class="signup">มีบัญชีแล้ว? <button type="button" class="link-muted" id="showLogin">เข้าสู่ระบบ</button></div>
+    <div class="signup">à¸¡à¸µà¸šà¸±à¸à¸Šà¸µà¹à¸¥à¹‰à¸§? <button type="button" class="link-muted" id="showLogin">à¹€à¸‚à¹‰à¸²à¸ªà¸¹à¹ˆà¸£à¸°à¸šà¸š</button></div>
 
     <div class="note">
-      รหัสผ่านถูกเข้ารหัส (SHA-256) ก่อนส่งจากเครื่องคุณ — ระบบไม่เก็บรหัสผ่านจริง<br>
-      คำขอสมัครจะถูกบันทึกไว้ให้ผู้ดูแลตรวจและเปิดสิทธิ์
+      à¸£à¸«à¸±à¸ªà¸œà¹ˆà¸²à¸™à¸–à¸¹à¸à¹€à¸‚à¹‰à¸²à¸£à¸«à¸±à¸ª (SHA-256) à¸à¹ˆà¸­à¸™à¸ªà¹ˆà¸‡à¸ˆà¸²à¸à¹€à¸„à¸£à¸·à¹ˆà¸­à¸‡à¸„à¸¸à¸“ â€” à¸£à¸°à¸šà¸šà¹„à¸¡à¹ˆà¹€à¸à¹‡à¸šà¸£à¸«à¸±à¸ªà¸œà¹ˆà¸²à¸™à¸ˆà¸£à¸´à¸‡<br>
+      à¸„à¸³à¸‚à¸­à¸ªà¸¡à¸±à¸„à¸£à¸ˆà¸°à¸–à¸¹à¸à¸šà¸±à¸™à¸—à¸¶à¸à¹„à¸§à¹‰à¹ƒà¸«à¹‰à¸œà¸¹à¹‰à¸”à¸¹à¹à¸¥à¸•à¸£à¸§à¸ˆà¹à¸¥à¸°à¹€à¸›à¸´à¸”à¸ªà¸´à¸—à¸˜à¸´à¹Œ
     </div>
   </div>
 </section>
 
-<script src="js/auth.js?v=20260805i"></script>
+<script src="js/auth.js?v=20260805n"></script>
 <script>
 (function () {
   'use strict';
@@ -370,7 +370,7 @@ form { margin-top: 32px; }
   var msg = document.getElementById('loginMsg');
   var btn = document.getElementById('submitBtn');
 
-  // Already signed in → skip the form.
+  // Already signed in â†’ skip the form.
   if (window.iDashAuth.isSignedIn()) { window.location.replace(nextPage()); return; }
 
   // Only ever return a same-directory page name (a query string is allowed so
@@ -379,7 +379,7 @@ form { margin-top: 32px; }
   function nextPage() {
     var raw = new URLSearchParams(window.location.search).get('next') || '';
     if (/^[a-z0-9_-]+\.html(\?[^#/\\]*)?$/i.test(raw)) return raw;
-    // No deep link → the start page chosen in Settings, same validation so a
+    // No deep link â†’ the start page chosen in Settings, same validation so a
     // tampered localStorage value can't redirect anywhere unexpected.
     var pref = '';
     try { pref = localStorage.getItem('idash.pref.startPage') || ''; } catch (e) {}
@@ -389,7 +389,7 @@ form { margin-top: 32px; }
   document.getElementById('peek').addEventListener('click', function () {
     var show = passEl.type === 'password';
     passEl.type = show ? 'text' : 'password';
-    this.setAttribute('aria-label', show ? 'ซ่อนรหัสผ่าน' : 'แสดงรหัสผ่าน');
+    this.setAttribute('aria-label', show ? 'à¸‹à¹ˆà¸­à¸™à¸£à¸«à¸±à¸ªà¸œà¹ˆà¸²à¸™' : 'à¹à¸ªà¸”à¸‡à¸£à¸«à¸±à¸ªà¸œà¹ˆà¸²à¸™');
     passEl.focus();
   });
 
@@ -398,19 +398,19 @@ form { margin-top: 32px; }
     msg.textContent = '';
 
     if (!userEl.value.trim() || !passEl.value) {
-      msg.textContent = 'กรอกชื่อผู้ใช้และรหัสผ่านให้ครบ';
+      msg.textContent = 'à¸à¸£à¸­à¸à¸Šà¸·à¹ˆà¸­à¸œà¸¹à¹‰à¹ƒà¸Šà¹‰à¹à¸¥à¸°à¸£à¸«à¸±à¸ªà¸œà¹ˆà¸²à¸™à¹ƒà¸«à¹‰à¸„à¸£à¸š';
       return;
     }
 
     btn.disabled = true;
-    btn.textContent = 'กำลังเข้าสู่ระบบ…';
+    btn.textContent = 'à¸à¸³à¸¥à¸±à¸‡à¹€à¸‚à¹‰à¸²à¸ªà¸¹à¹ˆà¸£à¸°à¸šà¸šâ€¦';
     window.iDashAuth.signIn(userEl.value, passEl.value).then(function (res) {
       if (res && res.ok) { window.location.href = nextPage(); return; }
       btn.disabled = false;
-      btn.textContent = 'เข้าสู่ระบบ';
+      btn.textContent = 'à¹€à¸‚à¹‰à¸²à¸ªà¸¹à¹ˆà¸£à¸°à¸šà¸š';
       // signIn now distinguishes "wrong password" from "pending/rejected/offline"
       // so an approved-but-not-yet user isn't told their password is wrong.
-      msg.textContent = (res && res.reason) || 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง';
+      msg.textContent = (res && res.reason) || 'à¸Šà¸·à¹ˆà¸­à¸œà¸¹à¹‰à¹ƒà¸Šà¹‰à¸«à¸£à¸·à¸­à¸£à¸«à¸±à¸ªà¸œà¹ˆà¸²à¸™à¹„à¸¡à¹ˆà¸–à¸¹à¸à¸•à¹‰à¸­à¸‡';
       passEl.value = '';
       passEl.focus();
     });
@@ -434,10 +434,10 @@ form { margin-top: 32px; }
     btn.focus();
   }
 
-  /* ── Signup ─────────────────────────────────────────────────────────────
+  /* â”€â”€ Signup â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
    * The submission is a LOG entry, not an account: the Apps Script appends
    * [timestamp, username, email, sha256, "pending"] to the admin's sheet.
-   * The password is hashed HERE, before it leaves the machine — the endpoint,
+   * The password is hashed HERE, before it leaves the machine â€” the endpoint,
    * the network, and the sheet never see the real password (same posture as
    * auth.js, and the reason the .gs validates a 64-hex hash, not a password).
    */
@@ -464,7 +464,7 @@ form { margin-top: 32px; }
 
   function sha256Hex(text) {
     var subtle = window.crypto && window.crypto.subtle;
-    if (!subtle || !window.TextEncoder) return Promise.reject(new Error('เบราว์เซอร์นี้ไม่รองรับการเข้ารหัส (ต้องเปิดผ่าน https)'));
+    if (!subtle || !window.TextEncoder) return Promise.reject(new Error('à¹€à¸šà¸£à¸²à¸§à¹Œà¹€à¸‹à¸­à¸£à¹Œà¸™à¸µà¹‰à¹„à¸¡à¹ˆà¸£à¸­à¸‡à¸£à¸±à¸šà¸à¸²à¸£à¹€à¸‚à¹‰à¸²à¸£à¸«à¸±à¸ª (à¸•à¹‰à¸­à¸‡à¹€à¸›à¸´à¸”à¸œà¹ˆà¸²à¸™ https)'));
     return subtle.digest('SHA-256', new TextEncoder().encode('idash-auth:' + text)).then(function (buf) {
       var out = '', v = new Uint8Array(buf);
       for (var i = 0; i < v.length; i++) out += ('0' + v[i].toString(16)).slice(-2);
@@ -480,14 +480,14 @@ form { margin-top: 32px; }
     var p2 = document.getElementById('suPass2').value;
     var em = document.getElementById('suEmail').value.trim();
 
-    if (!/^[a-zA-Z0-9_.\-]{3,32}$/.test(u)) { suMsg.textContent = 'ชื่อผู้ใช้: a-z, 0-9, _ . - ยาว 3-32 ตัว'; return; }
-    if (p1.length < 6) { suMsg.textContent = 'รหัสผ่านต้องยาวอย่างน้อย 6 ตัวอักษร'; return; }
-    if (p1 !== p2) { suMsg.textContent = 'รหัสผ่านทั้งสองช่องไม่ตรงกัน'; return; }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(em)) { suMsg.textContent = 'รูปแบบอีเมลไม่ถูกต้อง'; return; }
-    if (!SIGNUP_API_URL) { suMsg.textContent = 'ระบบสมัครยังไม่ได้เชื่อมต่อปลายทาง — แจ้งผู้ดูแลระบบ'; return; }
+    if (!/^[a-zA-Z0-9_.\-]{3,32}$/.test(u)) { suMsg.textContent = 'à¸Šà¸·à¹ˆà¸­à¸œà¸¹à¹‰à¹ƒà¸Šà¹‰: a-z, 0-9, _ . - à¸¢à¸²à¸§ 3-32 à¸•à¸±à¸§'; return; }
+    if (p1.length < 6) { suMsg.textContent = 'à¸£à¸«à¸±à¸ªà¸œà¹ˆà¸²à¸™à¸•à¹‰à¸­à¸‡à¸¢à¸²à¸§à¸­à¸¢à¹ˆà¸²à¸‡à¸™à¹‰à¸­à¸¢ 6 à¸•à¸±à¸§à¸­à¸±à¸à¸©à¸£'; return; }
+    if (p1 !== p2) { suMsg.textContent = 'à¸£à¸«à¸±à¸ªà¸œà¹ˆà¸²à¸™à¸—à¸±à¹‰à¸‡à¸ªà¸­à¸‡à¸Šà¹ˆà¸­à¸‡à¹„à¸¡à¹ˆà¸•à¸£à¸‡à¸à¸±à¸™'; return; }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(em)) { suMsg.textContent = 'à¸£à¸¹à¸›à¹à¸šà¸šà¸­à¸µà¹€à¸¡à¸¥à¹„à¸¡à¹ˆà¸–à¸¹à¸à¸•à¹‰à¸­à¸‡'; return; }
+    if (!SIGNUP_API_URL) { suMsg.textContent = 'à¸£à¸°à¸šà¸šà¸ªà¸¡à¸±à¸„à¸£à¸¢à¸±à¸‡à¹„à¸¡à¹ˆà¹„à¸”à¹‰à¹€à¸Šà¸·à¹ˆà¸­à¸¡à¸•à¹ˆà¸­à¸›à¸¥à¸²à¸¢à¸—à¸²à¸‡ â€” à¹à¸ˆà¹‰à¸‡à¸œà¸¹à¹‰à¸”à¸¹à¹à¸¥à¸£à¸°à¸šà¸š'; return; }
 
     suBtn.disabled = true;
-    suBtn.textContent = 'กำลังส่งคำขอ…';
+    suBtn.textContent = 'à¸à¸³à¸¥à¸±à¸‡à¸ªà¹ˆà¸‡à¸„à¸³à¸‚à¸­â€¦';
     sha256Hex(u + ':' + p1)
       .then(function (hash) {
         // Content-Type is deliberately text/plain: it keeps the request
@@ -504,25 +504,25 @@ form { margin-top: 32px; }
         if (data && data.ok) {
           suMsg.textContent = '';
           document.getElementById('signupForm').reset();
-          // Confirm as a clear action popup — a green line under the button is
+          // Confirm as a clear action popup â€” a green line under the button is
           // easy to miss; a modal with one OK button is not.
           showOkModal(
-            'ส่งคำขอสมัครเรียบร้อย',
-            'คำขอของคุณถูกส่งให้ผู้ดูแลระบบแล้ว เมื่อได้รับการอนุมัติ ระบบจะแจ้งผลกลับไปที่อีเมลที่คุณกรอกไว้',
+            'à¸ªà¹ˆà¸‡à¸„à¸³à¸‚à¸­à¸ªà¸¡à¸±à¸„à¸£à¹€à¸£à¸µà¸¢à¸šà¸£à¹‰à¸­à¸¢',
+            'à¸„à¸³à¸‚à¸­à¸‚à¸­à¸‡à¸„à¸¸à¸“à¸–à¸¹à¸à¸ªà¹ˆà¸‡à¹ƒà¸«à¹‰à¸œà¸¹à¹‰à¸”à¸¹à¹à¸¥à¸£à¸°à¸šà¸šà¹à¸¥à¹‰à¸§ à¹€à¸¡à¸·à¹ˆà¸­à¹„à¸”à¹‰à¸£à¸±à¸šà¸à¸²à¸£à¸­à¸™à¸¸à¸¡à¸±à¸•à¸´ à¸£à¸°à¸šà¸šà¸ˆà¸°à¹à¸ˆà¹‰à¸‡à¸œà¸¥à¸à¸¥à¸±à¸šà¹„à¸›à¸—à¸µà¹ˆà¸­à¸µà¹€à¸¡à¸¥à¸—à¸µà¹ˆà¸„à¸¸à¸“à¸à¸£à¸­à¸à¹„à¸§à¹‰',
             function () { swap(false); }
           );
         } else {
           suMsg.style.color = '';
-          suMsg.textContent = (data && data.error) || 'ส่งคำขอไม่สำเร็จ — ลองใหม่อีกครั้ง';
+          suMsg.textContent = (data && data.error) || 'à¸ªà¹ˆà¸‡à¸„à¸³à¸‚à¸­à¹„à¸¡à¹ˆà¸ªà¸³à¹€à¸£à¹‡à¸ˆ â€” à¸¥à¸­à¸‡à¹ƒà¸«à¸¡à¹ˆà¸­à¸µà¸à¸„à¸£à¸±à¹‰à¸‡';
         }
       })
       .catch(function () {
         suMsg.style.color = '';
-        suMsg.textContent = 'ติดต่อปลายทางไม่ได้ — ตรวจอินเทอร์เน็ตแล้วลองใหม่';
+        suMsg.textContent = 'à¸•à¸´à¸”à¸•à¹ˆà¸­à¸›à¸¥à¸²à¸¢à¸—à¸²à¸‡à¹„à¸¡à¹ˆà¹„à¸”à¹‰ â€” à¸•à¸£à¸§à¸ˆà¸­à¸´à¸™à¹€à¸—à¸­à¸£à¹Œà¹€à¸™à¹‡à¸•à¹à¸¥à¹‰à¸§à¸¥à¸­à¸‡à¹ƒà¸«à¸¡à¹ˆ';
       })
       .finally(function () {
         suBtn.disabled = false;
-        suBtn.textContent = 'สมัครใช้งาน';
+        suBtn.textContent = 'à¸ªà¸¡à¸±à¸„à¸£à¹ƒà¸Šà¹‰à¸‡à¸²à¸™';
       });
   });
 })();
@@ -536,7 +536,7 @@ form { margin-top: 32px; }
     </div>
     <div class="ok-title" id="okTitle"></div>
     <div class="ok-msg" id="okMsg"></div>
-    <button type="button" class="ok-btn" id="okBtn">ตกลง</button>
+    <button type="button" class="ok-btn" id="okBtn">à¸•à¸à¸¥à¸‡</button>
   </div>
 </div>
 <style>

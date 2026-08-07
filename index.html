@@ -5,12 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <!-- Sign-in gate. Runs before the page renders so protected content never
        flashes on screen for a signed-out visitor. -->
-  <script src="js/auth.js?v=20260805i"></script>
+  <script src="js/auth.js?v=20260805n"></script>
   <script>if (!window.iDashAuth.requireSignIn()) { document.documentElement.style.display = 'none'; }</script>
   <!-- Reloads once when a new build is deployed. The ?v= strings below can't
        protect this file itself, which GitHub Pages caches for 10 minutes. -->
   <script src="js/build_guard.js?v=20260731d" async></script>
-  <title>iDash — AI Dashboard Intelligence Platform</title>
+  <title>iDash â€” AI Dashboard Intelligence Platform</title>
   <link rel="stylesheet" href="css/style.css?v=20260804b">
   <link rel="stylesheet" href="css/ai_progress.css?v=20260730a">
   <link rel="stylesheet" href="css/home.css?v=20260804b">
@@ -24,7 +24,7 @@
 </head>
 <body>
 
-<!-- ─── SIDEBAR ─── -->
+<!-- â”€â”€â”€ SIDEBAR â”€â”€â”€ -->
 <aside class="sidebar">
   <div class="sidebar-logo">
     <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -81,32 +81,32 @@
       <div class="sidebar-user-menu" id="sidebarUserMenu" hidden>
         <button type="button" data-action="profile">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-          โปรไฟล์
+          à¹‚à¸›à¸£à¹„à¸Ÿà¸¥à¹Œ
         </button>
         <button type="button" data-action="settings">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06A1.65 1.65 0 004.6 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06A1.65 1.65 0 009 4.6a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
-          ตั้งค่า
+          à¸•à¸±à¹‰à¸‡à¸„à¹ˆà¸²
         </button>
         <div class="sidebar-user-menu-divider"></div>
         <button type="button" data-action="logout" class="danger">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-          ออกจากระบบ
+          à¸­à¸­à¸à¸ˆà¸²à¸à¸£à¸°à¸šà¸š
         </button>
       </div>
     </div>
   </div>
 </aside>
 
-<!-- ─── MAIN ─── -->
+<!-- â”€â”€â”€ MAIN â”€â”€â”€ -->
 <main class="main">
   <!-- Content -->
   <div class="content">
 
-    <!-- ─── TOPBAR ─── -->
+    <!-- â”€â”€â”€ TOPBAR â”€â”€â”€ -->
     <div class="home-topbar">
       <div>
-        <div class="home-greet"><span id="homeGreetText">Good Morning</span>, Bobo <span class="wave">👋</span></div>
-        <div class="home-subgreet">ภาพรวมการทำงานของโรงงานวันนี้ <span class="home-demo-pill" id="homeKpiStamp" hidden></span></div>
+        <div class="home-greet"><span id="homeGreetText">Good Morning</span>, Bobo <span class="wave">ðŸ‘‹</span></div>
+        <div class="home-subgreet">à¸ à¸²à¸žà¸£à¸§à¸¡à¸à¸²à¸£à¸—à¸³à¸‡à¸²à¸™à¸‚à¸­à¸‡à¹‚à¸£à¸‡à¸‡à¸²à¸™à¸§à¸±à¸™à¸™à¸µà¹‰ <span class="home-demo-pill" id="homeKpiStamp" hidden></span></div>
       </div>
       <div class="home-topbar-right">
         <div class="home-search home-date">
@@ -116,15 +116,15 @@
       </div>
     </div>
 
-    <!-- ─── KPI ROW — live from Production Dashboard (Dashboard ML / DailyReport) ─── -->
+    <!-- â”€â”€â”€ KPI ROW â€” live from Production Dashboard (Dashboard ML / DailyReport) â”€â”€â”€ -->
     <div class="home-kpi-row" id="homeKpiRow">
       <div class="home-kpi" data-kpi="cane_crushed" style="--acc:#2563eb;--acc2:#60a5fa">
         <div class="home-kpi-top">
           <img class="home-kpi-icon" src="assets/icons/kpi/cane_crushed.png" alt="">
           <div>
-            <div class="home-kpi-label">จำนวนอ้อยเข้าหีบ</div>
-            <div class="home-kpi-value" data-kpi-value>—</div>
-            <div class="home-kpi-delta" data-kpi-delta>กำลังโหลด…</div>
+            <div class="home-kpi-label">à¸ˆà¸³à¸™à¸§à¸™à¸­à¹‰à¸­à¸¢à¹€à¸‚à¹‰à¸²à¸«à¸µà¸š</div>
+            <div class="home-kpi-value" data-kpi-value>â€”</div>
+            <div class="home-kpi-delta" data-kpi-delta>à¸à¸³à¸¥à¸±à¸‡à¹‚à¸«à¸¥à¸”â€¦</div>
           </div>
         </div>
         <div class="home-kpi-spark" data-kpi-spark></div>
@@ -135,8 +135,8 @@
           <img class="home-kpi-icon" src="assets/icons/kpi/ccs_factory.png" alt="">
           <div>
             <div class="home-kpi-label">CCS of Factory</div>
-            <div class="home-kpi-value" data-kpi-value>—</div>
-            <div class="home-kpi-delta" data-kpi-delta>กำลังโหลด…</div>
+            <div class="home-kpi-value" data-kpi-value>â€”</div>
+            <div class="home-kpi-delta" data-kpi-delta>à¸à¸³à¸¥à¸±à¸‡à¹‚à¸«à¸¥à¸”â€¦</div>
           </div>
         </div>
         <div class="home-kpi-spark" data-kpi-spark></div>
@@ -147,8 +147,8 @@
           <img class="home-kpi-icon" src="assets/icons/kpi/burnt_cane.png" alt="">
           <div>
             <div class="home-kpi-label">% Burnt Cane</div>
-            <div class="home-kpi-value" data-kpi-value>—</div>
-            <div class="home-kpi-delta" data-kpi-delta>กำลังโหลด…</div>
+            <div class="home-kpi-value" data-kpi-value>â€”</div>
+            <div class="home-kpi-delta" data-kpi-delta>à¸à¸³à¸¥à¸±à¸‡à¹‚à¸«à¸¥à¸”â€¦</div>
           </div>
         </div>
         <div class="home-kpi-spark" data-kpi-spark></div>
@@ -159,8 +159,8 @@
           <img class="home-kpi-icon" src="assets/icons/kpi/cane_as_telq.png" alt="">
           <div>
             <div class="home-kpi-label">% Cane as TELQ</div>
-            <div class="home-kpi-value" data-kpi-value>—</div>
-            <div class="home-kpi-delta" data-kpi-delta>กำลังโหลด…</div>
+            <div class="home-kpi-value" data-kpi-value>â€”</div>
+            <div class="home-kpi-delta" data-kpi-delta>à¸à¸³à¸¥à¸±à¸‡à¹‚à¸«à¸¥à¸”â€¦</div>
           </div>
         </div>
         <div class="home-kpi-spark" data-kpi-spark></div>
@@ -170,21 +170,21 @@
         <div class="home-kpi-top">
           <img class="home-kpi-icon" src="assets/icons/kpi/edl_export.png" alt="">
           <div>
-            <div class="home-kpi-label">ขายไฟ (EDL)</div>
-            <div class="home-kpi-value" data-kpi-value>—</div>
-            <div class="home-kpi-delta" data-kpi-delta>กำลังโหลด…</div>
+            <div class="home-kpi-label">à¸‚à¸²à¸¢à¹„à¸Ÿ (EDL)</div>
+            <div class="home-kpi-value" data-kpi-value>â€”</div>
+            <div class="home-kpi-delta" data-kpi-delta>à¸à¸³à¸¥à¸±à¸‡à¹‚à¸«à¸¥à¸”â€¦</div>
           </div>
         </div>
         <div class="home-kpi-spark" data-kpi-spark></div>
       </div>
     </div>
 
-    <!-- ─── HERO + AI AUTOPILOT ─── -->
+    <!-- â”€â”€â”€ HERO + AI AUTOPILOT â”€â”€â”€ -->
     <div class="home-hero-row">
       <section class="home-hero">
         <div class="home-hero-body">
           <div class="home-hero-title">AI-Powered Dashboard for Smarter Factory</div>
-          <div class="home-hero-desc">อัปโหลดข้อมูล วิเคราะห์อัตโนมัติ<br>และสร้าง Dashboard อัจฉริยะในไม่กี่วินาที</div>
+          <div class="home-hero-desc">à¸­à¸±à¸›à¹‚à¸«à¸¥à¸”à¸‚à¹‰à¸­à¸¡à¸¹à¸¥ à¸§à¸´à¹€à¸„à¸£à¸²à¸°à¸«à¹Œà¸­à¸±à¸•à¹‚à¸™à¸¡à¸±à¸•à¸´<br>à¹à¸¥à¸°à¸ªà¸£à¹‰à¸²à¸‡ Dashboard à¸­à¸±à¸ˆà¸‰à¸£à¸´à¸¢à¸°à¹ƒà¸™à¹„à¸¡à¹ˆà¸à¸µà¹ˆà¸§à¸´à¸™à¸²à¸—à¸µ</div>
         </div>
         <div class="home-hero-art"></div>
       </section>
@@ -193,27 +193,27 @@
       <section class="home-autopilot">
         <div class="home-autopilot-head">
           <svg class="bolt" viewBox="0 0 24 24" fill="currentColor"><path d="M13 2L3 14h7l-1 8 10-12h-7l1-8z"/></svg>
-          <span class="home-autopilot-title">iDash - สร้างแดชบอร์ดของคุณ</span>
-          <span class="home-autopilot-pill">อัตโนมัติ</span>
+          <span class="home-autopilot-title">iDash - à¸ªà¸£à¹‰à¸²à¸‡à¹à¸”à¸Šà¸šà¸­à¸£à¹Œà¸”à¸‚à¸­à¸‡à¸„à¸¸à¸“</span>
+          <span class="home-autopilot-pill">à¸­à¸±à¸•à¹‚à¸™à¸¡à¸±à¸•à¸´</span>
         </div>
         <div class="home-dropzone mode-card" data-mode="autopilot">
           <svg class="cloud" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 16.6A5 5 0 0018 7h-1.26A8 8 0 103 15.3"/><polyline points="16 15 12 11 8 15"/><line x1="12" y1="11" x2="12" y2="21"/></svg>
-          <div class="home-dropzone-title">คลิกเพื่อเลือกช่องทาง หรือลากไฟล์มาวางที่นี่</div>
-          <div class="home-dropzone-hint">รองรับไฟล์ Excel, CSV, JSON</div>
+          <div class="home-dropzone-title">à¸„à¸¥à¸´à¸à¹€à¸žà¸·à¹ˆà¸­à¹€à¸¥à¸·à¸­à¸à¸Šà¹ˆà¸­à¸‡à¸—à¸²à¸‡ à¸«à¸£à¸·à¸­à¸¥à¸²à¸à¹„à¸Ÿà¸¥à¹Œà¸¡à¸²à¸§à¸²à¸‡à¸—à¸µà¹ˆà¸™à¸µà¹ˆ</div>
+          <div class="home-dropzone-hint">à¸£à¸­à¸‡à¸£à¸±à¸šà¹„à¸Ÿà¸¥à¹Œ Excel, CSV, JSON</div>
         </div>
         <div class="home-autopilot-foot">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
-          ทำงานในเครื่อง 100% ข้อมูลของคุณปลอดภัย
+          à¸—à¸³à¸‡à¸²à¸™à¹ƒà¸™à¹€à¸„à¸£à¸·à¹ˆà¸­à¸‡ 100% à¸‚à¹‰à¸­à¸¡à¸¹à¸¥à¸‚à¸­à¸‡à¸„à¸¸à¸“à¸›à¸¥à¸­à¸”à¸ à¸±à¸¢
         </div>
       </section>
     </div>
 
-    <!-- ─── QUICK ACCESS (placeholder targets) ─── -->
+    <!-- â”€â”€â”€ QUICK ACCESS (placeholder targets) â”€â”€â”€ -->
     <div class="home-sec-head"><span class="home-sec-title">Quick Access</span></div>
     <!-- Same targets as the Dashboard Center submenu: a card with a link opens it
          directly; the rest stay disabled until their dashboard is wired up. -->
     <div class="home-quick-row">
-      <!-- The factory's main board — flagged HOT so it reads as the primary
+      <!-- The factory's main board â€” flagged HOT so it reads as the primary
            destination among four otherwise equal-weight cards. -->
       <a class="home-quick is-hot" style="--acc:#f97316" href="embedded_dashboard.html?name=Quality%20Dashboard&amp;view=dashboard&amp;url=https%3A%2F%2Fboboapp2020-design.github.io%2FML_Dashboard2026_2027%2F">
         <span class="home-quick-hot">
@@ -241,48 +241,48 @@
       </a>
     </div>
 
-    <!-- ─── RECENT DASHBOARDS + AI CHATBOT ─── -->
+    <!-- â”€â”€â”€ RECENT DASHBOARDS + AI CHATBOT â”€â”€â”€ -->
     <div class="home-bottom">
 
-      <!-- Recent dashboards — real template assets, click opens the lightbox preview -->
+      <!-- Recent dashboards â€” real template assets, click opens the lightbox preview -->
       <section class="home-panel">
         <div class="home-sec-head">
           <span class="home-sec-title">Recent Dashboards</span>
-          <a class="home-sec-link" href="templates.html">ดูทั้งหมด</a>
+          <a class="home-sec-link" href="templates.html">à¸”à¸¹à¸—à¸±à¹‰à¸‡à¸«à¸¡à¸”</a>
         </div>
         <div class="home-recent-grid">
           <div class="template-card">
             <div class="template-thumb"><img src="assets/img/templates/003.png" alt="Production Summary"></div>
             <div class="template-info">
               <div class="template-name">Production Summary</div>
-              <div class="template-desc">อัปเดต 1 ชั่วโมงที่แล้ว</div>
+              <div class="template-desc">à¸­à¸±à¸›à¹€à¸”à¸• 1 à¸Šà¸±à¹ˆà¸§à¹‚à¸¡à¸‡à¸—à¸µà¹ˆà¹à¸¥à¹‰à¸§</div>
             </div>
           </div>
           <div class="template-card">
             <div class="template-thumb"><img src="assets/img/templates/002.png" alt="Sugar Loss Analysis"></div>
             <div class="template-info">
               <div class="template-name">Sugar Loss Analysis</div>
-              <div class="template-desc">อัปเดต 2 ชั่วโมงที่แล้ว</div>
+              <div class="template-desc">à¸­à¸±à¸›à¹€à¸”à¸• 2 à¸Šà¸±à¹ˆà¸§à¹‚à¸¡à¸‡à¸—à¸µà¹ˆà¹à¸¥à¹‰à¸§</div>
             </div>
           </div>
           <div class="template-card">
             <div class="template-thumb"><img src="assets/img/templates/004.png" alt="Raw Sugar Inventory"></div>
             <div class="template-info">
               <div class="template-name">Raw Sugar Inventory</div>
-              <div class="template-desc">อัปเดต 3 ชั่วโมงที่แล้ว</div>
+              <div class="template-desc">à¸­à¸±à¸›à¹€à¸”à¸• 3 à¸Šà¸±à¹ˆà¸§à¹‚à¸¡à¸‡à¸—à¸µà¹ˆà¹à¸¥à¹‰à¸§</div>
             </div>
           </div>
           <div class="template-card">
             <div class="template-thumb"><img src="assets/img/templates/001.png" alt="Boiler Performance"></div>
             <div class="template-info">
               <div class="template-name">Boiler Performance</div>
-              <div class="template-desc">อัปเดต เมื่อวาน 16:30</div>
+              <div class="template-desc">à¸­à¸±à¸›à¹€à¸”à¸• à¹€à¸¡à¸·à¹ˆà¸­à¸§à¸²à¸™ 16:30</div>
             </div>
           </div>
         </div>
       </section>
 
-      <!-- AI Chatbot — entry point to ML Expert AI (opened full-page). -->
+      <!-- AI Chatbot â€” entry point to ML Expert AI (opened full-page). -->
       <section class="home-panel home-chat">
         <div class="home-sec-head">
           <span class="home-sec-title">
@@ -291,7 +291,7 @@
             </span>
             AI Chatbot
           </span>
-          <a class="home-chat-open" id="homeChatOpen" href="#">เปิดเต็มจอ →</a>
+          <a class="home-chat-open" id="homeChatOpen" href="#">à¹€à¸›à¸´à¸”à¹€à¸•à¹‡à¸¡à¸ˆà¸­ â†’</a>
         </div>
 
         <!-- The real ML Expert AI, embedded live. At this width the app drops
@@ -304,14 +304,14 @@
                the home page never pays for a cross-origin app nobody opened. -->
           <button type="button" class="home-chat-cover" id="homeChatCover">
             <img class="home-chat-bot" src="assets/img/chatbot_mascot.png" alt="iDash Chatbot">
-            <span class="home-chat-cta">คลิก เพื่อคุยกับ Chat bot</span>
-            <span class="home-chat-cta-sub">ML Expert AI · ผู้ช่วยอัจฉริยะโรงงานน้ำตาล</span>
+            <span class="home-chat-cta">à¸„à¸¥à¸´à¸ à¹€à¸žà¸·à¹ˆà¸­à¸„à¸¸à¸¢à¸à¸±à¸š Chat bot</span>
+            <span class="home-chat-cta-sub">ML Expert AI Â· à¸œà¸¹à¹‰à¸Šà¹ˆà¸§à¸¢à¸­à¸±à¸ˆà¸‰à¸£à¸´à¸¢à¸°à¹‚à¸£à¸‡à¸‡à¸²à¸™à¸™à¹‰à¸³à¸•à¸²à¸¥</span>
           </button>
         </div>
       </section>
     </div>
 
-    <div class="home-foot">iDash AI Dashboard Intelligence Platform &nbsp;·&nbsp; Version 1.0.0 &nbsp;·&nbsp; © 2025 Mitr Lao Sugar Co., Ltd.</div>
+    <div class="home-foot">iDash AI Dashboard Intelligence Platform &nbsp;Â·&nbsp; Version 1.0.0 &nbsp;Â·&nbsp; Â© 2025 Mitr Lao Sugar Co., Ltd.</div>
 
   </div>
 </main>
@@ -344,8 +344,8 @@
       <div class="modal-dropzone-icon">
         <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
       </div>
-      <div class="modal-dropzone-text">Drag &amp; Drop ไฟล์ของคุณที่นี่</div>
-      <div class="modal-dropzone-hint">หรือคลิกเพื่อเลือกไฟล์จากเครื่อง</div>
+      <div class="modal-dropzone-text">Drag &amp; Drop à¹„à¸Ÿà¸¥à¹Œà¸‚à¸­à¸‡à¸„à¸¸à¸“à¸—à¸µà¹ˆà¸™à¸µà¹ˆ</div>
+      <div class="modal-dropzone-hint">à¸«à¸£à¸·à¸­à¸„à¸¥à¸´à¸à¹€à¸žà¸·à¹ˆà¸­à¹€à¸¥à¸·à¸­à¸à¹„à¸Ÿà¸¥à¹Œà¸ˆà¸²à¸à¹€à¸„à¸£à¸·à¹ˆà¸­à¸‡</div>
       <div class="modal-filetype-badges">
         <span class="modal-filetype-badge ft-xlsx">
           <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M4 3h16v18H4z" opacity="0"/><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
@@ -360,7 +360,7 @@
           JSON
         </span>
       </div>
-      <div class="modal-dropzone-maxsize">ขนาดไฟล์สูงสุด 100 MB <span class="modal-info-dot">i</span></div>
+      <div class="modal-dropzone-maxsize">à¸‚à¸™à¸²à¸”à¹„à¸Ÿà¸¥à¹Œà¸ªà¸¹à¸‡à¸ªà¸¸à¸” 100 MB <span class="modal-info-dot">i</span></div>
     </div>
 
     <div class="modal-file-picked" id="moduleUploadPicked" hidden>
@@ -371,7 +371,7 @@
       </div>
       <div class="modal-file-picked-status">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="8 12 11 15 16 9"/></svg>
-        พร้อมอัปโหลด
+        à¸žà¸£à¹‰à¸­à¸¡à¸­à¸±à¸›à¹‚à¸«à¸¥à¸”
       </div>
       <button class="modal-file-picked-remove" id="moduleUploadRemove" aria-label="Remove file">&times;</button>
     </div>
@@ -381,12 +381,12 @@
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><rect x="4" y="8" width="16" height="12" rx="2"/><circle cx="9" cy="14" r="1.2" fill="#fff"/><circle cx="15" cy="14" r="1.2" fill="#fff"/><path d="M12 8V4"/><circle cx="12" cy="3" r="1.2" fill="#fff"/></svg>
       </div>
       <div class="modal-ai-info-body">
-        <div class="modal-ai-info-title">AI จะทำอะไรหลังจากอัปโหลด</div>
+        <div class="modal-ai-info-title">AI à¸ˆà¸°à¸—à¸³à¸­à¸°à¹„à¸£à¸«à¸¥à¸±à¸‡à¸ˆà¸²à¸à¸­à¸±à¸›à¹‚à¸«à¸¥à¸”</div>
         <div class="modal-ai-info-grid">
-          <div class="modal-ai-info-item">✓ ตรวจสอบคุณภาพข้อมูล</div>
-          <div class="modal-ai-info-item">✓ ตรวจจับ Missing Value</div>
-          <div class="modal-ai-info-item">✓ วิเคราะห์โครงสร้างข้อมูล</div>
-          <div class="modal-ai-info-item">✓ แนะนำ Dashboard ที่เหมาะสม</div>
+          <div class="modal-ai-info-item">âœ“ à¸•à¸£à¸§à¸ˆà¸ªà¸­à¸šà¸„à¸¸à¸“à¸ à¸²à¸žà¸‚à¹‰à¸­à¸¡à¸¹à¸¥</div>
+          <div class="modal-ai-info-item">âœ“ à¸•à¸£à¸§à¸ˆà¸ˆà¸±à¸š Missing Value</div>
+          <div class="modal-ai-info-item">âœ“ à¸§à¸´à¹€à¸„à¸£à¸²à¸°à¸«à¹Œà¹‚à¸„à¸£à¸‡à¸ªà¸£à¹‰à¸²à¸‡à¸‚à¹‰à¸­à¸¡à¸¹à¸¥</div>
+          <div class="modal-ai-info-item">âœ“ à¹à¸™à¸°à¸™à¸³ Dashboard à¸—à¸µà¹ˆà¹€à¸«à¸¡à¸²à¸°à¸ªà¸¡</div>
         </div>
       </div>
     </div>
@@ -394,10 +394,10 @@
     <div class="modal-error" id="moduleUploadError" hidden></div>
 
     <div class="modal-actions">
-      <button class="modal-btn modal-btn-cancel" id="moduleUploadCancel">ยกเลิก</button>
+      <button class="modal-btn modal-btn-cancel" id="moduleUploadCancel">à¸¢à¸à¹€à¸¥à¸´à¸</button>
       <button class="modal-btn modal-btn-confirm" id="moduleUploadConfirm" disabled>
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-        อัปโหลดข้อมูล
+        à¸­à¸±à¸›à¹‚à¸«à¸¥à¸”à¸‚à¹‰à¸­à¸¡à¸¹à¸¥
       </button>
     </div>
     </div>
@@ -409,16 +409,16 @@
   <div class="modal-card" style="max-width:480px">
     <button class="modal-close" id="sheetPickerClose" aria-label="Close">&times;</button>
     <div class="modal-card-scroll">
-      <div class="modal-title">ไฟล์นี้มีหลาย Sheet</div>
-      <div class="modal-desc">เลือก Sheet ที่ต้องการใช้สร้าง Dashboard (เลือกได้มากกว่า 1 หรือเลือกทั้งหมด)</div>
+      <div class="modal-title">à¹„à¸Ÿà¸¥à¹Œà¸™à¸µà¹‰à¸¡à¸µà¸«à¸¥à¸²à¸¢ Sheet</div>
+      <div class="modal-desc">à¹€à¸¥à¸·à¸­à¸ Sheet à¸—à¸µà¹ˆà¸•à¹‰à¸­à¸‡à¸à¸²à¸£à¹ƒà¸Šà¹‰à¸ªà¸£à¹‰à¸²à¸‡ Dashboard (à¹€à¸¥à¸·à¸­à¸à¹„à¸”à¹‰à¸¡à¸²à¸à¸à¸§à¹ˆà¸² 1 à¸«à¸£à¸·à¸­à¹€à¸¥à¸·à¸­à¸à¸—à¸±à¹‰à¸‡à¸«à¸¡à¸”)</div>
       <label style="display:flex;align-items:center;gap:8px;padding:10px 0;border-bottom:1px solid #e5e7eb;font-weight:600;cursor:pointer">
-        <input type="checkbox" id="sheetPickerAll"> ทั้งหมด (All)
+        <input type="checkbox" id="sheetPickerAll"> à¸—à¸±à¹‰à¸‡à¸«à¸¡à¸” (All)
       </label>
       <div id="sheetPickerList" style="max-height:280px;overflow-y:auto;margin-top:4px"></div>
       <div class="modal-error" id="sheetPickerError" hidden></div>
       <div class="modal-actions">
-        <button class="modal-btn modal-btn-cancel" id="sheetPickerCancel">ยกเลิก</button>
-        <button class="modal-btn modal-btn-confirm" id="sheetPickerConfirm" disabled>ใช้ Sheet ที่เลือก</button>
+        <button class="modal-btn modal-btn-cancel" id="sheetPickerCancel">à¸¢à¸à¹€à¸¥à¸´à¸</button>
+        <button class="modal-btn modal-btn-confirm" id="sheetPickerConfirm" disabled>à¹ƒà¸Šà¹‰ Sheet à¸—à¸µà¹ˆà¹€à¸¥à¸·à¸­à¸</button>
       </div>
     </div>
   </div>
@@ -429,12 +429,12 @@
   <div class="modal-card" style="max-width:620px">
     <button class="modal-close" id="themePickerClose" aria-label="Close">&times;</button>
     <div class="modal-card-scroll">
-      <div class="modal-title">เลือกธีม Dashboard</div>
-      <div class="modal-desc">เลือกโทนสีที่ต้องการ — สามารถเปลี่ยนได้ภายหลังด้วยปุ่ม เปลี่ยนธีม</div>
+      <div class="modal-title">à¹€à¸¥à¸·à¸­à¸à¸˜à¸µà¸¡ Dashboard</div>
+      <div class="modal-desc">à¹€à¸¥à¸·à¸­à¸à¹‚à¸—à¸™à¸ªà¸µà¸—à¸µà¹ˆà¸•à¹‰à¸­à¸‡à¸à¸²à¸£ â€” à¸ªà¸²à¸¡à¸²à¸£à¸–à¹€à¸›à¸¥à¸µà¹ˆà¸¢à¸™à¹„à¸”à¹‰à¸ à¸²à¸¢à¸«à¸¥à¸±à¸‡à¸”à¹‰à¸§à¸¢à¸›à¸¸à¹ˆà¸¡ à¹€à¸›à¸¥à¸µà¹ˆà¸¢à¸™à¸˜à¸µà¸¡</div>
 
       <!-- Tabs -->
       <div id="themePickerTabs" style="display:flex;gap:6px;margin:12px 0 8px;flex-wrap:wrap">
-        <button class="tp-tab active" data-tab="all">ทั้งหมด <span class="tp-tab-count"></span></button>
+        <button class="tp-tab active" data-tab="all">à¸—à¸±à¹‰à¸‡à¸«à¸¡à¸” <span class="tp-tab-count"></span></button>
         <button class="tp-tab" data-tab="light">Light <span class="tp-tab-count"></span></button>
         <button class="tp-tab" data-tab="dark">Dark <span class="tp-tab-count"></span></button>
         <button class="tp-tab" data-tab="colorful">Colorful <span class="tp-tab-count"></span></button>
@@ -446,22 +446,22 @@
       <div id="themePickerGrid" style="display:grid;grid-template-columns:repeat(6,1fr);gap:10px;padding:8px 0;max-height:400px;overflow-y:auto"></div>
 
       <div class="modal-actions" style="margin-top:16px">
-        <button class="modal-btn modal-btn-cancel" id="themePickerCancel">ยกเลิก</button>
-        <button class="modal-btn modal-btn-confirm" id="themePickerConfirm" disabled>สร้าง Dashboard</button>
+        <button class="modal-btn modal-btn-cancel" id="themePickerCancel">à¸¢à¸à¹€à¸¥à¸´à¸</button>
+        <button class="modal-btn modal-btn-confirm" id="themePickerConfirm" disabled>à¸ªà¸£à¹‰à¸²à¸‡ Dashboard</button>
       </div>
     </div>
   </div>
 </div>
 
-<!-- ─── Build-mode chooser: shown right after a file is picked ───
-     Both routes run the same deterministic pipeline ①-⑨ first; they differ
+<!-- â”€â”€â”€ Build-mode chooser: shown right after a file is picked â”€â”€â”€
+     Both routes run the same deterministic pipeline â‘ -â‘¨ first; they differ
      only in who draws the final page. -->
 <div class="modal-overlay" id="buildModeModal" hidden>
   <div class="bm-card">
     <button class="modal-close" id="bmClose" aria-label="Close">&times;</button>
     <div class="bm-head">
-      <div class="bm-title">เลือกวิธีสร้าง Dashboard</div>
-      <div class="bm-sub" id="bmFileName">—</div>
+      <div class="bm-title">à¹€à¸¥à¸·à¸­à¸à¸§à¸´à¸˜à¸µà¸ªà¸£à¹‰à¸²à¸‡ Dashboard</div>
+      <div class="bm-sub" id="bmFileName">â€”</div>
     </div>
 
     <div class="bm-options">
@@ -470,9 +470,9 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>
         </span>
         <span class="bm-opt-body">
-          <span class="bm-opt-name">สร้างจาก Template</span>
-          <span class="bm-opt-desc">จับคู่ข้อมูลกับเทมเพลตที่เตรียมไว้ ทำงานในเครื่อง 100% ไม่ต้องต่อเน็ต</span>
-          <span class="bm-opt-tag ok">แนะนำ · เร็ว · ฟรี</span>
+          <span class="bm-opt-name">à¸ªà¸£à¹‰à¸²à¸‡à¸ˆà¸²à¸ Template</span>
+          <span class="bm-opt-desc">à¸ˆà¸±à¸šà¸„à¸¹à¹ˆà¸‚à¹‰à¸­à¸¡à¸¹à¸¥à¸à¸±à¸šà¹€à¸—à¸¡à¹€à¸žà¸¥à¸•à¸—à¸µà¹ˆà¹€à¸•à¸£à¸µà¸¢à¸¡à¹„à¸§à¹‰ à¸—à¸³à¸‡à¸²à¸™à¹ƒà¸™à¹€à¸„à¸£à¸·à¹ˆà¸­à¸‡ 100% à¹„à¸¡à¹ˆà¸•à¹‰à¸­à¸‡à¸•à¹ˆà¸­à¹€à¸™à¹‡à¸•</span>
+          <span class="bm-opt-tag ok">à¹à¸™à¸°à¸™à¸³ Â· à¹€à¸£à¹‡à¸§ Â· à¸Ÿà¸£à¸µ</span>
         </span>
         <svg class="bm-opt-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
       </button>
@@ -483,8 +483,8 @@
         </span>
         <span class="bm-opt-body">
           <span class="bm-opt-name">AI Autopilot</span>
-          <span class="bm-opt-desc">ส่งตัวเลขที่คำนวณแล้วให้ AI ออกแบบหน้าใหม่ทั้งหน้า ได้ดีไซน์แปลกใหม่ทุกครั้ง</span>
-          <span class="bm-opt-tag" id="bmAiTag">ต้องมี API key</span>
+          <span class="bm-opt-desc">à¸ªà¹ˆà¸‡à¸•à¸±à¸§à¹€à¸¥à¸‚à¸—à¸µà¹ˆà¸„à¸³à¸™à¸§à¸“à¹à¸¥à¹‰à¸§à¹ƒà¸«à¹‰ AI à¸­à¸­à¸à¹à¸šà¸šà¸«à¸™à¹‰à¸²à¹ƒà¸«à¸¡à¹ˆà¸—à¸±à¹‰à¸‡à¸«à¸™à¹‰à¸² à¹„à¸”à¹‰à¸”à¸µà¹„à¸‹à¸™à¹Œà¹à¸›à¸¥à¸à¹ƒà¸«à¸¡à¹ˆà¸—à¸¸à¸à¸„à¸£à¸±à¹‰à¸‡</span>
+          <span class="bm-opt-tag" id="bmAiTag">à¸•à¹‰à¸­à¸‡à¸¡à¸µ API key</span>
         </span>
         <svg class="bm-opt-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
       </button>
@@ -493,12 +493,12 @@
 
     <div class="bm-foot">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
-      ทั้งสองแบบส่งเฉพาะตัวเลขสรุปที่คำนวณแล้ว — ข้อมูลรายแถวไม่เคยออกจากเครื่องคุณ
+      à¸—à¸±à¹‰à¸‡à¸ªà¸­à¸‡à¹à¸šà¸šà¸ªà¹ˆà¸‡à¹€à¸‰à¸žà¸²à¸°à¸•à¸±à¸§à¹€à¸¥à¸‚à¸ªà¸£à¸¸à¸›à¸—à¸µà¹ˆà¸„à¸³à¸™à¸§à¸“à¹à¸¥à¹‰à¸§ â€” à¸‚à¹‰à¸­à¸¡à¸¹à¸¥à¸£à¸²à¸¢à¹à¸–à¸§à¹„à¸¡à¹ˆà¹€à¸„à¸¢à¸­à¸­à¸à¸ˆà¸²à¸à¹€à¸„à¸£à¸·à¹ˆà¸­à¸‡à¸„à¸¸à¸“
     </div>
   </div>
 </div>
 
-<!-- ─── Unknown-dataset choice (template route only) ───
+<!-- â”€â”€â”€ Unknown-dataset choice (template route only) â”€â”€â”€
      Shown only when the uploaded file matches no curated template: the user
      decides whether iDash designs the page or they tick the widgets
      themselves. Files that DO match a template never see this. -->
@@ -506,8 +506,8 @@
   <div class="bm-card">
     <button class="modal-close" id="ucClose" aria-label="Close">&times;</button>
     <div class="bm-head">
-      <div class="bm-title">ข้อมูลชุดนี้ยังไม่มีเทมเพลตที่จับคู่ได้</div>
-      <div class="bm-sub" id="ucSub">เลือกได้ว่าจะให้ iDash ออกแบบให้ หรือเลือก Widget เอง (ธีมสว่างทั้งสองแบบ)</div>
+      <div class="bm-title">à¸‚à¹‰à¸­à¸¡à¸¹à¸¥à¸Šà¸¸à¸”à¸™à¸µà¹‰à¸¢à¸±à¸‡à¹„à¸¡à¹ˆà¸¡à¸µà¹€à¸—à¸¡à¹€à¸žà¸¥à¸•à¸—à¸µà¹ˆà¸ˆà¸±à¸šà¸„à¸¹à¹ˆà¹„à¸”à¹‰</div>
+      <div class="bm-sub" id="ucSub">à¹€à¸¥à¸·à¸­à¸à¹„à¸”à¹‰à¸§à¹ˆà¸²à¸ˆà¸°à¹ƒà¸«à¹‰ iDash à¸­à¸­à¸à¹à¸šà¸šà¹ƒà¸«à¹‰ à¸«à¸£à¸·à¸­à¹€à¸¥à¸·à¸­à¸ Widget à¹€à¸­à¸‡ (à¸˜à¸µà¸¡à¸ªà¸§à¹ˆà¸²à¸‡à¸—à¸±à¹‰à¸‡à¸ªà¸­à¸‡à¹à¸šà¸š)</div>
     </div>
     <div class="bm-options">
       <button type="button" class="bm-opt" data-unknown-choice="auto">
@@ -515,9 +515,9 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2.4 4.9L20 8l-4 3.9.9 5.6-4.9-2.6L7.1 17.5 8 11.9 4 8l5.6-1.1z"/></svg>
         </span>
         <span class="bm-opt-body">
-          <span class="bm-opt-name">ให้ iDash ออกแบบให้</span>
-          <span class="bm-opt-desc">ระบบวิเคราะห์โครงสร้างข้อมูลแล้วเลือก KPI และกราฟที่เหมาะให้อัตโนมัติ</span>
-          <span class="bm-opt-tag ok">แนะนำ</span>
+          <span class="bm-opt-name">à¹ƒà¸«à¹‰ iDash à¸­à¸­à¸à¹à¸šà¸šà¹ƒà¸«à¹‰</span>
+          <span class="bm-opt-desc">à¸£à¸°à¸šà¸šà¸§à¸´à¹€à¸„à¸£à¸²à¸°à¸«à¹Œà¹‚à¸„à¸£à¸‡à¸ªà¸£à¹‰à¸²à¸‡à¸‚à¹‰à¸­à¸¡à¸¹à¸¥à¹à¸¥à¹‰à¸§à¹€à¸¥à¸·à¸­à¸ KPI à¹à¸¥à¸°à¸à¸£à¸²à¸Ÿà¸—à¸µà¹ˆà¹€à¸«à¸¡à¸²à¸°à¹ƒà¸«à¹‰à¸­à¸±à¸•à¹‚à¸™à¸¡à¸±à¸•à¸´</span>
+          <span class="bm-opt-tag ok">à¹à¸™à¸°à¸™à¸³</span>
         </span>
         <svg class="bm-opt-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
       </button>
@@ -527,8 +527,8 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 20 6"/><path d="M20 12v6a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h9"/></svg>
         </span>
         <span class="bm-opt-body">
-          <span class="bm-opt-name">เลือก Widget เอง</span>
-          <span class="bm-opt-desc">ติ๊กเลือกกราฟที่อยากได้ แล้วระบบผูกกับข้อมูลจริงและสร้างให้ทันที</span>
+          <span class="bm-opt-name">à¹€à¸¥à¸·à¸­à¸ Widget à¹€à¸­à¸‡</span>
+          <span class="bm-opt-desc">à¸•à¸´à¹Šà¸à¹€à¸¥à¸·à¸­à¸à¸à¸£à¸²à¸Ÿà¸—à¸µà¹ˆà¸­à¸¢à¸²à¸à¹„à¸”à¹‰ à¹à¸¥à¹‰à¸§à¸£à¸°à¸šà¸šà¸œà¸¹à¸à¸à¸±à¸šà¸‚à¹‰à¸­à¸¡à¸¹à¸¥à¸ˆà¸£à¸´à¸‡à¹à¸¥à¸°à¸ªà¸£à¹‰à¸²à¸‡à¹ƒà¸«à¹‰à¸—à¸±à¸™à¸—à¸µ</span>
         </span>
         <svg class="bm-opt-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
       </button>
@@ -536,52 +536,52 @@
   </div>
 </div>
 
-<!-- ─── Manual widget picker (build-mode "pick") ─── -->
+<!-- â”€â”€â”€ Manual widget picker (build-mode "pick") â”€â”€â”€ -->
 <div class="modal-overlay" id="widgetPickModal" hidden>
   <div class="bm-card wp-card">
     <button class="modal-close" id="wpClose" aria-label="Close">&times;</button>
     <div class="bm-head">
-      <div class="bm-title">เลือก Widget ที่ต้องการ</div>
-      <div class="bm-sub" id="wpSub">ติ๊กกราฟที่อยากได้ ระบบจะผูกกับข้อมูลจริงและสร้างแดชบอร์ดธีมสว่างให้ทันที</div>
+      <div class="bm-title">à¹€à¸¥à¸·à¸­à¸ Widget à¸—à¸µà¹ˆà¸•à¹‰à¸­à¸‡à¸à¸²à¸£</div>
+      <div class="bm-sub" id="wpSub">à¸•à¸´à¹Šà¸à¸à¸£à¸²à¸Ÿà¸—à¸µà¹ˆà¸­à¸¢à¸²à¸à¹„à¸”à¹‰ à¸£à¸°à¸šà¸šà¸ˆà¸°à¸œà¸¹à¸à¸à¸±à¸šà¸‚à¹‰à¸­à¸¡à¸¹à¸¥à¸ˆà¸£à¸´à¸‡à¹à¸¥à¸°à¸ªà¸£à¹‰à¸²à¸‡à¹à¸”à¸Šà¸šà¸­à¸£à¹Œà¸”à¸˜à¸µà¸¡à¸ªà¸§à¹ˆà¸²à¸‡à¹ƒà¸«à¹‰à¸—à¸±à¸™à¸—à¸µ</div>
     </div>
     <div class="wp-list" id="wpList"></div>
-    <div class="wp-note">ตารางข้อมูลดิบพร้อมตัวกรองจะแนบให้อัตโนมัติทุกครั้ง · widget ที่ข้อมูลไม่รองรับจะถูกปิดไว้พร้อมเหตุผล</div>
+    <div class="wp-note">à¸•à¸²à¸£à¸²à¸‡à¸‚à¹‰à¸­à¸¡à¸¹à¸¥à¸”à¸´à¸šà¸žà¸£à¹‰à¸­à¸¡à¸•à¸±à¸§à¸à¸£à¸­à¸‡à¸ˆà¸°à¹à¸™à¸šà¹ƒà¸«à¹‰à¸­à¸±à¸•à¹‚à¸™à¸¡à¸±à¸•à¸´à¸—à¸¸à¸à¸„à¸£à¸±à¹‰à¸‡ Â· widget à¸—à¸µà¹ˆà¸‚à¹‰à¸­à¸¡à¸¹à¸¥à¹„à¸¡à¹ˆà¸£à¸­à¸‡à¸£à¸±à¸šà¸ˆà¸°à¸–à¸¹à¸à¸›à¸´à¸”à¹„à¸§à¹‰à¸žà¸£à¹‰à¸­à¸¡à¹€à¸«à¸•à¸¸à¸œà¸¥</div>
     <div class="wp-actions">
-      <button type="button" class="wp-btn ghost" id="wpCancel">ยกเลิก</button>
-      <button type="button" class="wp-btn primary" id="wpBuild">สร้างแดชบอร์ด</button>
+      <button type="button" class="wp-btn ghost" id="wpCancel">à¸¢à¸à¹€à¸¥à¸´à¸</button>
+      <button type="button" class="wp-btn primary" id="wpBuild">à¸ªà¸£à¹‰à¸²à¸‡à¹à¸”à¸Šà¸šà¸­à¸£à¹Œà¸”</button>
     </div>
   </div>
 </div>
 
-<!-- ─── AI provider settings ─── -->
+<!-- â”€â”€â”€ AI provider settings â”€â”€â”€ -->
 <div class="modal-overlay" id="aiSetupModal" hidden>
   <div class="bm-card">
     <button class="modal-close" id="aiSetupClose" aria-label="Close">&times;</button>
     <div class="bm-head">
-      <div class="bm-title">ตั้งค่า AI</div>
-      <div class="bm-sub">เลือกช่องทางเชื่อมต่อ แล้วใส่ API key ของคุณเอง</div>
+      <div class="bm-title">à¸•à¸±à¹‰à¸‡à¸„à¹ˆà¸² AI</div>
+      <div class="bm-sub">à¹€à¸¥à¸·à¸­à¸à¸Šà¹ˆà¸­à¸‡à¸—à¸²à¸‡à¹€à¸Šà¸·à¹ˆà¸­à¸¡à¸•à¹ˆà¸­ à¹à¸¥à¹‰à¸§à¹ƒà¸ªà¹ˆ API key à¸‚à¸­à¸‡à¸„à¸¸à¸“à¹€à¸­à¸‡</div>
     </div>
 
     <div class="bm-form">
       <!-- Two ways to reach a model. They differ in where the key lives, which
-           is the decision worth putting first — everything below it is detail. -->
+           is the decision worth putting first â€” everything below it is detail. -->
       <div class="bm-modes" id="aiModeCards">
         <label class="bm-mode">
           <input type="radio" name="aiConnMode" value="direct" checked>
           <span class="bm-mode-dot" aria-hidden="true"></span>
-          <span class="bm-mode-name">ต่อ AI โดยตรง</span>
-          <span class="bm-mode-desc">เบราว์เซอร์เรียก API ของผู้ให้บริการเอง — เลือกได้ 11 เจ้า มีทั้งแบบฟรีและเสียเงิน</span>
+          <span class="bm-mode-name">à¸•à¹ˆà¸­ AI à¹‚à¸”à¸¢à¸•à¸£à¸‡</span>
+          <span class="bm-mode-desc">à¹€à¸šà¸£à¸²à¸§à¹Œà¹€à¸‹à¸­à¸£à¹Œà¹€à¸£à¸µà¸¢à¸ API à¸‚à¸­à¸‡à¸œà¸¹à¹‰à¹ƒà¸«à¹‰à¸šà¸£à¸´à¸à¸²à¸£à¹€à¸­à¸‡ â€” à¹€à¸¥à¸·à¸­à¸à¹„à¸”à¹‰ 11 à¹€à¸ˆà¹‰à¸² à¸¡à¸µà¸—à¸±à¹‰à¸‡à¹à¸šà¸šà¸Ÿà¸£à¸µà¹à¸¥à¸°à¹€à¸ªà¸µà¸¢à¹€à¸‡à¸´à¸™</span>
         </label>
         <label class="bm-mode">
           <input type="radio" name="aiConnMode" value="gateway">
           <span class="bm-mode-dot" aria-hidden="true"></span>
-          <span class="bm-mode-name">Production — ผ่าน Supabase</span>
-          <span class="bm-mode-desc">Edge Function เรียก Claude ให้ · Anthropic API key อยู่ฝั่งเซิร์ฟเวอร์ ไม่หลุดมาที่เบราว์เซอร์</span>
+          <span class="bm-mode-name">Production â€” à¸œà¹ˆà¸²à¸™ Supabase</span>
+          <span class="bm-mode-desc">Edge Function à¹€à¸£à¸µà¸¢à¸ Claude à¹ƒà¸«à¹‰ Â· Anthropic API key à¸­à¸¢à¸¹à¹ˆà¸à¸±à¹ˆà¸‡à¹€à¸‹à¸´à¸£à¹Œà¸Ÿà¹€à¸§à¸­à¸£à¹Œ à¹„à¸¡à¹ˆà¸«à¸¥à¸¸à¸”à¸¡à¸²à¸—à¸µà¹ˆà¹€à¸šà¸£à¸²à¸§à¹Œà¹€à¸‹à¸­à¸£à¹Œ</span>
         </label>
       </div>
 
       <label class="bm-field" id="aiProviderField">
-        <span class="bm-label">ผู้ให้บริการ</span>
+        <span class="bm-label">à¸œà¸¹à¹‰à¹ƒà¸«à¹‰à¸šà¸£à¸´à¸à¸²à¸£</span>
         <select id="aiProviderSelect"></select>
       </label>
 
@@ -591,13 +591,13 @@
       </label>
 
       <label class="bm-field">
-        <span class="bm-label">โมเดล</span>
+        <span class="bm-label">à¹‚à¸¡à¹€à¸”à¸¥</span>
         <select id="aiModelSelect"></select>
       </label>
 
       <label class="bm-field" id="aiModelCustomField" hidden>
-        <span class="bm-label">ชื่อโมเดล</span>
-        <input type="text" id="aiModelInput" spellcheck="false" autocomplete="off" placeholder="เช่น gemini-3.0-pro">
+        <span class="bm-label">à¸Šà¸·à¹ˆà¸­à¹‚à¸¡à¹€à¸”à¸¥</span>
+        <input type="text" id="aiModelInput" spellcheck="false" autocomplete="off" placeholder="à¹€à¸Šà¹ˆà¸™ gemini-3.0-pro">
       </label>
 
       <!-- Gateway mode only. The PIN is checked by the Edge Function, not here:
@@ -605,32 +605,32 @@
            the browser stops nobody who can read it. The PIN is the one thing
            that never leaves the user's head and the server's secrets. -->
       <label class="bm-field" id="aiPinField" hidden>
-        <span class="bm-label">PIN ของ Edge Function</span>
+        <span class="bm-label">PIN à¸‚à¸­à¸‡ Edge Function</span>
         <input type="password" id="aiPinInput" spellcheck="false" autocomplete="off"
-               inputmode="numeric" placeholder="ใส่ PIN ที่ตั้งไว้ใน Supabase Secrets">
-        <span class="bm-hint" id="aiPinHint">เว้นว่างได้ถ้ายังไม่ได้ตั้ง AUTOPILOT_PIN บน Edge Function</span>
+               inputmode="numeric" placeholder="à¹ƒà¸ªà¹ˆ PIN à¸—à¸µà¹ˆà¸•à¸±à¹‰à¸‡à¹„à¸§à¹‰à¹ƒà¸™ Supabase Secrets">
+        <span class="bm-hint" id="aiPinHint">à¹€à¸§à¹‰à¸™à¸§à¹ˆà¸²à¸‡à¹„à¸”à¹‰à¸–à¹‰à¸²à¸¢à¸±à¸‡à¹„à¸¡à¹ˆà¹„à¸”à¹‰à¸•à¸±à¹‰à¸‡ AUTOPILOT_PIN à¸šà¸™ Edge Function</span>
       </label>
 
       <label class="bm-field">
         <span class="bm-label">API key</span>
-        <input type="password" id="aiKeyInput" spellcheck="false" autocomplete="off" placeholder="วาง API key ที่นี่">
+        <input type="password" id="aiKeyInput" spellcheck="false" autocomplete="off" placeholder="à¸§à¸²à¸‡ API key à¸—à¸µà¹ˆà¸™à¸µà¹ˆ">
         <span class="bm-hint" id="aiKeyHint"></span>
       </label>
 
       <div class="bm-warn">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12" y2="17"/></svg>
-        <span id="aiKeyWarnText">key ถูกเก็บไว้ในเบราว์เซอร์เครื่องนี้เท่านั้น และเรียก API ตรงจากเบราว์เซอร์ — ใครเปิดเครื่องนี้ก็อาจเห็น key ได้ อย่าใช้บนเครื่องสาธารณะ</span>
+        <span id="aiKeyWarnText">key à¸–à¸¹à¸à¹€à¸à¹‡à¸šà¹„à¸§à¹‰à¹ƒà¸™à¹€à¸šà¸£à¸²à¸§à¹Œà¹€à¸‹à¸­à¸£à¹Œà¹€à¸„à¸£à¸·à¹ˆà¸­à¸‡à¸™à¸µà¹‰à¹€à¸—à¹ˆà¸²à¸™à¸±à¹‰à¸™ à¹à¸¥à¸°à¹€à¸£à¸µà¸¢à¸ API à¸•à¸£à¸‡à¸ˆà¸²à¸à¹€à¸šà¸£à¸²à¸§à¹Œà¹€à¸‹à¸­à¸£à¹Œ â€” à¹ƒà¸„à¸£à¹€à¸›à¸´à¸”à¹€à¸„à¸£à¸·à¹ˆà¸­à¸‡à¸™à¸µà¹‰à¸à¹‡à¸­à¸²à¸ˆà¹€à¸«à¹‡à¸™ key à¹„à¸”à¹‰ à¸­à¸¢à¹ˆà¸²à¹ƒà¸Šà¹‰à¸šà¸™à¹€à¸„à¸£à¸·à¹ˆà¸­à¸‡à¸ªà¸²à¸˜à¸²à¸£à¸“à¸°</span>
       </div>
 
       <div class="bm-msg" id="aiSetupMsg"></div>
     </div>
 
     <div class="bm-actions">
-      <button type="button" class="bm-btn" id="aiSetupCancel">ยกเลิก</button>
+      <button type="button" class="bm-btn" id="aiSetupCancel">à¸¢à¸à¹€à¸¥à¸´à¸</button>
       <!-- Answers "is this key right?" in seconds, instead of after a whole
            upload-and-generate round trip. -->
-      <button type="button" class="bm-btn" id="aiSetupTest">ทดสอบการเชื่อมต่อ</button>
-      <button type="button" class="bm-btn primary" id="aiSetupSave">บันทึกและสร้าง</button>
+      <button type="button" class="bm-btn" id="aiSetupTest">à¸—à¸”à¸ªà¸­à¸šà¸à¸²à¸£à¹€à¸Šà¸·à¹ˆà¸­à¸¡à¸•à¹ˆà¸­</button>
+      <button type="button" class="bm-btn primary" id="aiSetupSave">à¸šà¸±à¸™à¸—à¸¶à¸à¹à¸¥à¸°à¸ªà¸£à¹‰à¸²à¸‡</button>
     </div>
   </div>
 </div>
@@ -646,7 +646,7 @@
       </div>
       <div>
         <div class="ai-progress-header-title" id="aiProgressHeaderTitle">AI Autopilot</div>
-        <div class="ai-progress-header-sub" id="aiProgressHeaderSub">กำลังวิเคราะห์ข้อมูลของคุณ</div>
+        <div class="ai-progress-header-sub" id="aiProgressHeaderSub">à¸à¸³à¸¥à¸±à¸‡à¸§à¸´à¹€à¸„à¸£à¸²à¸°à¸«à¹Œà¸‚à¹‰à¸­à¸¡à¸¹à¸¥à¸‚à¸­à¸‡à¸„à¸¸à¸“</div>
       </div>
     </div>
 
@@ -664,12 +664,12 @@
       </div>
     </div>
 
-    <div class="ai-progress-title">AI กำลังสร้าง Dashboard ของคุณ</div>
-    <div class="ai-progress-desc" id="aiProgressDesc">กำลังวิเคราะห์ไฟล์และสร้างข้อมูลเชิงลึกที่เหมาะสมที่สุด...</div>
+    <div class="ai-progress-title">AI à¸à¸³à¸¥à¸±à¸‡à¸ªà¸£à¹‰à¸²à¸‡ Dashboard à¸‚à¸­à¸‡à¸„à¸¸à¸“</div>
+    <div class="ai-progress-desc" id="aiProgressDesc">à¸à¸³à¸¥à¸±à¸‡à¸§à¸´à¹€à¸„à¸£à¸²à¸°à¸«à¹Œà¹„à¸Ÿà¸¥à¹Œà¹à¸¥à¸°à¸ªà¸£à¹‰à¸²à¸‡à¸‚à¹‰à¸­à¸¡à¸¹à¸¥à¹€à¸Šà¸´à¸‡à¸¥à¸¶à¸à¸—à¸µà¹ˆà¹€à¸«à¸¡à¸²à¸°à¸ªà¸¡à¸—à¸µà¹ˆà¸ªà¸¸à¸”...</div>
 
     <div class="ai-progress-bar-card">
       <div class="ai-progress-bar-row">
-        <span>ความคืบหน้า</span>
+        <span>à¸„à¸§à¸²à¸¡à¸„à¸·à¸šà¸«à¸™à¹‰à¸²</span>
         <span id="aiProgressPct">0%</span>
       </div>
       <div class="ai-progress-bar-track">
@@ -680,22 +680,22 @@
     <ul class="ai-progress-steps" id="aiProgressSteps">
       <li class="ai-progress-step" data-step="upload">
         <span class="ai-step-icon"></span>
-        <span class="ai-step-label">อัปโหลดไฟล์เรียบร้อย</span>
+        <span class="ai-step-label">à¸­à¸±à¸›à¹‚à¸«à¸¥à¸”à¹„à¸Ÿà¸¥à¹Œà¹€à¸£à¸µà¸¢à¸šà¸£à¹‰à¸­à¸¢</span>
         <span class="ai-step-status"></span>
       </li>
       <li class="ai-progress-step" data-step="understand">
         <span class="ai-step-icon"></span>
-        <span class="ai-step-label">กำลังอ่านและทำความเข้าใจข้อมูล</span>
+        <span class="ai-step-label">à¸à¸³à¸¥à¸±à¸‡à¸­à¹ˆà¸²à¸™à¹à¸¥à¸°à¸—à¸³à¸„à¸§à¸²à¸¡à¹€à¸‚à¹‰à¸²à¹ƒà¸ˆà¸‚à¹‰à¸­à¸¡à¸¹à¸¥</span>
         <span class="ai-step-status"></span>
       </li>
       <li class="ai-progress-step" data-step="analyze">
         <span class="ai-step-icon"></span>
-        <span class="ai-step-label">กำลังวิเคราะห์และประมวลผลข้อมูล</span>
+        <span class="ai-step-label">à¸à¸³à¸¥à¸±à¸‡à¸§à¸´à¹€à¸„à¸£à¸²à¸°à¸«à¹Œà¹à¸¥à¸°à¸›à¸£à¸°à¸¡à¸§à¸¥à¸œà¸¥à¸‚à¹‰à¸­à¸¡à¸¹à¸¥</span>
         <span class="ai-step-status"></span>
       </li>
       <li class="ai-progress-step" data-step="build">
         <span class="ai-step-icon"></span>
-        <span class="ai-step-label">กำลังสร้าง Dashboard และ Visualizations</span>
+        <span class="ai-step-label">à¸à¸³à¸¥à¸±à¸‡à¸ªà¸£à¹‰à¸²à¸‡ Dashboard à¹à¸¥à¸° Visualizations</span>
         <span class="ai-step-status"></span>
       </li>
     </ul>
@@ -705,14 +705,14 @@
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 00-4 12.7V17h8v-2.3A7 7 0 0012 2z"/></svg>
       </div>
       <div>
-        <div class="ai-progress-tip-title">เคล็ดลับ</div>
-        <div class="ai-progress-tip-desc">AI จะเลือกแสดงข้อมูลที่สำคัญและสร้าง Dashboard ที่เหมาะสมกับวัตถุประสงค์ของคุณโดยอัตโนมัติ</div>
+        <div class="ai-progress-tip-title">à¹€à¸„à¸¥à¹‡à¸”à¸¥à¸±à¸š</div>
+        <div class="ai-progress-tip-desc">AI à¸ˆà¸°à¹€à¸¥à¸·à¸­à¸à¹à¸ªà¸”à¸‡à¸‚à¹‰à¸­à¸¡à¸¹à¸¥à¸—à¸µà¹ˆà¸ªà¸³à¸„à¸±à¸à¹à¸¥à¸°à¸ªà¸£à¹‰à¸²à¸‡ Dashboard à¸—à¸µà¹ˆà¹€à¸«à¸¡à¸²à¸°à¸ªà¸¡à¸à¸±à¸šà¸§à¸±à¸•à¸–à¸¸à¸›à¸£à¸°à¸ªà¸‡à¸„à¹Œà¸‚à¸­à¸‡à¸„à¸¸à¸“à¹‚à¸”à¸¢à¸­à¸±à¸•à¹‚à¸™à¸¡à¸±à¸•à¸´</div>
       </div>
     </div>
 
     <div class="ai-progress-error" id="aiProgressError" hidden></div>
     <button type="button" class="bm-btn primary" id="aiProgressFix" hidden
-            style="margin-top:10px;width:100%">เปิดการตั้งค่า AI เพื่อแก้ไข</button>
+            style="margin-top:10px;width:100%">à¹€à¸›à¸´à¸”à¸à¸²à¸£à¸•à¸±à¹‰à¸‡à¸„à¹ˆà¸² AI à¹€à¸žà¸·à¹ˆà¸­à¹à¸à¹‰à¹„à¸‚</button>
   </div>
 </div>
 
@@ -734,7 +734,7 @@
 <script src="js/infographic_ai_composer.js?v=20260803c"></script>
 <script src="js/ai_providers.js?v=20260803d"></script>
 <script src="js/app.js?v=20260803h"></script>
-<script src="js/sidebar.js?v=20260805h"></script>
+<script src="js/sidebar.js?v=20260805n"></script>
 <script>
   // Live topbar values: greeting + today's date follow the viewer's real clock.
   (function () {
@@ -749,12 +749,12 @@
         weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
       });
     }
-    // "เปิดเต็มจอ" hands the chat its own full page (chat.html) instead of the
+    // "à¹€à¸›à¸´à¸”à¹€à¸•à¹‡à¸¡à¸ˆà¸­" hands the chat its own full page (chat.html) instead of the
     // dashboard viewer shell, which would scale the app down into a panel.
     var chatOpen = document.getElementById('homeChatOpen');
     if (chatOpen) chatOpen.setAttribute('href', 'chat.html');
 
-    // The chat app is only fetched when the cover is clicked — one click swaps
+    // The chat app is only fetched when the cover is clicked â€” one click swaps
     // the greeting for the live chatbot, and the cover never comes back.
     var chatCover = document.getElementById('homeChatCover');
     var chatFrame = document.getElementById('homeChatFrame');

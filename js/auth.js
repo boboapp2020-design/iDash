@@ -127,7 +127,13 @@
     password = String(password || '');
     return verify(username, password).then(function (localOk) {
       if (localOk) {
-        try { sessionStorage.setItem(KEY, '1'); } catch (e) {}
+        try {
+          sessionStorage.setItem(KEY, '1');
+          // Built-in owner login: drop any sheet account left by a previous
+          // user of this browser, so the sidebar shows the owner's profile
+          // again instead of the last signed-in account.
+          localStorage.removeItem(ACCOUNT_KEY);
+        } catch (e) {}
         return { ok: true };
       }
       return remoteVerify(username, password).then(function (res) {
