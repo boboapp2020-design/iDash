@@ -418,6 +418,22 @@ form { margin-top: 32px; }
 
   userEl.focus();
 
+  /* One-button confirmation popup. Built once, reused. */
+  function showOkModal(title, msg, onClose) {
+    var ov = document.getElementById('okModal');
+    document.getElementById('okTitle').textContent = title;
+    document.getElementById('okMsg').textContent = msg;
+    ov.hidden = false;
+    var btn = document.getElementById('okBtn');
+    function close() {
+      ov.hidden = true;
+      btn.removeEventListener('click', close);
+      if (typeof onClose === 'function') onClose();
+    }
+    btn.addEventListener('click', close);
+    btn.focus();
+  }
+
   /* ── Signup ─────────────────────────────────────────────────────────────
    * The submission is a LOG entry, not an account: the Apps Script appends
    * [timestamp, username, email, sha256, "pending"] to the admin's sheet.
@@ -486,9 +502,15 @@ form { margin-top: 32px; }
       .then(function (resp) { return resp.json(); })
       .then(function (data) {
         if (data && data.ok) {
-          suMsg.style.color = '#16a34a';
-          suMsg.textContent = 'ส่งคำขอสมัครแล้ว — ผู้ดูแลจะติดต่อกลับทางอีเมลของคุณ';
+          suMsg.textContent = '';
           document.getElementById('signupForm').reset();
+          // Confirm as a clear action popup — a green line under the button is
+          // easy to miss; a modal with one OK button is not.
+          showOkModal(
+            'ส่งคำขอสมัครเรียบร้อย',
+            'คำขอของคุณถูกส่งให้ผู้ดูแลระบบแล้ว เมื่อได้รับการอนุมัติ ระบบจะแจ้งผลกลับไปที่อีเมลที่คุณกรอกไว้',
+            function () { swap(false); }
+          );
         } else {
           suMsg.style.color = '';
           suMsg.textContent = (data && data.error) || 'ส่งคำขอไม่สำเร็จ — ลองใหม่อีกครั้ง';
@@ -505,5 +527,48 @@ form { margin-top: 32px; }
   });
 })();
 </script>
+
+<!-- One-button success/confirmation popup -->
+<div class="ok-overlay" id="okModal" hidden>
+  <div class="ok-card">
+    <div class="ok-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+    </div>
+    <div class="ok-title" id="okTitle"></div>
+    <div class="ok-msg" id="okMsg"></div>
+    <button type="button" class="ok-btn" id="okBtn">ตกลง</button>
+  </div>
+</div>
+<style>
+  .ok-overlay {
+    position: fixed; inset: 0; z-index: 1000;
+    background: rgba(15,27,45,.42); backdrop-filter: blur(2px);
+    display: flex; align-items: center; justify-content: center; padding: 24px;
+    animation: ok-fade .15s ease-out;
+  }
+  .ok-overlay[hidden] { display: none; }
+  .ok-card {
+    width: 100%; max-width: 380px; background: #fff; border-radius: 18px;
+    padding: 30px 30px 26px; text-align: center;
+    box-shadow: 0 20px 60px -12px rgba(15,27,45,.35);
+    animation: ok-pop .18s cubic-bezier(.16,1,.3,1);
+  }
+  .ok-icon {
+    width: 60px; height: 60px; border-radius: 50%; margin: 0 auto 16px;
+    background: #e7f8ef; color: #16a34a;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .ok-icon svg { width: 30px; height: 30px; }
+  .ok-title { font-size: 18px; font-weight: 800; color: var(--ink); margin-bottom: 8px; }
+  .ok-msg { font-size: 13.5px; color: var(--ink-2); line-height: 1.7; margin-bottom: 22px; }
+  .ok-btn {
+    width: 100%; padding: 13px 0; border: none; border-radius: 11px;
+    background: var(--primary); color: #fff; font-family: inherit;
+    font-size: 15px; font-weight: 700; cursor: pointer; transition: background .15s;
+  }
+  .ok-btn:hover { background: var(--primary-dark); }
+  @keyframes ok-fade { from { opacity: 0 } to { opacity: 1 } }
+  @keyframes ok-pop { from { opacity: 0; transform: translateY(10px) scale(.97) } to { opacity: 1; transform: none } }
+</style>
 </body>
 </html>
