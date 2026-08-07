@@ -1,22 +1,25 @@
 /**
  * iDash — Quick Ask bot (no-AI, grounded)
  * ---------------------------------------------------------------------------
- * An inline "ถามผลงานเร็ว" panel (mounted at #qbMount, in the Home bottom row
- * beside the AI Chatbot) that answers from the platform's REAL numbers only —
- * it matches the question to a KPI and prints the figures the dashboards
- * already computed. There is NO language model in this path, so it cannot
- * invent a number: every value shown is read verbatim from a connected source.
+ * An inline panel (mounted at #qbMount, beside the AI Chatbot on Home) that
+ * answers factory performance from the platform's REAL numbers only — it
+ * matches the question to a KPI and prints the figures already reported. There
+ * is NO language model in this path, so it cannot invent a number: every value
+ * is read verbatim from the live feed.
  *
- * Multi-source by design. A source is {id, label, ready, getKpis()}. Only ones
- * with a live data feed are `ready`; the rest are listed so the user sees
- * they're planned, and wiring one later is just adding its getKpis().
+ * Data: the same "Dashboard ML" Apps Script feed the Home KPI row uses. That
+ * feed's daily[] rows carry ~200 fields covering BOTH the Production and the
+ * Quality dashboards (ML_Dashboard2026_2027) — so the bot reads the raw feed
+ * directly and exposes a curated catalog of both, not just the 5 headline
+ * figures the row paints.
  *
- *   production — live, via window.iDashHomeKpi (Production Dashboard / DailyReport)
- *   sale / store / boi / qm — declared, awaiting their own data API.
+ * Sources (chips): Production + Quality are live from that feed; Sale / Store /
+ * BOI / QM are declared and await their own data API.
  */
 (function () {
   'use strict';
 
+  /* ── helpers ──────────────────────────────────────────────────────────── */
   function fmt(v, dec) {
     if (v === null || v === undefined || isNaN(v)) return '—';
     return Number(v).toLocaleString('en-US', {
@@ -28,44 +31,130 @@
       return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c];
     });
   }
+  function num(v) {
+    if (v === null || v === undefined || v === '') return null;
+    var n = parseFloat(String(v).replace(/[, ]/g, ''));
+    return isNaN(n) ? null : n;
+  }
 
-  /* ── Sources ──────────────────────────────────────────────────────────── */
-  var PROD_SYN = {
-    cane_crushed: ['อ้อย', 'เข้าหีบ', 'หีบ', 'crush', 'cane', 'ตันอ้อย', 'อ้อยเข้า'],
-    ccs_factory:  ['ccs', 'ความหวาน', 'ซีซีเอส'],
-    burnt_cane:   ['ไฟไหม้', 'อ้อยไฟ', 'burnt', 'เผา', 'ไหม้'],
-    cane_as_telq: ['telq', 'สด', 'อ้อยสด', 'เทลคิว', 'เทล'],
-    edl_export:   ['ไฟ', 'ขายไฟ', 'edl', 'kwh', 'ไฟฟ้า', 'พลังงาน', 'หน่วยไฟ']
-  };
+  /* ── Live feed (raw daily rows, same endpoint as home_kpi_live) ─────────── */
+  var FEED_URL_DEFAULT = 'https://script.google.com/macros/s/AKfycbx2KmyntEHLOMW5MfWtxmNlntB8I7_mJ_mQdxdadzLaI88AXDHuD3EmVUyP7nv2sNnl/exec';
+  var FEED_CACHE_KEY = 'idash.qbFeed';
+  var feedMem = null;
+
+  function feedUrl() {
+    try { var o = localStorage.getItem('idash.kpiApiUrl'); if (o) return o; } catch (e) {}
+    return window.IDASH_KPI_API_URL || FEED_URL_DEFAULT;
+  }
+  function readFeedCache() {
+    if (feedMem) return feedMem;
+    try { var c = JSON.parse(localStorage.getItem(FEED_CACHE_KEY) || 'null'); if (c && c.daily) { feedMem = c; return c; } } catch (e) {}
+    return null;
+  }
+  var feedInFlight = null;
+  function loadFeed() {
+    if (feedInFlight) return feedInFlight;
+    feedInFlight = fetch(feedUrl(), { method: 'GET' })
+      .then(function (r) { return r.json(); })
+      .then(function (j) {
+        var daily = Array.isArray(j.daily) ? j.daily.filter(function (r) { return r && r.date; }) : [];
+        feedMem = { at: Date.now(), daily: daily };
+        try { localStorage.setItem(FEED_CACHE_KEY, JSON.stringify(feedMem)); } catch (e) {}
+        feedInFlight = null;
+        return feedMem;
+      })
+      .catch(function (e) { feedInFlight = null; throw e; });
+    return feedInFlight;
+  }
+
+  /* ── KPI catalog ──────────────────────────────────────────────────────────
+   * tag: 'p' = Production, 'q' = Quality. t/c/g = today/cumulative/target field
+   * names in the feed. low = lower is better. head = shown in "สรุป". */
+  var CATALOG = [
+    // ── Production ──
+    { tag:'p', head:1, t:'cane_today', c:'cane_todate', g:'cane_target', nameTH:'จำนวนอ้อยเข้าหีบ', unit:'ตัน', dec:0, syn:['อ้อย','เข้าหีบ','หีบ','cane','crush','ตันอ้อย','อ้อยเข้า'] },
+    { tag:'p', head:1, t:'tcph_today', c:'tcph_todate', g:'tcph_target', nameTH:'อัตราการหีบ (ตัน/ชม.)', unit:'', dec:1, syn:['อัตราหีบ','tcph','tch','ตันต่อชั่วโมง','อัตราการหีบ'] },
+    { tag:'p', head:1, t:'ccs_today', c:'ccs_todate', g:'ccs_target', nameTH:'CCS of Factory', unit:'', dec:2, syn:['ccs','ความหวาน','ซีซีเอส'] },
+    { tag:'p', t:'pol_today', c:'pol_todate', g:'pol_target', nameTH:'% Pol in Cane', unit:'%', dec:2, syn:['pol cane','โพลอ้อย','pol อ้อย','โพลในอ้อย'] },
+    { tag:'p', t:'fiber_today', c:'fiber_todate', nameTH:'% Fiber in Cane', unit:'%', dec:2, syn:['fiber','ไฟเบอร์','เยื่อใย','ไฟเบอร์อ้อย'] },
+    { tag:'p', head:1, t:'burnt_today', c:'burnt_todate', low:1, nameTH:'% อ้อยไฟไหม้', unit:'%', dec:2, syn:['ไฟไหม้','อ้อยไฟ','burnt','เผา','ไหม้'] },
+    { tag:'p', t:'trash_today', c:'trash_todate', low:1, nameTH:'% สิ่งปลอมปน (Trash)', unit:'%', dec:2, syn:['trash','สิ่งปลอมปน','ปลอมปน','ทราช','ขยะ'] },
+    { tag:'p', t:'soil_today', c:'soil_todate', low:1, nameTH:'% ดินติดอ้อย', unit:'%', dec:2, syn:['ดิน','soil','ดินติดอ้อย'] },
+    { tag:'p', t:'pcttelq_today', c:'pcttelq_todate', g:'pcttelq_target', nameTH:'% Cane as TELQ', unit:'%', dec:2, syn:['telq','อ้อยสด','สด','เทลคิว','เทล'] },
+    { tag:'p', head:1, t:'recov_today', c:'recov_todate', g:'recov_target', nameTH:'% Overall Recovery', unit:'%', dec:2, syn:['recovery','recov','รีคัฟ','รีโคฟ','รีคัฟเวอรี'] },
+    { tag:'p', t:'bhr_today', c:'bhr_todate', g:'bhr_target', nameTH:'BHR (Boiling House Recovery)', unit:'%', dec:2, syn:['bhr','boiling house'] },
+    { tag:'p', t:'extpol_today', c:'extpol_todate', g:'extpol_target', nameTH:'% Extraction (Pol)', unit:'%', dec:2, syn:['extraction','สกัด','extpol','การสกัด'] },
+    { tag:'p', t:'prepidx_today', c:'prepidx_todate', g:'prepidx_target', nameTH:'Preparation Index (PI)', unit:'', dec:1, syn:['preparation','prep','pi','เตรียมอ้อย','prepidx'] },
+    { tag:'p', t:'polbag_today', c:'polbag_todate', g:'polbag_target', low:1, nameTH:'% Pol in Bagasse', unit:'%', dec:2, syn:['pol bagasse','โพลชานอ้อย','polbag','ชานอ้อย pol'] },
+    { tag:'p', t:'loss_today', c:'loss_todate', g:'loss_target', low:1, nameTH:'% การสูญเสียรวม', unit:'%', dec:3, syn:['loss','สูญเสีย','ลอส','สูญเสียรวม'] },
+    { tag:'p', t:'loss_bag_today', c:'loss_bag_todate', g:'loss_bag_target', low:1, nameTH:'สูญเสียในชานอ้อย', unit:'%', dec:3, syn:['สูญเสียชาน','loss bagasse','ชานอ้อย'] },
+    { tag:'p', t:'loss_fc_today', c:'loss_fc_todate', g:'loss_fc_target', low:1, nameTH:'สูญเสียในกากตะกอน', unit:'%', dec:3, syn:['สูญเสียกาก','loss filter','กากตะกอน','filter cake loss'] },
+    { tag:'p', t:'loss_fm_today', c:'loss_fm_todate', g:'loss_fm_target', low:1, nameTH:'สูญเสียในโมลาส', unit:'%', dec:3, syn:['สูญเสียโมลาส','loss molasses','โมลาสสูญเสีย'] },
+    { tag:'p', t:'loss_undet_today', c:'loss_undet_todate', g:'loss_undet_target', low:1, nameTH:'สูญเสียหาสาเหตุไม่ได้', unit:'%', dec:3, syn:['undetermined','undet','หาสาเหตุไม่ได้','สูญเสียหาสาเหตุ'] },
+    { tag:'p', t:'me_today', c:'me_todate', g:'me_target', nameTH:'% Mechanical Efficiency', unit:'%', dec:2, syn:['mechanical','efficiency','ประสิทธิภาพ','me','โอทีอี','ote'] },
+    { tag:'p', head:1, t:'avgsteam_today', c:'avgsteam_todate', g:'avgsteam_target', low:1, nameTH:'ไอน้ำต่อตันอ้อย', unit:'', dec:2, syn:['steam','ไอน้ำ','สตีม','ไอน้ำต่อตัน'] },
+    { tag:'p', t:'kwhtc_today', c:'kwhtc_todate', g:'kwhtc_target', low:1, nameTH:'หน่วยไฟต่อตันอ้อย', unit:'', dec:1, syn:['kwh ต่อตัน','หน่วยไฟต่อตัน','ไฟต่อตัน','kwhtc'] },
+    { tag:'p', head:1, t:'edl_today', c:'edl_todate', g:'edl_target', nameTH:'ขายไฟ (EDL)', unit:'kWh', dec:0, syn:['ขายไฟ','edl','ไฟ','พลังงาน'] },
+    { tag:'p', t:'netkwh_today', c:'netkwh_todate', g:'netkwh_target', nameTH:'ไฟฟ้าสุทธิ', unit:'kWh', dec:0, syn:['ไฟสุทธิ','netkwh','net kwh','ไฟฟ้าสุทธิ'] },
+
+    // ── Quality ──
+    { tag:'q', head:1, t:'vhp_today', c:'vhp_todate', g:'vhp_target', nameTH:'น้ำตาล VHP (ผลิต)', unit:'ตัน', dec:0, syn:['vhp','น้ำตาลvhp','น้ำตาล vhp','ผลิตน้ำตาล'] },
+    { tag:'q', t:'totsugar_today', c:'totsugar_todate', g:'totsugar_target', nameTH:'น้ำตาลรวม', unit:'ตัน', dec:0, syn:['น้ำตาลรวม','total sugar','totsugar','น้ำตาลทั้งหมด'] },
+    { tag:'q', head:1, t:'vhp_pol_today', c:'vhp_pol_todate', nameTH:'Pol น้ำตาล VHP', unit:'%', dec:2, syn:['pol น้ำตาล','vhp pol','โพลน้ำตาล','pol sugar'] },
+    { tag:'q', head:1, t:'vhp_moist_today', c:'vhp_moist_todate', low:1, nameTH:'ความชื้นน้ำตาล VHP', unit:'%', dec:2, syn:['ความชื้น','moisture','ชื้น','ความชื้นน้ำตาล'] },
+    { tag:'q', head:1, t:'vhp_colour_today', c:'vhp_colour_todate', low:1, nameTH:'สีน้ำตาล VHP (ICUMSA)', unit:'IU', dec:0, syn:['สี','color','colour','icumsa','สีน้ำตาล','ไอยู'] },
+    { tag:'q', head:1, t:'purity_today', c:'purity_todate', g:'purity_target', nameTH:'% Purity รวม', unit:'%', dec:2, syn:['purity','ความบริสุทธิ์','เพียวริตี้','บริสุทธิ์'] },
+    { tag:'q', head:1, t:'fm_purity_today', c:'fm_purity_todate', g:'fm_purity_target', low:1, nameTH:'ความบริสุทธิ์ Final Molasses', unit:'%', dec:1, syn:['molasses purity','โมลาส purity','ความบริสุทธิ์โมลาส','purity molasses','fm purity'] },
+    { tag:'q', t:'fm_brix_today', c:'fm_brix_todate', g:'fm_brix_target', nameTH:'Brix Final Molasses', unit:'', dec:1, syn:['brix molasses','บริกซ์โมลาส','fm brix','brix โมลาส'] },
+    { tag:'q', t:'fm_rs_today', c:'fm_rs_todate', low:1, nameTH:'Reducing Sugar โมลาส', unit:'%', dec:2, syn:['reducing sugar','rs','รีดิวซ์','น้ำตาลรีดิวซ์'] },
+    { tag:'q', t:'fm_ash_today', c:'fm_ash_todate', low:1, nameTH:'Ash โมลาส (เถ้า)', unit:'%', dec:2, syn:['ash','เถ้า','เถ้าโมลาส'] },
+    { tag:'q', t:'fej_purity', nameTH:'Purity FEJ (น้ำอ้อยแรก)', unit:'%', dec:1, syn:['fej','first juice','น้ำอ้อยแรก','fej purity'] },
+    { tag:'q', t:'mj_purity', nameTH:'Purity Mixed Juice', unit:'%', dec:1, syn:['mixed juice','mj','น้ำอ้อยรวม','mj purity'] },
+    { tag:'q', t:'cj_purity', nameTH:'Purity Clarified Juice', unit:'%', dec:1, syn:['clarified','cj','น้ำใส','cj purity'] },
+    { tag:'q', t:'fc_pol_today', c:'fc_pol_todate', g:'fc_pol_target', low:1, nameTH:'Pol กากตะกอน (Filter Cake)', unit:'%', dec:2, syn:['pol กาก','filter cake pol','fc pol','โพลกาก'] },
+    { tag:'q', t:'fc_moist_today', c:'fc_moist_todate', g:'fc_moist_target', nameTH:'ความชื้นกากตะกอน', unit:'%', dec:2, syn:['ความชื้นกาก','filter cake moisture','fc moist'] }
+  ];
+
+  function buildOne(k, last, prev) {
+    var today = num(last[k.t]);
+    if (today === null) return null;
+    var before = prev ? num(prev[k.t]) : null;
+    var delta = (before !== null && before !== 0) ? ((today - before) / Math.abs(before)) * 100 : null;
+    var direction = delta === null ? null : ((k.low ? delta < 0 : delta > 0) ? 'up' : 'down');
+    return {
+      nameTH: k.nameTH, unit: k.unit, decimals: k.dec, head: !!k.head,
+      today: today, delta: delta, direction: direction,
+      todate: k.c ? num(last[k.c]) : null,
+      target: k.g ? num(last[k.g]) : null,
+      syn: k.syn || []
+    };
+  }
+
+  function kpisFor(tag) {
+    var f = readFeedCache();
+    if (!f || !f.daily.length) return null;
+    var rows = f.daily;
+    var last = rows[rows.length - 1], prev = rows.length > 1 ? rows[rows.length - 2] : null;
+    var kpis = CATALOG.filter(function (k) { return k.tag === tag; })
+      .map(function (k) { return buildOne(k, last, prev); })
+      .filter(Boolean);
+    return kpis.length ? { latestDate: last.date, kpis: kpis } : null;
+  }
 
   var SOURCES = [
-    {
-      id: 'production', label: 'Production', ready: true,
-      getKpis: function () {
-        var d = (window.iDashHomeKpi && window.iDashHomeKpi.getData && window.iDashHomeKpi.getData()) || null;
-        if (!d || !Array.isArray(d.kpis)) return null;
-        return {
-          latestDate: d.latestDate || '',
-          kpis: d.kpis.map(function (k) {
-            return {
-              id: k.id, nameTH: k.nameTH, unit: k.unit, decimals: k.decimals,
-              today: (k.today !== null && k.today !== undefined) ? k.today : k.value,
-              delta: k.delta, direction: k.direction, todate: k.todate, target: k.target,
-              syn: PROD_SYN[k.id] || []
-            };
-          })
-        };
-      },
-      refresh: function () {
-        return (window.iDashHomeKpi && window.iDashHomeKpi.refresh)
-          ? window.iDashHomeKpi.refresh() : Promise.resolve(null);
-      }
-    },
+    { id: 'production', tag: 'p', label: 'Production', ready: true, getKpis: function () { return kpisFor('p'); }, refresh: loadFeed },
+    { id: 'quality',    tag: 'q', label: 'Quality',    ready: true, getKpis: function () { return kpisFor('q'); }, refresh: loadFeed },
     { id: 'sale',  label: 'Sale',  ready: false },
     { id: 'store', label: 'Store', ready: false },
     { id: 'boi',   label: 'BOI',   ready: false },
     { id: 'qm',    label: 'QM',    ready: false }
   ];
+  function byId(id) { return SOURCES.filter(function (s) { return s.id === id; })[0]; }
+
+  var SUGG = {
+    production: ['อ้อยเข้าหีบ', 'CCS', 'Recovery', 'อัตราหีบ', 'ขายไฟ', 'สรุป'],
+    quality:    ['Pol น้ำตาล', 'สีน้ำตาล', 'ความชื้น', 'ความบริสุทธิ์โมลาส', 'VHP', 'สรุป']
+  };
 
   var OVERVIEW = ['สรุป', 'ทั้งหมด', 'รวม', 'overview', 'all', 'ภาพรวม', 'ทุกตัว'];
   var activeSourceId = 'production';
@@ -75,14 +164,16 @@
   function matchKpis(query, data) {
     var q = nq(query);
     if (!q) return [];
-    if (OVERVIEW.some(function (w) { return q.indexOf(nq(w)) > -1; })) return data.kpis.slice();
+    if (OVERVIEW.some(function (w) { return q.indexOf(nq(w)) > -1; })) {
+      var h = data.kpis.filter(function (k) { return k.head; });
+      return h.length ? h : data.kpis;
+    }
     return data.kpis.filter(function (k) {
       if (nq(k.nameTH).indexOf(q) > -1 || q.indexOf(nq(k.nameTH)) > -1) return true;
       return (k.syn || []).some(function (s) { return q.indexOf(nq(s)) > -1; });
     });
   }
 
-  /* ── Answer (real figures only) ───────────────────────────────────────── */
   function kpiBlock(k) {
     var val = fmt(k.today, k.decimals) + (k.unit ? ' ' + k.unit : '');
     var parts = [];
@@ -110,30 +201,43 @@
     log.scrollTop = log.scrollHeight;
   }
 
-  function answer(query) {
-    pushMsg(esc(query), 'me');
-    var src = SOURCES.filter(function (s) { return s.id === activeSourceId; })[0];
-    if (!src.ready) {
-      pushMsg('ยังไม่ได้เชื่อมข้อมูลของ <b>' + esc(src.label) + '</b> — ตอนนี้ตอบได้เฉพาะ <b>Production</b> ' +
-        'เมื่อเชื่อม data API ของ ' + esc(src.label) + ' แล้วจะถามได้ทันที', 'bot');
-      return;
-    }
-    var data = src.getKpis();
-    if (!data || !data.kpis.length) {
-      pushMsg('กำลังโหลดข้อมูล Production… ลองอีกครั้งในอีกสักครู่', 'bot');
-      if (src.refresh) src.refresh().then(function () {}).catch(function () {});
-      return;
-    }
-    var hits = matchKpis(query, data);
-    if (!hits.length) {
-      pushMsg('ไม่พบตัวชี้วัดที่ตรงกับคำถาม ลองพิมพ์: <b>อ้อยเข้าหีบ · CCS · Burnt Cane · TELQ · ขายไฟ · สรุป</b>', 'bot');
-      return;
-    }
-    var head = data.latestDate ? '<div class="qb-date">ข้อมูลจริงล่าสุด ' + esc(data.latestDate) + ' · Production</div>' : '';
+  function renderHits(hits, data, srcLabel, note) {
+    var head = '<div class="qb-date">ข้อมูลจริงล่าสุด ' + esc(data.latestDate || '') + ' · ' + esc(srcLabel) + (note ? ' · ' + esc(note) : '') + '</div>';
     pushMsg(head + hits.map(kpiBlock).join(''), 'bot');
   }
 
-  /* ── Inline panel ─────────────────────────────────────────────────────── */
+  function answer(query) {
+    pushMsg(esc(query), 'me');
+    var src = byId(activeSourceId);
+
+    if (!src.ready) {
+      pushMsg('ยังไม่ได้เชื่อมข้อมูลของ <b>' + esc(src.label) + '</b> — ตอนนี้ตอบได้ <b>Production</b> และ <b>Quality</b> ' +
+        'เมื่อเชื่อม data API ของ ' + esc(src.label) + ' แล้วจะถามได้ทันที', 'bot');
+      return;
+    }
+
+    var data = src.getKpis();
+    if (!data) {
+      pushMsg('กำลังโหลดข้อมูล… ลองอีกครั้งในอีกสักครู่', 'bot');
+      loadFeed().catch(function () {});
+      return;
+    }
+
+    var hits = matchKpis(query, data);
+    if (hits.length) { renderHits(hits, data, src.label); return; }
+
+    // Forgiving: look in the OTHER ready source too (Production ⇄ Quality).
+    var others = SOURCES.filter(function (s) { return s.ready && s.id !== activeSourceId; });
+    for (var i = 0; i < others.length; i++) {
+      var od = others[i].getKpis();
+      if (!od) continue;
+      var oh = matchKpis(query, od);
+      if (oh.length) { renderHits(oh, od, others[i].label, 'พบในแท็บ ' + others[i].label); return; }
+    }
+    pushMsg('ไม่พบตัวชี้วัดที่ตรงกับคำถาม ลองพิมพ์ชื่อ KPI เช่น <b>Recovery · สีน้ำตาล · ความบริสุทธิ์ · การสูญเสีย</b> หรือกด <b>สรุป</b>', 'bot');
+  }
+
+  /* ── Inline panel (teal identity — distinct from the blue AI Chatbot) ──── */
   function injectStyles() {
     if (document.getElementById('qbStyles')) return;
     var css = document.createElement('style');
@@ -141,8 +245,7 @@
     css.textContent =
       '.home-quickbot{display:flex;flex-direction:column;background:linear-gradient(180deg,#f0fdfa 0%,#ffffff 46%)!important;border-color:#c9ede6!important}' +
       '.home-quickbot:hover{border-color:#8fddce!important}' +
-      '.home-quickbot .home-chat-badge{background:linear-gradient(135deg,#2dd4bf,#0d9488)}' +
-      '.qb-hero{display:flex;align-items:center;gap:14px;padding:2px 2px 13px;margin-bottom:2px;border-bottom:1px solid #eef2f8}' +
+      '.qb-hero{display:flex;align-items:center;gap:14px;padding:2px 2px 13px;margin-bottom:2px;border-bottom:1px solid #e4f3ef}' +
       '.qb-hero-ava{width:56px;height:56px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;' +
         'background:radial-gradient(circle at 50% 32%,#ecfdf9,#cbf3ec);box-shadow:0 8px 18px -7px rgba(13,148,136,.5),inset 0 1px 0 #fff,0 0 0 1px #d3f2ec}' +
       '.qb-hero-ava svg{width:38px;height:38px}' +
@@ -153,17 +256,17 @@
       '.qb-hero-sub{font-size:12.5px;color:#64748b;margin-top:3px;font-weight:500}' +
       '.qb-hero-badge{align-self:flex-start;font-size:10px;font-weight:700;color:#0e7a4e;background:#e2f5ec;border-radius:20px;padding:3px 9px;white-space:nowrap}' +
       '.qb-src{display:flex;gap:6px;margin:10px 0 8px;flex-wrap:wrap}' +
-      '.qb-chip{border:1px solid #d3e0f7;background:#fff;border-radius:20px;padding:4px 12px;font:inherit;font-size:11.5px;font-weight:700;color:#475569;cursor:pointer;transition:background .15s,border-color .15s}' +
+      '.qb-chip{border:1px solid #cbe7e1;background:#fff;border-radius:20px;padding:4px 12px;font:inherit;font-size:11.5px;font-weight:700;color:#475569;cursor:pointer;transition:background .15s,border-color .15s}' +
       '.qb-chip.on{background:#0d9488;color:#fff;border-color:#0d9488}' +
       '.qb-chip.lock{opacity:.55;cursor:pointer}.qb-chip.lock::after{content:" 🔒";font-size:9px}' +
-      '.qb-log{height:300px;overflow-y:auto;background:linear-gradient(180deg,#f7faff,#fbfdff);border:1px solid #eaf1fb;border-radius:10px;padding:13px;display:flex;flex-direction:column;gap:9px;margin-bottom:9px}' +
+      '.qb-log{height:300px;overflow-y:auto;background:linear-gradient(180deg,#f7fefc,#fbfffe);border:1px solid #e4f3ef;border-radius:10px;padding:13px;display:flex;flex-direction:column;gap:9px;margin-bottom:9px}' +
       '.qb-msg{max-width:90%;font-size:12.5px;line-height:1.6}' +
       '.qb-msg.me{align-self:flex-end;background:linear-gradient(180deg,#14b8a6,#0d9488);color:#fff;padding:8px 12px;border-radius:12px 12px 4px 12px}' +
       '.qb-msg.bot{align-self:flex-start;background:#fff;border:1px solid #e3ecfa;color:#374151;padding:10px 12px;border-radius:3px 12px 12px 12px;box-shadow:var(--shadow-sm)}' +
       '.qb-date{font-size:10.5px;color:#94a3b8;margin-bottom:6px;font-weight:600}' +
       '.qb-ans{padding:7px 0;border-top:1px dashed #eef2f8}.qb-ans:first-of-type{border-top:none;padding-top:0}' +
       '.qb-ans-name{font-size:11.5px;color:#64748b;font-weight:700}' +
-      '.qb-ans-val{font-size:18px;font-weight:800;color:#0f1b3d;margin:1px 0 2px}' +
+      '.qb-ans-val{font-size:18px;font-weight:800;color:#0f2a28;margin:1px 0 2px}' +
       '.qb-ans-sub{font-size:11px;color:#64748b}.qb-good{color:#0e9f6e;font-weight:700}.qb-bad{color:#e11d48;font-weight:700}' +
       '.qb-sugg{display:flex;gap:7px;flex-wrap:wrap;margin:0 0 10px}' +
       '.qb-sugg button{border:1px solid #bfeee5;background:#fff;border-radius:999px;padding:5px 11px;font:inherit;font-size:11.5px;color:#0d9488;font-weight:700;cursor:pointer;transition:background .15s,transform .15s}' +
@@ -174,6 +277,20 @@
       '.qb-input button{width:30px;height:30px;border-radius:8px;border:none;flex-shrink:0;cursor:pointer;background:linear-gradient(180deg,#14b8a6,#0d9488);display:flex;align-items:center;justify-content:center}' +
       '.qb-input button svg{width:16px;height:16px;color:#fff}';
     document.head.appendChild(css);
+  }
+
+  function renderSugg(mount) {
+    var el = mount.querySelector('#qbSugg');
+    if (!el) return;
+    el.innerHTML = '';
+    var list = SUGG[activeSourceId] || [];
+    list.forEach(function (t) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.textContent = t;
+      b.addEventListener('click', function () { answer(t); });
+      el.appendChild(b);
+    });
   }
 
   function build(mount) {
@@ -198,7 +315,7 @@
       '<div class="qb-log" id="qbLog"></div>' +
       '<div class="qb-sugg" id="qbSugg"></div>' +
       '<form class="qb-input" id="qbForm">' +
-        '<input id="qbInput" placeholder="พิมพ์คำถาม เช่น อ้อยเข้าหีบวันนี้" autocomplete="off">' +
+        '<input id="qbInput" placeholder="พิมพ์คำถาม เช่น Recovery หรือ สีน้ำตาล" autocomplete="off">' +
         '<button type="submit" aria-label="ถาม"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></button>' +
       '</form>';
 
@@ -212,21 +329,16 @@
         activeSourceId = s.id;
         [].forEach.call(srcEl.children, function (c) { c.classList.remove('on'); });
         b.classList.add('on');
+        renderSugg(mount);
         if (!s.ready) pushMsg('ยังไม่ได้เชื่อมข้อมูลของ <b>' + esc(s.label) + '</b> — เมื่อมี data API แล้วจะถามได้ทันที', 'bot');
       });
       srcEl.appendChild(b);
     });
 
-    var suggEl = mount.querySelector('#qbSugg');
-    ['อ้อยเข้าหีบ', 'CCS', 'Burnt Cane', 'TELQ', 'ขายไฟ', 'สรุปทั้งหมด'].forEach(function (t) {
-      var b = document.createElement('button');
-      b.type = 'button';
-      b.textContent = t;
-      b.addEventListener('click', function () { answer(t); });
-      suggEl.appendChild(b);
-    });
+    renderSugg(mount);
 
-    pushMsg('สวัสดีครับ 👋 ถามผลงาน Production ได้เลย เช่น "อ้อยเข้าหีบวันนี้" หรือ "สรุปทั้งหมด" — ตอบจากตัวเลขจริงในระบบเท่านั้น', 'bot');
+    pushMsg('สวัสดีครับ 👋 ถามผลงานโรงงานได้เลย — <b>Production</b> (อ้อย/หีบ/Recovery/ไฟ) หรือ <b>Quality</b> (Pol/สี/ความชื้น/ความบริสุทธิ์) ' +
+      'พิมพ์ชื่อ KPI หรือกด "สรุป" ก็ได้ ตอบจากตัวเลขจริงในระบบเท่านั้น', 'bot');
 
     mount.querySelector('#qbForm').addEventListener('submit', function (e) {
       e.preventDefault();
@@ -237,14 +349,14 @@
       answer(q);
     });
 
-    // Warm the Production data if the cache is cold.
-    var prod = SOURCES[0];
-    if (prod.getKpis && !prod.getKpis() && prod.refresh) prod.refresh().catch(function () {});
+    // Warm the feed so answers are instant.
+    if (!readFeedCache()) loadFeed().catch(function () {});
+    else loadFeed().catch(function () {});   // refresh in background too
   }
 
   function boot() {
     var mount = document.getElementById('qbMount');
-    if (!mount) return;   // only renders where the page provides a slot
+    if (!mount) return;
     injectStyles();
     build(mount);
   }
