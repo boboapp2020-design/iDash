@@ -113,8 +113,8 @@
     // (index.html), placed after the current-date pill. sidebar.js only owns
     // the unread dot on whatever page carries #inboxDot.
 
-    // "อากาศ × อ้อย" — injected into the main nav on every page so one change
-    // reaches all. Placed after AI Chatbot.
+    // "iField" (weather × cane map) — injected into the main nav on every page
+    // so one change reaches all. Placed after AI Chatbot.
     const nav = document.querySelector('.sidebar-nav');
     if (nav && !document.getElementById('weatherLink')) {
       const w = document.createElement('a');
@@ -123,7 +123,7 @@
       if (/(^|\/)weather\.html/.test(location.pathname)) w.classList.add('active');
       w.innerHTML =
         '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 19a4.5 4.5 0 100-9 6 6 0 10-11.5 2"/><line x1="8" y1="19" x2="8" y2="21"/><line x1="12" y1="20" x2="12" y2="22"/><line x1="16" y1="19" x2="16" y2="21"/></svg>' +
-        'อากาศ × อ้อย';
+        'iField';
       nav.appendChild(w);
     }
 
