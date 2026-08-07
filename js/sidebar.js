@@ -40,10 +40,13 @@
     }
 
     // "จัดการคำขอสมัคร" is injected here rather than into every page's markup,
-    // so one change reaches all pages. Placed just above the divider, before
-    // ออกจากระบบ. The admin page itself gates access (Admin Token), so this
-    // being visible to any signed-in user only exposes a locked door.
-    if (!menu.querySelector('[data-action="admin"]')) {
+    // so one change reaches all pages. Only for the owner (built-in login sets
+    // no idash.account) or an account whose sheet role is admin — a plain
+    // "user" account must not even see the admin door.
+    var acct = null;
+    try { acct = JSON.parse(localStorage.getItem('idash.account') || 'null'); } catch (e) {}
+    var isAdmin = !acct || acct.role === 'admin';
+    if (isAdmin && !menu.querySelector('[data-action="admin"]')) {
       const divider = menu.querySelector('.sidebar-user-menu-divider');
       const adminBtn = document.createElement('button');
       adminBtn.type = 'button';

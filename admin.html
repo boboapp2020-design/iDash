@@ -5,6 +5,20 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="js/auth.js?v=20260805n"></script>
   <script>if (!window.iDashAuth.requireSignIn()) { document.documentElement.style.display = 'none'; }</script>
+  <script>
+    // Admin page: for the owner (built-in login → no idash.account) or a sheet
+    // account whose role is admin. A plain "user" account is sent Home before
+    // the page even paints. Client-side gate only — the real lock is the
+    // ADMIN_TOKEN script property on the service.
+    (function () {
+      var acct = null;
+      try { acct = JSON.parse(localStorage.getItem('idash.account') || 'null'); } catch (e) {}
+      if (acct && acct.role !== 'admin') {
+        document.documentElement.style.display = 'none';
+        window.location.replace('index.html');
+      }
+    })();
+  </script>
   <title>iDash — จัดการคำขอสมัคร</title>
   <link rel="stylesheet" href="css/style.css?v=20260804b">
   <link rel="stylesheet" href="css/account.css?v=20260805m">
@@ -151,7 +165,7 @@
   </div>
 </div>
 
-<script src="js/sidebar.js?v=20260805n"></script>
+<script src="js/sidebar.js?v=20260805p"></script>
 <script src="js/admin.js?v=20260805j"></script>
 </body>
 </html>
