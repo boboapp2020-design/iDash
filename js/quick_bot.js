@@ -153,11 +153,12 @@
 
   var SUGG = {
     production: ['อ้อยเข้าหีบ', 'CCS', 'Recovery', 'อัตราหีบ', 'ขายไฟ', 'สรุป'],
-    quality:    ['Pol น้ำตาล', 'สีน้ำตาล', 'ความชื้น', 'ความบริสุทธิ์โมลาส', 'VHP', 'สรุป']
+    quality:    ['สรุป Quality วันนี้', 'สีน้ำตาลเป็นยังไง', 'แนวโน้ม CCS 7 วัน', 'ความบริสุทธิ์โมลาส', 'เทียบเมื่อวานกับวันนี้']
   };
 
   var OVERVIEW = ['สรุป', 'ทั้งหมด', 'รวม', 'overview', 'all', 'ภาพรวม', 'ทุกตัว'];
   var activeSourceId = 'production';
+  var qualityNoted = false;
 
   /* ── Matching (pure keyword, no AI) ───────────────────────────────────── */
   function nq(s) { return String(s || '').toLowerCase().replace(/\s+/g, ''); }
@@ -216,6 +217,10 @@
       return;
     }
 
+    // Quality answers with grounded AI (scoped to the dashboard data) when an
+    // AI provider is configured; otherwise it falls back to keyword lookup.
+    if (src.id === 'quality' && aiConfig()) { askAI(query); return; }
+
     var data = src.getKpis();
     if (!data) {
       pushMsg('กำลังโหลดข้อมูล… ลองอีกครั้งในอีกสักครู่', 'bot');
@@ -235,6 +240,112 @@
       if (oh.length) { renderHits(oh, od, others[i].label, 'พบในแท็บ ' + others[i].label); return; }
     }
     pushMsg('ไม่พบตัวชี้วัดที่ตรงกับคำถาม ลองพิมพ์ชื่อ KPI เช่น <b>Recovery · สีน้ำตาล · ความบริสุทธิ์ · การสูญเสีย</b> หรือกด <b>สรุป</b>', 'bot');
+  }
+
+  /* ── Grounded AI (Quality only, scoped to the dashboard) ────────────────── */
+  function aiConfig() {
+    try {
+      var c = window.iDashAIProviders && window.iDashAIProviders.currentConfig && window.iDashAIProviders.currentConfig();
+      if (c && c.shape === 'supabase' && c.endpoint && c.apiKey) return c;
+    } catch (e) {}
+    return null;
+  }
+
+  var QA_SYSTEM = [
+    'คุณคือผู้ช่วยตอบคำถามเกี่ยวกับ "Quality Dashboard" ของโรงงานน้ำตาลมิตรลาวเท่านั้น',
+    'กติกาเด็ดขาด (ห้ามฝ่าฝืน):',
+    '1) ใช้ได้เฉพาะตัวเลขที่อยู่ใน JSON facts ที่ให้มาเท่านั้น ห้ามสร้าง/เดา/ประมาณตัวเลขที่ไม่มีใน facts',
+    '2) ถ้าคำถามไม่เกี่ยวกับข้อมูล Quality นี้ หรือ facts ไม่มีข้อมูลที่ถาม ให้บอกตรง ๆ ว่า "ไม่มีข้อมูลนี้ใน Quality Dashboard" และย้ำว่าตอบได้เฉพาะเรื่องในแดชบอร์ดนี้',
+    '3) ตอบภาษาไทย กระชับ อ้างอิงตัวเลขจริงพร้อมหน่วยและวันที่เสมอ',
+    '4) แต่ละ KPI มี history เรียงจากวันเก่าไปวันใหม่ (ค่าล่าสุด = รายการสุดท้าย) ใช้เปรียบเทียบย้อนหลัง/แนวโน้มได้',
+    '5) ห้ามพูดหรือแนะนำเรื่องนอกเหนือข้อมูลในแดชบอร์ดนี้'
+  ].join('\n');
+
+  function qualityFacts() {
+    var f = readFeedCache();
+    if (!f || !f.daily.length) return null;
+    var rows = f.daily, recent = rows.slice(-14), latest = rows[rows.length - 1];
+    var kpis = CATALOG.filter(function (k) { return k.tag === 'q'; }).map(function (k) {
+      var hist = recent.map(function (r) { return { date: r.date, value: num(r[k.t]) }; })
+        .filter(function (p) { return p.value !== null; });
+      if (!hist.length) return null;
+      return {
+        name: k.nameTH, unit: k.unit || '', history: hist,
+        cumulative: k.c ? num(latest[k.c]) : null,
+        target: k.g ? num(latest[k.g]) : null
+      };
+    }).filter(Boolean);
+    return kpis.length ? { latestDate: latest.date, kpis: kpis } : null;
+  }
+
+  var thinkSeq = 0;
+  function pushThinking() {
+    var log = document.getElementById('qbLog'); if (!log) return null;
+    var id = 'qbThink' + (++thinkSeq);
+    var row = document.createElement('div');
+    row.className = 'qb-msg bot qb-think'; row.id = id;
+    row.innerHTML = '<span class="qb-dot"></span><span class="qb-dot"></span><span class="qb-dot"></span>';
+    log.appendChild(row); log.scrollTop = log.scrollHeight;
+    return id;
+  }
+  function removeThinking(id) { if (!id) return; var el = document.getElementById(id); if (el) el.remove(); }
+
+  // Soft check: flag only egregious fabrication — an answer that cites two or
+  // more numbers of which NONE appear in the real facts. Dates and rounding
+  // are tolerated so genuine answers are not nagged.
+  function verifyNumbers(answerText, facts) {
+    var nums = String(answerText).replace(/,/g, '').match(/\d+(?:\.\d+)?/g) || [];
+    if (nums.length < 2) return true;
+    var real = [];
+    facts.kpis.forEach(function (k) {
+      (k.history || []).forEach(function (p) { if (p.value != null) real.push(p.value); });
+      if (k.cumulative != null) real.push(k.cumulative);
+      if (k.target != null) real.push(k.target);
+    });
+    var hit = nums.some(function (n) {
+      var f = parseFloat(n);
+      return real.some(function (rv) { return Math.abs(rv - f) < 0.05 || (rv !== 0 && Math.abs((rv - f) / rv) < 0.01); });
+    });
+    return hit;
+  }
+
+  function askAI(question) {
+    var cfg = aiConfig();
+    var facts = qualityFacts();
+    if (!facts) {
+      pushMsg('กำลังโหลดข้อมูล Quality… ลองอีกครั้งในอีกสักครู่', 'bot');
+      loadFeed().catch(function () {});
+      return;
+    }
+    var tid = pushThinking();
+    var prompt = 'ข้อมูล Quality Dashboard (ล่าสุด ' + facts.latestDate + ') เป็น JSON:\n' +
+      JSON.stringify(facts.kpis) + '\n\nคำถามผู้ใช้: ' + question + '\n\nตอบเป็นภาษาไทยตามกติกา:';
+    fetch(cfg.endpoint, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', 'Authorization': 'Bearer ' + cfg.apiKey, 'apikey': cfg.apiKey },
+      body: JSON.stringify({
+        action: 'quick-ask',
+        payload: { model: 'claude-sonnet-5', system: QA_SYSTEM, prompt: prompt, facts: facts, maxTokens: 900, pin: cfg.pin }
+      })
+    })
+      .then(function (r) { return r.json(); })
+      .then(function (d) {
+        removeThinking(tid);
+        if (d && d.result && d.result.text) {
+          var ans = d.result.text.trim();
+          var ok = verifyNumbers(ans, facts);
+          pushMsg(esc(ans).replace(/\n/g, '<br>') +
+            '<div class="qb-aicred">🤖 AI · ตอบจากข้อมูล Quality จริง' +
+            (ok ? '' : ' · <span class="qb-warn">⚠ โปรดตรวจตัวเลขอีกครั้ง</span>') + '</div>', 'bot');
+        } else {
+          var msg = (d && d.error && d.error.message) || 'ตอบไม่สำเร็จ';
+          pushMsg('ขออภัย ตอบไม่สำเร็จ: ' + esc(msg), 'bot');
+        }
+      })
+      .catch(function () {
+        removeThinking(tid);
+        pushMsg('เชื่อมต่อ AI ไม่สำเร็จ — ตรวจการตั้งค่า AI ในหน้า Home (โหมด Supabase gateway) หรือ PIN', 'bot');
+      });
   }
 
   /* ── Inline panel (teal identity — distinct from the blue AI Chatbot) ──── */
@@ -268,6 +379,12 @@
       '.qb-ans-name{font-size:11.5px;color:#64748b;font-weight:700}' +
       '.qb-ans-val{font-size:18px;font-weight:800;color:#0f2a28;margin:1px 0 2px}' +
       '.qb-ans-sub{font-size:11px;color:#64748b}.qb-good{color:#0e9f6e;font-weight:700}.qb-bad{color:#e11d48;font-weight:700}' +
+      '.qb-think{display:flex!important;gap:5px;align-items:center;padding:12px 14px!important}' +
+      '.qb-dot{width:7px;height:7px;border-radius:50%;background:#0d9488;opacity:.4;animation:qbBlink 1s infinite}' +
+      '.qb-dot:nth-child(2){animation-delay:.2s}.qb-dot:nth-child(3){animation-delay:.4s}' +
+      '@keyframes qbBlink{0%,100%{opacity:.3;transform:translateY(0)}50%{opacity:1;transform:translateY(-2px)}}' +
+      '.qb-aicred{font-size:10px;color:#94a3b8;margin-top:7px;border-top:1px dashed #eef2f8;padding-top:5px}' +
+      '.qb-warn{color:#b45309;font-weight:700}' +
       '.qb-sugg{display:flex;gap:7px;flex-wrap:wrap;margin:0 0 10px}' +
       '.qb-sugg button{border:1px solid #bfeee5;background:#fff;border-radius:999px;padding:5px 11px;font:inherit;font-size:11.5px;color:#0d9488;font-weight:700;cursor:pointer;transition:background .15s,transform .15s}' +
       '.qb-sugg button:hover{background:#ecfdf9;transform:translateY(-1px)}' +
@@ -306,7 +423,7 @@
           '</svg>' +
         '</div>' +
         '<div class="qb-hero-txt">' +
-          '<div class="qb-hero-title">Quick AI Chatbot <span class="qb-spark">✨</span></div>' +
+          '<div class="qb-hero-title">iDash Copilot <span class="qb-spark">✨</span></div>' +
           '<div class="qb-hero-sub">ค้นหาข้อมูลโรงงานได้ทันที</div>' +
         '</div>' +
         '<span class="qb-hero-badge">ตัวเลขจริง 100%</span>' +
@@ -330,7 +447,14 @@
         [].forEach.call(srcEl.children, function (c) { c.classList.remove('on'); });
         b.classList.add('on');
         renderSugg(mount);
-        if (!s.ready) pushMsg('ยังไม่ได้เชื่อมข้อมูลของ <b>' + esc(s.label) + '</b> — เมื่อมี data API แล้วจะถามได้ทันที', 'bot');
+        if (!s.ready) {
+          pushMsg('ยังไม่ได้เชื่อมข้อมูลของ <b>' + esc(s.label) + '</b> — เมื่อมี data API แล้วจะถามได้ทันที', 'bot');
+        } else if (s.id === 'quality' && !qualityNoted) {
+          qualityNoted = true;
+          pushMsg(aiConfig()
+            ? '💬 แท็บ <b>Quality</b> ตอบด้วย <b>AI</b> (เฉพาะข้อมูลในแดชบอร์ดนี้เท่านั้น) — ถามเป็นประโยคได้เลย เช่น "แนวโน้มสีน้ำตาล 7 วัน" หรือ "เทียบความบริสุทธิ์เมื่อวานกับวันนี้"'
+            : 'แท็บ <b>Quality</b> ค้นข้อมูลจริงได้เลย — ถ้าตั้งค่า AI (โหมด Supabase gateway) ในหน้า Home จะถามเป็นประโยค/วิเคราะห์ย้อนหลังได้', 'bot');
+        }
       });
       srcEl.appendChild(b);
     });
