@@ -192,6 +192,18 @@
     '</div>';
   }
 
+  function greeting() {
+    pushMsg('สวัสดีครับ 👋 ผมคือ iDash Copilot — ถามได้เฉพาะข้อมูลจากแดชบอร์ดใน iDash (<b>Production</b> และ <b>Quality</b>) ' +
+      'พิมพ์เป็นประโยคได้เลย เช่น "คุณภาพเมื่อวานเป็นยังไง", "Recovery 7 วันล่าสุด", "อ้อยเข้าหีบวันนี้เทียบเมื่อวาน" ' +
+      '— ตอบจากตัวเลขจริงในแดชบอร์ดเท่านั้น', 'bot');
+  }
+  function clearChat() {
+    var log = document.getElementById('qbLog');
+    if (log) log.innerHTML = '';
+    qualityNoted = false;
+    greeting();
+  }
+
   function pushMsg(html, who) {
     var log = document.getElementById('qbLog');
     if (!log) return;
@@ -636,7 +648,10 @@
         '</div>' +
         '<div class="qb-hero-right">' +
           '<span class="qb-hero-badge">ตัวเลขจริง 100%</span>' +
-          '<button type="button" class="qb-gear" id="qbGear" title="ตั้งค่า Gemini API key (ฟรี)" aria-label="ตั้งค่า">' +
+          '<button type="button" class="qb-gear" id="qbClear" title="ล้างการสนทนา" aria-label="ล้างการสนทนา">' +
+            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>' +
+          '</button>' +
+          '<button type="button" class="qb-gear" id="qbGear" title="ตั้งค่าโมเดล AI (ฟรี)" aria-label="ตั้งค่า">' +
             '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>' +
           '</button>' +
         '</div>' +
@@ -687,9 +702,7 @@
 
     renderSugg(mount);
 
-    pushMsg('สวัสดีครับ 👋 ผมคือ iDash Copilot — ถามเรื่องผลงานโรงงานได้ทั้ง <b>Production</b> และ <b>Quality</b> ' +
-      'พิมพ์เป็นประโยคได้เลย เช่น "คุณภาพเมื่อวานเป็นยังไง", "Recovery 7 วันล่าสุด", "อ้อยเข้าหีบวันนี้เทียบเมื่อวาน" ' +
-      '— ตอบจากตัวเลขจริงในระบบเท่านั้น', 'bot');
+    greeting();
 
     mount.querySelector('#qbForm').addEventListener('submit', function (e) {
       e.preventDefault();
@@ -706,6 +719,7 @@
     var setModel = mount.querySelector('#qbSetModel');
     setInput.value = copilotKey();
     setModel.value = copilotModel();
+    mount.querySelector('#qbClear').addEventListener('click', clearChat);
     mount.querySelector('#qbGear').addEventListener('click', function () {
       setBox.hidden = !setBox.hidden;
       if (!setBox.hidden) setInput.focus();
