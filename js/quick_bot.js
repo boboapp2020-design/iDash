@@ -358,7 +358,7 @@
       '.home-quickbot:hover{border-color:#8fddce!important}' +
       '.qb-hero{display:flex;align-items:center;gap:14px;padding:2px 2px 13px;margin-bottom:2px;border-bottom:1px solid #e4f3ef}' +
       '.qb-hero-ava{width:56px;height:56px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;' +
-        'background:radial-gradient(circle at 50% 32%,#ecfdf9,#cbf3ec);box-shadow:0 8px 18px -7px rgba(13,148,136,.5),inset 0 1px 0 #fff,0 0 0 1px #d3f2ec}' +
+        'background:radial-gradient(circle at 50% 30%,#ffffff,#eef2ff);box-shadow:0 8px 18px -7px rgba(79,70,229,.4),inset 0 1px 0 #fff,0 0 0 1px #e4e8fb}' +
       '.qb-hero-ava svg{width:38px;height:38px}' +
       '.qb-hero-txt{flex:1;min-width:0}' +
       '.qb-hero-title{font-size:20px;font-weight:800;letter-spacing:-.01em;line-height:1.1;' +
@@ -416,10 +416,18 @@
       '<div class="qb-hero">' +
         '<div class="qb-hero-ava">' +
           '<svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">' +
-            '<path d="M27 4 L11 27 h10 l-3 17 L37 20 H26 z" fill="url(#qbBolt)" stroke="#0d9488" stroke-width="1.4" stroke-linejoin="round"/>' +
-            '<circle cx="38.5" cy="9.5" r="1.7" fill="#5eead4"/>' +
-            '<circle cx="9" cy="16" r="1.3" fill="#99f6e4"/>' +
-            '<defs><linearGradient id="qbBolt" x1="10" y1="4" x2="38" y2="44" gradientUnits="userSpaceOnUse"><stop stop-color="#2dd4bf"/><stop offset="1" stop-color="#0d9488"/></linearGradient></defs>' +
+            '<defs><linearGradient id="qbCop" x1="7" y1="7" x2="41" y2="41" gradientUnits="userSpaceOnUse">' +
+              '<stop stop-color="#22d3ee"/><stop offset=".5" stop-color="#3b82f6"/><stop offset="1" stop-color="#7c3aed"/></linearGradient></defs>' +
+            '<path d="M10 26 a14 14 0 0 1 28 0" fill="none" stroke="url(#qbCop)" stroke-width="3" stroke-linecap="round"/>' +
+            '<rect x="5.5" y="23" width="7" height="12.5" rx="3.5" fill="url(#qbCop)"/>' +
+            '<rect x="35.5" y="23" width="7" height="12.5" rx="3.5" fill="url(#qbCop)"/>' +
+            '<rect x="12" y="16" width="24" height="24" rx="9" fill="url(#qbCop)"/>' +
+            '<rect x="16" y="21" width="16" height="14" rx="7" fill="#eef4ff"/>' +
+            '<circle cx="21" cy="27.5" r="2" fill="#3730a3"/>' +
+            '<circle cx="27" cy="27.5" r="2" fill="#3730a3"/>' +
+            '<path d="M21 31.2 q3 2.6 6 0" stroke="#3730a3" stroke-width="1.7" fill="none" stroke-linecap="round"/>' +
+            '<path d="M12.5 30 v3.5 a3 3 0 0 0 3 3 H19" fill="none" stroke="url(#qbCop)" stroke-width="2" stroke-linecap="round"/>' +
+            '<circle cx="20.2" cy="36.5" r="1.7" fill="#7c3aed"/>' +
           '</svg>' +
         '</div>' +
         '<div class="qb-hero-txt">' +
