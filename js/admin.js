@@ -91,6 +91,9 @@
     return post({ action: 'list' })
       .then(function (d) {
         if (!d || !d.ok) {
+          // Only a token error means "this door is locked, enter a token".
+          // Anything else is a plain failure shown in place.
+          if (d && /token/i.test(d.error || '')) { showTokenCard(); return false; }
           admMsg.className = 'acct-msg err';
           admMsg.textContent = (d && d.error) || 'โหลดคำขอไม่สำเร็จ';
           return false;
@@ -217,13 +220,12 @@
     admMsg.className = 'acct-msg err';
     admMsg.textContent = 'ยังไม่ได้ตั้งค่าปลายทางบัญชี (auth.js accountApiUrl)';
     showTokenCard();
-  } else if (!token()) {
-    showTokenCard();
   } else {
+    // Try to load straight away. If the service is open (no ADMIN_TOKEN set)
+    // this just shows the list — no token step. Only if it answers with a
+    // token error does load() reveal the token card. A stored token (from a
+    // locked setup) still rides along via post().
     showListCard();
-    load().then(function (ok) {
-      if (ok) autoOpenFromUrl();
-      else showTokenCard();
-    });
+    load().then(function (ok) { if (ok) autoOpenFromUrl(); });
   }
 })();
