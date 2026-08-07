@@ -38,6 +38,27 @@
       border-radius: 50%; background: #ef4444; border: 1.5px solid #fff;
       box-shadow: 0 0 0 1px rgba(239,68,68,.25);
     }
+    /* Weather × Cane preview card (links to the full map page). */
+    .home-wx-card { display:flex; align-items:center; justify-content:space-between; gap:16px; text-decoration:none;
+      background:linear-gradient(120deg,#eef5ff,#f7fbff); border:1px solid #dbe7fb; border-radius:16px; padding:14px 18px; margin-bottom:14px;
+      transition:transform .18s, box-shadow .18s, border-color .18s; }
+    .home-wx-card:hover { transform:translateY(-2px); box-shadow:0 10px 24px -12px rgba(37,99,235,.3); border-color:#bcd2f7; }
+    .home-wx-l { flex:1; min-width:0; }
+    .home-wx-title { font-size:14px; font-weight:800; color:#0f1b3d; }
+    .home-wx-title span { font-size:11.5px; font-weight:600; color:#64748b; margin-left:6px; }
+    .home-wx-body { margin-top:8px; }
+    .home-wx-load { font-size:12px; color:#94a3b8; }
+    .hw-alert { font-size:12px; font-weight:700; padding:5px 10px; border-radius:8px; display:inline-block; margin-bottom:8px; }
+    .hw-alert.lv-ok { background:#e7f8ef; color:#0e7a4e; } .hw-alert.lv-watch { background:#fff7e6; color:#a15c00; }
+    .hw-alert.lv-mid { background:#fef3e2; color:#b45309; } .hw-alert.lv-high { background:#fdeaea; color:#b91c1c; }
+    .hw-days { display:flex; gap:16px; }
+    .hw-day { text-align:center; }
+    .hw-dow { font-size:10.5px; font-weight:700; color:#64748b; }
+    .hw-emoji { font-size:22px; margin:1px 0; }
+    .hw-t { font-size:12px; font-weight:700; color:#334155; }
+    .hw-r { font-size:10px; color:#2563eb; font-weight:700; }
+    .home-wx-cta { font-size:12.5px; font-weight:700; color:#2563eb; white-space:nowrap; flex-shrink:0; }
+    @media (max-width:640px){ .home-wx-card{ flex-direction:column; align-items:flex-start; } .home-wx-cta{ align-self:flex-end; } }
   </style>
 </head>
 <body>
@@ -229,6 +250,15 @@
         </div>
       </section>
     </div>
+
+    <!-- ─── WEATHER × CANE preview → full map page ─── -->
+    <a class="home-wx-card" href="weather.html" id="homeWx">
+      <div class="home-wx-l">
+        <div class="home-wx-title">🌧️ อากาศ × อ้อย <span>สะหวันนะเขต (โรงงาน)</span></div>
+        <div class="home-wx-body" data-wxbody><div class="home-wx-load">กำลังโหลดพยากรณ์…</div></div>
+      </div>
+      <div class="home-wx-cta">ดูแผนที่พยากรณ์ทั้งหมด →</div>
+    </a>
 
     <!-- ─── QUICK ACCESS (placeholder targets) ─── -->
     <div class="home-sec-head"><span class="home-sec-title">Quick Access</span></div>
@@ -724,6 +754,7 @@
 <script src="js/ai_providers.js?v=20260803d"></script>
 <script src="js/app.js?v=20260803h"></script>
 <script src="js/quick_bot.js?v=20260807s"></script>
+<script src="js/weather.js?v=20260807u"></script>
 <script src="js/sidebar.js?v=20260807t"></script>
 <script>
   // Live topbar values: greeting + today's date follow the viewer's real clock.

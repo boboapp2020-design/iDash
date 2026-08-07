@@ -1,35 +1,31 @@
 /**
  * iDash — อากาศ × อ้อย (Weather × Cane)
  * ---------------------------------------------------------------------------
- * Free weather for the factory + cane-growing zones via Open-Meteo (no API key,
- * CORS-friendly). Each zone shows a 7-day forecast (rain, temp, chance of rain)
- * with a rule-based cane-impact advisory (harvest / haulage / CCS) — no AI, so
- * nothing is invented; the advisory is a fixed reading of the real forecast.
+ * A real, clickable map (Leaflet + OpenStreetMap) focused on the two Lao
+ * provinces that feed the mill: แขวงคำม่วน (Khammouane) and แขวงสะหวันนะเขต
+ * (Savannakhet). Cane-zone pins are coloured by rain risk; clicking a pin — or
+ * anywhere on the map — opens a 7-day Open-Meteo forecast with a rule-based
+ * cane advisory (no AI; the advisory is a fixed reading of the real forecast).
  *
- * Zones are user-managed: type a place name, we geocode it (Open-Meteo geocoding)
- * and store {name, lat, lon} in localStorage. Ships with one editable example.
+ * The same file also fills a compact preview card on Home (#homeWx).
+ * Open-Meteo is free, needs no key, and is CORS-friendly.
  */
 (function () {
   'use strict';
 
-  var GEO = 'https://geocoding-api.open-meteo.com/v1/search';
   var FORECAST = 'https://api.open-meteo.com/v1/forecast';
-  var ZONES_KEY = 'idash.weatherZones';
 
-  var DEFAULT_ZONES = [
-    { name: 'สะหวันนะเขต (โรงงาน)', lat: 16.556, lon: 104.751, factory: true }
+  // Cane zones across the two provinces (approximate town centres; the map also
+  // lets you click anywhere).
+  var ZONES = [
+    { name: 'เมืองสะหวันนะเขต', prov: 'สะหวันนะเขต', lat: 16.556, lon: 104.751, factory: true },
+    { name: 'ไชยบุรี (Xaybuly)', prov: 'สะหวันนะเขต', lat: 16.830, lon: 105.200 },
+    { name: 'จำพอน (Champhone)', prov: 'สะหวันนะเขต', lat: 16.220, lon: 105.140 },
+    { name: 'อุทุมพอน (Outhoumphone)', prov: 'สะหวันนะเขต', lat: 16.620, lon: 105.020 },
+    { name: 'ท่าแขก (Thakhek)', prov: 'คำม่วน', lat: 17.411, lon: 104.821 },
+    { name: 'หนองบก (Nongbok)', prov: 'คำม่วน', lat: 17.100, lon: 104.930 },
+    { name: 'เซบั้งไฟ (Xebangfai)', prov: 'คำม่วน', lat: 16.980, lon: 105.120 }
   ];
-
-  function loadZones() {
-    try {
-      var z = JSON.parse(localStorage.getItem(ZONES_KEY) || 'null');
-      if (Array.isArray(z) && z.length) return z;
-    } catch (e) {}
-    return DEFAULT_ZONES.slice();
-  }
-  function saveZones(z) {
-    try { localStorage.setItem(ZONES_KEY, JSON.stringify(z)); } catch (e) {}
-  }
 
   function esc(s) {
     return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) {
@@ -41,7 +37,6 @@
     return Number(v).toLocaleString('en-US', { minimumFractionDigits: d || 0, maximumFractionDigits: d || 0 });
   }
 
-  /* ── WMO weather codes → emoji + Thai ─────────────────────────────────── */
   function wx(code) {
     var c = Number(code);
     if (c === 0) return { e: '☀️', t: 'แจ่มใส' };
@@ -55,7 +50,6 @@
     return { e: '🌤️', t: 'ทั่วไป' };
   }
 
-  /* ── Rule-based cane advisory (no AI) ─────────────────────────────────── */
   function dayAdvisory(precip, prob, tmax) {
     if (precip >= 30) return { lv: 'high', txt: 'ฝนหนัก — รถตัด/รถบรรทุกเข้าแปลงลำบาก อ้อยเปียก ดินติดเยอะ เสี่ยง CCS/ความหวานลด ควรปรับแผนตัด' };
     if (precip >= 10) return { lv: 'mid', txt: 'ฝนปานกลาง — แปลงอาจแฉะ ระวังอ้อยเปียก/ดินติดเพิ่ม' };
@@ -63,8 +57,6 @@
     if (tmax >= 38) return { lv: 'heat', txt: 'ร้อนจัด — อ้อยเครียด อาจสุกช้า' };
     return { lv: 'ok', txt: 'อากาศดี เหมาะเก็บเกี่ยวและขนส่ง' };
   }
-
-  // Zone-level summary from the 7-day forecast.
   function zoneSummary(daily) {
     var rainDays = 0, maxP = 0, maxPDay = '';
     for (var i = 0; i < daily.time.length; i++) {
@@ -72,29 +64,18 @@
       if (p >= 10) rainDays++;
       if (p > maxP) { maxP = p; maxPDay = daily.time[i]; }
     }
-    if (maxP >= 30) return { lv: 'high', txt: 'เตือน: มีวันฝนหนัก (' + fmt(maxP, 0) + ' มม. วันที่ ' + thDate(maxPDay) + ') — เสี่ยงกระทบการตัด/ขนส่ง/CCS' };
+    if (maxP >= 30) return { lv: 'high', txt: 'เตือน: มีวันฝนหนัก (' + fmt(maxP, 0) + ' มม. ' + thDate(maxPDay) + ') — เสี่ยงกระทบการตัด/ขนส่ง/CCS' };
     if (rainDays >= 3) return { lv: 'mid', txt: 'ฝนหลายวันใน 7 วันนี้ (' + rainDays + ' วัน) — วางแผนตัดเผื่อแปลงแฉะ' };
-    if (rainDays >= 1) return { lv: 'watch', txt: 'มีฝนบางวัน — เฝ้าระวังเป็นช่วงๆ' };
+    if (rainDays >= 1) return { lv: 'watch', txt: 'มีฝนบางวัน — เฝ้าระวังเป็นช่วง ๆ' };
     return { lv: 'ok', txt: 'อากาศดีตลอด 7 วัน เหมาะเก็บเกี่ยว' };
   }
-
-  function thDate(iso) {
-    var p = String(iso).split('-');
-    if (p.length !== 3) return iso;
-    return p[2] + '/' + p[1];
-  }
+  function thDate(iso) { var p = String(iso).split('-'); return p.length === 3 ? p[2] + '/' + p[1] : iso; }
   function thWeekday(iso) {
-    // Avoid Date locale surprises — derive weekday from the ISO date only.
-    var d = new Date(iso + 'T00:00:00');
-    var w = ['อา', 'จ', 'อ', 'พ', 'พฤ', 'ศ', 'ส'];
+    var d = new Date(iso + 'T00:00:00'); var w = ['อา', 'จ', 'อ', 'พ', 'พฤ', 'ศ', 'ส'];
     return isNaN(d) ? '' : w[d.getDay()];
   }
+  function riskColor(p) { return p >= 30 ? '#dc2626' : p >= 10 ? '#f59e0b' : '#16a34a'; }
 
-  /* ── Fetch ────────────────────────────────────────────────────────────── */
-  function geocode(name) {
-    var url = GEO + '?name=' + encodeURIComponent(name) + '&count=5&language=th&format=json';
-    return fetch(url).then(function (r) { return r.json(); }).then(function (j) { return (j && j.results) || []; });
-  }
   function forecast(lat, lon) {
     var url = FORECAST + '?latitude=' + lat + '&longitude=' + lon +
       '&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,wind_speed_10m_max' +
@@ -102,119 +83,119 @@
     return fetch(url).then(function (r) { return r.json(); });
   }
 
-  /* ── Render ───────────────────────────────────────────────────────────── */
-  function zoneCard(zone, idx) {
-    var el = document.createElement('div');
-    el.className = 'wx-card';
-    el.innerHTML =
-      '<div class="wx-head">' +
-        '<div><div class="wx-name">' + (zone.factory ? '🏭 ' : '📍 ') + esc(zone.name) + '</div>' +
-          '<div class="wx-coord">' + fmt(zone.lat, 3) + ', ' + fmt(zone.lon, 3) + '</div></div>' +
-        '<button class="wx-del" title="ลบเขต" data-idx="' + idx + '">✕</button>' +
-      '</div>' +
-      '<div class="wx-alert" data-alert>กำลังโหลดพยากรณ์…</div>' +
-      '<div class="wx-days" data-days></div>';
-    return el;
+  /* ── Detail panel (map page) ─────────────────────────────────────────── */
+  function renderPanelLoading(title) {
+    var p = document.getElementById('wxPanel'); if (!p) return;
+    p.innerHTML = '<div class="wxp-empty">กำลังโหลดพยากรณ์ ' + esc(title) + '…</div>';
   }
-
-  function fillCard(el, data) {
-    var alertEl = el.querySelector('[data-alert]');
-    var daysEl = el.querySelector('[data-days]');
-    if (!data || !data.daily || !data.daily.time) {
-      alertEl.className = 'wx-alert lv-err';
-      alertEl.textContent = 'ดึงพยากรณ์ไม่สำเร็จ';
-      return;
-    }
+  function renderPanel(title, sub, factory, data) {
+    var p = document.getElementById('wxPanel'); if (!p) return;
+    if (!data || !data.daily || !data.daily.time) { p.innerHTML = '<div class="wxp-empty">ดึงพยากรณ์ไม่สำเร็จ</div>'; return; }
     var d = data.daily;
     var sum = zoneSummary(d);
-    alertEl.className = 'wx-alert lv-' + sum.lv;
-    alertEl.innerHTML = '<b>' + esc(sum.txt) + '</b>';
-
-    daysEl.innerHTML = d.time.map(function (t, i) {
+    var t0 = wx(d.weather_code[0]);
+    var days = d.time.map(function (t, i) {
       var w = wx(d.weather_code[i]);
-      var p = d.precipitation_sum[i] || 0;
+      var pr = d.precipitation_sum[i] || 0;
       var prob = d.precipitation_probability_max ? (d.precipitation_probability_max[i] || 0) : 0;
-      var adv = dayAdvisory(p, prob, d.temperature_2m_max[i]);
-      return '<div class="wx-day lv-' + adv.lv + '" title="' + esc(adv.txt) + '">' +
-        '<div class="wx-dow">' + thWeekday(t) + ' ' + thDate(t) + '</div>' +
-        '<div class="wx-emoji">' + w.e + '</div>' +
-        '<div class="wx-temp">' + fmt(d.temperature_2m_max[i], 0) + '° / ' + fmt(d.temperature_2m_min[i], 0) + '°</div>' +
-        '<div class="wx-rain">💧 ' + fmt(p, 1) + ' มม.</div>' +
-        '<div class="wx-prob">' + fmt(prob, 0) + '%</div>' +
+      var adv = dayAdvisory(pr, prob, d.temperature_2m_max[i]);
+      return '<div class="wxp-day lv-' + adv.lv + '" title="' + esc(adv.txt) + '">' +
+        '<div class="wxp-dow">' + thWeekday(t) + ' ' + thDate(t) + '</div>' +
+        '<div class="wxp-emoji">' + w.e + '</div>' +
+        '<div class="wxp-temp">' + fmt(d.temperature_2m_max[i], 0) + '° / ' + fmt(d.temperature_2m_min[i], 0) + '°</div>' +
+        '<div class="wxp-rain">💧 ' + fmt(pr, 1) + '</div>' +
+        '<div class="wxp-prob">' + fmt(prob, 0) + '%</div>' +
       '</div>';
     }).join('');
+    p.innerHTML =
+      '<div class="wxp-head">' +
+        '<div class="wxp-title">' + (factory ? '🏭 ' : '📍 ') + esc(title) + '</div>' +
+        '<div class="wxp-sub">' + esc(sub) + '</div>' +
+      '</div>' +
+      '<div class="wxp-now">' +
+        '<div class="wxp-now-emoji">' + t0.e + '</div>' +
+        '<div><div class="wxp-now-temp">' + fmt(d.temperature_2m_max[0], 0) + '°<span>/ ' + fmt(d.temperature_2m_min[0], 0) + '°</span></div>' +
+          '<div class="wxp-now-desc">' + esc(t0.t) + ' · ฝน ' + fmt(d.precipitation_sum[0], 1) + ' มม. (' + fmt((d.precipitation_probability_max || [])[0] || 0, 0) + '%)</div></div>' +
+      '</div>' +
+      '<div class="wxp-alert lv-' + sum.lv + '"><b>' + esc(sum.txt) + '</b></div>' +
+      '<div class="wxp-days">' + days + '</div>' +
+      '<div class="wxp-note">💧 = ฝน (มม.) · % = โอกาสฝน · สีการ์ด/หมุด = ระดับผลกระทบต่อการเก็บเกี่ยว · ข้อมูล Open-Meteo</div>';
   }
 
-  function renderAll() {
-    var wrap = document.getElementById('wxZones');
-    if (!wrap) return;
-    var zones = loadZones();
-    wrap.innerHTML = '';
-    if (!zones.length) {
-      wrap.innerHTML = '<div class="wx-empty">ยังไม่มีเขต — เพิ่มเขตแรกด้านล่าง (พิมพ์ชื่อเมือง/อำเภอ)</div>';
-      return;
+  /* ── Map page ────────────────────────────────────────────────────────── */
+  function bootMap() {
+    var mapEl = document.getElementById('wxMap');
+    if (!mapEl) return false;
+    if (!window.L) {
+      mapEl.innerHTML = '<div class="wx-fallback">แผนที่โหลดไม่สำเร็จ — ต้องต่ออินเทอร์เน็ตเพื่อโหลดแผนที่</div>';
+      return true;
     }
-    zones.forEach(function (z, i) {
-      var card = zoneCard(z, i);
-      wrap.appendChild(card);
-      forecast(z.lat, z.lon)
-        .then(function (data) { fillCard(card, data); })
-        .catch(function () { fillCard(card, null); });
-    });
-    // Delete handlers.
-    [].forEach.call(wrap.querySelectorAll('.wx-del'), function (b) {
-      b.addEventListener('click', function () {
-        var zs = loadZones();
-        zs.splice(+b.getAttribute('data-idx'), 1);
-        saveZones(zs);
-        renderAll();
-      });
-    });
-  }
+    var map = L.map('wxMap', { scrollWheelZoom: true, zoomControl: true })
+      .fitBounds([[15.4, 104.3], [18.0, 106.4]]);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 12, attribution: '© OpenStreetMap'
+    }).addTo(map);
 
-  /* ── Add-zone flow (geocode a place name) ─────────────────────────────── */
-  function wireAdd() {
-    var input = document.getElementById('wxAddInput');
-    var btn = document.getElementById('wxAddBtn');
-    var results = document.getElementById('wxResults');
-    if (!input || !btn) return;
+    ZONES.forEach(function (z) {
+      var m = L.circleMarker([z.lat, z.lon], {
+        radius: z.factory ? 11 : 8, color: '#ffffff', weight: 2.5,
+        fillColor: '#64748b', fillOpacity: 1
+      }).addTo(map);
+      m.bindTooltip((z.factory ? '🏭 ' : '') + z.name + ' · ' + z.prov, { direction: 'top' });
+      m.on('click', function () { selectZone(z); });
+      z._m = m;
+      forecast(z.lat, z.lon).then(function (d) {
+        z._data = d;
+        if (d && d.daily) m.setStyle({ fillColor: riskColor(d.daily.precipitation_sum[0] || 0) });
+      }).catch(function () {});
+    });
 
-    function search() {
-      var q = input.value.trim();
-      if (!q) return;
-      results.innerHTML = '<div class="wx-searching">กำลังค้นหา…</div>';
-      geocode(q).then(function (list) {
-        if (!list.length) { results.innerHTML = '<div class="wx-searching">ไม่พบสถานที่ "' + esc(q) + '" — ลองพิมพ์ชื่อเมือง/จังหวัดเป็นภาษาอังกฤษ</div>'; return; }
-        results.innerHTML = list.map(function (r, i) {
-          var place = [r.name, r.admin1, r.country].filter(Boolean).join(', ');
-          return '<button class="wx-result" data-i="' + i + '">' + esc(place) +
-            ' <span>(' + fmt(r.latitude, 2) + ', ' + fmt(r.longitude, 2) + ')</span></button>';
-        }).join('');
-        [].forEach.call(results.querySelectorAll('.wx-result'), function (b) {
-          b.addEventListener('click', function () {
-            var r = list[+b.getAttribute('data-i')];
-            var zs = loadZones();
-            zs.push({ name: input.value.trim() || r.name, lat: r.latitude, lon: r.longitude });
-            saveZones(zs);
-            input.value = '';
-            results.innerHTML = '';
-            renderAll();
-          });
-        });
-      }).catch(function () { results.innerHTML = '<div class="wx-searching">ค้นหาไม่สำเร็จ — ตรวจอินเทอร์เน็ต</div>'; });
+    map.on('click', function (e) {
+      renderPanelLoading('จุดที่เลือก');
+      forecast(e.latlng.lat, e.latlng.lng)
+        .then(function (d) { renderPanel('จุดที่เลือกบนแผนที่', fmt(e.latlng.lat, 3) + ', ' + fmt(e.latlng.lng, 3), false, d); })
+        .catch(function () { renderPanel('จุดที่เลือก', '', false, null); });
+    });
+
+    function selectZone(z) {
+      map.setView([z.lat, z.lon], Math.max(map.getZoom(), 9), { animate: true });
+      if (z._data) renderPanel(z.name, z.prov, z.factory, z._data);
+      else {
+        renderPanelLoading(z.name);
+        forecast(z.lat, z.lon).then(function (d) { z._data = d; renderPanel(z.name, z.prov, z.factory, d); })
+          .catch(function () { renderPanel(z.name, z.prov, z.factory, null); });
+      }
     }
 
-    btn.addEventListener('click', search);
-    input.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); search(); } });
+    selectZone(ZONES[0]);   // factory by default
+    // Leaflet needs a resize nudge once its container has its final size.
+    setTimeout(function () { map.invalidateSize(); }, 200);
+    return true;
   }
 
-  function boot() {
-    if (!document.getElementById('wxZones')) return;
-    renderAll();
-    wireAdd();
-    var refresh = document.getElementById('wxRefresh');
-    if (refresh) refresh.addEventListener('click', renderAll);
+  /* ── Home preview card (#homeWx) ─────────────────────────────────────── */
+  function bootHome() {
+    var el = document.getElementById('homeWx');
+    if (!el) return false;
+    var z = ZONES[0];
+    forecast(z.lat, z.lon).then(function (data) {
+      if (!data || !data.daily) { el.querySelector('[data-wxbody]').textContent = 'ดึงพยากรณ์ไม่สำเร็จ'; return; }
+      var d = data.daily, sum = zoneSummary(d);
+      var mini = d.time.slice(0, 4).map(function (t, i) {
+        var w = wx(d.weather_code[i]);
+        return '<div class="hw-day"><div class="hw-dow">' + thWeekday(t) + '</div>' +
+          '<div class="hw-emoji">' + w.e + '</div>' +
+          '<div class="hw-t">' + fmt(d.temperature_2m_max[i], 0) + '°</div>' +
+          '<div class="hw-r">💧' + fmt(d.precipitation_sum[i], 0) + '</div></div>';
+      }).join('');
+      el.querySelector('[data-wxbody]').innerHTML =
+        '<div class="hw-alert lv-' + sum.lv + '">' + esc(sum.txt) + '</div>' +
+        '<div class="hw-days">' + mini + '</div>';
+    }).catch(function () { el.querySelector('[data-wxbody]').textContent = 'ดึงพยากรณ์ไม่สำเร็จ'; });
+    return true;
   }
+
+  function boot() { if (bootMap()) return; bootHome(); }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
   else boot();
 })();

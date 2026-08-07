@@ -8,50 +8,51 @@
   <title>iDash — อากาศ × อ้อย</title>
   <link rel="stylesheet" href="css/style.css?v=20260804b">
   <link rel="stylesheet" href="css/account.css?v=20260805m">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect x='2' y='18' width='6' height='12' rx='1' fill='%232563eb'/><rect x='10' y='12' width='6' height='18' rx='1' fill='%233b82f6'/><rect x='18' y='6' width='6' height='24' rx='1' fill='%2360a5fa'/><rect x='26' y='2' width='6' height='28' rx='1' fill='%2393c5fd'/></svg>">
   <style>
-    .wx-sub2 { display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-bottom:16px; }
-    .wx-refresh { border:1px solid var(--border-strong); background:#fff; border-radius:10px; padding:8px 14px; font-family:inherit; font-size:12.5px; font-weight:700; color:var(--gray-700); cursor:pointer; }
-    .wx-refresh:hover { background:var(--gray-100); }
-    .wx-zones { display:flex; flex-direction:column; gap:16px; }
-    .wx-card { background:linear-gradient(180deg,#ffffff,#fbfdff); border:1px solid var(--border); border-radius:16px; box-shadow:var(--edge-light),var(--shadow-sm); padding:18px 18px 16px; }
-    .wx-head { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; margin-bottom:12px; }
-    .wx-name { font-size:16px; font-weight:800; color:var(--gray-900); }
-    .wx-coord { font-size:11px; color:var(--text-muted); margin-top:2px; }
-    .wx-del { border:none; background:#f1f5f9; color:#94a3b8; width:26px; height:26px; border-radius:8px; cursor:pointer; font-size:13px; flex-shrink:0; }
-    .wx-del:hover { background:#fee2e2; color:#dc2626; }
-    .wx-alert { font-size:13px; line-height:1.6; padding:10px 14px; border-radius:11px; margin-bottom:14px; }
-    .wx-alert.lv-ok { background:#e7f8ef; color:#0e7a4e; }
-    .wx-alert.lv-watch { background:#fff7e6; color:#a15c00; }
-    .wx-alert.lv-mid { background:#fef3e2; color:#b45309; }
-    .wx-alert.lv-high { background:#fdeaea; color:#b91c1c; }
-    .wx-alert.lv-err { background:var(--gray-100); color:var(--gray-600); }
-    .wx-days { display:grid; grid-template-columns:repeat(7,1fr); gap:8px; }
-    .wx-day { border:1px solid var(--border); border-radius:12px; padding:10px 6px; text-align:center; background:#fff; }
-    .wx-day.lv-high { border-color:#f6c9c9; background:#fef5f5; }
-    .wx-day.lv-mid { border-color:#f7d9b3; background:#fffaf3; }
-    .wx-day.lv-watch { border-color:#f3e3b3; background:#fffdf5; }
-    .wx-day.lv-heat { border-color:#f3cdae; background:#fff8f3; }
-    .wx-dow { font-size:11px; font-weight:700; color:var(--gray-600); }
-    .wx-emoji { font-size:24px; margin:4px 0 2px; }
-    .wx-temp { font-size:11.5px; font-weight:700; color:var(--gray-800); }
-    .wx-rain { font-size:11px; color:#2563eb; font-weight:700; margin-top:3px; }
-    .wx-prob { font-size:10px; color:var(--text-muted); }
-    .wx-empty { text-align:center; color:var(--text-muted); font-size:13.5px; padding:36px 0; }
-    /* Add zone */
-    .wx-add { margin-top:18px; background:linear-gradient(180deg,#f7fbff,#fff); border:1px solid var(--border); border-radius:16px; padding:18px; }
-    .wx-add-title { font-size:14px; font-weight:800; color:var(--gray-900); margin-bottom:4px; }
-    .wx-add-desc { font-size:12px; color:var(--text-secondary); margin-bottom:12px; line-height:1.6; }
-    .wx-add-row { display:flex; gap:8px; }
-    .wx-add-row input { flex:1; border:1px solid var(--border-strong); border-radius:10px; padding:10px 13px; font-family:inherit; font-size:13.5px; outline:none; }
-    .wx-add-row input:focus { border-color:var(--primary); box-shadow:0 0 0 3px rgba(37,99,235,.11); }
-    .wx-add-row button { border:none; background:var(--primary-gradient); color:#fff; border-radius:10px; padding:0 18px; font-family:inherit; font-size:13.5px; font-weight:700; cursor:pointer; }
-    .wx-results { margin-top:10px; display:flex; flex-direction:column; gap:6px; }
-    .wx-result { text-align:left; border:1px solid var(--border); background:#fff; border-radius:10px; padding:9px 12px; font-family:inherit; font-size:13px; color:var(--gray-800); cursor:pointer; }
-    .wx-result:hover { background:#f4f8ff; border-color:#bcd2f7; }
-    .wx-result span { color:var(--text-muted); font-size:11px; }
-    .wx-searching { font-size:12.5px; color:var(--text-muted); padding:6px 2px; }
-    @media (max-width:720px){ .wx-days{ grid-template-columns:repeat(4,1fr);} }
+    .wx-wide { max-width: 1180px; }
+    .wx-grid { display: grid; grid-template-columns: 1.35fr 1fr; gap: 18px; align-items: start; }
+    @media (max-width: 900px) { .wx-grid { grid-template-columns: 1fr; } }
+    .wx-mapcard { background: #fff; border: 1px solid var(--border); border-radius: 18px; box-shadow: var(--edge-light), var(--shadow); overflow: hidden; }
+    .wx-maphead { display: flex; align-items: center; gap: 8px; padding: 12px 16px; border-bottom: 1px solid var(--border); font-size: 12.5px; color: var(--text-secondary); font-weight: 600; }
+    .wx-prov { display: inline-flex; align-items: center; gap: 5px; padding: 3px 9px; border-radius: 20px; font-size: 11px; font-weight: 700; }
+    .wx-prov.p1 { background: #eef2ff; color: #4f46e5; }
+    .wx-prov.p2 { background: #ecfdf5; color: #0e9f6e; }
+    #wxMap { height: 560px; width: 100%; background: #eaf1fb; z-index: 0; }
+    .wx-fallback { display: flex; align-items: center; justify-content: center; height: 100%; color: var(--text-muted); font-size: 13.5px; padding: 24px; text-align: center; }
+    .wx-legend { display: flex; gap: 14px; flex-wrap: wrap; padding: 10px 16px; border-top: 1px solid var(--border); font-size: 11.5px; color: var(--text-secondary); }
+    .wx-legend span { display: inline-flex; align-items: center; gap: 6px; }
+    .wx-dot { width: 11px; height: 11px; border-radius: 50%; border: 2px solid #fff; box-shadow: 0 0 0 1px #e2e8f0; }
+    /* Detail panel */
+    #wxPanel { background: linear-gradient(180deg, #ffffff, #fbfdff); border: 1px solid var(--border); border-radius: 18px; box-shadow: var(--edge-light), var(--shadow); padding: 20px; min-height: 300px; position: sticky; top: 20px; }
+    .wxp-empty { text-align: center; color: var(--text-muted); font-size: 13.5px; padding: 60px 0; }
+    .wxp-head { margin-bottom: 12px; }
+    .wxp-title { font-size: 18px; font-weight: 800; color: var(--gray-900); letter-spacing: -.01em; }
+    .wxp-sub { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+    .wxp-now { display: flex; align-items: center; gap: 14px; padding: 12px 0 14px; }
+    .wxp-now-emoji { font-size: 46px; line-height: 1; }
+    .wxp-now-temp { font-size: 30px; font-weight: 800; color: var(--gray-900); }
+    .wxp-now-temp span { font-size: 17px; font-weight: 600; color: var(--text-muted); }
+    .wxp-now-desc { font-size: 12.5px; color: var(--text-secondary); margin-top: 3px; }
+    .wxp-alert { font-size: 13px; line-height: 1.6; padding: 11px 14px; border-radius: 12px; margin-bottom: 14px; }
+    .wxp-alert.lv-ok { background: #e7f8ef; color: #0e7a4e; }
+    .wxp-alert.lv-watch { background: #fff7e6; color: #a15c00; }
+    .wxp-alert.lv-mid { background: #fef3e2; color: #b45309; }
+    .wxp-alert.lv-high { background: #fdeaea; color: #b91c1c; }
+    .wxp-days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+    .wxp-day { border: 1px solid var(--border); border-radius: 11px; padding: 9px 3px; text-align: center; background: #fff; }
+    .wxp-day.lv-high { border-color: #f6c9c9; background: #fef5f5; }
+    .wxp-day.lv-mid { border-color: #f7d9b3; background: #fffaf3; }
+    .wxp-day.lv-watch { border-color: #f3e3b3; background: #fffdf5; }
+    .wxp-day.lv-heat { border-color: #f3cdae; background: #fff8f3; }
+    .wxp-dow { font-size: 10.5px; font-weight: 700; color: var(--gray-600); }
+    .wxp-emoji { font-size: 21px; margin: 3px 0 2px; }
+    .wxp-temp { font-size: 11px; font-weight: 700; color: var(--gray-800); }
+    .wxp-rain { font-size: 10.5px; color: #2563eb; font-weight: 700; margin-top: 2px; }
+    .wxp-prob { font-size: 9.5px; color: var(--text-muted); }
+    .wxp-note { font-size: 10.5px; color: var(--text-muted); line-height: 1.6; margin-top: 12px; }
   </style>
 </head>
 <body>
@@ -126,36 +127,38 @@
 </aside>
 
 <main class="main">
-  <div class="acct-wrap">
+  <div class="acct-wrap wx-wide">
     <div class="acct-head">
       <div class="acct-title">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 19a4.5 4.5 0 100-9 6 6 0 10-11.5 2"/><line x1="8" y1="19" x2="8" y2="21"/><line x1="12" y1="20" x2="12" y2="22"/><line x1="16" y1="19" x2="16" y2="21"/></svg>
         อากาศ × อ้อย
       </div>
-      <div class="acct-sub">พยากรณ์อากาศ 7 วันของโรงงานและพื้นที่ปลูกอ้อย พร้อมคำแนะนำผลต่อการเก็บเกี่ยว · ข้อมูลจาก Open-Meteo (ฟรี)</div>
+      <div class="acct-sub">แผนที่พยากรณ์อากาศพื้นที่ปลูกอ้อย — คลิกหมุดหรือจุดใดก็ได้บนแผนที่เพื่อดูพยากรณ์ 7 วัน + ผลต่อการเก็บเกี่ยว · โฟกัส แขวงคำม่วน &amp; สะหวันนะเขต</div>
     </div>
 
-    <div class="acct-card">
-      <div class="wx-sub2">
-        <div class="acct-card-title" style="margin:0">พยากรณ์รายเขต</div>
-        <button type="button" class="wx-refresh" id="wxRefresh">รีเฟรช</button>
-      </div>
-      <div class="wx-zones" id="wxZones"></div>
-
-      <div class="wx-add">
-        <div class="wx-add-title">เพิ่มเขตปลูกอ้อย / จุดที่ต้องเฝ้าระวัง</div>
-        <div class="wx-add-desc">พิมพ์ชื่อเมือง/อำเภอ/จังหวัด (ไทย ลาว หรืออังกฤษ) แล้วเลือกจากผลค้นหา — ระบบหาพิกัดให้อัตโนมัติ</div>
-        <div class="wx-add-row">
-          <input id="wxAddInput" placeholder="เช่น Savannakhet, ไชยบุรี, Xaybuly" autocomplete="off">
-          <button id="wxAddBtn">ค้นหา</button>
+    <div class="wx-grid">
+      <div class="wx-mapcard">
+        <div class="wx-maphead">
+          <span class="wx-prov p2">🏭 สะหวันนะเขต</span>
+          <span class="wx-prov p1">คำม่วน</span>
+          <span style="margin-left:auto">คลิกบนแผนที่เพื่อดูพยากรณ์จุดนั้น</span>
         </div>
-        <div class="wx-results" id="wxResults"></div>
+        <div id="wxMap"><div class="wx-fallback">กำลังโหลดแผนที่…</div></div>
+        <div class="wx-legend">
+          <span><i class="wx-dot" style="background:#16a34a"></i> อากาศดี</span>
+          <span><i class="wx-dot" style="background:#f59e0b"></i> ฝนปานกลาง</span>
+          <span><i class="wx-dot" style="background:#dc2626"></i> ฝนหนัก (เสี่ยง)</span>
+        </div>
       </div>
+
+      <div id="wxPanel"><div class="wxp-empty">เลือกจุดบนแผนที่เพื่อดูพยากรณ์</div></div>
     </div>
   </div>
 </main>
 
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 <script src="js/sidebar.js?v=20260807t"></script>
-<script src="js/weather.js?v=20260807s"></script>
+<script src="js/weather.js?v=20260807u"></script>
 </body>
 </html>
