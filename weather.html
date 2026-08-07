@@ -5,14 +5,57 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="js/auth.js?v=20260805n"></script>
   <script>if (!window.iDashAuth.requireSignIn()) { document.documentElement.style.display = 'none'; }</script>
-  <title>iDash — Profile</title>
+  <title>iDash — อากาศ × อ้อย</title>
   <link rel="stylesheet" href="css/style.css?v=20260804b">
   <link rel="stylesheet" href="css/account.css?v=20260805m">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect x='2' y='18' width='6' height='12' rx='1' fill='%232563eb'/><rect x='10' y='12' width='6' height='18' rx='1' fill='%233b82f6'/><rect x='18' y='6' width='6' height='24' rx='1' fill='%2360a5fa'/><rect x='26' y='2' width='6' height='28' rx='1' fill='%2393c5fd'/></svg>">
+  <style>
+    .wx-sub2 { display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-bottom:16px; }
+    .wx-refresh { border:1px solid var(--border-strong); background:#fff; border-radius:10px; padding:8px 14px; font-family:inherit; font-size:12.5px; font-weight:700; color:var(--gray-700); cursor:pointer; }
+    .wx-refresh:hover { background:var(--gray-100); }
+    .wx-zones { display:flex; flex-direction:column; gap:16px; }
+    .wx-card { background:linear-gradient(180deg,#ffffff,#fbfdff); border:1px solid var(--border); border-radius:16px; box-shadow:var(--edge-light),var(--shadow-sm); padding:18px 18px 16px; }
+    .wx-head { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; margin-bottom:12px; }
+    .wx-name { font-size:16px; font-weight:800; color:var(--gray-900); }
+    .wx-coord { font-size:11px; color:var(--text-muted); margin-top:2px; }
+    .wx-del { border:none; background:#f1f5f9; color:#94a3b8; width:26px; height:26px; border-radius:8px; cursor:pointer; font-size:13px; flex-shrink:0; }
+    .wx-del:hover { background:#fee2e2; color:#dc2626; }
+    .wx-alert { font-size:13px; line-height:1.6; padding:10px 14px; border-radius:11px; margin-bottom:14px; }
+    .wx-alert.lv-ok { background:#e7f8ef; color:#0e7a4e; }
+    .wx-alert.lv-watch { background:#fff7e6; color:#a15c00; }
+    .wx-alert.lv-mid { background:#fef3e2; color:#b45309; }
+    .wx-alert.lv-high { background:#fdeaea; color:#b91c1c; }
+    .wx-alert.lv-err { background:var(--gray-100); color:var(--gray-600); }
+    .wx-days { display:grid; grid-template-columns:repeat(7,1fr); gap:8px; }
+    .wx-day { border:1px solid var(--border); border-radius:12px; padding:10px 6px; text-align:center; background:#fff; }
+    .wx-day.lv-high { border-color:#f6c9c9; background:#fef5f5; }
+    .wx-day.lv-mid { border-color:#f7d9b3; background:#fffaf3; }
+    .wx-day.lv-watch { border-color:#f3e3b3; background:#fffdf5; }
+    .wx-day.lv-heat { border-color:#f3cdae; background:#fff8f3; }
+    .wx-dow { font-size:11px; font-weight:700; color:var(--gray-600); }
+    .wx-emoji { font-size:24px; margin:4px 0 2px; }
+    .wx-temp { font-size:11.5px; font-weight:700; color:var(--gray-800); }
+    .wx-rain { font-size:11px; color:#2563eb; font-weight:700; margin-top:3px; }
+    .wx-prob { font-size:10px; color:var(--text-muted); }
+    .wx-empty { text-align:center; color:var(--text-muted); font-size:13.5px; padding:36px 0; }
+    /* Add zone */
+    .wx-add { margin-top:18px; background:linear-gradient(180deg,#f7fbff,#fff); border:1px solid var(--border); border-radius:16px; padding:18px; }
+    .wx-add-title { font-size:14px; font-weight:800; color:var(--gray-900); margin-bottom:4px; }
+    .wx-add-desc { font-size:12px; color:var(--text-secondary); margin-bottom:12px; line-height:1.6; }
+    .wx-add-row { display:flex; gap:8px; }
+    .wx-add-row input { flex:1; border:1px solid var(--border-strong); border-radius:10px; padding:10px 13px; font-family:inherit; font-size:13.5px; outline:none; }
+    .wx-add-row input:focus { border-color:var(--primary); box-shadow:0 0 0 3px rgba(37,99,235,.11); }
+    .wx-add-row button { border:none; background:var(--primary-gradient); color:#fff; border-radius:10px; padding:0 18px; font-family:inherit; font-size:13.5px; font-weight:700; cursor:pointer; }
+    .wx-results { margin-top:10px; display:flex; flex-direction:column; gap:6px; }
+    .wx-result { text-align:left; border:1px solid var(--border); background:#fff; border-radius:10px; padding:9px 12px; font-family:inherit; font-size:13px; color:var(--gray-800); cursor:pointer; }
+    .wx-result:hover { background:#f4f8ff; border-color:#bcd2f7; }
+    .wx-result span { color:var(--text-muted); font-size:11px; }
+    .wx-searching { font-size:12.5px; color:var(--text-muted); padding:6px 2px; }
+    @media (max-width:720px){ .wx-days{ grid-template-columns:repeat(4,1fr);} }
+  </style>
 </head>
 <body>
 
-<!-- ─── SIDEBAR ─── -->
 <aside class="sidebar">
   <div class="sidebar-logo">
     <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -38,7 +81,6 @@
       <svg class="nav-chevron" id="dashCenterChevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
     </a>
     <div class="nav-submenu" id="dashCenterMenu" hidden>
-      <!-- Keep this list identical to index.html's #dashCenterMenu. -->
       <a href="embedded_dashboard.html?name=Quality%20Dashboard&amp;view=dashboard&amp;url=https%3A%2F%2Fboboapp2020-design.github.io%2FML_Dashboard2026_2027%2F">Quality Dashboard</a>
       <a href="embedded_dashboard.html?name=Production%20Dashboard&amp;url=https%3A%2F%2Fboboapp2020-design.github.io%2FSmartdashboardML%2F">Production Dashboard</a>
       <a href="embedded_dashboard.html?name=Sale%20Dashboard&amp;url=dashboards%2Fsales_dashboard.html">Sale Dashboard</a>
@@ -83,75 +125,37 @@
   </div>
 </aside>
 
-<!-- ─── MAIN ─── -->
 <main class="main">
   <div class="acct-wrap">
     <div class="acct-head">
       <div class="acct-title">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-        โปรไฟล์ของฉัน
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 19a4.5 4.5 0 100-9 6 6 0 10-11.5 2"/><line x1="8" y1="19" x2="8" y2="21"/><line x1="12" y1="20" x2="12" y2="22"/><line x1="16" y1="19" x2="16" y2="21"/></svg>
+        อากาศ × อ้อย
       </div>
-      <div class="acct-sub">ข้อมูลนี้แสดงบนแถบด้านซ้ายของทุกหน้า และบันทึกไว้ในเครื่องนี้</div>
+      <div class="acct-sub">พยากรณ์อากาศ 7 วันของโรงงานและพื้นที่ปลูกอ้อย พร้อมคำแนะนำผลต่อการเก็บเกี่ยว · ข้อมูลจาก Open-Meteo (ฟรี)</div>
     </div>
 
     <div class="acct-card">
-      <div class="pf-identity">
-        <button type="button" class="pf-avatar-btn" id="pfAvatarBtn" title="เปลี่ยนรูปโปรไฟล์">
-          <span class="pf-avatar" id="pfAvatar">B</span>
-          <span class="pf-avatar-cam">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
-          </span>
-        </button>
-        <input type="file" id="pfPhotoFile" accept="image/*" hidden>
-        <div>
-          <div class="pf-identity-name" id="pfNamePreview">Bobo</div>
-          <div class="pf-identity-note" id="pfRolePreview">Admin</div>
-          <div class="pf-photo-actions">
-            <button type="button" class="pf-photo-link" id="pfPhotoPick">อัปโหลดรูป</button>
-            <button type="button" class="pf-photo-link danger" id="pfPhotoRemove" hidden>ลบรูป</button>
-          </div>
-        </div>
+      <div class="wx-sub2">
+        <div class="acct-card-title" style="margin:0">พยากรณ์รายเขต</div>
+        <button type="button" class="wx-refresh" id="wxRefresh">รีเฟรช</button>
       </div>
+      <div class="wx-zones" id="wxZones"></div>
 
-      <form id="pfForm" novalidate>
-        <div class="acct-row2">
-          <div class="acct-field">
-            <label class="acct-label" for="pfName">ชื่อที่แสดง</label>
-            <input class="acct-input" type="text" id="pfName" maxlength="40" placeholder="เช่น Bobo">
-          </div>
-          <div class="acct-field">
-            <label class="acct-label" for="pfRole">ตำแหน่ง / บทบาท</label>
-            <input class="acct-input" type="text" id="pfRole" maxlength="40" placeholder="เช่น Admin, Planner">
-          </div>
+      <div class="wx-add">
+        <div class="wx-add-title">เพิ่มเขตปลูกอ้อย / จุดที่ต้องเฝ้าระวัง</div>
+        <div class="wx-add-desc">พิมพ์ชื่อเมือง/อำเภอ/จังหวัด (ไทย ลาว หรืออังกฤษ) แล้วเลือกจากผลค้นหา — ระบบหาพิกัดให้อัตโนมัติ</div>
+        <div class="wx-add-row">
+          <input id="wxAddInput" placeholder="เช่น Savannakhet, ไชยบุรี, Xaybuly" autocomplete="off">
+          <button id="wxAddBtn">ค้นหา</button>
         </div>
-        <div class="acct-field">
-          <label class="acct-label" for="pfEmail">Email ติดต่อ</label>
-          <input class="acct-input" type="email" id="pfEmail" maxlength="80" placeholder="name@example.com" spellcheck="false">
-          <div class="acct-hint">ใช้เป็นค่าเริ่มต้นในหน้า "ขอสร้าง Dashboard" เพื่อไม่ต้องพิมพ์ซ้ำ</div>
-        </div>
-
-        <div class="acct-actions">
-          <button type="submit" class="acct-btn primary">บันทึกโปรไฟล์</button>
-          <button type="button" class="acct-btn ghost" id="pfReset">คืนค่าเดิม</button>
-        </div>
-        <div class="acct-msg" id="pfMsg"></div>
-      </form>
-    </div>
-
-    <div class="acct-card">
-      <div class="acct-card-title">บัญชีผู้ใช้</div>
-      <div class="acct-card-desc">
-        โปรไฟล์นี้เก็บไว้ในเบราว์เซอร์เครื่องนี้เท่านั้น (localStorage) — ยังไม่ผูกกับระบบบัญชีกลาง
-        การสมัครสมาชิกจากหน้าเข้าสู่ระบบจะถูกส่งให้ผู้ดูแลตรวจและเปิดสิทธิ์ก่อนใช้งานจริง
-      </div>
-      <div class="acct-actions">
-        <button type="button" class="acct-btn danger" id="pfSignOut">ออกจากระบบ</button>
+        <div class="wx-results" id="wxResults"></div>
       </div>
     </div>
   </div>
 </main>
 
 <script src="js/sidebar.js?v=20260807t"></script>
-<script src="js/account.js?v=20260805a"></script>
+<script src="js/weather.js?v=20260807s"></script>
 </body>
 </html>
