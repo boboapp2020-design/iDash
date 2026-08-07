@@ -140,7 +140,16 @@
     css.id = 'qbStyles';
     css.textContent =
       '.home-quickbot{display:flex;flex-direction:column}' +
-      '.qb-badge{font-size:10.5px;font-weight:700;color:#0e7a4e;background:#e2f5ec;border-radius:20px;padding:3px 10px;white-space:nowrap}' +
+      '.qb-hero{display:flex;align-items:center;gap:14px;padding:2px 2px 13px;margin-bottom:2px;border-bottom:1px solid #eef2f8}' +
+      '.qb-hero-ava{width:56px;height:56px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;' +
+        'background:radial-gradient(circle at 50% 32%,#f2f7ff,#dce8fb);box-shadow:0 8px 18px -7px rgba(37,99,235,.45),inset 0 1px 0 #fff,0 0 0 1px #e6eefb}' +
+      '.qb-hero-ava svg{width:42px;height:42px}' +
+      '.qb-hero-txt{flex:1;min-width:0}' +
+      '.qb-hero-title{font-size:20px;font-weight:800;letter-spacing:-.01em;line-height:1.1;' +
+        'background:linear-gradient(100deg,#0f1b3d 42%,#2563eb 96%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}' +
+      '.qb-spark{-webkit-text-fill-color:initial;font-size:16px}' +
+      '.qb-hero-sub{font-size:12.5px;color:#64748b;margin-top:3px;font-weight:500}' +
+      '.qb-hero-badge{align-self:flex-start;font-size:10px;font-weight:700;color:#0e7a4e;background:#e2f5ec;border-radius:20px;padding:3px 9px;white-space:nowrap}' +
       '.qb-src{display:flex;gap:6px;margin:10px 0 8px;flex-wrap:wrap}' +
       '.qb-chip{border:1px solid #d3e0f7;background:#fff;border-radius:20px;padding:4px 12px;font:inherit;font-size:11.5px;font-weight:700;color:#475569;cursor:pointer;transition:background .15s,border-color .15s}' +
       '.qb-chip.on{background:#2563eb;color:#fff;border-color:#2563eb}' +
@@ -168,11 +177,26 @@
   function build(mount) {
     mount.classList.add('home-quickbot');
     mount.innerHTML =
-      '<div class="home-sec-head">' +
-        '<span class="home-sec-title"><span class="home-chat-badge">' +
-          '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><path d="M8 10h8M8 13h5"/></svg>' +
-        '</span>ถามผลงานเร็ว</span>' +
-        '<span class="qb-badge">ตัวเลขจริง 100% · ไม่ใช้ AI</span>' +
+      '<div class="qb-hero">' +
+        '<div class="qb-hero-ava">' +
+          '<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">' +
+            '<line x1="32" y1="8" x2="32" y2="15" stroke="#2563eb" stroke-width="2.6" stroke-linecap="round"/>' +
+            '<circle cx="32" cy="6.5" r="3" fill="#3b82f6"/>' +
+            '<rect x="8" y="24" width="7" height="13" rx="3.5" fill="#93c5fd"/>' +
+            '<rect x="49" y="24" width="7" height="13" rx="3.5" fill="#93c5fd"/>' +
+            '<rect x="14" y="15" width="36" height="30" rx="11" fill="url(#qbRg)"/>' +
+            '<rect x="19" y="21" width="26" height="18" rx="9" fill="#0f1b3d"/>' +
+            '<circle cx="27" cy="29.5" r="3.2" fill="#5eead4"/>' +
+            '<circle cx="37" cy="29.5" r="3.2" fill="#5eead4"/>' +
+            '<path d="M27 35 q5 3 10 0" stroke="#5eead4" stroke-width="2" fill="none" stroke-linecap="round"/>' +
+            '<defs><linearGradient id="qbRg" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#60a5fa"/><stop offset="1" stop-color="#2563eb"/></linearGradient></defs>' +
+          '</svg>' +
+        '</div>' +
+        '<div class="qb-hero-txt">' +
+          '<div class="qb-hero-title">Quick AI Chatbot <span class="qb-spark">✨</span></div>' +
+          '<div class="qb-hero-sub">ค้นหาข้อมูลโรงงานได้ทันที</div>' +
+        '</div>' +
+        '<span class="qb-hero-badge">ตัวเลขจริง 100%</span>' +
       '</div>' +
       '<div class="qb-src" id="qbSrc"></div>' +
       '<div class="qb-log" id="qbLog"></div>' +
