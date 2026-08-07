@@ -7,9 +7,11 @@
   'use strict';
 
   // ── Apps Script Web App /exec URL ─────────────────────────────────────────
-  // Deployed on the iDash spreadsheet, as its own deployment — separate from
-  // the KPI API (AKfycbx2Kmyn…) and the learn-packet webhook.
-  var REQUEST_API_URL = 'https://script.google.com/macros/s/AKfycbzVQWOLmJvhbKiVxPPGpYB-7N2cnamMR15GR_lipM-Ea2QKyjWgLozNoAgr0bskfbfxjg/exec';
+  // Consolidated into the account service (signup_log.gs) so there is one
+  // Apps Script to deploy, not two — dashboard requests POST here with
+  // action:'dashreq', and the "ทำเสร็จ" button links back to this same
+  // deployment's doGet. Same URL as auth.js accountApiUrl.
+  var REQUEST_API_URL = 'https://script.google.com/macros/s/AKfycbwGAHWfHN-u6WW1uPLWo12vMRdj2aLNJIdi458UNm6vza1yDT1PH_1EcU0qNbNSY7NW9w/exec';
   // ──────────────────────────────────────────────────────────────────────────
   // Or set it without editing this file, from the browser console:
   //   iDashRequest.setUrl('https://script.google.com/macros/s/.../exec')
@@ -353,6 +355,7 @@
           // Apps Script Web Apps do not answer.
           headers: { 'Content-Type': 'text/plain;charset=utf-8' },
           body: JSON.stringify({
+            action: 'dashreq',
             fromEmail: el.from.value.trim(),
             subject: el.subject.value,
             // The sender's name rides inside details, so it reaches the admin
