@@ -25,7 +25,7 @@
   // signup, admin review, and sign-in verification — landing.html and
   // admin.js read it from here so there is a single source of truth.
   var ACCOUNT_API_URL =
-    'https://script.google.com/macros/s/AKfycbyY5SHhs5_-qFOraFkIRNcj4gUh2Ak1AEhoAv7cdEdFQi86glm7Lyw5ycpHRm9zB4aG/exec';
+    'https://script.google.com/macros/s/AKfycbwGAHWfHN-u6WW1uPLWo12vMRdj2aLNJIdi458UNm6vza1yDT1PH_1EcU0qNbNSY7NW9w/exec';
   var ACCOUNT_KEY = 'idash.account';
 
   function isSignedIn() {
