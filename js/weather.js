@@ -15,16 +15,32 @@
 
   var FORECAST = 'https://api.open-meteo.com/v1/forecast';
 
-  // Cane zones across the two provinces (approximate town centres; the map also
-  // lets you click anywhere).
+  // Zones down to the district level. Savannakhet is covered densely (all 15
+  // districts) per the owner; Khammouane keeps its main towns. Coordinates are
+  // approximate district centres — the map also lets you click ANY point for an
+  // exact-spot forecast.
   var ZONES = [
-    { name: 'เมืองสะหวันนะเขต', prov: 'สะหวันนะเขต', lat: 16.556, lon: 104.751, factory: true },
-    { name: 'ไชยบุรี (Xaybuly)', prov: 'สะหวันนะเขต', lat: 16.830, lon: 105.200 },
+    // ── แขวงสะหวันนะเขต (Savannakhet) — 15 เมือง ──
+    { name: 'เมืองสะหวันนะเขต (ไกสอน)', prov: 'สะหวันนะเขต', lat: 16.556, lon: 104.751, factory: true },
+    { name: 'อุทุมพอน (Outhoumphone)', prov: 'สะหวันนะเขต', lat: 16.620, lon: 105.030 },
+    { name: 'ไซบูลี (Xaybuly)', prov: 'สะหวันนะเขต', lat: 16.860, lon: 105.130 },
+    { name: 'ไซพูทอง (Xaiphouthong)', prov: 'สะหวันนะเขต', lat: 16.330, lon: 104.960 },
     { name: 'จำพอน (Champhone)', prov: 'สะหวันนะเขต', lat: 16.220, lon: 105.140 },
-    { name: 'อุทุมพอน (Outhoumphone)', prov: 'สะหวันนะเขต', lat: 16.620, lon: 105.020 },
+    { name: 'สองคอน (Songkhone)', prov: 'สะหวันนะเขต', lat: 16.100, lon: 105.000 },
+    { name: 'ท่าปางทอง (Thapangthong)', prov: 'สะหวันนะเขต', lat: 16.400, lon: 105.330 },
+    { name: 'อาดสะพังทอง (Atsaphangthong)', prov: 'สะหวันนะเขต', lat: 16.730, lon: 105.300 },
+    { name: 'พะลานไซ (Phalanxay)', prov: 'สะหวันนะเขต', lat: 16.480, lon: 105.520 },
+    { name: 'อาดสะพอน (Atsaphone)', prov: 'สะหวันนะเขต', lat: 16.930, lon: 105.520 },
+    { name: 'ซนบุรี (Xonbuly)', prov: 'สะหวันนะเขต', lat: 15.950, lon: 105.420 },
+    { name: 'พิน (Phine)', prov: 'สะหวันนะเขต', lat: 16.530, lon: 105.750 },
+    { name: 'วีละบุรี (Vilabuly)', prov: 'สะหวันนะเขต', lat: 16.720, lon: 105.950 },
+    { name: 'เซโปน (Xepon)', prov: 'สะหวันนะเขต', lat: 16.690, lon: 106.220 },
+    { name: 'นอง (Nong)', prov: 'สะหวันนะเขต', lat: 16.450, lon: 106.420 },
+    // ── แขวงคำม่วน (Khammouane) ──
     { name: 'ท่าแขก (Thakhek)', prov: 'คำม่วน', lat: 17.411, lon: 104.821 },
     { name: 'หนองบก (Nongbok)', prov: 'คำม่วน', lat: 17.100, lon: 104.930 },
-    { name: 'เซบั้งไฟ (Xebangfai)', prov: 'คำม่วน', lat: 16.980, lon: 105.120 }
+    { name: 'เซบั้งไฟ (Xebangfai)', prov: 'คำม่วน', lat: 16.980, lon: 105.120 },
+    { name: 'มะหาไซ (Mahaxay)', prov: 'คำม่วน', lat: 17.400, lon: 105.200 }
   ];
 
   function esc(s) {
