@@ -217,9 +217,9 @@
       return;
     }
 
-    // Quality answers with grounded AI (scoped to the dashboard data) when an
-    // AI provider is configured; otherwise it falls back to keyword lookup.
-    if (src.id === 'quality' && aiConfig()) { askAI(query); return; }
+    // Quality answers with grounded AI (Google Gemini free tier, scoped to the
+    // dashboard data) when a Copilot key is set; otherwise keyword lookup.
+    if (src.id === 'quality' && copilotKey()) { askGemini(query); return; }
 
     var data = src.getKpis();
     if (!data) {
@@ -348,6 +348,59 @@
       });
   }
 
+  /* ── Google Gemini (free tier, direct) — the Copilot's default AI ───────── */
+  var GEMINI_MODEL = 'gemini-2.0-flash';
+  function copilotKey() {
+    try { return (localStorage.getItem('idash.copilotKey') || '').trim(); } catch (e) { return ''; }
+  }
+  function setCopilotKey(k) {
+    try { localStorage.setItem('idash.copilotKey', String(k || '').trim()); } catch (e) {}
+  }
+
+  function askGemini(question) {
+    var key = copilotKey();
+    var facts = qualityFacts();
+    if (!facts) {
+      pushMsg('กำลังโหลดข้อมูล Quality… ลองอีกครั้งในอีกสักครู่', 'bot');
+      loadFeed().catch(function () {});
+      return;
+    }
+    var tid = pushThinking();
+    var prompt = 'ข้อมูล Quality Dashboard (ล่าสุด ' + facts.latestDate + ') เป็น JSON:\n' +
+      JSON.stringify(facts.kpis) + '\n\nคำถามผู้ใช้: ' + question + '\n\nตอบเป็นภาษาไทยตามกติกา:';
+    var url = 'https://generativelanguage.googleapis.com/v1beta/models/' + GEMINI_MODEL +
+      ':generateContent?key=' + encodeURIComponent(key);
+    fetch(url, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({
+        system_instruction: { parts: [{ text: QA_SYSTEM }] },
+        contents: [{ role: 'user', parts: [{ text: prompt }] }],
+        generationConfig: { maxOutputTokens: 900, temperature: 0.2 }
+      })
+    })
+      .then(function (r) { return r.json(); })
+      .then(function (d) {
+        removeThinking(tid);
+        var text = d && d.candidates && d.candidates[0] && d.candidates[0].content &&
+          d.candidates[0].content.parts &&
+          d.candidates[0].content.parts.map(function (p) { return p.text || ''; }).join('').trim();
+        if (text) {
+          var ok = verifyNumbers(text, facts);
+          pushMsg(esc(text).replace(/\n/g, '<br>') +
+            '<div class="qb-aicred">🤖 AI (Gemini · ฟรี) · ตอบจากข้อมูล Quality จริง' +
+            (ok ? '' : ' · <span class="qb-warn">⚠ โปรดตรวจตัวเลขอีกครั้ง</span>') + '</div>', 'bot');
+        } else {
+          var err = (d && d.error && d.error.message) || 'ตอบไม่สำเร็จ — ตรวจ API key ว่าถูกต้อง';
+          pushMsg('ขออภัย ตอบไม่สำเร็จ: ' + esc(err), 'bot');
+        }
+      })
+      .catch(function () {
+        removeThinking(tid);
+        pushMsg('เชื่อมต่อ Gemini ไม่สำเร็จ — ตรวจอินเทอร์เน็ต หรือ API key (กดรูปเฟือง ⚙ เพื่อแก้)', 'bot');
+      });
+  }
+
   /* ── Inline panel (teal identity — distinct from the blue AI Chatbot) ──── */
   function injectStyles() {
     if (document.getElementById('qbStyles')) return;
@@ -365,7 +418,18 @@
         'background:linear-gradient(100deg,#0f2a28 38%,#0d9488 96%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}' +
       '.qb-spark{-webkit-text-fill-color:initial;font-size:16px}' +
       '.qb-hero-sub{font-size:12.5px;color:#64748b;margin-top:3px;font-weight:500}' +
-      '.qb-hero-badge{align-self:flex-start;font-size:10px;font-weight:700;color:#0e7a4e;background:#e2f5ec;border-radius:20px;padding:3px 9px;white-space:nowrap}' +
+      '.qb-hero-right{display:flex;align-items:center;gap:7px;align-self:flex-start}' +
+      '.qb-hero-badge{font-size:10px;font-weight:700;color:#0e7a4e;background:#e2f5ec;border-radius:20px;padding:3px 9px;white-space:nowrap}' +
+      '.qb-gear{border:none;background:none;padding:2px;cursor:pointer;color:#94a3b8;display:flex;border-radius:6px;transition:color .15s,background .15s}' +
+      '.qb-gear:hover{color:#0d9488;background:#ecfdf9}.qb-gear svg{width:16px;height:16px}' +
+      '.qb-set{background:#f0fdfa;border:1px solid #cbe7e1;border-radius:10px;padding:10px 12px;margin-bottom:10px}' +
+      '.qb-set[hidden]{display:none}' +
+      '.qb-set-label{font-size:11px;font-weight:700;color:#0f2a28;margin-bottom:6px}' +
+      '.qb-set-row{display:flex;gap:7px}' +
+      '.qb-set-row input{flex:1;min-width:0;border:1px solid #cfe9e3;border-radius:8px;padding:7px 10px;font:inherit;font-size:12px;outline:none}' +
+      '.qb-set-row input:focus{border-color:#0d9488;box-shadow:0 0 0 3px rgba(13,148,136,.12)}' +
+      '.qb-set-row button{border:none;background:linear-gradient(180deg,#14b8a6,#0d9488);color:#fff;border-radius:8px;padding:0 14px;font:inherit;font-size:12px;font-weight:700;cursor:pointer}' +
+      '.qb-set-hint{font-size:10.5px;color:#5b8a82;margin-top:6px;line-height:1.5}' +
       '.qb-src{display:flex;gap:6px;margin:10px 0 8px;flex-wrap:wrap}' +
       '.qb-chip{border:1px solid #cbe7e1;background:#fff;border-radius:20px;padding:4px 12px;font:inherit;font-size:11.5px;font-weight:700;color:#475569;cursor:pointer;transition:background .15s,border-color .15s}' +
       '.qb-chip.on{background:#0d9488;color:#fff;border-color:#0d9488}' +
@@ -434,7 +498,20 @@
           '<div class="qb-hero-title">iDash Copilot <span class="qb-spark">✨</span></div>' +
           '<div class="qb-hero-sub">ค้นหาข้อมูลโรงงานได้ทันที</div>' +
         '</div>' +
-        '<span class="qb-hero-badge">ตัวเลขจริง 100%</span>' +
+        '<div class="qb-hero-right">' +
+          '<span class="qb-hero-badge">ตัวเลขจริง 100%</span>' +
+          '<button type="button" class="qb-gear" id="qbGear" title="ตั้งค่า Gemini API key (ฟรี)" aria-label="ตั้งค่า">' +
+            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>' +
+          '</button>' +
+        '</div>' +
+      '</div>' +
+      '<div class="qb-set" id="qbSet" hidden>' +
+        '<div class="qb-set-label">Gemini API key (ฟรีจาก Google AI Studio)</div>' +
+        '<div class="qb-set-row">' +
+          '<input id="qbSetInput" type="password" placeholder="วาง API key ที่นี่" autocomplete="off">' +
+          '<button type="button" id="qbSetSave">บันทึก</button>' +
+        '</div>' +
+        '<div class="qb-set-hint">รับ key ฟรีที่ <b>aistudio.google.com/apikey</b> — ใช้โควตาฟรี ไม่เสียเงิน · เก็บไว้ในเครื่องนี้เท่านั้น</div>' +
       '</div>' +
       '<div class="qb-src" id="qbSrc"></div>' +
       '<div class="qb-log" id="qbLog"></div>' +
@@ -459,9 +536,9 @@
           pushMsg('ยังไม่ได้เชื่อมข้อมูลของ <b>' + esc(s.label) + '</b> — เมื่อมี data API แล้วจะถามได้ทันที', 'bot');
         } else if (s.id === 'quality' && !qualityNoted) {
           qualityNoted = true;
-          pushMsg(aiConfig()
-            ? '💬 แท็บ <b>Quality</b> ตอบด้วย <b>AI</b> (เฉพาะข้อมูลในแดชบอร์ดนี้เท่านั้น) — ถามเป็นประโยคได้เลย เช่น "แนวโน้มสีน้ำตาล 7 วัน" หรือ "เทียบความบริสุทธิ์เมื่อวานกับวันนี้"'
-            : 'แท็บ <b>Quality</b> ค้นข้อมูลจริงได้เลย — ถ้าตั้งค่า AI (โหมด Supabase gateway) ในหน้า Home จะถามเป็นประโยค/วิเคราะห์ย้อนหลังได้', 'bot');
+          pushMsg(copilotKey()
+            ? '💬 แท็บ <b>Quality</b> ตอบด้วย <b>AI (Gemini · ฟรี)</b> เฉพาะข้อมูลในแดชบอร์ดนี้ — ถามเป็นประโยคได้เลย เช่น "แนวโน้มสีน้ำตาล 7 วัน" หรือ "เทียบความบริสุทธิ์เมื่อวานกับวันนี้"'
+            : '🔑 แท็บ <b>Quality</b> ใช้ <b>AI ฟรี (Gemini)</b> — กดรูปเฟือง ⚙ มุมขวาบนเพื่อใส่ API key ฟรีก่อน (ตอนนี้ยังค้นแบบ keyword ได้)', 'bot');
         }
       });
       srcEl.appendChild(b);
@@ -479,6 +556,22 @@
       if (!q) return;
       inp.value = '';
       answer(q);
+    });
+
+    // Gemini key settings (gear → strip). The key stays in this browser only.
+    var setBox = mount.querySelector('#qbSet');
+    var setInput = mount.querySelector('#qbSetInput');
+    setInput.value = copilotKey();
+    mount.querySelector('#qbGear').addEventListener('click', function () {
+      setBox.hidden = !setBox.hidden;
+      if (!setBox.hidden) setInput.focus();
+    });
+    mount.querySelector('#qbSetSave').addEventListener('click', function () {
+      setCopilotKey(setInput.value);
+      setBox.hidden = true;
+      pushMsg(copilotKey()
+        ? '✅ บันทึก Gemini key แล้ว — แท็บ Quality ถามเป็นประโยค/วิเคราะห์ย้อนหลังได้เลย (ฟรี)'
+        : 'ล้าง key แล้ว — แท็บ Quality กลับไปโหมดค้นหา keyword', 'bot');
     });
 
     // Warm the feed so answers are instant.
