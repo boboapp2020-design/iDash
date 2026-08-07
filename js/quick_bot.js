@@ -349,12 +349,17 @@
   }
 
   /* ── Google Gemini (free tier, direct) — the Copilot's default AI ───────── */
-  var GEMINI_MODEL = 'gemini-2.0-flash';
   function copilotKey() {
     try { return (localStorage.getItem('idash.copilotKey') || '').trim(); } catch (e) { return ''; }
   }
   function setCopilotKey(k) {
     try { localStorage.setItem('idash.copilotKey', String(k || '').trim()); } catch (e) {}
+  }
+  function copilotModel() {
+    try { return (localStorage.getItem('idash.copilotModel') || 'gemini-2.0-flash').trim(); } catch (e) { return 'gemini-2.0-flash'; }
+  }
+  function setCopilotModel(m) {
+    try { localStorage.setItem('idash.copilotModel', String(m || '').trim()); } catch (e) {}
   }
 
   function askGemini(question) {
@@ -368,7 +373,7 @@
     var tid = pushThinking();
     var prompt = 'ข้อมูล Quality Dashboard (ล่าสุด ' + facts.latestDate + ') เป็น JSON:\n' +
       JSON.stringify(facts.kpis) + '\n\nคำถามผู้ใช้: ' + question + '\n\nตอบเป็นภาษาไทยตามกติกา:';
-    var url = 'https://generativelanguage.googleapis.com/v1beta/models/' + GEMINI_MODEL +
+    var url = 'https://generativelanguage.googleapis.com/v1beta/models/' + copilotModel() +
       ':generateContent?key=' + encodeURIComponent(key);
     fetch(url, {
       method: 'POST',
@@ -429,6 +434,8 @@
       '.qb-set-row input{flex:1;min-width:0;border:1px solid #cfe9e3;border-radius:8px;padding:7px 10px;font:inherit;font-size:12px;outline:none}' +
       '.qb-set-row input:focus{border-color:#0d9488;box-shadow:0 0 0 3px rgba(13,148,136,.12)}' +
       '.qb-set-row button{border:none;background:linear-gradient(180deg,#14b8a6,#0d9488);color:#fff;border-radius:8px;padding:0 14px;font:inherit;font-size:12px;font-weight:700;cursor:pointer}' +
+      '.qb-set-model{width:100%;margin-top:5px;border:1px solid #cfe9e3;border-radius:8px;padding:7px 10px;font:inherit;font-size:12px;color:#0f2a28;background:#fff;outline:none}' +
+      '.qb-set-model:focus{border-color:#0d9488;box-shadow:0 0 0 3px rgba(13,148,136,.12)}' +
       '.qb-set-hint{font-size:10.5px;color:#5b8a82;margin-top:6px;line-height:1.5}' +
       '.qb-src{display:flex;gap:6px;margin:10px 0 8px;flex-wrap:wrap}' +
       '.qb-chip{border:1px solid #cbe7e1;background:#fff;border-radius:20px;padding:4px 12px;font:inherit;font-size:11.5px;font-weight:700;color:#475569;cursor:pointer;transition:background .15s,border-color .15s}' +
@@ -511,7 +518,14 @@
           '<input id="qbSetInput" type="password" placeholder="วาง API key ที่นี่" autocomplete="off">' +
           '<button type="button" id="qbSetSave">บันทึก</button>' +
         '</div>' +
-        '<div class="qb-set-hint">รับ key ฟรีที่ <b>aistudio.google.com/apikey</b> — ใช้โควตาฟรี ไม่เสียเงิน · เก็บไว้ในเครื่องนี้เท่านั้น</div>' +
+        '<div class="qb-set-label" style="margin-top:9px">โมเดล (ถ้าตัวหนึ่งโควตาเต็ม ลองอีกตัว)</div>' +
+        '<select id="qbSetModel" class="qb-set-model">' +
+          '<option value="gemini-2.0-flash">gemini-2.0-flash</option>' +
+          '<option value="gemini-2.5-flash">gemini-2.5-flash</option>' +
+          '<option value="gemini-2.0-flash-lite">gemini-2.0-flash-lite</option>' +
+          '<option value="gemini-1.5-flash">gemini-1.5-flash</option>' +
+        '</select>' +
+        '<div class="qb-set-hint">รับ key ฟรีที่ <b>aistudio.google.com/apikey</b> — ตอน Create key เลือก <b>"Create API key in new project"</b> เพื่อให้ได้โควตาฟรี · เก็บไว้ในเครื่องนี้เท่านั้น</div>' +
       '</div>' +
       '<div class="qb-src" id="qbSrc"></div>' +
       '<div class="qb-log" id="qbLog"></div>' +
@@ -561,16 +575,19 @@
     // Gemini key settings (gear → strip). The key stays in this browser only.
     var setBox = mount.querySelector('#qbSet');
     var setInput = mount.querySelector('#qbSetInput');
+    var setModel = mount.querySelector('#qbSetModel');
     setInput.value = copilotKey();
+    setModel.value = copilotModel();
     mount.querySelector('#qbGear').addEventListener('click', function () {
       setBox.hidden = !setBox.hidden;
       if (!setBox.hidden) setInput.focus();
     });
     mount.querySelector('#qbSetSave').addEventListener('click', function () {
       setCopilotKey(setInput.value);
+      setCopilotModel(setModel.value);
       setBox.hidden = true;
       pushMsg(copilotKey()
-        ? '✅ บันทึก Gemini key แล้ว — แท็บ Quality ถามเป็นประโยค/วิเคราะห์ย้อนหลังได้เลย (ฟรี)'
+        ? '✅ บันทึกแล้ว (โมเดล ' + esc(copilotModel()) + ') — แท็บ Quality ถามเป็นประโยค/วิเคราะห์ย้อนหลังได้เลย (ฟรี)'
         : 'ล้าง key แล้ว — แท็บ Quality กลับไปโหมดค้นหา keyword', 'bot');
     });
 
