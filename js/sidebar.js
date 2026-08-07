@@ -34,6 +34,7 @@
     if (dot) dot.hidden = !(max > inboxSeen());
   }
   function checkInboxUnread() {
+    if (!document.getElementById('inboxDot')) return;  // no inbox icon on this page
     var a = inboxAccount();
     if (!a || !a.username) return;                 // owner / not a sheet account
     var API = window.iDashAuth && window.iDashAuth.accountApiUrl;
@@ -108,22 +109,9 @@
       else menu.appendChild(adminBtn);
     }
 
-    // "กล่องข้อความ" (inbox) — injected into the main nav on every page so one
-    // change reaches all. Carries an unread dot; the count is fetched below.
-    const nav = document.querySelector('.sidebar-nav');
-    if (nav && !document.getElementById('inboxLink')) {
-      const a = document.createElement('a');
-      a.href = 'inbox.html';
-      a.id = 'inboxLink';
-      a.style.position = 'relative';
-      if (/(^|\/)inbox\.html/.test(location.pathname)) a.classList.add('active');
-      a.innerHTML =
-        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16a2 2 0 012 2v12a2 2 0 01-2 2H4a2 2 0 01-2-2V6a2 2 0 012-2z"/><polyline points="22 6 12 13 2 6"/></svg>' +
-        'กล่องข้อความ' +
-        '<span id="inboxDot" hidden style="position:absolute;top:11px;left:26px;width:8px;height:8px;border-radius:50%;background:#ef4444;border:1.5px solid #fff;box-shadow:0 0 0 1px rgba(239,68,68,.25)"></span>';
-      // Place it just after AI Chatbot (last nav link), else append.
-      nav.appendChild(a);
-    }
+    // The inbox is reached from the icon-only button in the Home topbar
+    // (index.html), placed after the current-date pill. sidebar.js only owns
+    // the unread dot on whatever page carries #inboxDot.
 
     trigger.addEventListener('click', (e) => {
       e.stopPropagation();
