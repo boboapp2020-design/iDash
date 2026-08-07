@@ -348,12 +348,13 @@
   ];
 
   // Compact facts: a shared dates[] plus each KPI's values[] aligned to it —
-  // far fewer tokens than repeating the date on every point, so all ~55 fields
-  // fit with 10 days of history.
+  // far fewer tokens than repeating the date on every point. Per the owner we
+  // send the WHOLE season (every day in the feed) so any date can be asked; the
+  // compact shape keeps even a full season inside the model's context.
   function qualityFacts() {
     var f = readFeedCache();
     if (!f || !f.daily.length) return null;
-    var rows = f.daily.slice(-10);
+    var rows = f.daily;
     var latest = rows[rows.length - 1];
     var dates = rows.map(function (r) { return r.date; });
     function r3(v) { return v === null ? null : Math.round(v * 1000) / 1000; }
