@@ -39,7 +39,10 @@
     { name: 'จำพอน (Champhone)', short: 'จำพอน', prov: 'สะหวันนะเขต', lat: 16.220, lon: 105.140, key: true },
     { name: 'อาดสะพังทอง (Atsaphangthong)', short: 'อาดสะพังทอง', prov: 'สะหวันนะเขต', lat: 16.730, lon: 105.300, key: true },
     { name: 'เซบั้งไฟ (Xebangfai)', short: 'เซบั้งไฟ', prov: 'คำม่วน', lat: 16.980, lon: 105.120, key: true },
-    { name: 'นาสะอาด (คำม่วน)', short: 'นาสะอาด', prov: 'คำม่วน', lat: 17.030, lon: 105.040, key: true, approx: true },
+    // นาสะอาด: per the owner's map screenshot — on Route 13 just east of Nong
+    // Bok town (which sits by the Mekong at ~16.96,104.80), between Ban Nadon
+    // (N) and Ban Nongpèn (SE).
+    { name: 'นาสะอาด (คำม่วน)', short: 'นาสะอาด', prov: 'คำม่วน', lat: 16.968, lon: 104.878, key: true, approx: true },
     { name: 'อุทุมพอน (Outhoumphone)', prov: 'สะหวันนะเขต', lat: 16.620, lon: 105.030 },
     { name: 'ไซพูทอง (Xaiphouthong)', prov: 'สะหวันนะเขต', lat: 16.330, lon: 104.960 },
     { name: 'สองคอน (Songkhone)', prov: 'สะหวันนะเขต', lat: 16.100, lon: 105.000 },
@@ -52,7 +55,7 @@
     { name: 'เซโปน (Xepon)', prov: 'สะหวันนะเขต', lat: 16.690, lon: 106.220 },
     { name: 'นอง (Nong)', prov: 'สะหวันนะเขต', lat: 16.450, lon: 106.420 },
     { name: 'ท่าแขก (Thakhek)', prov: 'คำม่วน', lat: 17.411, lon: 104.821 },
-    { name: 'หนองบก (Nongbok)', prov: 'คำม่วน', lat: 17.100, lon: 104.930 },
+    { name: 'หนองบก (Nongbok)', prov: 'คำม่วน', lat: 16.958, lon: 104.802 },
     { name: 'มะหาไซ (Mahaxay)', prov: 'คำม่วน', lat: 17.400, lon: 105.200 }
   ];
 
