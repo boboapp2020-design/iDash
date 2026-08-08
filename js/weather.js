@@ -106,13 +106,31 @@
     return Math.ceil((open - now) / 86400000);
   }
 
-  /* ── Open-Meteo: 7 past + 7 future days + current, one call ──────────── */
+  /* ── Open-Meteo: 7 past + 7 future days + current, one call ────────────
+   * Responses are cached in localStorage for 30 min so a refresh paints every
+   * pin + the panel instantly instead of re-fetching 19 forecasts. */
+  var WX_TTL = 30 * 60 * 1000;
+  function wxCacheAll() {
+    try { return JSON.parse(localStorage.getItem('idash.wxCache') || '{}'); } catch (e) { return {}; }
+  }
   function forecast(lat, lon) {
+    var key = Number(lat).toFixed(3) + ',' + Number(lon).toFixed(3);
+    var hit = wxCacheAll()[key];
+    if (hit && Date.now() - hit.ts < WX_TTL) return Promise.resolve(hit.d);
     var url = FORECAST + '?latitude=' + lat + '&longitude=' + lon +
       '&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,wind_speed_10m_max,sunrise,sunset' +
       '&current=temperature_2m,relative_humidity_2m,surface_pressure,wind_speed_10m,wind_direction_10m,weather_code' +
       '&timezone=auto&forecast_days=7&past_days=7';
-    return fetch(url).then(function (r) { return r.json(); });
+    return fetch(url).then(function (r) { return r.json(); }).then(function (d) {
+      if (d && d.daily) {
+        try {
+          var all = wxCacheAll();
+          all[key] = { ts: Date.now(), d: d };
+          localStorage.setItem('idash.wxCache', JSON.stringify(all));
+        } catch (e) {}
+      }
+      return d;
+    });
   }
   // daily arrays carry 14 entries: [0..6] past, [7..13] today onward.
   function splitDaily(daily) {
@@ -336,12 +354,20 @@
   /* ── Rain radar (RainViewer, free) ────────────────────────────────────── */
   var radar = { host: null, path: null, time: null };
   function loadRadarMeta() {
+    // 5-min cache — radar frames update every ~10 min anyway.
+    try {
+      var c = JSON.parse(localStorage.getItem('idash.wxRadar') || 'null');
+      if (c && Date.now() - c.ts < 300000) { radar.host = c.host; radar.path = c.path; radar.time = c.time; return Promise.resolve(radar); }
+    } catch (e) {}
     return fetch('https://api.rainviewer.com/public/weather-maps.json')
       .then(function (r) { return r.json(); })
       .then(function (j) {
         var frames = (j && j.radar && j.radar.past) || [];
         var last = frames[frames.length - 1];
-        if (last) { radar.host = j.host; radar.path = last.path; radar.time = last.time; }
+        if (last) {
+          radar.host = j.host; radar.path = last.path; radar.time = last.time;
+          try { localStorage.setItem('idash.wxRadar', JSON.stringify({ ts: Date.now(), host: radar.host, path: radar.path, time: radar.time })); } catch (e) {}
+        }
         return radar;
       });
   }
