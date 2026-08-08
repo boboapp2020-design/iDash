@@ -96,6 +96,35 @@
     .wxf-npk { font-size: 13px; font-weight: 700; color: #e6f7ee; letter-spacing: .01em; }
     .wxf-npk b { color: #6ee7b7; }
     .wxp-fert-note { font-size: 11px; color: #b9d4c4; line-height: 1.6; margin-top: 7px; }
+    /* District soil intelligence (executive) */
+    .if-intel { margin-top: 16px; padding: 18px 20px 22px; }
+    .if-intel-head { font-size: 16px; font-weight: 800; color: #e2ecff; margin-bottom: 4px; }
+    .if-intel-head span { display: block; font-size: 11px; font-weight: 600; color: #7488ab; margin-top: 3px; }
+    .wxi-kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 16px 0 6px; }
+    @media (max-width: 720px){ .wxi-kpis { grid-template-columns: repeat(2, 1fr); } }
+    .wxi-kpi { background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.1); border-radius: 14px; padding: 13px; text-align: center; }
+    .wxi-kpi-v { font-size: 24px; font-weight: 800; color: #f1f6ff; letter-spacing: -.02em; }
+    .wxi-kpi-n { font-size: 11px; font-weight: 600; color: #8fa3c4; margin-top: 3px; }
+    .wxi-sec-h { font-size: 13px; font-weight: 800; color: #a5b8d6; margin: 20px 0 9px; }
+    .wxi-tbl { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+    .wxi-tbl th { text-align: left; font-size: 10.5px; font-weight: 700; color: #7488ab; padding: 6px 9px; border-bottom: 1px solid rgba(255,255,255,.12); white-space: nowrap; }
+    .wxi-tbl td { padding: 8px 9px; border-bottom: 1px solid rgba(255,255,255,.06); color: #cdd9ef; }
+    .wxi-tbl tbody tr:hover { background: rgba(255,255,255,.03); }
+    .wxi-d { font-weight: 700; color: #e2ecff; }
+    .wxi-tex { font-size: 11px; color: #9fb0cd; }
+    .wxi-pill { display: inline-block; font-size: 10.5px; font-weight: 800; padding: 2px 10px; border-radius: 999px; }
+    .wxi-pill.lv-high { background: rgba(239,68,68,.16); color: #fca5a5; }
+    .wxi-pill.lv-mid { background: rgba(245,158,11,.16); color: #fcd34d; }
+    .wxi-pill.lv-low { background: rgba(16,185,129,.14); color: #6ee7b7; }
+    .wxi-plan { background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.09); border-radius: 13px; padding: 11px 14px; margin-bottom: 8px; }
+    .wxi-plan-h { font-size: 13px; color: #e2ecff; margin-bottom: 5px; }
+    .wxi-plan-a { font-size: 11.5px; color: #c4d2ea; line-height: 1.6; margin-top: 3px; }
+    .wxi-price { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; font-size: 11.5px; color: #8fa3c4; margin-bottom: 10px; }
+    .wxi-price label { color: #cdd9ef; font-weight: 700; display: inline-flex; align-items: center; gap: 5px; }
+    .wxi-price input { width: 62px; background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.16); border-radius: 8px;
+      padding: 5px 8px; color: #e2ecff; font-family: inherit; font-size: 12px; outline: none; }
+    .wxi-price input:focus { border-color: #22c55e; box-shadow: 0 0 0 3px rgba(34,197,94,.2); }
+    .wxi-note { font-size: 10.5px; color: #7488ab; line-height: 1.6; margin-top: 9px; }
     /* Soil × weather combined analysis */
     .wxp-combo { margin-bottom: 10px; background: linear-gradient(120deg, rgba(6,182,212,.08), rgba(139,92,246,.07));
       border: 1px solid rgba(6,182,212,.28); border-radius: 15px; padding: 12px 14px; }
@@ -340,6 +369,14 @@
       </div>
     </div>
 
+    <!-- ── District soil intelligence (executive view) ── -->
+    <div class="if-card if-intel">
+      <div class="if-intel-head">📊 ภาพรวมดินรายเขต — สำหรับวางแผน &amp; ผู้บริหาร
+        <span>คำนวณจากผลวิเคราะห์ดินจริง 188 แปลง · ศูนย์นวัตกรรมและการวิจัยมิตรผล</span>
+      </div>
+      <div id="wxIntel"></div>
+    </div>
+
   </div>
 </main>
 
@@ -348,6 +385,6 @@
 <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
 <script src="js/soil_data.js?v=20260809a"></script>
 <script src="js/sidebar.js?v=20260808i"></script>
-<script src="js/weather.js?v=20260809a"></script>
+<script src="js/weather.js?v=20260809b"></script>
 </body>
 </html>

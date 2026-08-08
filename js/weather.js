@@ -278,6 +278,99 @@
     '</div>';
   }
 
+  /* ── District soil intelligence (executive view, from the 188-field lab) ──
+   * Aggregates every analysed field by district → degradation ranking, soil-
+   * improvement plan (per-rai rates as general cane-brain guidance, area left
+   * to the user), and a fertiliser-cost calculator driven by the lab's real
+   * per-rai N-P-K and user-editable nutrient prices. */
+  function districtIntel() {
+    var S = window.IFIELD_SOIL; if (!S || !S.pts) return [];
+    var g = {};
+    S.pts.forEach(function (p) {
+      var d = p[7] || 'ไม่ระบุ'; if (d === 'เชบั้งไป') d = 'เซบั้งไฟ';
+      if (!g[d]) g[d] = { n: 0, om: 0, ph: 0, lowom: 0, acid: 0, nn: 0, pn: 0, kn: 0, nt: 0, pt: 0, kt: 0, tex: {} };
+      var x = g[d];
+      x.n++; x.om += p[2]; x.ph += p[3];
+      if (p[2] < 1.5) x.lowom++; if (p[3] < 5.5) x.acid++;
+      x.nn += p[8] || 0; x.pn += p[9] || 0; x.kn += p[10] || 0;
+      x.nt += p[11] || 0; x.pt += p[12] || 0; x.kt += p[13] || 0;
+      if (p[6]) x.tex[p[6]] = (x.tex[p[6]] || 0) + 1;
+    });
+    return Object.keys(g).map(function (d) {
+      var x = g[d], om = x.om / x.n, ph = x.ph / x.n;
+      var tex = Object.keys(x.tex).sort(function (a, b) { return x.tex[b] - x.tex[a]; })[0] || '';
+      var urgency = (om < 1.5 ? (1.5 - om) / 1.5 : 0) * 0.6 + (x.acid / x.n) * 0.4;
+      return { d: d, n: x.n, om: om, ph: ph, pctLow: x.lowom / x.n * 100, pctAcid: x.acid / x.n * 100,
+        tex: tex, nn: x.nn / x.n, pn: x.pn / x.n, kn: x.kn / x.n, urgency: urgency };
+    }).sort(function (a, b) { return b.urgency - a.urgency; });
+  }
+
+  var FERT_PRICE = { n: 40, p: 45, k: 35 };   // ฿/kg nutrient — editable, assumption only
+  function renderDistrictIntel() {
+    var host = document.getElementById('wxIntel'); if (!host) return;
+    var rows = districtIntel(); if (!rows.length) { host.innerHTML = ''; return; }
+    var totalFields = rows.reduce(function (s, r) { return s + r.n; }, 0);
+    var lowOmFields = rows.reduce(function (s, r) { return s + Math.round(r.pctLow / 100 * r.n); }, 0);
+
+    function urgencyPill(u) {
+      var lv = u >= 0.5 ? 'high' : u >= 0.35 ? 'mid' : 'low';
+      var t = lv === 'high' ? 'เร่งด่วน' : lv === 'mid' ? 'ควรทำ' : 'เฝ้าระวัง';
+      return '<span class="wxi-pill lv-' + lv + '">' + t + '</span>';
+    }
+    // A) degradation ranking
+    var rank = '<table class="wxi-tbl"><thead><tr><th>เขต</th><th>แปลง</th><th>OM%</th><th>pH</th><th>%OM ต่ำ</th><th>ดินเด่น</th><th>ความเร่งด่วน</th></tr></thead><tbody>' +
+      rows.map(function (r) {
+        return '<tr><td class="wxi-d">' + esc(r.d) + '</td><td>' + r.n + '</td>' +
+          '<td style="color:' + omColor(r.om) + ';font-weight:800">' + fmt(r.om, 2) + '</td>' +
+          '<td style="color:' + (r.ph < 5.5 ? '#fbbf24' : '#9fd3b6') + '">' + fmt(r.ph, 1) + '</td>' +
+          '<td>' + fmt(r.pctLow, 0) + '%</td><td class="wxi-tex">' + esc(r.tex) + '</td>' +
+          '<td>' + urgencyPill(r.urgency) + '</td></tr>';
+      }).join('') + '</tbody></table>';
+
+    // B) improvement plan — top 3 urgent districts
+    var plan = rows.slice(0, 3).map(function (r) {
+      var acts = [];
+      if (r.om < 1.5) acts.push('เพิ่มอินทรียวัตถุ (OM เฉลี่ย ' + fmt(r.om, 2) + '%): ไว้ใบอ้อยคลุมดิน + กากหม้อกรอง ~2-4 ตัน/ไร่ (ค่าทั่วไป ยืนยันกับค่าวิเคราะห์รายแปลง)');
+      if (r.pctAcid >= 30) acts.push('ปรับกรด (' + fmt(r.pctAcid, 0) + '% ของแปลง pH<5.5): ปูนโดโลไมต์/ขี้เถ้าหม้อไอน้ำ ตามค่าวิเคราะห์');
+      if (!acts.length) acts.push('ดินอยู่ในเกณฑ์ใช้ได้ รักษาระดับด้วยการไม่เผาใบ');
+      return '<div class="wxi-plan"><div class="wxi-plan-h">' + urgencyPill(r.urgency) + ' <b>' + esc(r.d) + '</b> · ' + r.n + ' แปลง</div>' +
+        acts.map(function (a) { return '<div class="wxi-plan-a">🌱 ' + esc(a) + '</div>'; }).join('') + '</div>';
+    }).join('');
+
+    // C) fertiliser cost calculator (real per-rai N-P-K × editable prices)
+    var cost = '<div class="wxi-price"><span>ราคาธาตุอาหาร (บาท/กก. · ปรับได้):</span>' +
+      '<label>N <input type="number" id="wxpN" value="' + FERT_PRICE.n + '" min="0"></label>' +
+      '<label>P <input type="number" id="wxpP" value="' + FERT_PRICE.p + '" min="0"></label>' +
+      '<label>K <input type="number" id="wxpK" value="' + FERT_PRICE.k + '" min="0"></label></div>' +
+      '<table class="wxi-tbl" id="wxiCostTbl"><thead><tr><th>เขต</th><th>ปุ๋ยอ้อยปลูก N-P-K (กก./ไร่)</th><th>ต้นทุนปุ๋ย/ไร่ (฿)</th></tr></thead><tbody></tbody></table>' +
+      '<div class="wxi-note">ต้นทุนรวมของเขต = ต้นทุน/ไร่ × พื้นที่ปลูกจริงของเขต (กรอกพื้นที่ที่ทราบ) · ราคาเป็นค่าสมมติเริ่มต้น ปรับให้ตรงราคาจริงได้</div>';
+
+    host.innerHTML =
+      '<div class="wxi-kpis">' +
+        '<div class="wxi-kpi"><div class="wxi-kpi-v">' + totalFields + '</div><div class="wxi-kpi-n">แปลงตรวจดินจริง</div></div>' +
+        '<div class="wxi-kpi"><div class="wxi-kpi-v" style="color:#f87171">' + Math.round(lowOmFields / totalFields * 100) + '%</div><div class="wxi-kpi-n">แปลง OM ต่ำกว่าเกณฑ์</div></div>' +
+        '<div class="wxi-kpi"><div class="wxi-kpi-v">' + rows.length + '</div><div class="wxi-kpi-n">เขตที่มีข้อมูล</div></div>' +
+        '<div class="wxi-kpi"><div class="wxi-kpi-v" style="color:#fbbf24">' + rows.filter(function (r) { return r.urgency >= 0.5; }).length + '</div><div class="wxi-kpi-n">เขตเร่งด่วน</div></div>' +
+      '</div>' +
+      '<div class="wxi-sec-h">🎯 ลำดับความเร่งด่วนปรับปรุงดิน (แย่สุด→ดีสุด)</div>' + rank +
+      '<div class="wxi-sec-h">🌱 แผนปรับปรุงดิน — 3 เขตเร่งด่วนสุด</div>' + plan +
+      '<div class="wxi-sec-h">💰 ต้นทุนปุ๋ยประเมิน (จากค่าแนะนำแล็บ)</div>' + cost;
+
+    function recompute() {
+      FERT_PRICE.n = +(document.getElementById('wxpN').value) || 0;
+      FERT_PRICE.p = +(document.getElementById('wxpP').value) || 0;
+      FERT_PRICE.k = +(document.getElementById('wxpK').value) || 0;
+      var body = rows.map(function (r) {
+        var c = r.nn * FERT_PRICE.n + r.pn * FERT_PRICE.p + r.kn * FERT_PRICE.k;
+        return '<tr><td class="wxi-d">' + esc(r.d) + '</td><td>' + fmt(r.nn, 0) + '-' + fmt(r.pn, 0) + '-' + fmt(r.kn, 0) + '</td>' +
+          '<td style="font-weight:800;color:#86efac">' + fmt(c, 0) + '</td></tr>';
+      }).join('');
+      document.querySelector('#wxiCostTbl tbody').innerHTML = body;
+    }
+    ['wxpN', 'wxpP', 'wxpK'].forEach(function (id) { document.getElementById(id).addEventListener('input', recompute); });
+    recompute();
+  }
+
   /* ── Cane advisory (cane-brain grounded, deterministic, SEASON-aware) ──── */
   function caneAdvisory(f) {
     var s = seasonInfo();
@@ -848,7 +941,7 @@
   }
 
   function boot() {
-    if (document.getElementById('wxMap')) { bootMap(); wireSearch(); wireChrome(); wireKeyBar(); return; }
+    if (document.getElementById('wxMap')) { bootMap(); wireSearch(); wireChrome(); wireKeyBar(); renderDistrictIntel(); return; }
     bootHome();
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
