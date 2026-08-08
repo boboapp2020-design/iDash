@@ -36,7 +36,9 @@
     { name: 'เมืองสะหวันนะเขต (ไกสอน)', prov: 'สะหวันนะเขต', lat: 16.556, lon: 104.751, factory: true },
     { name: 'เซโน (Seno)', short: 'เซโน', prov: 'สะหวันนะเขต', lat: 16.679, lon: 104.964, key: true },
     { name: 'ไซบูลี (Xaybuly)', short: 'ไซบูลี', prov: 'สะหวันนะเขต', lat: 16.860, lon: 105.130, key: true },
-    { name: 'จำพอน (Champhone)', short: 'จำพอน', prov: 'สะหวันนะเขต', lat: 16.220, lon: 105.140, key: true },
+    // จำพอน pin sits on the district's actual cane cluster (the 9 analysed
+    // fields all fall 16.51-16.59 × 105.05-105.10), not the far-south edge.
+    { name: 'จำพอน (Champhone)', short: 'จำพอน', prov: 'สะหวันนะเขต', lat: 16.550, lon: 105.070, key: true },
     { name: 'อาดสะพังทอง (Atsaphangthong)', short: 'อาดสะพังทอง', prov: 'สะหวันนะเขต', lat: 16.730, lon: 105.300, key: true },
     { name: 'เซบั้งไฟ (Xebangfai)', short: 'เซบั้งไฟ', prov: 'คำม่วน', lat: 16.980, lon: 105.120, key: true },
     // นาสะอาด: per the owner's map screenshot — on Route 13 just east of Nong
@@ -207,6 +209,48 @@
     '</div>';
   }
 
+  /* ── Soil × Weather combined analysis (cane-brain, deterministic) ────────
+   * The point where the two real datasets meet: each soil texture responds to
+   * the same rain differently —
+   *   sandy  + heavy rain   → little ponding but heavy N/K leaching
+   *   clayey + accumulated  → slow drainage, waterlogging, bogging risk
+   *   low OM + heavy rain   → weak topsoil structure, crusting/erosion
+   *   low OM + dry spell    → poor water holding → early drought stress
+   *   acid   + wet season   → continued base leaching, pH drifts lower
+   * Harvest season adds trafficability: sandy fields re-enter days after rain,
+   * clay fields need the longer 7-14 day wait. */
+  function comboAnalysis(f, s) {
+    if (!f || !s) return [];
+    var season = seasonInfo();
+    var sandy = /ทราย/.test(s.soil) && !/เหนียว/.test(s.soil);
+    var clayey = /เหนียว/.test(s.soil);
+    var heavy3 = Math.max(f.rain[0] || 0, f.rain[1] || 0, f.rain[2] || 0);
+    var next3 = (f.rain[0] || 0) + (f.rain[1] || 0) + (f.rain[2] || 0);
+    var out = [];
+
+    if (season.id === 'harvest') {
+      if (clayey && f.past7 >= 30) out.push({ lv: 'high', txt: 'ดินเด่นแถบนี้เป็น' + s.soil + ' ระบายน้ำช้า + ฝนสะสม ' + fmt(f.past7, 0) + ' มม. — แห้งช้ากว่าแปลงดินทราย ควรเว้นนานกว่าปกติก่อนเอารถลง และสลับคิวไปตัดโซนดินทรายก่อน' });
+      if (sandy && f.past7 >= 30) out.push({ lv: 'ok', txt: s.soil + 'ระบายน้ำเร็ว — แม้ฝนสะสม ' + fmt(f.past7, 0) + ' มม. แปลงโซนนี้กลับเข้าได้เร็วกว่าโซนดินเหนียว จัดคิวตัดที่นี่ก่อนได้' });
+    } else {
+      if (sandy && (heavy3 >= 30 || next3 >= 50)) out.push({ lv: 'watch', txt: s.soil + ' + ฝนหนักที่กำลังมา (' + fmt(next3, 0) + ' มม./3วัน) — น้ำไม่ค่อยขังแต่ชะล้าง N/K สูง อย่าใส่ปุ๋ยก่อนฝนหนัก รอฝนซาแล้วแบ่งใส่ทีละน้อย' });
+      if (clayey && f.past7 >= 100) out.push({ lv: 'high', txt: s.soil + 'ระบายน้ำช้า + ฝนสะสม ' + fmt(f.past7, 0) + ' มม./7วัน — เสี่ยงน้ำขังแปลงลุ่ม รากขาดออกซิเจน เร่งเปิดร่องระบายน้ำ' });
+      if (s.om !== null && s.om < 1 && heavy3 >= 30) out.push({ lv: 'watch', txt: 'OM ต่ำ (' + fmt(s.om, 2) + '%) โครงสร้างหน้าดินอ่อนแอ + ฝนหนัก — เสี่ยงหน้าดินถูกชะล้าง/แน่นทึบ ใบอ้อยคลุมดินช่วยรับแรงเม็ดฝนได้มาก' });
+      if (s.om !== null && s.om < 1 && f.past7 < 10) out.push({ lv: 'watch', txt: 'OM ต่ำ (' + fmt(s.om, 2) + '%) ดินอุ้มน้ำได้น้อย + ฝนทิ้งช่วง — แปลงโซนนี้จะเครียดน้ำเร็วกว่าโซน OM สูง ถ้ามีแหล่งน้ำให้ลำดับความสำคัญที่นี่ก่อน' });
+      if (s.ph !== null && s.ph < 5.5 && f.past7 >= 60) out.push({ lv: 'watch', txt: 'ดินกรด (pH ' + fmt(s.ph, 1) + ') + ฝนชุกต่อเนื่อง — ธาตุเบสถูกชะล้างเพิ่ม ดินมีแนวโน้มกรดขึ้น วางแผนใส่ปูน/โดโลไมต์ช่วงปลายฝน (ขี้เถ้าหม้อไอน้ำของโรงงานก็ช่วยปรับ pH + ให้ K/Si ได้)' });
+    }
+    if (!out.length) out.push({ lv: 'ok', txt: s.soil + ' + สภาพอากาศช่วงนี้ — ไม่มีความเสี่ยงร่วมที่ต้องเฝ้าเป็นพิเศษ' });
+    return out;
+  }
+  function comboBlockHtml(f, lat, lon) {
+    var s = soilSummary(lat, lon);
+    if (!s) return '';
+    var items = comboAnalysis(f, s);
+    return '<div class="wxp-combo">' +
+      '<div class="wxp-combo-h">🧬 วิเคราะห์ร่วม ดิน × อากาศ</div>' +
+      items.map(function (it) { return '<div class="wxp-combo-i lv-' + it.lv + '">' + esc(it.txt) + '</div>'; }).join('') +
+    '</div>';
+  }
+
   /* ── Cane advisory (cane-brain grounded, deterministic, SEASON-aware) ──── */
   function caneAdvisory(f) {
     var s = seasonInfo();
@@ -219,7 +263,7 @@
 
     if (s.id === 'grow') {
       // ย่างปล้อง: อ้อยต้องการน้ำมากที่สุด — ฝนคือเรื่องดี เฝ้าเฉพาะท่วมขัง/แล้ง
-      if (f.past7 >= 150) return { lv: 'high', txt: 'ฝนสะสม 7 วัน ' + fmt(f.past7, 0) + ' มม. — เสี่ยงน้ำท่วมขังแปลงลุ่ม ถ้าขังเกิน 24-48 ชม. รากขาดออกซิเจน เร่งระบายน้ำ และเฝ้าระวังโรคที่มากับน้ำ (เหี่ยวเน่าแดง)' };
+      if (f.past7 >= 150) return { lv: 'high', txt: 'ฝนสะสม 7 วัน ' + fmt(f.past7, 0) + ' มม. — เสี่ยงน้ำท่วมขังแปลงลุ่ม อ้อยทนน้ำขังได้ไม่กี่วัน รากจะเริ่มตาย ต้องรีบระบายน้ำออกให้เร็วที่สุด และเฝ้าระวังโรคที่มากับน้ำ (เหี่ยวเน่าแดง)' };
       if (f.past7 >= 60) return { lv: 'watch', txt: 'ฝนชุก (สะสม ' + fmt(f.past7, 0) + ' มม./7วัน) — ดีต่ออ้อยช่วงย่างปล้อง แต่ตรวจการระบายน้ำแปลงลุ่ม และถนนในไร่ลื่น สัญจรระวัง' };
       if (f.past7 < 10 && rainDays === 0) return { lv: 'watch', txt: 'ฝนทิ้งช่วง — ย่างปล้องคือช่วงที่อ้อยต้องการน้ำมากที่สุด แล้งต่อเนื่องกระทบผลผลิต พิจารณาให้น้ำเสริมถ้ามีแหล่งน้ำ' };
       return { lv: 'ok', txt: 'ฝนเหมาะสม — อ้อยช่วงย่างปล้องโตเร็ว ฝนช่วยสะสมน้ำหนักลำ (เก็บเกี่ยว ธ.ค.–มี.ค.)' };
@@ -290,6 +334,7 @@
         '</div>' +
       '</div>' +
       '<div class="wxp-alert lv-' + adv.lv + '">🌱 ' + esc(adv.txt) + '</div>' +
+      (lastLL ? comboBlockHtml(f, lastLL[0], lastLL[1]) : '') +
       statusStrip(f) +
       '<div class="wxp-acc">ฝนสะสม 7 วันที่ผ่านมา: <b style="color:' + wetColor(f.past7) + '">' + fmt(f.past7, 1) + ' มม.</b>' +
         (f.past7 >= 20 ? ' · แปลงอาจยังชื้น' : ' · แปลงแห้ง') + '</div>' +

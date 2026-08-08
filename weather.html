@@ -85,6 +85,14 @@
     .wxsc-v { font-size: 14px; font-weight: 800; margin-top: 2px; }
     .wxp-soil-rec { font-size: 11.5px; color: #d9c3a8; line-height: 1.7; }
     .wxp-soil-src { font-size: 9.5px; color: #7488ab; margin-top: 7px; }
+    /* Soil × weather combined analysis */
+    .wxp-combo { margin-bottom: 10px; background: linear-gradient(120deg, rgba(6,182,212,.08), rgba(139,92,246,.07));
+      border: 1px solid rgba(6,182,212,.28); border-radius: 15px; padding: 12px 14px; }
+    .wxp-combo-h { font-size: 12.5px; font-weight: 800; color: #7dd3fc; margin-bottom: 7px; }
+    .wxp-combo-i { font-size: 12px; line-height: 1.65; padding: 7px 11px; border-radius: 10px; margin-top: 5px; border: 1px solid transparent; }
+    .wxp-combo-i.lv-ok { background: rgba(16,185,129,.09); border-color: rgba(16,185,129,.25); color: #6ee7b7; }
+    .wxp-combo-i.lv-watch { background: rgba(245,158,11,.09); border-color: rgba(245,158,11,.25); color: #fcd34d; }
+    .wxp-combo-i.lv-high { background: rgba(239,68,68,.09); border-color: rgba(239,68,68,.28); color: #fca5a5; }
     .if-stamp { position: absolute; right: 12px; bottom: 12px; z-index: 5; background: rgba(8,13,26,.78); border: 1px solid rgba(255,255,255,.12);
       color: #dbe7fb; font-size: 11px; font-weight: 600; padding: 6px 12px; border-radius: 999px; backdrop-filter: blur(8px); display: flex; align-items: center; gap: 6px; }
     .if-rainscale { position: absolute; left: 12px; bottom: 12px; z-index: 5; background: rgba(8,13,26,.78); border: 1px solid rgba(255,255,255,.12);
@@ -329,6 +337,6 @@
 <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
 <script src="js/soil_data.js?v=20260808x"></script>
 <script src="js/sidebar.js?v=20260808i"></script>
-<script src="js/weather.js?v=20260808x"></script>
+<script src="js/weather.js?v=20260808z"></script>
 </body>
 </html>
