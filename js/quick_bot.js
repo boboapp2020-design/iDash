@@ -67,6 +67,42 @@
     return feedInFlight;
   }
 
+  /* ── Store Dashboard (its own embedded data, extracted from the page) ─────
+   * StoreML embeds `const D = [{n,name,loc,v:[8 monthly],diff,st}, …]` — 14
+   * departments' spending (kip) by month. GitHub Pages sends CORS *, so we can
+   * fetch the page and pull D out. We parse with a targeted regex (NEVER eval
+   * remote code) and summarise: latest month + diff per department. */
+  var STORE_URL = 'https://shippingml.github.io/StoreML/';
+  var STORE_MONTHS = ['ธ.ค.67', 'ม.ค.69', 'ก.พ.69', 'มี.ค.69', 'เม.ย.69', 'พ.ค.69', 'มิ.ย.69', 'ก.ค.69'];
+  var storeMem = null, storeInFlight = null;
+  function loadStore() {
+    if (storeMem) return Promise.resolve(storeMem);
+    if (storeInFlight) return storeInFlight;
+    storeInFlight = fetch(STORE_URL).then(function (r) { return r.text(); }).then(function (txt) {
+      var m = txt.match(/\bD\s*=\s*(\[[\s\S]*?\])\s*[;\n]/);
+      if (!m) { storeInFlight = null; return null; }
+      var body = m[1], rows = [];
+      // {n:1,name:'x',loc:'N2P',v:[...],diff:8110,st:'up'}
+      var re = /\{[^{}]*?name:\s*'([^']*)'[^{}]*?v:\s*\[([^\]]*)\][^{}]*?diff:\s*(-?\d+(?:\.\d+)?)[^{}]*?\}/g, x;
+      while ((x = re.exec(body))) {
+        var vals = x[2].split(',').map(function (s) { return num(s); });
+        rows.push({ dept: x[1], latest: vals[vals.length - 1], diff: num(x[3]) });
+      }
+      storeMem = rows.length ? { latestMonth: STORE_MONTHS[STORE_MONTHS.length - 1], rows: rows } : null;
+      storeInFlight = null;
+      return storeMem;
+    }).catch(function () { storeInFlight = null; return null; });
+    return storeInFlight;
+  }
+  function storeFacts() {
+    if (!storeMem || !storeMem.rows.length) return null;
+    var total = 0;
+    storeMem.rows.forEach(function (r) { if (r.latest != null) total += r.latest; });
+    return { note: 'ยอดเบิกจ่ายพัสดุรายแผนก หน่วยกีบ (LAK) เดือนล่าสุด ' + storeMem.latestMonth,
+      latestMonth: storeMem.latestMonth, totalLatest: Math.round(total),
+      byDept: storeMem.rows.map(function (r) { return { dept: r.dept, latest: r.latest, diffVsPrev: r.diff }; }) };
+  }
+
   /* ── Sale feed (the Sale Dashboard's own Google Sheet, public gviz CSV) ───
    * Columns: Month, DCR, VHP, Organic, White Sugar, Total, Plan, แผนขายสะสม —
    * MONTHLY sugar sales in tons. Same source the Sale Dashboard renders, so
@@ -247,8 +283,8 @@
   }
 
   function greeting() {
-    pushMsg('สวัสดีครับ 👋 ผมคือ iDash Copilot — ถามได้จากแดชบอร์ดใน iDash: <b>Production</b> · <b>Quality</b> · <b>Sale (ยอดขายน้ำตาล)</b> ' +
-      'พิมพ์เป็นประโยคได้เลย เช่น "เดือนนี้ขายน้ำตาล DCR ได้เท่าไร", "คุณภาพเมื่อวานเป็นยังไง", "Recovery 7 วันล่าสุด" ' +
+    pushMsg('สวัสดีครับ 👋 ผมคือ iDash Copilot — ถามได้จากแดชบอร์ดใน iDash: <b>Production</b> · <b>Quality</b> · <b>Sale</b> · <b>Store (งบพัสดุ)</b> ' +
+      'เช่น "เดือนนี้ขายน้ำตาล DCR เท่าไร", "แผนกไหนเบิกพัสดุเยอะสุด", "Recovery 7 วันล่าสุด" ' +
       '— ตอบจากตัวเลขจริงในแดชบอร์ดเท่านั้น', 'bot');
   }
   function clearChat() {
@@ -311,14 +347,15 @@
   }
 
   var QA_SYSTEM = [
-    'คุณคือผู้ช่วยตอบคำถามจากข้อมูลแดชบอร์ดของโรงงานน้ำตาลมิตรลาวเท่านั้น: การผลิต (Production), คุณภาพ (Quality) และยอดขายน้ำตาล (Sale)',
+    'คุณคือผู้ช่วยตอบคำถามจากข้อมูลแดชบอร์ดของโรงงานน้ำตาลมิตรลาวเท่านั้น: การผลิต (Production), คุณภาพ (Quality), ยอดขายน้ำตาล (Sale) และงบเบิกจ่ายพัสดุรายแผนก (Store)',
     'กติกาเด็ดขาด (ห้ามฝ่าฝืน):',
     '1) ใช้ได้เฉพาะตัวเลขที่อยู่ใน JSON facts ที่ให้มาเท่านั้น ห้ามสร้าง/เดา/ประมาณตัวเลขที่ไม่มีใน facts',
     '2) ถ้าคำถามไม่เกี่ยวกับข้อมูลโรงงานนี้ หรือ facts ไม่มีข้อมูลที่ถาม ให้บอกตรง ๆ ว่า "ไม่มีข้อมูลนี้ในแดชบอร์ด" และย้ำว่าตอบได้เฉพาะเรื่องในแดชบอร์ดโรงงานน้ำตาลนี้',
     '3) ตอบภาษาไทย กระชับ อ้างอิงตัวเลขจริงพร้อมหน่วยและวันที่/เดือนเสมอ',
     '4) latest[] = ค่าล่าสุดของทุกตัวชี้วัด: value = ค่าของวันล่าสุด (รายวัน), cum = ค่าสะสมทั้งฤดูถึงวันล่าสุด (season-to-date), target = เป้าหมาย — ถ้าถาม "สะสม/ทั้งฤดู" ต้องใช้ cum ห้ามใช้ value. history[] = เฉพาะตัวชี้วัดหลัก มี values[] รายวัน ตรงตำแหน่งกับ dates[] (เก่า→ใหม่, null = ไม่มีข้อมูลวันนั้น) ใช้ดูแนวโน้ม/เทียบย้อนหลัง/หาสูงสุด-ต่ำสุด. ถ้าถามค่าย้อนหลังของตัวชี้วัดที่ไม่ได้อยู่ใน history ให้บอกว่ามีเฉพาะค่าล่าสุด',
     '5) sales[] = ยอดขายน้ำตาลรายเดือน (ตัน) แยกชนิด: DCR, VHP, Organic, WhiteSugar, Total, Plan(แผน), PlanCum(แผนสะสม) — ข้อมูลขายเป็นรายเดือน ไม่มีรายวัน ถ้าถาม "วันนี้ขายเท่าไร" ให้ตอบยอดเดือนล่าสุดพร้อมบอกว่าข้อมูลเป็นรายเดือน · ค่าว่าง/null = เดือนนั้นไม่มีการขายชนิดนั้น',
-    '6) ห้ามพูดหรือแนะนำเรื่องนอกเหนือข้อมูลในแดชบอร์ดนี้'
+    '6) store = ยอดเบิกจ่ายพัสดุ/งบรายแผนก (Store Dashboard) หน่วยกีบ LAK: byDept[] มี dept(ชื่อแผนก), latest(ยอดเดือนล่าสุด), diffVsPrev(ผลต่างจากเดือนก่อน) และ totalLatest(รวมทุกแผนก) — ใช้ตอบเรื่องแผนกไหนเบิกเยอะ/งบพัสดุ',
+    '7) ห้ามพูดหรือแนะนำเรื่องนอกเหนือข้อมูลในแดชบอร์ดนี้'
   ].join('\n');
 
   // The FULL Quality Dashboard field set sent to the AI (every section). t =
@@ -430,14 +467,39 @@
     return all.length ? { latestDate: latest.date, dates: dates, latest: all, history: history } : null;
   }
 
+  // Whole-season daily history is the biggest slice of the payload (~12×42
+  // values + dates). Send it ONLY when the question is actually time-series, so
+  // everyday cross-dashboard questions stay well under the free model's TPM.
+  function needsHistory(q) {
+    return /ย้อนหลัง|ที่ผ่านมา|กี่วัน|แนวโน้ม|เทรนด์|trend|สูงสุด|ต่ำสุด|มากสุด|น้อยสุด|เฉลี่ย|เทียบ|เมื่อวาน|สัปดาห์|\d+\s*วัน|ทั้งฤดู|ทั้งหมด|กราฟ|ช่วง|\d{1,2}\/\d{1,2}/.test(String(q || ''));
+  }
+  // Only ship the dashboard section(s) the question is about — the free model's
+  // per-minute token budget can't hold every dashboard on every request. A
+  // question with no clear target gets the compact all-sections view.
+  function sections(q) {
+    q = String(q || '');
+    var s = {
+      sale: /ขาย|sale|ยอด|dcr|vhp|organic|white\s*sugar|น้ำตาลทราย|ตลาด|ส่งออก|ลูกค้า/i.test(q),
+      store: /พัสดุ|เบิก|งบ|แผนก|store|คลังพัสดุ|ค่าใช้จ่าย|จัดซื้อ|วัสดุ/i.test(q),
+      prod: /ผลิต|หีบ|อ้อย|ccs|recover|pol|คุณภาพ|สี|colour|color|ความชื้น|บริสุทธิ|purity|tcph|burnt|ไฟไหม้|brix|loss|สูญเสีย|edl|ไอน้ำ|ไฟฟ้า|steam|โมลาส|กาก|เถ้า|recovery/i.test(q)
+    };
+    if (!s.sale && !s.store && !s.prod) { s.sale = s.store = s.prod = true; }
+    return s;
+  }
   function buildAiPrompt(facts, question) {
-    var sale = saleFacts();
-    return 'ข้อมูลแดชบอร์ดโรงงานน้ำตาล Production & Quality (ล่าสุด ' + facts.latestDate + ')\n' +
-      'latest = ค่าล่าสุดของตัวชี้วัดทั้งหมด (วันที่ ' + facts.latestDate + '):\n' + JSON.stringify(facts.latest) + '\n' +
-      'dates = วันที่ย้อนหลังทั้งฤดู เก่า→ใหม่: ' + JSON.stringify(facts.dates) + '\n' +
-      'history = ตัวชี้วัดหลักย้อนหลังทั้งฤดู (values[] ตรงตำแหน่งกับ dates[]):\n' + JSON.stringify(facts.history) + '\n' +
-      (sale ? 'sales = ยอดขายน้ำตาลรายเดือน หน่วยตัน (จาก Sale Dashboard):\n' + JSON.stringify(sale) + '\n' : '') +
-      '\nคำถามผู้ใช้: ' + question + '\n\nตอบเป็นภาษาไทยตามกติกา:';
+    var sec = sections(question);
+    var withHist = needsHistory(question);
+    var p = 'ข้อมูลแดชบอร์ดโรงงานน้ำตาลมิตรลาว (ล่าสุด ' + facts.latestDate + ')\n';
+    if (sec.prod) {
+      p += 'latest = ค่าล่าสุดของตัวชี้วัดการผลิต/คุณภาพทั้งหมด (วันที่ ' + facts.latestDate + '):\n' + JSON.stringify(facts.latest) + '\n' +
+        (withHist
+          ? 'dates = วันที่ย้อนหลังทั้งฤดู เก่า→ใหม่: ' + JSON.stringify(facts.dates) + '\n' +
+            'history = ตัวชี้วัดหลักย้อนหลังทั้งฤดู (values[] ตรงตำแหน่งกับ dates[]):\n' + JSON.stringify(facts.history) + '\n'
+          : 'หมายเหตุ: ถ้าถามค่าย้อนหลัง/แนวโน้มของการผลิต ให้ระบุช่วงเวลา ระบบจะดึงประวัติมาให้\n');
+    }
+    if (sec.sale && saleFacts()) p += 'sales = ยอดขายน้ำตาลรายเดือน หน่วยตัน (Sale Dashboard):\n' + JSON.stringify(saleFacts()) + '\n';
+    if (sec.store && storeFacts()) p += 'store = งบเบิกจ่ายพัสดุรายแผนก หน่วยกีบ (Store Dashboard):\n' + JSON.stringify(storeFacts()) + '\n';
+    return p + '\nคำถามผู้ใช้: ' + question + '\n\nตอบเป็นภาษาไทยตามกติกา:';
   }
 
   var thinkSeq = 0;
@@ -471,6 +533,8 @@
         if (r[k] != null) real.push(r[k]);
       });
     });
+    var sf = storeFacts();
+    if (sf) { real.push(sf.totalLatest); sf.byDept.forEach(function (r) { if (r.latest != null) real.push(r.latest); if (r.diffVsPrev != null) real.push(r.diffVsPrev); }); }
     var hit = nums.some(function (n) {
       var f = parseFloat(n);
       return real.some(function (rv) { return Math.abs(rv - f) < 0.05 || (rv !== 0 && Math.abs((rv - f) / rv) < 0.01); });
@@ -528,6 +592,11 @@
   // key it fronts stays a server-side secret in the gateway.
   var COPILOT_ANON = 'sb_publishable_BZEZ_UVLqNLg2pQsXtNUjQ_cp2ZPY5h';
 
+  // Fallback chain: each Groq model has its OWN separate free quota, so when
+  // the primary model's daily/minute budget is exhausted we silently retry the
+  // same question on the next model instead of showing a wait message.
+  var GROQ_FALLBACKS = ['llama-3.1-8b-instant', 'gemma2-9b-it'];
+
   function askViaGateway(question) {
     var facts = qualityFacts();
     if (!facts) {
@@ -537,36 +606,48 @@
     }
     var tid = pushThinking();
     var prompt = buildAiPrompt(facts, question);
-    fetch(COPILOT_GATEWAY, {
-      method: 'POST',
-      headers: { 'content-type': 'application/json', 'Authorization': 'Bearer ' + COPILOT_ANON, 'apikey': COPILOT_ANON },
-      body: JSON.stringify({
-        action: 'quick-ask',
-        payload: { provider: 'groq', model: copilotModel(), system: QA_SYSTEM, prompt: prompt, facts: facts, maxTokens: 900 }
+
+    function call(model, remainingFallbacks) {
+      fetch(COPILOT_GATEWAY, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', 'Authorization': 'Bearer ' + COPILOT_ANON, 'apikey': COPILOT_ANON },
+        body: JSON.stringify({
+          action: 'quick-ask',
+          payload: { provider: 'groq', model: model, system: QA_SYSTEM, prompt: prompt, facts: facts, maxTokens: 900 }
+        })
       })
-    })
-      .then(function (r) { return r.json(); })
-      .then(function (d) {
-        removeThinking(tid);
-        if (d && d.result && d.result.text) {
-          var ans = d.result.text.trim();
-          var ok = verifyNumbers(ans, facts);
-          pushMsg(esc(ans).replace(/\n/g, '<br>') +
-            '<div class="qb-aicred">🤖 AI · ตอบจากข้อมูลโรงงานจริง' +
-            (ok ? '' : ' · <span class="qb-warn">⚠ โปรดตรวจตัวเลขอีกครั้ง</span>') + '</div>', 'bot');
-        } else {
+        .then(function (r) { return r.json(); })
+        .then(function (d) {
+          if (d && d.result && d.result.text) {
+            removeThinking(tid);
+            var ans = d.result.text.trim();
+            var ok = verifyNumbers(ans, facts);
+            pushMsg(esc(ans).replace(/\n/g, '<br>') +
+              '<div class="qb-aicred">🤖 AI · ตอบจากข้อมูลโรงงานจริง' +
+              (ok ? '' : ' · <span class="qb-warn">⚠ โปรดตรวจตัวเลขอีกครั้ง</span>') + '</div>', 'bot');
+            return;
+          }
           var em = (d && d.error && d.error.message) || 'ไม่ทราบสาเหตุ';
-          if (/rate limit|tokens per minute|TPM/i.test(em)) {
-            pushMsg('⏳ ตอนนี้มีคนถามพร้อมกันเยอะ (โควตา AI ฟรีต่อนาทีเต็มชั่วคราว) — รอสัก 20–30 วินาทีแล้วถามใหม่ได้เลยครับ', 'bot');
+          if (/rate limit|tokens per (minute|day)|TPM|TPD/i.test(em) && remainingFallbacks.length) {
+            // Quota hit on this model — hop to the next one, same question.
+            call(remainingFallbacks[0], remainingFallbacks.slice(1));
+            return;
+          }
+          removeThinking(tid);
+          if (/rate limit|tokens per (minute|day)|TPM|TPD/i.test(em)) {
+            pushMsg('⏳ โควตา AI ฟรีเต็มชั่วคราวทุกโมเดล — รอสัก 1-2 นาทีแล้วถามใหม่ได้เลยครับ', 'bot');
           } else {
             pushMsg('ขออภัย ตอบไม่สำเร็จ: ' + esc(em), 'bot');
           }
-        }
-      })
-      .catch(function () {
-        removeThinking(tid);
-        pushMsg('เชื่อมต่อ AI ไม่สำเร็จ — ลองใหม่อีกครั้ง', 'bot');
-      });
+        })
+        .catch(function () {
+          removeThinking(tid);
+          pushMsg('เชื่อมต่อ AI ไม่สำเร็จ — ลองใหม่อีกครั้ง', 'bot');
+        });
+    }
+
+    var primary = copilotModel();
+    call(primary, GROQ_FALLBACKS.filter(function (m) { return m !== primary; }));
   }
 
   /* ── Google Gemini (per-user key, direct) — fallback when no shared key ──── */
@@ -626,63 +707,73 @@
       });
   }
 
-  /* ── Inline panel (teal identity — distinct from the blue AI Chatbot) ──── */
+  /* ── Inline panel — "iDash Copilot logo" theme (owner's mock): near-white
+   * surface, blue→violet gradient identity, Online pill, 6 suggestion cards
+   * with coloured icon tiles, pill input with gradient send. ─────────────── */
   function injectStyles() {
     if (document.getElementById('qbStyles')) return;
     var css = document.createElement('style');
     css.id = 'qbStyles';
     css.textContent =
-      '.home-quickbot{display:flex;flex-direction:column;background:linear-gradient(180deg,#f0fdfa 0%,#ffffff 46%)!important;border-color:#c9ede6!important}' +
-      '.home-quickbot:hover{border-color:#8fddce!important}' +
-      '.qb-hero{display:flex;align-items:center;gap:14px;padding:2px 2px 13px;margin-bottom:2px;border-bottom:1px solid #e4f3ef}' +
-      '.qb-hero-ava{width:56px;height:56px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;' +
-        'background:radial-gradient(circle at 50% 30%,#ffffff,#eef2ff);box-shadow:0 8px 18px -7px rgba(79,70,229,.4),inset 0 1px 0 #fff,0 0 0 1px #e4e8fb}' +
-      '.qb-hero-ava svg{width:38px;height:38px}' +
+      '.home-quickbot{display:flex;flex-direction:column;background:linear-gradient(160deg,#fbfcff 0%,#f6f8ff 55%,#faf9ff 100%)!important;border-color:#e2e8fb!important}' +
+      '.home-quickbot:hover{border-color:#c7d4fa!important}' +
+      '.qb-hero{display:flex;align-items:center;gap:14px;padding:2px 2px 13px;margin-bottom:2px;border-bottom:1px solid #ecf0fb}' +
+      '.qb-hero-ava{width:58px;height:58px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;' +
+        'background:radial-gradient(circle at 50% 30%,#ffffff,#eef2ff);box-shadow:0 10px 22px -8px rgba(79,70,229,.45),inset 0 1px 0 #fff,0 0 0 3px #e8edfd}' +
+      '.qb-hero-ava svg{width:40px;height:40px}' +
       '.qb-hero-txt{flex:1;min-width:0}' +
-      '.qb-hero-title{font-size:20px;font-weight:800;letter-spacing:-.01em;line-height:1.1;' +
-        'background:linear-gradient(100deg,#0f2a28 38%,#0d9488 96%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}' +
-      '.qb-spark{-webkit-text-fill-color:initial;font-size:16px}' +
-      '.qb-hero-sub{font-size:12.5px;color:#64748b;margin-top:3px;font-weight:500}' +
+      '.qb-hero-title{font-size:21px;font-weight:800;letter-spacing:-.01em;line-height:1.1;color:#0f1b3d}' +
+      '.qb-spark{font-size:16px;background:linear-gradient(120deg,#3b82f6,#8b5cf6);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}' +
+      '.qb-hero-sub{font-size:12.5px;color:#8593ad;margin-top:3px;font-weight:500}' +
       '.qb-hero-right{display:flex;align-items:center;gap:7px;align-self:flex-start}' +
-      '.qb-hero-badge{font-size:10px;font-weight:700;color:#0e7a4e;background:#e2f5ec;border-radius:20px;padding:3px 9px;white-space:nowrap}' +
-      '.qb-gear{border:none;background:none;padding:2px;cursor:pointer;color:#94a3b8;display:flex;border-radius:6px;transition:color .15s,background .15s}' +
-      '.qb-gear:hover{color:#0d9488;background:#ecfdf9}.qb-gear svg{width:16px;height:16px}' +
-      '.qb-set{background:#f0fdfa;border:1px solid #cbe7e1;border-radius:10px;padding:10px 12px;margin-bottom:10px}' +
+      '.qb-hero-badge{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:700;color:#334155;background:#fff;border:1px solid #e5eaf6;border-radius:999px;padding:6px 12px;white-space:nowrap;box-shadow:0 2px 6px -2px rgba(15,27,45,.08)}' +
+      '.qb-hero-badge::before{content:"";width:8px;height:8px;border-radius:50%;background:#22c55e;box-shadow:0 0 6px rgba(34,197,94,.6)}' +
+      '.qb-gear{border:1px solid #e5eaf6;background:#fff;padding:0;width:32px;height:32px;cursor:pointer;color:#8593ad;display:flex;align-items:center;justify-content:center;border-radius:10px;transition:color .15s,background .15s,border-color .15s;box-shadow:0 2px 6px -2px rgba(15,27,45,.08)}' +
+      '.qb-gear:hover{color:#6d28d9;background:#f5f3ff;border-color:#ddd6fe}.qb-gear svg{width:15px;height:15px}' +
+      '.qb-set{background:#f6f8ff;border:1px solid #dde5fb;border-radius:12px;padding:10px 12px;margin-bottom:10px}' +
       '.qb-set[hidden]{display:none}' +
-      '.qb-set-label{font-size:11px;font-weight:700;color:#0f2a28;margin-bottom:6px}' +
+      '.qb-set-label{font-size:11px;font-weight:700;color:#0f1b3d;margin-bottom:6px}' +
       '.qb-set-row{display:flex;gap:7px}' +
-      '.qb-set-row input{flex:1;min-width:0;border:1px solid #cfe9e3;border-radius:8px;padding:7px 10px;font:inherit;font-size:12px;outline:none}' +
-      '.qb-set-row input:focus{border-color:#0d9488;box-shadow:0 0 0 3px rgba(13,148,136,.12)}' +
-      '.qb-set-row button{border:none;background:linear-gradient(180deg,#14b8a6,#0d9488);color:#fff;border-radius:8px;padding:0 14px;font:inherit;font-size:12px;font-weight:700;cursor:pointer}' +
-      '.qb-set-model{width:100%;margin-top:5px;border:1px solid #cfe9e3;border-radius:8px;padding:7px 10px;font:inherit;font-size:12px;color:#0f2a28;background:#fff;outline:none}' +
-      '.qb-set-model:focus{border-color:#0d9488;box-shadow:0 0 0 3px rgba(13,148,136,.12)}' +
-      '.qb-set-hint{font-size:10.5px;color:#5b8a82;margin-top:6px;line-height:1.5}' +
-      '.qb-src{display:flex;gap:6px;margin:10px 0 8px;flex-wrap:wrap}' +
-      '.qb-chip{border:1px solid #cbe7e1;background:#fff;border-radius:20px;padding:4px 12px;font:inherit;font-size:11.5px;font-weight:700;color:#475569;cursor:pointer;transition:background .15s,border-color .15s}' +
-      '.qb-chip.on{background:#0d9488;color:#fff;border-color:#0d9488}' +
-      '.qb-chip.lock{opacity:.55;cursor:pointer}.qb-chip.lock::after{content:" 🔒";font-size:9px}' +
-      '.qb-log{height:300px;overflow-y:auto;background:linear-gradient(180deg,#f7fefc,#fbfffe);border:1px solid #e4f3ef;border-radius:10px;padding:13px;display:flex;flex-direction:column;gap:9px;margin-bottom:9px}' +
-      '.qb-msg{max-width:90%;font-size:12.5px;line-height:1.6}' +
-      '.qb-msg.me{align-self:flex-end;background:linear-gradient(180deg,#14b8a6,#0d9488);color:#fff;padding:8px 12px;border-radius:12px 12px 4px 12px}' +
-      '.qb-msg.bot{align-self:flex-start;background:#fff;border:1px solid #e3ecfa;color:#374151;padding:10px 12px;border-radius:3px 12px 12px 12px;box-shadow:var(--shadow-sm)}' +
+      '.qb-set-row input{flex:1;min-width:0;border:1px solid #dbe3f7;border-radius:8px;padding:7px 10px;font:inherit;font-size:12px;outline:none}' +
+      '.qb-set-row input:focus{border-color:#6366f1;box-shadow:0 0 0 3px rgba(99,102,241,.13)}' +
+      '.qb-set-row button{border:none;background:linear-gradient(135deg,#3b82f6,#7c3aed);color:#fff;border-radius:8px;padding:0 14px;font:inherit;font-size:12px;font-weight:700;cursor:pointer}' +
+      '.qb-set-model{width:100%;margin-top:5px;border:1px solid #dbe3f7;border-radius:8px;padding:7px 10px;font:inherit;font-size:12px;color:#0f1b3d;background:#fff;outline:none}' +
+      '.qb-set-model:focus{border-color:#6366f1;box-shadow:0 0 0 3px rgba(99,102,241,.13)}' +
+      '.qb-set-hint{font-size:10.5px;color:#7787a8;margin-top:6px;line-height:1.5}' +
+      '.qb-log{height:270px;overflow-y:auto;background:#fff;border:1px solid #e9edfa;border-radius:14px;padding:13px;display:flex;flex-direction:column;gap:9px;margin-bottom:10px;box-shadow:inset 0 1px 3px rgba(15,27,45,.03)}' +
+      '.qb-msg{max-width:90%;font-size:12.5px;line-height:1.65}' +
+      '.qb-msg.me{align-self:flex-end;background:linear-gradient(135deg,#3b82f6,#7c3aed);color:#fff;padding:8px 12px;border-radius:13px 13px 4px 13px;box-shadow:0 4px 10px -4px rgba(99,102,241,.45)}' +
+      '.qb-msg.bot{align-self:flex-start;background:linear-gradient(180deg,#fdfdff,#f9faff);border:1px solid #e4e6fb;color:#374151;padding:10px 13px;border-radius:3px 13px 13px 13px;box-shadow:0 2px 8px -4px rgba(79,70,229,.14)}' +
+      '.qb-msg.bot b{color:#4f46e5}' +
       '.qb-date{font-size:10.5px;color:#94a3b8;margin-bottom:6px;font-weight:600}' +
       '.qb-ans{padding:7px 0;border-top:1px dashed #eef2f8}.qb-ans:first-of-type{border-top:none;padding-top:0}' +
       '.qb-ans-name{font-size:11.5px;color:#64748b;font-weight:700}' +
-      '.qb-ans-val{font-size:18px;font-weight:800;color:#0f2a28;margin:1px 0 2px}' +
+      '.qb-ans-val{font-size:18px;font-weight:800;color:#0f1b3d;margin:1px 0 2px}' +
       '.qb-ans-sub{font-size:11px;color:#64748b}.qb-good{color:#0e9f6e;font-weight:700}.qb-bad{color:#e11d48;font-weight:700}' +
       '.qb-think{display:flex!important;gap:5px;align-items:center;padding:12px 14px!important}' +
-      '.qb-dot{width:7px;height:7px;border-radius:50%;background:#0d9488;opacity:.4;animation:qbBlink 1s infinite}' +
+      '.qb-dot{width:7px;height:7px;border-radius:50%;background:#7c3aed;opacity:.4;animation:qbBlink 1s infinite}' +
       '.qb-dot:nth-child(2){animation-delay:.2s}.qb-dot:nth-child(3){animation-delay:.4s}' +
       '@keyframes qbBlink{0%,100%{opacity:.3;transform:translateY(0)}50%{opacity:1;transform:translateY(-2px)}}' +
       '.qb-aicred{font-size:10px;color:#94a3b8;margin-top:7px;border-top:1px dashed #eef2f8;padding-top:5px}' +
       '.qb-warn{color:#b45309;font-weight:700}' +
-      '.qb-sugg{display:flex;gap:7px;flex-wrap:wrap;margin:0 0 10px}' +
-      '.qb-sugg button{border:1px solid #bfeee5;background:#fff;border-radius:999px;padding:5px 11px;font:inherit;font-size:11.5px;color:#0d9488;font-weight:700;cursor:pointer;transition:background .15s,transform .15s}' +
-      '.qb-sugg button:hover{background:#ecfdf9;transform:translateY(-1px)}' +
-      '.qb-input{display:flex;align-items:center;gap:8px;background:#fff;border:1px solid #cfe9e3;border-radius:10px;padding:5px 5px 5px 14px}' +
-      '.qb-input:focus-within{border-color:#0d9488;box-shadow:0 0 0 3px rgba(13,148,136,.14)}' +
+      '.qb-sugg-head{display:flex;align-items:center;gap:6px;font-size:11.5px;font-weight:800;color:#3f4d6e;margin:0 0 8px}' +
+      '.qb-sugg-head .sp{background:linear-gradient(120deg,#3b82f6,#8b5cf6);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}' +
+      '.qb-sugg{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:0 0 11px}' +
+      '@media (max-width:1350px){.qb-sugg{grid-template-columns:repeat(2,1fr)}}' +
+      '.qb-sug{display:flex;align-items:center;gap:9px;border:1px solid #e7ebf8;background:#fff;border-radius:13px;padding:9px 10px;font:inherit;text-align:left;cursor:pointer;transition:transform .15s,box-shadow .15s,border-color .15s;box-shadow:0 2px 6px -3px rgba(15,27,45,.07)}' +
+      '.qb-sug:hover{transform:translateY(-2px);border-color:#c7d4fa;box-shadow:0 8px 16px -8px rgba(79,70,229,.28)}' +
+      '.qb-sug-ic{width:34px;height:34px;border-radius:10px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:16px}' +
+      '.qb-sug-ic.green{background:#e8f8ee}.qb-sug-ic.blue{background:#e3edfd}.qb-sug-ic.violet{background:#efeafd}' +
+      '.qb-sug-ic.sky{background:#e0f2fe}.qb-sug-ic.amber{background:#fdf2d9}.qb-sug-ic.teal{background:#dcf7f1}' +
+      '.qb-sug-t{min-width:0}' +
+      '.qb-sug-name{font-size:12px;font-weight:800;color:#0f1b3d;line-height:1.2}' +
+      '.qb-sug-sub{font-size:10.5px;color:#8593ad;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}' +
+      '.qb-input{display:flex;align-items:center;gap:8px;background:#fff;border:1.5px solid #dfe6fa;border-radius:999px;padding:6px 6px 6px 15px;box-shadow:0 4px 14px -8px rgba(79,70,229,.25)}' +
+      '.qb-input:focus-within{border-color:#818cf8;box-shadow:0 0 0 3px rgba(99,102,241,.16)}' +
+      '.qb-input .qb-in-spark{font-size:14px;background:linear-gradient(120deg,#3b82f6,#8b5cf6);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}' +
       '.qb-input input{flex:1;min-width:0;border:none;outline:none;background:none;font-family:var(--font);font-size:13px;color:var(--text)}' +
-      '.qb-input button{width:30px;height:30px;border-radius:8px;border:none;flex-shrink:0;cursor:pointer;background:linear-gradient(180deg,#14b8a6,#0d9488);display:flex;align-items:center;justify-content:center}' +
+      '.qb-input button{width:40px;height:34px;border-radius:999px;border:none;flex-shrink:0;cursor:pointer;background:linear-gradient(135deg,#3b82f6,#8b5cf6);display:flex;align-items:center;justify-content:center;box-shadow:0 6px 14px -6px rgba(124,58,237,.55);transition:transform .12s}' +
+      '.qb-input button:hover{transform:translateY(-1px)}' +
       '.qb-input button svg{width:16px;height:16px;color:#fff}';
     document.head.appendChild(css);
   }
@@ -723,10 +814,10 @@
         '</div>' +
         '<div class="qb-hero-txt">' +
           '<div class="qb-hero-title">iDash Copilot <span class="qb-spark">✨</span></div>' +
-          '<div class="qb-hero-sub">ค้นหาข้อมูลโรงงานได้ทันที</div>' +
+          '<div class="qb-hero-sub">AI Assistant for iDash</div>' +
         '</div>' +
         '<div class="qb-hero-right">' +
-          '<span class="qb-hero-badge">ตัวเลขจริง 100%</span>' +
+          '<span class="qb-hero-badge">Online 100%</span>' +
           '<button type="button" class="qb-gear" id="qbClear" title="ล้างการสนทนา" aria-label="ล้างการสนทนา">' +
             '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>' +
           '</button>' +
@@ -749,18 +840,32 @@
         '<input id="qbSetInput" type="hidden">' +
       '</div>' +
       '<div class="qb-log" id="qbLog"></div>' +
+      '<div class="qb-sugg-head"><span class="sp">✦</span> ตัวอย่างคำถามยอดนิยม</div>' +
       '<div class="qb-sugg" id="qbSugg"></div>' +
       '<form class="qb-input" id="qbForm">' +
+        '<span class="qb-in-spark">✦</span>' +
         '<input id="qbInput" placeholder="พิมพ์คำถาม เช่น Recovery หรือ สีน้ำตาล" autocomplete="off">' +
         '<button type="submit" aria-label="ถาม"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></button>' +
       '</form>';
 
+    // 6 suggestion cards (per the "iDash Copilot logo" mock): coloured icon
+    // tile + name + subtitle; click fires the full underlying question.
     var suggEl = mount.querySelector('#qbSugg');
-    ['อ้อยเข้าหีบ', 'CCS', 'Recovery', 'สีน้ำตาล', 'ความบริสุทธิ์', 'สรุป'].forEach(function (t) {
+    [
+      { ic: '🌿', hue: 'green', name: 'อ้อยเข้าหีบ', sub: 'วันนี้ / เมื่อวาน', q: 'อ้อยเข้าหีบวันนี้ เทียบเมื่อวาน' },
+      { ic: '📊', hue: 'blue', name: 'CCS', sub: 'ค่าล่าสุด + เป้า', q: 'CCS วันนี้เท่าไร เทียบเป้าหมาย' },
+      { ic: '🔄', hue: 'violet', name: 'Recovery', sub: '7 วันล่าสุด', q: 'Recovery 7 วันล่าสุด' },
+      { ic: '💧', hue: 'sky', name: 'สีน้ำตาล', sub: 'VHP ล่าสุด', q: 'สีน้ำตาล VHP ล่าสุดเท่าไร' },
+      { ic: '🍬', hue: 'amber', name: 'ยอดขายน้ำตาล', sub: 'DCR เดือนล่าสุด', q: 'เดือนล่าสุดขายน้ำตาล DCR ได้เท่าไร' },
+      { ic: '📦', hue: 'teal', name: 'งบพัสดุ', sub: 'แผนกไหนเบิกเยอะสุด', q: 'แผนกไหนเบิกพัสดุเยอะสุด 3 อันดับ' }
+    ].forEach(function (s) {
       var b = document.createElement('button');
       b.type = 'button';
-      b.textContent = t;
-      b.addEventListener('click', function () { answer(t); });
+      b.className = 'qb-sug';
+      b.innerHTML = '<span class="qb-sug-ic ' + s.hue + '">' + s.ic + '</span>' +
+        '<span class="qb-sug-t"><span class="qb-sug-name">' + s.name + '</span><br>' +
+        '<span class="qb-sug-sub">' + s.sub + '</span></span>';
+      b.addEventListener('click', function () { answer(s.q); });
       suggEl.appendChild(b);
     });
 
@@ -795,7 +900,7 @@
     // Warm both feeds so answers are instant.
     if (!readFeedCache()) loadFeed().catch(function () {});
     else loadFeed().catch(function () {});   // refresh in background too
-    loadSale();
+    loadSale(); loadStore();
   }
 
   function boot() {
