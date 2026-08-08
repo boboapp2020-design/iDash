@@ -39,7 +39,9 @@
     // จำพอน pin sits on the district's actual cane cluster (the 9 analysed
     // fields all fall 16.51-16.59 × 105.05-105.10), not the far-south edge.
     { name: 'จำพอน (Champhone)', short: 'จำพอน', prov: 'สะหวันนะเขต', lat: 16.550, lon: 105.070, key: true },
-    { name: 'อาดสะพังทอง (Atsaphangthong)', short: 'อาดสะพังทอง', prov: 'สะหวันนะเขต', lat: 16.730, lon: 105.300, key: true },
+    // Moved onto the actual analysed cane cluster (the อาดสะพังทอง/อาดสะพอน
+    // sample fields sit ~16.82,105.14, not the far-east town at 105.30).
+    { name: 'อาดสะพังทอง (Atsaphangthong)', short: 'อาดสะพังทอง', prov: 'สะหวันนะเขต', lat: 16.820, lon: 105.140, key: true },
     { name: 'เซบั้งไฟ (Xebangfai)', short: 'เซบั้งไฟ', prov: 'คำม่วน', lat: 16.980, lon: 105.120, key: true },
     // นาสะอาด: per the owner's map screenshot — on Route 13 just east of Nong
     // Bok town (which sits by the Mekong at ~16.96,104.80), between Ban Nadon
@@ -183,12 +185,36 @@
     pts.forEach(function (p) { if (p[6]) soils[p[6]] = (soils[p[6]] || 0) + 1; });
     var top = Object.keys(soils).sort(function (a, b) { return soils[b] - soils[a]; })[0] || '';
     return { n: pts.length, om: avg(2), ph: avg(3), p: avg(4), k: avg(5), soil: top,
-      lowOM: pts.filter(function (p) { return p[2] < 1.5; }).length };
+      lowOM: pts.filter(function (p) { return p[2] < 1.5; }).length,
+      // lab-recommended fertiliser rates (kg/rai/yr): plant cane + ratoon
+      fert: { nNew: avg(8), pNew: avg(9), kNew: avg(10), nTor: avg(11), pTor: avg(12), kTor: avg(13) } };
+  }
+  function fertBlockHtml(f, lat, lon) {
+    var s = soilSummary(lat, lon);
+    if (!s || !s.fert || s.fert.nNew === null) return '';
+    var ft = s.fert;
+    // Weather-aware timing note (cane-brain): split on sandy/low-OM, hold before heavy rain.
+    var next3 = f ? ((f.rain[0] || 0) + (f.rain[1] || 0) + (f.rain[2] || 0)) : 0;
+    var sandy = /ทราย/.test(s.soil) && !/เหนียว/.test(s.soil);
+    var timing = (sandy || (s.om !== null && s.om < 1))
+      ? 'ดินทราย/OM ต่ำ → แบ่งใส่ 2-3 ครั้ง กันปุ๋ยถูกชะล้าง'
+      : 'ใส่ตามระยะการเจริญเติบโต';
+    if (next3 >= 40) timing = '⚠️ ฝนหนัก ' + fmt(next3, 0) + ' มม./3วันข้างหน้า — เลื่อนใส่ปุ๋ยไปหลังฝนซา แล้ว' + timing;
+    function row(label, n, p, k) {
+      return '<div class="wxf-row"><span class="wxf-lab">' + label + '</span>' +
+        '<span class="wxf-npk"><b>N</b> ' + fmt(n, 0) + ' · <b>P</b> ' + fmt(p, 0) + ' · <b>K</b> ' + fmt(k, 0) + '</span></div>';
+    }
+    return '<div class="wxp-fert">' +
+      '<div class="wxp-fert-h">🧪 ค่าแนะนำปุ๋ยรายเขต <span>(กก./ไร่/ปี · จากผลวิเคราะห์ดินจริง)</span></div>' +
+      row('อ้อยปลูก', ft.nNew, ft.pNew, ft.kNew) +
+      row('อ้อยตอ', ft.nTor, ft.pTor, ft.kTor) +
+      '<div class="wxp-fert-note">⏱️ ' + esc(timing) + '</div>' +
+    '</div>';
   }
   function soilCell(n, v, c) {
     return '<div class="wxsc"><div class="wxsc-n">' + n + '</div><div class="wxsc-v" style="color:' + c + '">' + v + '</div></div>';
   }
-  function soilBlockHtml(lat, lon) {
+  function soilBlockHtml(fc, lat, lon) {
     var s = soilSummary(lat, lon); if (!s) return '';
     var recs = [];
     if (s.om !== null && s.om < 1.5) recs.push('OM ต่ำ (เฉลี่ย ' + fmt(s.om, 2) + '%) — เพิ่มอินทรียวัตถุ: ไว้ใบอ้อยคลุมดินแทนการเผา ใส่กากหม้อกรอง/ปุ๋ยคอก');
@@ -206,7 +232,8 @@
       '</div>' +
       (recs.length ? '<div class="wxp-soil-rec">' + recs.map(function (r) { return '🌱 ' + esc(r); }).join('<br>') + '</div>' : '') +
       '<div class="wxp-soil-src">' + esc((window.IFIELD_SOIL.source || '')) + ' · ' + s.lowOM + '/' + s.n + ' แปลงมี OM&lt;1.5%</div>' +
-    '</div>';
+    '</div>' +
+    fertBlockHtml(fc, lat, lon);
   }
 
   /* ── Soil × Weather combined analysis (cane-brain, deterministic) ────────
@@ -346,7 +373,7 @@
         tile('🌡️', 'violet', 'ความกดอากาศ', fmt(cur.surface_pressure, 0), 'hPa') +
         tile('🌅', 'amber', 'พระอาทิตย์', hhmm(f.sunrise[0]) + ' ขึ้น', hhmm(f.sunset[0]) + ' ตก') +
       '</div>' +
-      (lastLL ? soilBlockHtml(lastLL[0], lastLL[1]) : '');
+      (lastLL ? soilBlockHtml(f, lastLL[0], lastLL[1]) : '');
   }
   /* 3-way operational status — the three chips change with the production
      season (cane-brain): harvest = cut/haul/CCS; grand-growth = growth/water-
@@ -391,6 +418,7 @@
       'คุณคือนักวิชาการเกษตรผู้เชี่ยวชาญอ้อยของโรงงานน้ำตาลมิตรลาว ให้คำแนะนำจากพยากรณ์อากาศจริงเท่านั้น',
       'หลักวิชาการ (cane-brain): ฝนก่อนตัด → Brix เจือจาง CCS ตกชั่วคราว รอ 7-14 วันหลังฝน · ดินแฉะ → รถติดหล่ม ดินอัดแน่น ดินติดอ้อย · ย่างปล้อง (มิ.ย.-ต.ค.) อ้อยต้องการน้ำมากที่สุด ฝนคือผลดี แต่ระวังน้ำท่วมขังเกิน 24-48 ชม. รากขาดออกซิเจน · พ.ย. อ้อยแห้งตัวสร้างความหวาน ฝนชะลอการสุกแก่ · ร้อนจัด → ตัดเช้า ส่งหีบเร็ว',
       'ปฏิสัมพันธ์ดิน×ฝน (ใช้ soil_* ใน facts): ดินทราย+ฝนหนัก → ปุ๋ย N/K ถูกชะล้าง ห้ามใส่ปุ๋ยก่อนฝน รอฝนซาแล้วแบ่งใส่ · ดินเหนียว+ฝนสะสมมาก → ระบายช้า เสี่ยงน้ำขัง เร่งเปิดร่องระบาย และแห้งช้ากว่าดินทราย (ตัดโซนดินทรายก่อน) · OM ต่ำ (<1%)+ฝนหนัก → หน้าดินถูกชะล้าง/แน่นทึบ ควรไว้ใบอ้อยคลุมดิน · OM ต่ำ+ฝนทิ้งช่วง → อุ้มน้ำได้น้อย เครียดน้ำเร็ว ให้น้ำโซนนี้ก่อน · ดินกรด (pH<5.5)+ฝนชุก → ธาตุเบสถูกชะล้าง ใส่ปูน/โดโลไมต์หรือขี้เถ้าหม้อไอน้ำปลายฝน',
+      'ปุ๋ย: ใช้ค่า fert_* ที่ให้มา (เป็นค่าแนะนำจากแล็บ) อ้างเป็นช่วง N-P-K กก./ไร่ ห้ามเดาเลขปุ๋ยเอง; จังหวะใส่ให้ดูฝน 3 วันข้างหน้า ถ้าฝนหนักให้เลื่อนไปหลังฝนซา และดินทราย/OM ต่ำแนะนำแบ่งใส่หลายครั้ง',
       'บริบทปัจจุบัน: ' + s.emoji + ' ' + s.label + ' (' + s.range + ') · ฤดูเก็บเกี่ยวคือ ธ.ค.–มี.ค.' +
         (s.id === 'harvest'
           ? ' — โฟกัสแผนตัด-ขนส่งรายวัน จัดกลุ่ม: ตัดได้เต็มกำลัง / เฝ้าระวัง / ควรเลี่ยง-เลื่อน + คำแนะนำจัดคิวรถ'
@@ -421,11 +449,15 @@
         one.soil_om_pct = s.om !== null ? Math.round(s.om * 100) / 100 : null;
         one.soil_ph = s.ph !== null ? Math.round(s.ph * 10) / 10 : null;
         one.soil_fields_tested = s.n;
+        if (s.fert && s.fert.nNew !== null) {
+          one.fert_plant_npk_kg_rai = [Math.round(s.fert.nNew), Math.round(s.fert.pNew), Math.round(s.fert.kNew)];
+          one.fert_ratoon_npk_kg_rai = [Math.round(s.fert.nTor), Math.round(s.fert.pTor), Math.round(s.fert.kTor)];
+        }
       }
       return one;
     });
     var s = seasonInfo();
-    var prompt = 'พยากรณ์จริง + ข้อมูลดินจากผลแล็บรายเขต (past7=ฝนสะสม7วันที่ผ่านมา, today=ฝนวันนี้, next3=ฝนรวม3วันข้างหน้า หน่วย มม.; soil_texture=ชนิดดินเด่น, soil_om_pct=อินทรียวัตถุ%, soil_ph=pH ดิน, soil_fields_tested=จำนวนแปลงตรวจจริง):\n' +
+    var prompt = 'พยากรณ์จริง + ข้อมูลดิน + ค่าแนะนำปุ๋ยจากผลแล็บรายเขต (past7=ฝนสะสม7วันที่ผ่านมา, today=ฝนวันนี้, next3=ฝนรวม3วันข้างหน้า หน่วย มม.; soil_texture=ชนิดดินเด่น, soil_om_pct=อินทรียวัตถุ%, soil_ph=pH; fert_plant_npk_kg_rai/fert_ratoon_npk_kg_rai=[N,P,K] กก./ไร่/ปี ค่าแนะนำจากแล็บสำหรับอ้อยปลูก/อ้อยตอ):\n' +
       JSON.stringify(facts) + '\n\n' +
       (s.id === 'harvest' ? 'ช่วยสรุปแผนตัด-ขนส่งอ้อยวันนี้สำหรับทุกเขต'
         : 'ช่วยสรุปสถานการณ์แปลงอ้อยวันนี้ทุกเขต (ตอนนี้' + s.label + ' ยังไม่ตัด) — การดูแลแปลง การระบายน้ำ การเดินทาง และการเตรียมพร้อมก่อนเปิดหีบ') +
