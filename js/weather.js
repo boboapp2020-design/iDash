@@ -159,6 +159,54 @@
     };
   }
 
+  /* ── Soil layer (REAL lab data — window.IFIELD_SOIL from js/soil_data.js) ─
+   * 188 analysed fields: OM %, pH, P, K, soil texture, district. The panel
+   * summarises fields within 15 km of the selected point; the map can show
+   * every sampling point coloured by OM level. Interpretation follows
+   * cane-brain: low OM → build organic matter (trash blanketing, filter cake),
+   * acid soil → lime per field analysis, low P → banded basal P, sandy soil →
+   * split fertiliser applications. */
+  function omColor(om) { return om < 0.8 ? '#ef4444' : om < 1.5 ? '#f59e0b' : om < 2.5 ? '#84cc16' : '#22c55e'; }
+  function soilSummary(lat, lon) {
+    var S = window.IFIELD_SOIL; if (!S || !S.pts) return null;
+    var kmLat = 111.32, kmLon = 111.32 * Math.cos(lat * Math.PI / 180);
+    var near = S.pts.map(function (p) {
+      var d = Math.sqrt(Math.pow((p[0] - lat) * kmLat, 2) + Math.pow((p[1] - lon) * kmLon, 2));
+      return { p: p, d: d };
+    }).filter(function (x) { return x.d <= 15; }).sort(function (a, b) { return a.d - b.d; });
+    if (near.length < 2) return null;
+    var pts = near.slice(0, 40).map(function (x) { return x.p; });
+    function avg(i) { var s = 0, n = 0; pts.forEach(function (p) { if (p[i] != null && p[i] > -900) { s += p[i]; n++; } }); return n ? s / n : null; }
+    var soils = {};
+    pts.forEach(function (p) { if (p[6]) soils[p[6]] = (soils[p[6]] || 0) + 1; });
+    var top = Object.keys(soils).sort(function (a, b) { return soils[b] - soils[a]; })[0] || '';
+    return { n: pts.length, om: avg(2), ph: avg(3), p: avg(4), k: avg(5), soil: top,
+      lowOM: pts.filter(function (p) { return p[2] < 1.5; }).length };
+  }
+  function soilCell(n, v, c) {
+    return '<div class="wxsc"><div class="wxsc-n">' + n + '</div><div class="wxsc-v" style="color:' + c + '">' + v + '</div></div>';
+  }
+  function soilBlockHtml(lat, lon) {
+    var s = soilSummary(lat, lon); if (!s) return '';
+    var recs = [];
+    if (s.om !== null && s.om < 1.5) recs.push('OM ต่ำ (เฉลี่ย ' + fmt(s.om, 2) + '%) — เพิ่มอินทรียวัตถุ: ไว้ใบอ้อยคลุมดินแทนการเผา ใส่กากหม้อกรอง/ปุ๋ยคอก');
+    if (s.ph !== null && s.ph < 5.5) recs.push('ดินค่อนข้างกรด (pH ' + fmt(s.ph, 1) + ') — พิจารณาปูน/โดโลไมท์ตามค่าวิเคราะห์รายแปลง');
+    if (s.p !== null && s.p < 10) recs.push('ฟอสฟอรัสต่ำ (' + fmt(s.p, 1) + ' ppm) — รองพื้น P ตอนปลูก/แต่งตอให้ตรงจุด');
+    if (/ทราย/.test(s.soil)) recs.push('เนื้อดินเด่น: ' + s.soil + ' — อุ้มน้ำ/ธาตุอาหารต่ำ ควรแบ่งใส่ปุ๋ยหลายครั้ง');
+    else if (s.soil) recs.push('เนื้อดินเด่น: ' + s.soil);
+    return '<div class="wxp-soil">' +
+      '<div class="wxp-soil-h">🟤 คุณภาพดินรอบจุดนี้ <span>(' + s.n + ' แปลงตรวจจริงในรัศมี 15 กม.)</span></div>' +
+      '<div class="wxp-soil-grid">' +
+        soilCell('OM', fmt(s.om, 2) + '%', omColor(s.om)) +
+        soilCell('pH', fmt(s.ph, 1), s.ph < 5.5 ? '#fbbf24' : '#6ee7b7') +
+        soilCell('P', fmt(s.p, 1) + ' ppm', s.p < 10 ? '#f87171' : '#6ee7b7') +
+        soilCell('K', fmt(s.k, 0) + ' ppm', s.k < 80 ? '#fbbf24' : '#6ee7b7') +
+      '</div>' +
+      (recs.length ? '<div class="wxp-soil-rec">' + recs.map(function (r) { return '🌱 ' + esc(r); }).join('<br>') + '</div>' : '') +
+      '<div class="wxp-soil-src">' + esc((window.IFIELD_SOIL.source || '')) + ' · ' + s.lowOM + '/' + s.n + ' แปลงมี OM&lt;1.5%</div>' +
+    '</div>';
+  }
+
   /* ── Cane advisory (cane-brain grounded, deterministic, SEASON-aware) ──── */
   function caneAdvisory(f) {
     var s = seasonInfo();
@@ -252,7 +300,8 @@
         tile('💧', 'blue', 'ความชื้น', fmt(cur.relative_humidity_2m, 0) + '%', (cur.relative_humidity_2m >= 80 ? 'สูง' : 'ปกติ')) +
         tile('🌡️', 'violet', 'ความกดอากาศ', fmt(cur.surface_pressure, 0), 'hPa') +
         tile('🌅', 'amber', 'พระอาทิตย์', hhmm(f.sunrise[0]) + ' ขึ้น', hhmm(f.sunset[0]) + ' ตก') +
-      '</div>';
+      '</div>' +
+      (lastLL ? soilBlockHtml(lastLL[0], lastLL[1]) : '');
   }
   /* 3-way operational status — the three chips change with the production
      season (cane-brain): harvest = cut/haul/CCS; grand-growth = growth/water-
@@ -395,7 +444,9 @@
   /* ── Map (3D MapLibre with key → fallback 2D Leaflet) ─────────────────── */
   // One view only, per the owner: the weather map (satellite base + live rain
   // radar always on). Pins colour by today's forecast rain risk.
-  var activeGoTo = null, activeDrawBoundary = null;
+  var activeGoTo = null, activeDrawBoundary = null, activeSoilToggle = null;
+  var lastLL = null;   // the point the panel is describing (for the soil block)
+  var soilOn = false;
 
   function pinColorFor(z) {
     if (!z._f) return '#64748b';
@@ -410,6 +461,7 @@
   }
 
   function selectZoneCommon(z) {
+    lastLL = [z.lat, z.lon];
     if (activeDrawBoundary) activeDrawBoundary(null);
     if (z._data) renderPanel(z.name, z.prov, z.factory, z._data);
     else {
@@ -476,6 +528,22 @@
         stampUpdated();
       });
 
+      // Soil sampling points (lazy — built on first toggle).
+      var soilEls = [];
+      activeSoilToggle = function (on) {
+        if (on && !soilEls.length && window.IFIELD_SOIL) {
+          window.IFIELD_SOIL.pts.forEach(function (p) {
+            var el = document.createElement('div');
+            el.className = 'wx-soil';
+            el.style.background = omColor(p[2]);
+            el.title = 'OM ' + p[2] + '% · pH ' + p[3] + ' · ' + (p[6] || '') + ' · ' + (p[7] || '');
+            new maplibregl.Marker({ element: el, anchor: 'center' }).setLngLat([p[1], p[0]]).addTo(map);
+            soilEls.push(el);
+          });
+        }
+        soilEls.forEach(function (el) { el.style.display = on ? '' : 'none'; });
+      };
+
       ZONES.forEach(function (z) {
         var el = document.createElement('div');
         el.className = 'wx-pin' + (z.factory ? ' factory' : '') + (z.key ? ' key' : '');
@@ -522,6 +590,20 @@
       stampUpdated();
     });
 
+    // Soil sampling points (Leaflet layer, lazy-built).
+    var soilLayer = null;
+    activeSoilToggle = function (on) {
+      if (on) {
+        if (!soilLayer && window.IFIELD_SOIL) {
+          soilLayer = L.layerGroup(window.IFIELD_SOIL.pts.map(function (p) {
+            return L.circleMarker([p[0], p[1]], { radius: 4, color: '#0b1220', weight: 1, fillColor: omColor(p[2]), fillOpacity: .9 })
+              .bindTooltip('OM ' + p[2] + '% · pH ' + p[3] + ' · ' + (p[6] || '') + ' · ' + (p[7] || ''));
+          }));
+        }
+        if (soilLayer) soilLayer.addTo(map);
+      } else if (soilLayer) { map.removeLayer(soilLayer); }
+    };
+
     ZONES.forEach(function (z) {
       var m = L.circleMarker([z.lat, z.lon], {
         radius: z.factory ? 11 : z.key ? 10 : 8,
@@ -548,6 +630,7 @@
   }
 
   function setCoordLabel(lat, lon) {
+    lastLL = [lat, lon];
     var el = document.getElementById('wxCoord');
     if (el) el.textContent = fmt(lat, 3) + ', ' + fmt(lon, 3);
   }
@@ -642,6 +725,15 @@
     if (aiBtn) {
       aiBtn.textContent = s.id === 'harvest' ? '🤖 AI วางแผนตัดวันนี้' : '🤖 AI วิเคราะห์แปลงวันนี้';
       aiBtn.addEventListener('click', aiBrief);
+    }
+
+    var soilBtn = document.getElementById('wxSoilBtn');
+    if (soilBtn) {
+      soilBtn.addEventListener('click', function () {
+        soilOn = !soilOn;
+        soilBtn.classList.toggle('on', soilOn);
+        if (activeSoilToggle) activeSoilToggle(soilOn);
+      });
     }
   }
 
