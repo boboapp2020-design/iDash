@@ -67,6 +67,60 @@
     return feedInFlight;
   }
 
+  /* ── Sale feed (the Sale Dashboard's own Google Sheet, public gviz CSV) ───
+   * Columns: Month, DCR, VHP, Organic, White Sugar, Total, Plan, แผนขายสะสม —
+   * MONTHLY sugar sales in tons. Same source the Sale Dashboard renders, so
+   * the Copilot answers "ขายน้ำตาล DCR เท่าไร" from the identical real rows. */
+  var SALE_CSV = 'https://docs.google.com/spreadsheets/d/1lhhOGy9mRxcWSyM70CweoLH6MhSN_qf83tEEFaCpWi0/gviz/tq?tqx=out:csv&sheet=Sheet1';
+  var saleMem = null, saleInFlight = null;
+
+  function parseCsvLine(line) {
+    var out = [], cur = '', inQ = false;
+    for (var i = 0; i < line.length; i++) {
+      var ch = line[i];
+      if (inQ) {
+        if (ch === '"') { if (line[i + 1] === '"') { cur += '"'; i++; } else inQ = false; }
+        else cur += ch;
+      } else if (ch === '"') inQ = true;
+      else if (ch === ',') { out.push(cur); cur = ''; }
+      else cur += ch;
+    }
+    out.push(cur);
+    return out;
+  }
+  function loadSale() {
+    if (saleMem) return Promise.resolve(saleMem);
+    if (saleInFlight) return saleInFlight;
+    saleInFlight = fetch(SALE_CSV)
+      .then(function (r) { return r.text(); })
+      .then(function (txt) {
+        var lines = txt.split(/\r?\n/).filter(function (l) { return l.trim(); });
+        if (lines.length < 2) return null;
+        var head = parseCsvLine(lines[0]);
+        var rows = lines.slice(1).map(function (l) {
+          var cells = parseCsvLine(l), o = {};
+          head.forEach(function (h, i) { o[h.trim()] = (cells[i] || '').trim(); });
+          return o;
+        }).filter(function (o) { return o[head[0]]; });
+        saleMem = { header: head, rows: rows };
+        saleInFlight = null;
+        return saleMem;
+      })
+      .catch(function () { saleInFlight = null; return null; });
+    return saleInFlight;
+  }
+  function saleFacts() {
+    if (!saleMem || !saleMem.rows.length) return null;
+    // Small table — pass it whole (numbers as-is; blank = no sales that month).
+    return saleMem.rows.map(function (r) {
+      return {
+        month: r['Month'], DCR: num(r['DCR']), VHP: num(r['VHP']), Organic: num(r['Organic']),
+        WhiteSugar: num(r['White Sugar']), Total: num(r['Total']), Plan: num(r['Plan']),
+        PlanCum: num(r['แผนขายสะสม'])
+      };
+    });
+  }
+
   /* ── KPI catalog ──────────────────────────────────────────────────────────
    * tag: 'p' = Production, 'q' = Quality. t/c/g = today/cumulative/target field
    * names in the feed. low = lower is better. head = shown in "สรุป". */
@@ -193,8 +247,8 @@
   }
 
   function greeting() {
-    pushMsg('สวัสดีครับ 👋 ผมคือ iDash Copilot — ถามได้เฉพาะข้อมูลจากแดชบอร์ดใน iDash (<b>Production</b> และ <b>Quality</b>) ' +
-      'พิมพ์เป็นประโยคได้เลย เช่น "คุณภาพเมื่อวานเป็นยังไง", "Recovery 7 วันล่าสุด", "อ้อยเข้าหีบวันนี้เทียบเมื่อวาน" ' +
+    pushMsg('สวัสดีครับ 👋 ผมคือ iDash Copilot — ถามได้จากแดชบอร์ดใน iDash: <b>Production</b> · <b>Quality</b> · <b>Sale (ยอดขายน้ำตาล)</b> ' +
+      'พิมพ์เป็นประโยคได้เลย เช่น "เดือนนี้ขายน้ำตาล DCR ได้เท่าไร", "คุณภาพเมื่อวานเป็นยังไง", "Recovery 7 วันล่าสุด" ' +
       '— ตอบจากตัวเลขจริงในแดชบอร์ดเท่านั้น', 'bot');
   }
   function clearChat() {
@@ -257,13 +311,14 @@
   }
 
   var QA_SYSTEM = [
-    'คุณคือผู้ช่วยตอบคำถามเกี่ยวกับข้อมูลแดชบอร์ดการผลิตและคุณภาพ (Production & Quality) ของโรงงานน้ำตาลมิตรลาวเท่านั้น',
+    'คุณคือผู้ช่วยตอบคำถามจากข้อมูลแดชบอร์ดของโรงงานน้ำตาลมิตรลาวเท่านั้น: การผลิต (Production), คุณภาพ (Quality) และยอดขายน้ำตาล (Sale)',
     'กติกาเด็ดขาด (ห้ามฝ่าฝืน):',
     '1) ใช้ได้เฉพาะตัวเลขที่อยู่ใน JSON facts ที่ให้มาเท่านั้น ห้ามสร้าง/เดา/ประมาณตัวเลขที่ไม่มีใน facts',
     '2) ถ้าคำถามไม่เกี่ยวกับข้อมูลโรงงานนี้ หรือ facts ไม่มีข้อมูลที่ถาม ให้บอกตรง ๆ ว่า "ไม่มีข้อมูลนี้ในแดชบอร์ด" และย้ำว่าตอบได้เฉพาะเรื่องในแดชบอร์ดโรงงานน้ำตาลนี้',
-    '3) ตอบภาษาไทย กระชับ อ้างอิงตัวเลขจริงพร้อมหน่วยและวันที่เสมอ',
+    '3) ตอบภาษาไทย กระชับ อ้างอิงตัวเลขจริงพร้อมหน่วยและวันที่/เดือนเสมอ',
     '4) latest[] = ค่าล่าสุดของทุกตัวชี้วัด (วันเดียว). history[] = เฉพาะตัวชี้วัดหลัก มี values[] ตรงตำแหน่งกับ dates[] (เก่า→ใหม่, null = ไม่มีข้อมูลวันนั้น) ใช้ดูแนวโน้ม/เทียบย้อนหลัง/หาสูงสุด-ต่ำสุด. ถ้าถามค่าย้อนหลังของตัวชี้วัดที่ไม่ได้อยู่ใน history ให้บอกว่ามีเฉพาะค่าล่าสุด',
-    '5) ห้ามพูดหรือแนะนำเรื่องนอกเหนือข้อมูลในแดชบอร์ดนี้'
+    '5) sales[] = ยอดขายน้ำตาลรายเดือน (ตัน) แยกชนิด: DCR, VHP, Organic, WhiteSugar, Total, Plan(แผน), PlanCum(แผนสะสม) — ข้อมูลขายเป็นรายเดือน ไม่มีรายวัน ถ้าถาม "วันนี้ขายเท่าไร" ให้ตอบยอดเดือนล่าสุดพร้อมบอกว่าข้อมูลเป็นรายเดือน · ค่าว่าง/null = เดือนนั้นไม่มีการขายชนิดนั้น',
+    '6) ห้ามพูดหรือแนะนำเรื่องนอกเหนือข้อมูลในแดชบอร์ดนี้'
   ].join('\n');
 
   // The FULL Quality Dashboard field set sent to the AI (every section). t =
@@ -369,11 +424,13 @@
   }
 
   function buildAiPrompt(facts, question) {
+    var sale = saleFacts();
     return 'ข้อมูลแดชบอร์ดโรงงานน้ำตาล Production & Quality (ล่าสุด ' + facts.latestDate + ')\n' +
       'latest = ค่าล่าสุดของตัวชี้วัดทั้งหมด (วันที่ ' + facts.latestDate + '):\n' + JSON.stringify(facts.latest) + '\n' +
       'dates = วันที่ย้อนหลังทั้งฤดู เก่า→ใหม่: ' + JSON.stringify(facts.dates) + '\n' +
-      'history = ตัวชี้วัดหลักย้อนหลังทั้งฤดู (values[] ตรงตำแหน่งกับ dates[]):\n' + JSON.stringify(facts.history) + '\n\n' +
-      'คำถามผู้ใช้: ' + question + '\n\nตอบเป็นภาษาไทยตามกติกา:';
+      'history = ตัวชี้วัดหลักย้อนหลังทั้งฤดู (values[] ตรงตำแหน่งกับ dates[]):\n' + JSON.stringify(facts.history) + '\n' +
+      (sale ? 'sales = ยอดขายน้ำตาลรายเดือน หน่วยตัน (จาก Sale Dashboard):\n' + JSON.stringify(sale) + '\n' : '') +
+      '\nคำถามผู้ใช้: ' + question + '\n\nตอบเป็นภาษาไทยตามกติกา:';
   }
 
   var thinkSeq = 0;
@@ -401,6 +458,11 @@
     });
     (facts.history || []).forEach(function (k) {
       (k.values || []).forEach(function (v) { if (v != null) real.push(v); });
+    });
+    (saleFacts() || []).forEach(function (r) {
+      ['DCR', 'VHP', 'Organic', 'WhiteSugar', 'Total', 'Plan', 'PlanCum'].forEach(function (k) {
+        if (r[k] != null) real.push(r[k]);
+      });
     });
     var hit = nums.some(function (n) {
       var f = parseFloat(n);
@@ -723,9 +785,10 @@
       pushMsg('✅ บันทึกแล้ว — ใช้โมเดล <b>' + esc(copilotModel()) + '</b> (Groq · ฟรี) ถามเป็นประโยค/วิเคราะห์ย้อนหลังได้เลย', 'bot');
     });
 
-    // Warm the feed so answers are instant.
+    // Warm both feeds so answers are instant.
     if (!readFeedCache()) loadFeed().catch(function () {});
     else loadFeed().catch(function () {});   // refresh in background too
+    loadSale();
   }
 
   function boot() {
