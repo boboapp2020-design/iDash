@@ -27,16 +27,23 @@
   var AI_GATEWAY = 'https://hcckwaukoaioxpsfpipk.supabase.co/functions/v1/swift-action';
   var AI_ANON = 'sb_publishable_BZEZ_UVLqNLg2pQsXtNUjQ_cp2ZPY5h';
 
-  /* ── Zones (สะหวันนะเขต all 15 districts + คำม่วน main towns) ──────────── */
+  /* ── Zones (สะหวันนะเขต all 15 districts + คำม่วน main towns) ────────────
+   * key: true = the owner's priority cane zones (เน้นเป็นพิเศษ): gold star
+   * pins, a quick-select bar above the map, and first place in the AI brief.
+   * นาสะอาด is not in OSM — coordinates are approximate (Khammouane cane belt
+   * between Nongbok and Xebangfai) until the owner pins the exact spot. */
   var ZONES = [
     { name: 'เมืองสะหวันนะเขต (ไกสอน)', prov: 'สะหวันนะเขต', lat: 16.556, lon: 104.751, factory: true },
+    { name: 'เซโน (Seno)', short: 'เซโน', prov: 'สะหวันนะเขต', lat: 16.679, lon: 104.964, key: true },
+    { name: 'ไซบูลี (Xaybuly)', short: 'ไซบูลี', prov: 'สะหวันนะเขต', lat: 16.860, lon: 105.130, key: true },
+    { name: 'จำพอน (Champhone)', short: 'จำพอน', prov: 'สะหวันนะเขต', lat: 16.220, lon: 105.140, key: true },
+    { name: 'อาดสะพังทอง (Atsaphangthong)', short: 'อาดสะพังทอง', prov: 'สะหวันนะเขต', lat: 16.730, lon: 105.300, key: true },
+    { name: 'เซบั้งไฟ (Xebangfai)', short: 'เซบั้งไฟ', prov: 'คำม่วน', lat: 16.980, lon: 105.120, key: true },
+    { name: 'นาสะอาด (คำม่วน)', short: 'นาสะอาด', prov: 'คำม่วน', lat: 17.030, lon: 105.040, key: true, approx: true },
     { name: 'อุทุมพอน (Outhoumphone)', prov: 'สะหวันนะเขต', lat: 16.620, lon: 105.030 },
-    { name: 'ไซบูลี (Xaybuly)', prov: 'สะหวันนะเขต', lat: 16.860, lon: 105.130 },
     { name: 'ไซพูทอง (Xaiphouthong)', prov: 'สะหวันนะเขต', lat: 16.330, lon: 104.960 },
-    { name: 'จำพอน (Champhone)', prov: 'สะหวันนะเขต', lat: 16.220, lon: 105.140 },
     { name: 'สองคอน (Songkhone)', prov: 'สะหวันนะเขต', lat: 16.100, lon: 105.000 },
     { name: 'ท่าปางทอง (Thapangthong)', prov: 'สะหวันนะเขต', lat: 16.400, lon: 105.330 },
-    { name: 'อาดสะพังทอง (Atsaphangthong)', prov: 'สะหวันนะเขต', lat: 16.730, lon: 105.300 },
     { name: 'พะลานไซ (Phalanxay)', prov: 'สะหวันนะเขต', lat: 16.480, lon: 105.520 },
     { name: 'อาดสะพอน (Atsaphone)', prov: 'สะหวันนะเขต', lat: 16.930, lon: 105.520 },
     { name: 'ซนบุรี (Xonbuly)', prov: 'สะหวันนะเขต', lat: 15.950, lon: 105.420 },
@@ -46,7 +53,6 @@
     { name: 'นอง (Nong)', prov: 'สะหวันนะเขต', lat: 16.450, lon: 106.420 },
     { name: 'ท่าแขก (Thakhek)', prov: 'คำม่วน', lat: 17.411, lon: 104.821 },
     { name: 'หนองบก (Nongbok)', prov: 'คำม่วน', lat: 17.100, lon: 104.930 },
-    { name: 'เซบั้งไฟ (Xebangfai)', prov: 'คำม่วน', lat: 16.980, lon: 105.120 },
     { name: 'มะหาไซ (Mahaxay)', prov: 'คำม่วน', lat: 17.400, lon: 105.200 }
   ];
 
@@ -305,7 +311,8 @@
     if (btn) btn.disabled = true;
     box.innerHTML = '<div class="wxai-load">🤖 AI กำลังวิเคราะห์ทุกเขต…</div>';
     var facts = zonesReady.map(function (z) {
-      return { zone: z.name, province: z.prov, rain_past7day_mm: Math.round(z._f.past7 * 10) / 10,
+      return { zone: z.name, province: z.prov, priority: z.key ? 1 : 0,
+        rain_past7day_mm: Math.round(z._f.past7 * 10) / 10,
         rain_today_mm: Math.round((z._f.rain[0] || 0) * 10) / 10,
         rain_next3day_mm: Math.round(((z._f.rain[0] || 0) + (z._f.rain[1] || 0) + (z._f.rain[2] || 0)) * 10) / 10,
         tmax_today: z._f.tmax[0] };
@@ -314,7 +321,8 @@
     var prompt = 'พยากรณ์จริงรายเขต (past7=ฝนสะสม7วันที่ผ่านมา, today=ฝนวันนี้, next3=ฝนรวม3วันข้างหน้า หน่วย มม.):\n' +
       JSON.stringify(facts) + '\n\n' +
       (s.id === 'harvest' ? 'ช่วยสรุปแผนตัด-ขนส่งอ้อยวันนี้สำหรับทุกเขต'
-        : 'ช่วยสรุปสถานการณ์แปลงอ้อยวันนี้ทุกเขต (ตอนนี้' + s.label + ' ยังไม่ตัด) — การดูแลแปลง การระบายน้ำ การเดินทาง และการเตรียมพร้อมก่อนเปิดหีบ');
+        : 'ช่วยสรุปสถานการณ์แปลงอ้อยวันนี้ทุกเขต (ตอนนี้' + s.label + ' ยังไม่ตัด) — การดูแลแปลง การระบายน้ำ การเดินทาง และการเตรียมพร้อมก่อนเปิดหีบ') +
+      '\nสำคัญ: เขตที่ priority=1 คือโซนอ้อยหลักของโรงงาน ให้วิเคราะห์โซนเหล่านี้ก่อนแบบละเอียดรายเขต (ขึ้นหัวข้อ "⭐ โซนอ้อยหลัก") แล้วค่อยสรุปเขตอื่นแบบย่อ';
     fetch(AI_GATEWAY, {
       method: 'POST',
       headers: { 'content-type': 'application/json', 'Authorization': 'Bearer ' + AI_ANON, 'apikey': AI_ANON },
@@ -467,8 +475,8 @@
 
       ZONES.forEach(function (z) {
         var el = document.createElement('div');
-        el.className = 'wx-pin' + (z.factory ? ' factory' : '');
-        el.title = (z.factory ? '🏭 ' : '') + z.name + ' · ' + z.prov;
+        el.className = 'wx-pin' + (z.factory ? ' factory' : '') + (z.key ? ' key' : '');
+        el.title = (z.factory ? '🏭 ' : z.key ? '⭐ ' : '') + z.name + ' · ' + z.prov;
         new maplibregl.Marker({ element: el, anchor: 'center' }).setLngLat([z.lon, z.lat]).addTo(map);
         z._el = el;
         el.addEventListener('click', function (ev) {
@@ -512,8 +520,12 @@
     });
 
     ZONES.forEach(function (z) {
-      var m = L.circleMarker([z.lat, z.lon], { radius: z.factory ? 11 : 8, color: '#ffffff', weight: 2.5, fillColor: '#64748b', fillOpacity: 1 }).addTo(map);
-      m.bindTooltip((z.factory ? '🏭 ' : '') + z.name + ' · ' + z.prov, { direction: 'top' });
+      var m = L.circleMarker([z.lat, z.lon], {
+        radius: z.factory ? 11 : z.key ? 10 : 8,
+        color: z.key ? '#fbbf24' : '#ffffff', weight: z.key ? 3.5 : 2.5,
+        fillColor: '#64748b', fillOpacity: 1
+      }).addTo(map);
+      m.bindTooltip((z.factory ? '🏭 ' : z.key ? '⭐ ' : '') + z.name + ' · ' + z.prov, { direction: 'top' });
       m.on('click', function () { selectZoneCommon(z); });
       z._m = m;
     });
@@ -587,6 +599,26 @@
     inp.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); go(); } });
   }
 
+  /* ── Priority-zone quick bar (⭐ key zones — one tap to its forecast) ──── */
+  function wireKeyBar() {
+    var bar = document.getElementById('wxKeyBar');
+    if (!bar) return;
+    ZONES.filter(function (z) { return z.key; }).forEach(function (z) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'if-key';
+      b.textContent = '⭐ ' + (z.short || z.name);
+      b.title = z.name + ' · ' + z.prov + (z.approx ? ' (พิกัดโดยประมาณ)' : '');
+      b.addEventListener('click', function () {
+        [].forEach.call(bar.querySelectorAll('.if-key'), function (x) { x.classList.remove('on'); });
+        b.classList.add('on');
+        if (activeGoTo) activeGoTo(z.lat, z.lon);
+        selectZoneCommon(z);
+      });
+      bar.appendChild(b);
+    });
+  }
+
   /* ── Header date + tabs + AI wiring ──────────────────────────────────── */
   function wireChrome() {
     var d = new Date();
@@ -634,7 +666,7 @@
   }
 
   function boot() {
-    if (document.getElementById('wxMap')) { bootMap(); wireSearch(); wireChrome(); return; }
+    if (document.getElementById('wxMap')) { bootMap(); wireSearch(); wireChrome(); wireKeyBar(); return; }
     bootHome();
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);

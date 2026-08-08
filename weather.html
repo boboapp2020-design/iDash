@@ -58,6 +58,18 @@
     .wx-pin { width: 15px; height: 15px; border-radius: 50%; background: #64748b; border: 2.5px solid #fff; box-shadow: 0 0 12px rgba(59,130,246,.35), 0 2px 7px rgba(0,0,0,.6); cursor: pointer; transition: transform .15s; }
     .wx-pin:hover { transform: scale(1.4); }
     .wx-pin.factory { width: 22px; height: 22px; border-width: 3px; box-shadow: 0 0 0 4px rgba(59,130,246,.28), 0 0 18px rgba(59,130,246,.5), 0 2px 9px rgba(0,0,0,.65); }
+    .wx-pin.key { width: 19px; height: 19px; border-color: #fbbf24;
+      box-shadow: 0 0 0 3px rgba(251,191,36,.3), 0 0 16px rgba(251,191,36,.55), 0 2px 8px rgba(0,0,0,.6); }
+    /* Priority-zone quick bar */
+    .if-keybar { display: flex; gap: 7px; flex-wrap: wrap; padding: 10px 16px; border-bottom: 1px solid rgba(255,255,255,.08);
+      background: linear-gradient(120deg, rgba(251,191,36,.06), rgba(251,191,36,.02)); }
+    .if-keybar:empty { display: none; }
+    .if-key { border: 1px solid rgba(251,191,36,.35); background: rgba(251,191,36,.10); color: #fcd34d;
+      border-radius: 999px; padding: 6px 13px; font-family: inherit; font-size: 12px; font-weight: 700; cursor: pointer;
+      transition: background .15s, transform .12s, border-color .15s; }
+    .if-key:hover { background: rgba(251,191,36,.2); transform: translateY(-1px); }
+    .if-key.on { background: linear-gradient(135deg,#f59e0b,#d97706); color: #fff; border-color: #f59e0b;
+      box-shadow: 0 6px 14px -6px rgba(245,158,11,.6); }
     .if-stamp { position: absolute; right: 12px; bottom: 12px; z-index: 5; background: rgba(8,13,26,.78); border: 1px solid rgba(255,255,255,.12);
       color: #dbe7fb; font-size: 11px; font-weight: 600; padding: 6px 12px; border-radius: 999px; backdrop-filter: blur(8px); display: flex; align-items: center; gap: 6px; }
     .if-rainscale { position: absolute; left: 12px; bottom: 12px; z-index: 5; background: rgba(8,13,26,.78); border: 1px solid rgba(255,255,255,.12);
@@ -255,6 +267,7 @@
           <span class="if-maptitle">🌧️ แผนที่สภาพอากาศ · เรดาร์ฝนสด</span>
           <span class="hint">คลิกหมุดหรือจุดใดก็ได้บนแผนที่เพื่อดูพยากรณ์</span>
         </div>
+        <div class="if-keybar" id="wxKeyBar"></div>
         <div class="if-mapwrap">
           <div id="wxMap"><div class="wx-fallback">กำลังโหลดแผนที่…</div></div>
           <div class="if-rainscale" id="wxRainScale" hidden>
@@ -265,6 +278,7 @@
           <div class="if-stamp"><span>🕐</span><span id="wxStamp">อัปเดตล่าสุด —</span></div>
         </div>
         <div class="if-chips">
+          <span class="if-chip" style="border-color:rgba(251,191,36,.4);color:#fcd34d"><i class="if-dot" style="background:#fbbf24"></i> ⭐ โซนอ้อยหลัก (ขอบทอง)</span>
           <span class="if-chip"><i class="if-dot" style="background:#16a34a"></i> อากาศดี</span>
           <span class="if-chip"><i class="if-dot" style="background:#eab308"></i> เฝ้าระวัง</span>
           <span class="if-chip"><i class="if-dot" style="background:#f59e0b"></i> ฝนปานกลาง</span>
@@ -298,6 +312,6 @@
         integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
 <script src="js/sidebar.js?v=20260808i"></script>
-<script src="js/weather.js?v=20260808u"></script>
+<script src="js/weather.js?v=20260808v"></script>
 </body>
 </html>
