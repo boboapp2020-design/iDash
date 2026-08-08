@@ -87,6 +87,25 @@
   function riskColor(p) { return p >= 30 ? '#dc2626' : p >= 10 ? '#f59e0b' : '#16a34a'; }
   function wetColor(acc) { return acc >= 60 ? '#dc2626' : acc >= 20 ? '#f59e0b' : '#16a34a'; }
 
+  /* ── Production-season model (cane-brain) ─────────────────────────────────
+   * Lao/Thai cane calendar: harvest/crush ธ.ค.–มี.ค.; ปลูก/แต่งตอ เม.ย.–พ.ค.;
+   * grand growth (ย่างปล้อง — peak water demand, rain is GOOD) มิ.ย.–ต.ค.;
+   * พ.ย. = ripening/sugar build-up before opening. Advice must follow the
+   * stage — "delay cutting" in August is meaningless. */
+  function seasonInfo() {
+    var m = new Date().getMonth() + 1;
+    if (m === 12 || m <= 3) return { id: 'harvest', emoji: '🚜', label: 'ฤดูเก็บเกี่ยว (เปิดหีบ)', range: 'ธ.ค.–มี.ค.' };
+    if (m === 4 || m === 5) return { id: 'plant', emoji: '🌱', label: 'ฤดูปลูก / แต่งตอ', range: 'เม.ย.–พ.ค.' };
+    if (m === 11) return { id: 'preharvest', emoji: '🍬', label: 'ช่วงสร้างความหวาน ก่อนเปิดหีบ', range: 'พ.ย.' };
+    return { id: 'grow', emoji: '🌿', label: 'ฤดูบำรุง (ย่างปล้อง)', range: 'มิ.ย.–ต.ค.' };
+  }
+  function daysToHarvest() {
+    var now = new Date();
+    var open = new Date(now.getFullYear(), 11, 1);   // 1 Dec
+    if (now > open) return 0;
+    return Math.ceil((open - now) / 86400000);
+  }
+
   /* ── Open-Meteo: 7 past + 7 future days + current, one call ──────────── */
   function forecast(lat, lon) {
     var url = FORECAST + '?latitude=' + lat + '&longitude=' + lon +
@@ -113,14 +132,35 @@
     };
   }
 
-  /* ── Cane advisory (cane-brain grounded, deterministic) ───────────────── */
+  /* ── Cane advisory (cane-brain grounded, deterministic, SEASON-aware) ──── */
   function caneAdvisory(f) {
+    var s = seasonInfo();
     var rainDays = 0, maxP = 0, maxDay = '';
     for (var i = 0; i < f.time.length; i++) {
       var p = f.rain[i] || 0;
       if (p >= 10) rainDays++;
       if (p > maxP) { maxP = p; maxDay = f.time[i]; }
     }
+
+    if (s.id === 'grow') {
+      // ย่างปล้อง: อ้อยต้องการน้ำมากที่สุด — ฝนคือเรื่องดี เฝ้าเฉพาะท่วมขัง/แล้ง
+      if (f.past7 >= 150) return { lv: 'high', txt: 'ฝนสะสม 7 วัน ' + fmt(f.past7, 0) + ' มม. — เสี่ยงน้ำท่วมขังแปลงลุ่ม ถ้าขังเกิน 24-48 ชม. รากขาดออกซิเจน เร่งระบายน้ำ และเฝ้าระวังโรคที่มากับน้ำ (เหี่ยวเน่าแดง)' };
+      if (f.past7 >= 60) return { lv: 'watch', txt: 'ฝนชุก (สะสม ' + fmt(f.past7, 0) + ' มม./7วัน) — ดีต่ออ้อยช่วงย่างปล้อง แต่ตรวจการระบายน้ำแปลงลุ่ม และถนนในไร่ลื่น สัญจรระวัง' };
+      if (f.past7 < 10 && rainDays === 0) return { lv: 'watch', txt: 'ฝนทิ้งช่วง — ย่างปล้องคือช่วงที่อ้อยต้องการน้ำมากที่สุด แล้งต่อเนื่องกระทบผลผลิต พิจารณาให้น้ำเสริมถ้ามีแหล่งน้ำ' };
+      return { lv: 'ok', txt: 'ฝนเหมาะสม — อ้อยช่วงย่างปล้องโตเร็ว ฝนช่วยสะสมน้ำหนักลำ (เก็บเกี่ยว ธ.ค.–มี.ค.)' };
+    }
+    if (s.id === 'preharvest') {
+      // พ.ย.: อ้อยแห้งตัวสร้างความหวาน — ฝนตอนนี้ชะลอการสุกแก่
+      if (maxP >= 30 || rainDays >= 3) return { lv: 'mid', txt: 'ฝนมากช่วงก่อนเปิดหีบ — ชะลอการสุกแก่/การสร้างความหวาน ถ้าฝนลากยาว CCS ต้นฤดูหีบอาจต่ำ วางแผนคิวเปิดหีบเผื่อ' };
+      return { lv: 'ok', txt: 'อากาศเริ่มแห้ง — อ้อยเข้าสู่ช่วงสร้างความหวาน เตรียมความพร้อมรถตัด/คิวขนส่งก่อนเปิดหีบ ธ.ค.' };
+    }
+    if (s.id === 'plant') {
+      if (maxP >= 30) return { lv: 'mid', txt: 'ฝนหนัก — เลื่อนปลูกช่วงดินแฉะ ท่อนพันธุ์เสี่ยงเน่า รอดินหมาดก่อนลงปลูก/แต่งตอ' };
+      if (f.past7 < 5) return { lv: 'watch', txt: 'ดินแห้ง — การปลูก/แต่งตอควรรอฝนหรือให้น้ำช่วยการงอกของท่อนพันธุ์และตออ้อย' };
+      return { lv: 'ok', txt: 'ความชื้นดินเหมาะปลูกและแต่งตอ — ท่อนพันธุ์งอกดี ตอแตกกอไว' };
+    }
+
+    // ฤดูเก็บเกี่ยว (ธ.ค.–มี.ค.) — กติกาตัด/ขนส่ง/CCS
     if (f.past7 >= 60) return { lv: 'high', txt: 'ฝนสะสม 7 วันที่ผ่านมา ' + fmt(f.past7, 0) + ' มม. — ดินยังแฉะ เสี่ยงรถตัด/รถบรรทุกติดหล่ม ดินอัดแน่น และดินติดอ้อย ควรรอแปลงแห้งก่อนตัด (หลังฝนหนักควรเว้น 7-14 วัน)' };
     if (maxP >= 30) return { lv: 'high', txt: 'มีวันฝนหนัก (' + fmt(maxP, 0) + ' มม. ' + thDate(maxDay) + ') — ฝนก่อนตัดทำให้อ้อยดูดน้ำ Brix เจือจาง CCS ตกชั่วคราว วางแผนเลี่ยง/เลื่อนคิวตัดเขตนี้' };
     if (rainDays >= 3) return { lv: 'mid', txt: 'ฝนตกต่อเนื่องใน 7 วันนี้ (' + rainDays + ' วัน) — วางแผนตัดอ้อยล่วงหน้า จัดคิวรถเผื่อแปลงแฉะ' };
@@ -131,12 +171,21 @@
   }
 
   /* ── Right panel ─────────────────────────────────────────────────────── */
+  // The card's static header (#wxSelTitle/#wxCoord) is the ONE place the
+  // selected-point name lives — the body never repeats it.
+  function setPanelHead(title, sub) {
+    var t = document.getElementById('wxSelTitle');
+    var c = document.getElementById('wxCoord');
+    if (t) t.textContent = title;
+    if (c) c.textContent = sub || '—';
+  }
   function panelLoading(title) {
     var p = document.getElementById('wxPanel'); if (!p) return;
     p.innerHTML = '<div class="wxp-empty">กำลังโหลดพยากรณ์ ' + esc(title) + '…</div>';
   }
   function renderPanel(title, sub, factory, data) {
     var p = document.getElementById('wxPanel'); if (!p) return;
+    setPanelHead((factory ? '🏭 ' : '📍 ') + title, sub);
     if (!data || !data.daily || !data.daily.time) { p.innerHTML = '<div class="wxp-empty">ดึงพยากรณ์ไม่สำเร็จ</div>'; return; }
     var f = splitDaily(data.daily);
     var cur = data.current || {};
@@ -157,10 +206,6 @@
     }).join('');
 
     p.innerHTML =
-      '<div class="wxp-head">' +
-        '<div class="wxp-title">' + (factory ? '🏭 ' : '📍 ') + esc(title) + '</div>' +
-        '<div class="wxp-sub">' + esc(sub) + '</div>' +
-      '</div>' +
       '<div class="wxp-now">' +
         '<div class="wxp-now-emoji">' + cw.e + '</div>' +
         '<div>' +
@@ -182,22 +227,35 @@
         tile('🌅', 'amber', 'พระอาทิตย์', hhmm(f.sunrise[0]) + ' ขึ้น', hhmm(f.sunset[0]) + ' ตก') +
       '</div>';
   }
-  /* 3-way operational status (deterministic, cane-brain thresholds):
-     ตัดอ้อย = today's rain + wet-field; ขนส่ง = soil trafficability from
-     past-7d accumulation; ความหวาน = Brix dilution risk from recent rain. */
+  /* 3-way operational status — the three chips change with the production
+     season (cane-brain): harvest = cut/haul/CCS; grand-growth = growth/water-
+     logging/travel; planting = germination/soil-moisture/field prep;
+     pre-harvest = sugar build-up/dry-down/crush prep. */
   function statusStrip(f) {
+    var s = seasonInfo();
     var today = f.rain[0] || 0;
     function chip(label, lv, txt) {
       return '<div class="wxs lv-' + lv + '"><div class="wxs-n">' + label + '</div><div class="wxs-v">' + txt + '</div></div>';
     }
-    var cut = (today >= 30 || f.past7 >= 60) ? ['bad', 'ควรเลื่อน'] : (today >= 10 || f.past7 >= 20) ? ['watch', 'เฝ้าระวัง'] : ['ok', 'ตัดได้'];
-    var haul = f.past7 >= 60 ? ['bad', 'เสี่ยงติดหล่ม'] : (f.past7 >= 20 || today >= 10) ? ['watch', 'ระวังแปลงแฉะ'] : ['ok', 'คล่องตัว'];
-    var ccs = today >= 10 ? ['watch', 'Brix เจือจาง'] : f.past7 >= 60 ? ['watch', 'รอแปลงแห้ง'] : ['ok', 'ปกติ'];
-    return '<div class="wxp-status">' +
-      chip('🚜 ตัดอ้อย', cut[0], cut[1]) +
-      chip('🚚 ขนส่ง', haul[0], haul[1]) +
-      chip('🍬 ความหวาน', ccs[0], ccs[1]) +
-    '</div>';
+    var a, b, c;
+    if (s.id === 'grow') {
+      a = (f.past7 < 10) ? ['🌿 การเจริญเติบโต', 'watch', 'ฝนทิ้งช่วง'] : ['🌿 การเจริญเติบโต', 'ok', 'ฝนดีต่ออ้อย'];
+      b = f.past7 >= 150 ? ['💧 น้ำในแปลง', 'bad', 'เสี่ยงท่วมขัง'] : f.past7 >= 60 ? ['💧 น้ำในแปลง', 'watch', 'ระวังน้ำขัง'] : ['💧 น้ำในแปลง', 'ok', 'ปกติ'];
+      c = today >= 30 ? ['🛣️ การเดินทาง', 'bad', 'ถนนลื่น/น้ำขัง'] : today >= 10 ? ['🛣️ การเดินทาง', 'watch', 'ระวังถนนลื่น'] : ['🛣️ การเดินทาง', 'ok', 'สะดวก'];
+    } else if (s.id === 'plant') {
+      a = today >= 30 ? ['🌱 การปลูก/งอก', 'watch', 'รอดินหมาด'] : f.past7 < 5 ? ['🌱 การปลูก/งอก', 'watch', 'ดินแห้ง'] : ['🌱 การปลูก/งอก', 'ok', 'เหมาะปลูก'];
+      b = f.past7 >= 60 ? ['💧 ความชื้นดิน', 'watch', 'แฉะเกิน'] : f.past7 >= 5 ? ['💧 ความชื้นดิน', 'ok', 'พอดี'] : ['💧 ความชื้นดิน', 'watch', 'ต้องให้น้ำ'];
+      c = today >= 10 ? ['🚜 เตรียมแปลง', 'watch', 'ระวังดินแฉะ'] : ['🚜 เตรียมแปลง', 'ok', 'ทำได้'];
+    } else if (s.id === 'preharvest') {
+      a = (today >= 10 || f.past7 >= 60) ? ['🍬 สร้างความหวาน', 'watch', 'ฝนช้าการสุก'] : ['🍬 สร้างความหวาน', 'ok', 'กำลังดี'];
+      b = f.past7 >= 60 ? ['💧 แปลงแห้งตัว', 'watch', 'ยังชื้น'] : ['💧 แปลงแห้งตัว', 'ok', 'แห้งตามแผน'];
+      c = ['🛠️ เตรียมเปิดหีบ', 'ok', 'อีก ' + daysToHarvest() + ' วัน'];
+    } else {
+      a = (today >= 30 || f.past7 >= 60) ? ['🚜 ตัดอ้อย', 'bad', 'ควรเลื่อน'] : (today >= 10 || f.past7 >= 20) ? ['🚜 ตัดอ้อย', 'watch', 'เฝ้าระวัง'] : ['🚜 ตัดอ้อย', 'ok', 'ตัดได้'];
+      b = f.past7 >= 60 ? ['🚚 ขนส่ง', 'bad', 'เสี่ยงติดหล่ม'] : (f.past7 >= 20 || today >= 10) ? ['🚚 ขนส่ง', 'watch', 'ระวังแปลงแฉะ'] : ['🚚 ขนส่ง', 'ok', 'คล่องตัว'];
+      c = today >= 10 ? ['🍬 ความหวาน', 'watch', 'Brix เจือจาง'] : f.past7 >= 60 ? ['🍬 ความหวาน', 'watch', 'รอแปลงแห้ง'] : ['🍬 ความหวาน', 'ok', 'ปกติ'];
+    }
+    return '<div class="wxp-status">' + chip(a[0], a[1], a[2]) + chip(b[0], b[1], b[2]) + chip(c[0], c[1], c[2]) + '</div>';
   }
 
   function tile(emoji, hue, name, big, sub) {
@@ -206,14 +264,19 @@
   }
 
   /* ── AI brief (Groq via gateway, cane-brain-grounded system prompt) ───── */
-  var AI_SYSTEM = [
-    'คุณคือนักวิชาการเกษตรผู้เชี่ยวชาญอ้อยของโรงงานน้ำตาลมิตรลาว ให้คำแนะนำวางแผนตัด-ขนส่งอ้อยจากพยากรณ์อากาศจริงเท่านั้น',
-    'หลักวิชาการที่ต้องใช้ (cane-brain):',
-    '- ฝนตกก่อนตัด → อ้อยดูดน้ำ Brix เจือจาง CCS ตกชั่วคราว ควรรอ 7-14 วันหลังฝนหยุดถ้าเลือกได้',
-    '- ดินแฉะ (ฝนสะสมมาก) → รถตัด/รถบรรทุกติดหล่ม ดินอัดแน่น กอช้ำ ดินติดอ้อยเพิ่ม',
-    '- อากาศร้อนจัด → ตัดเช้า ส่งเข้าหีบเร็ว ลดการสูญเสียน้ำหนัก/ความหวาน',
-    'กติกา: 1) ใช้เฉพาะตัวเลขใน facts ห้ามเดา 2) ตอบไทย กระชับ จัดกลุ่มเป็น: เขตที่ตัดได้เต็มกำลัง / เขตที่ต้องเฝ้าระวัง / เขตที่ควรเลี่ยง-เลื่อน พร้อมเหตุผลสั้นๆ และคำแนะนำจัดคิวรถ 1-2 ข้อ 3) ถ้าคำถามไม่เกี่ยวกับการวางแผนตัดอ้อย/อากาศ ให้ปฏิเสธ'
-  ].join('\n');
+  function aiSystem() {
+    var s = seasonInfo();
+    var base = [
+      'คุณคือนักวิชาการเกษตรผู้เชี่ยวชาญอ้อยของโรงงานน้ำตาลมิตรลาว ให้คำแนะนำจากพยากรณ์อากาศจริงเท่านั้น',
+      'หลักวิชาการ (cane-brain): ฝนก่อนตัด → Brix เจือจาง CCS ตกชั่วคราว รอ 7-14 วันหลังฝน · ดินแฉะ → รถติดหล่ม ดินอัดแน่น ดินติดอ้อย · ย่างปล้อง (มิ.ย.-ต.ค.) อ้อยต้องการน้ำมากที่สุด ฝนคือผลดี แต่ระวังน้ำท่วมขังเกิน 24-48 ชม. รากขาดออกซิเจน · พ.ย. อ้อยแห้งตัวสร้างความหวาน ฝนชะลอการสุกแก่ · ร้อนจัด → ตัดเช้า ส่งหีบเร็ว',
+      'บริบทปัจจุบัน: ' + s.emoji + ' ' + s.label + ' (' + s.range + ') · ฤดูเก็บเกี่ยวคือ ธ.ค.–มี.ค.' +
+        (s.id === 'harvest'
+          ? ' — โฟกัสแผนตัด-ขนส่งรายวัน จัดกลุ่ม: ตัดได้เต็มกำลัง / เฝ้าระวัง / ควรเลี่ยง-เลื่อน + คำแนะนำจัดคิวรถ'
+          : ' — ตอนนี้ยังไม่ใช่ฤดูตัด ห้ามแนะนำให้ตัดอ้อย! อีก ' + daysToHarvest() + ' วันจะเปิดหีบ โฟกัส: การดูแลแปลงช่วงนี้ การระบายน้ำ/น้ำท่วมขัง โรคช่วงฝน การเดินทางเข้าแปลง และการเตรียมพร้อมก่อนเปิดหีบ จัดกลุ่มเขตเป็น: ปกติ-ฝนดีต่ออ้อย / เฝ้าระวังน้ำขัง-การเดินทาง / ต้องเร่งระบายน้ำ'),
+      'กติกา: 1) ใช้เฉพาะตัวเลขใน facts ห้ามเดา 2) ตอบไทย กระชับ 3) นอกเรื่องอ้อย/อากาศ ให้ปฏิเสธ'
+    ];
+    return base.join('\n');
+  }
 
   function aiBrief() {
     var box = document.getElementById('wxAiBody');
@@ -229,12 +292,15 @@
         rain_next3day_mm: Math.round(((z._f.rain[0] || 0) + (z._f.rain[1] || 0) + (z._f.rain[2] || 0)) * 10) / 10,
         tmax_today: z._f.tmax[0] };
     });
+    var s = seasonInfo();
     var prompt = 'พยากรณ์จริงรายเขต (past7=ฝนสะสม7วันที่ผ่านมา, today=ฝนวันนี้, next3=ฝนรวม3วันข้างหน้า หน่วย มม.):\n' +
-      JSON.stringify(facts) + '\n\nช่วยสรุปแผนตัด-ขนส่งอ้อยวันนี้สำหรับทุกเขต';
+      JSON.stringify(facts) + '\n\n' +
+      (s.id === 'harvest' ? 'ช่วยสรุปแผนตัด-ขนส่งอ้อยวันนี้สำหรับทุกเขต'
+        : 'ช่วยสรุปสถานการณ์แปลงอ้อยวันนี้ทุกเขต (ตอนนี้' + s.label + ' ยังไม่ตัด) — การดูแลแปลง การระบายน้ำ การเดินทาง และการเตรียมพร้อมก่อนเปิดหีบ');
     fetch(AI_GATEWAY, {
       method: 'POST',
       headers: { 'content-type': 'application/json', 'Authorization': 'Bearer ' + AI_ANON, 'apikey': AI_ANON },
-      body: JSON.stringify({ action: 'quick-ask', payload: { provider: 'groq', model: 'llama-3.3-70b-versatile', system: AI_SYSTEM, prompt: prompt, facts: { kpis: [] }, maxTokens: 900 } })
+      body: JSON.stringify({ action: 'quick-ask', payload: { provider: 'groq', model: 'llama-3.3-70b-versatile', system: aiSystem(), prompt: prompt, facts: { kpis: [] }, maxTokens: 900 } })
     })
       .then(function (r) { return r.json(); })
       .then(function (d) {
@@ -504,8 +570,18 @@
     var rf = document.getElementById('wxRefresh');
     if (rf) rf.addEventListener('click', function () { location.reload(); });
 
+    // Season pill + season-appropriate AI button label.
+    var s = seasonInfo();
+    var sp = document.getElementById('wxSeason');
+    if (sp) {
+      sp.textContent = s.emoji + ' ' + s.label +
+        (s.id === 'harvest' ? ' · กำลังเปิดหีบ' : ' · อีก ' + daysToHarvest() + ' วันถึงเปิดหีบ (ธ.ค.–มี.ค.)');
+    }
     var aiBtn = document.getElementById('wxAiBtn');
-    if (aiBtn) aiBtn.addEventListener('click', aiBrief);
+    if (aiBtn) {
+      aiBtn.textContent = s.id === 'harvest' ? '🤖 AI วางแผนตัดวันนี้' : '🤖 AI วิเคราะห์แปลงวันนี้';
+      aiBtn.addEventListener('click', aiBrief);
+    }
   }
 
   /* ── Home preview card (#homeWx) ─────────────────────────────────────── */
